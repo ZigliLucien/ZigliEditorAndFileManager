@@ -1,0 +1,28 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/SentMail.java distribution/src/srcdiffs/ServPak/jv/SentMail.java
+--- ServPak/jv/SentMail.java	2007-06-28 09:50:59.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/SentMail.java	2007-06-28 09:45:28.000000000 -0500
+@@ -1,7 +1,6 @@
+ package ServPak.jv;
+ 
+ import NetsManager.*;
+-import java.io.*;
+ 
+ public class SentMail{
+ 
+@@ -23,13 +22,7 @@
+ 		listing = listing.replaceAll("<br>","<br/>");
+ 		listing = listing.replaceAll("align=center","align='center'");
+ try{
+-		FileOutputStream fout = new FileOutputStream("/home/ph/XML-JAVA/listing.xml");
+-		fout.write(listing.getBytes());
+-		fout.flush();
+-		fout.close();
+-
+ 		out = (new NetsManager.Query(listing, "ServPak/xql/sentmail.xql", null, true)).qtabby.toByteArray(); 
+-
+ }catch(Exception ee){}
+ 
+ 		printout = new String(out);

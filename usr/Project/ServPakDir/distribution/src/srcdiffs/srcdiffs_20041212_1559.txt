@@ -1,0 +1,33 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBM.java distribution/src/srcdiffs/ServPak/jv/DBM.java
+--- ServPak/jv/DBM.java	2004-12-12 15:59:30.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBM.java	2004-12-12 15:56:42.000000000 -0600
+@@ -78,19 +78,20 @@
+         }
+ 
+         dbasename = data.get("dbase");
+-
++/*
+             new Traxit("DB/" + dbasename + ".xml", "ServPak/xsl/db2csv.xsl");
+             buff = new BufferedReader(new InputStreamReader(
+                         new ByteArrayInputStream(Traxit.tabby)));
+             buff.readLine();      
++*/
+ 
+-//	try{
+-//	new NetsManager.Query(
+-//		new FileInputStream("DB/" + dbasename + ".xml"), "for $i in /*/* return $i");
+-//	}catch (Exception ee){ }
++	try{
++	new NetsManager.Query(
++		new FileInputStream("DB/" + dbasename + ".xml"), "for $i in /*/* return $i");
++	}catch (Exception ee){ }
+ 
+-//	BufferedReader buff = new BufferedReader(
+-//		new StringReader(NetsManager.Query.qtabby.toString()));
++	BufferedReader buff = new BufferedReader(
++		new StringReader(NetsManager.Query.qtabby.toString()));
+ 
+ 
+         PrintWriter pw = new PrintWriter(new FileWriter("DB/" + dbasename + ".xml"), true);
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

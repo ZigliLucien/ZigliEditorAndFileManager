@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBrcops.java distribution/src/srcdiffs/ServPak/jv/DBrcops.java
+--- ServPak/jv/DBrcops.java	2005-05-14 17:23:23.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBrcops.java	2005-05-14 17:21:32.000000000 -0500
+@@ -119,7 +119,7 @@
+                         string_30_ = DBM.converter(string_30_);
+ 
+                         if (string_30_.indexOf(",") < 0) {
+-                            int i = Integer.parseInt(string_30_.replace('+',' ').trim());
++                            int i = Integer.parseInt(string_30_);
+ 
+                             numrows--;
+                             table2 = new String[numrows][numcols];
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

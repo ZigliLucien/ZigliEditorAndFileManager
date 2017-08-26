@@ -1,0 +1,92 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MKcal.java distribution/src/srcdiffs/ServPak/jv/MKcal.java
+--- ServPak/jv/MKcal.java	2005-05-19 17:11:56.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MKcal.java	2005-05-19 17:10:54.000000000 -0500
+@@ -45,84 +45,46 @@
+         String[] monmon = new String[35];
+         String[] wkwk = new String[6];
+         HashMap <String,String>hashmap = new HashMap<String,String>();
+-// StartTrace
+-System.out.println(48);// traceon
++
+         cal();
+-System.out.println(49);// traceon
+         inputString = string;
+-System.out.println(50);// traceon
+ 
+-System.out.println(51);// traceon
+         boolean bool;
+-System.out.println(52);// traceon
+         String username;
+-System.out.println(53);// traceon
+         int weekday;
+-System.out.println(54);// traceon
+         int month;
+-System.out.println(55);// traceon
+         int year;
+-System.out.println(56);// traceon
+ 
+-System.out.println(57);// traceon
+         if ((inputString.indexOf("NEXT") > -1) ||
+                 (inputString.indexOf("BACK") > -1)) {
+-System.out.println(59);// traceon
+             int cut = inputString.indexOf("=");
+-System.out.println(60);// traceon
+             String pre = inputString.substring(0, cut);
+-System.out.println(61);// traceon
+             String[] tox = pre.split("+");
+-System.out.println(62);// traceon
+ for(String v : tox) System.out.println("HELLO "+v);
+-System.out.println(63);// traceon
+             username = tox[0];
+-System.out.println(64);// traceon
+             monthindex = Integer.parseInt(tox[1]);
+-System.out.println(65);// traceon
+             year = Integer.parseInt(tox[2]);
+-System.out.println(66);// traceon
+             month = Integer.parseInt(tox[3]);
+-System.out.println(67);// traceon
+             weekday = Integer.parseInt(tox[4]);
+-System.out.println(68);// traceon
+             bool = true;
+-System.out.println(69);// traceon
+ 	leapYearCheck(year);
+-System.out.println(70);// traceon
+         } else {
+-System.out.println(71);// traceon
+             bool = false;
+-System.out.println(72);// traceon
+ 
+-System.out.println(73);// traceon
+             int locali = inputString.indexOf("=");
+-System.out.println(74);// traceon
+ 
+-System.out.println(75);// traceon
+             username = inputString.substring(locali + 1);
+-System.out.println(76);// traceon
+ 
+-System.out.println(77);// traceon
+             if (username.length() == 0) {
+-System.out.println(78);// traceon
+                 username = ZEFMServer.username;
+-System.out.println(79);// traceon
+             }
+-System.out.println(80);// traceon
+ 
+-System.out.println(81);// traceon
+             weekday = dayindex;
+-System.out.println(82);// traceon
+             month = Integer.parseInt(dateinfo[2]);
+-System.out.println(83);// traceon
+             year = Integer.parseInt(dateinfo[5]);
+-System.out.println(84);// traceon
+ 	leapYearCheck(year);
+-System.out.println(85);// traceon
+         }
+-System.out.println(86);// traceon
+-// StopTrace
++System.out.println("HELLLLOOOOOO");
+         String mName = MONTHNAMES[monthindex];
+         String _mname = monthnames[monthindex];
+         int lday = lastday[monthindex];

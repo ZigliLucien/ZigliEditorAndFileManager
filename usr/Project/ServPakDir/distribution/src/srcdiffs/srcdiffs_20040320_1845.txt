@@ -1,0 +1,53 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2004-03-20 18:44:56.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2004-03-20 18:32:16.000000000 -0600
+@@ -32,7 +32,7 @@
+ 
+         dirname = string.substring(0, string.indexOf("^"));
+         dirname = DBM.converter(dirname);
+-
++System.out.println("GOING-FM "+dirname);
+         String dirnum = string.substring(string.indexOf("^") + 1);
+ 
+         String lstfile = "Listings/" + dirname.replace('/', '_') +
+@@ -46,7 +46,7 @@
+         if (localprocess == null) {
+             localprocess = "VVV";
+         }
+-
++System.out.println("GOING-FM 0");
+         if (dirnum.equals("0")) {
+             bufi = new StringBuffer();
+             bufferedreader = new BufferedReader(new FileReader(lstfile));
+@@ -61,14 +61,14 @@
+                 bufi.append(v + "\n");
+             }
+ 
+-//	         printout = bufi.toString().trim();	
+-	          ZConnection.out.write(bufi.toString().trim().getBytes());
++	         printout = bufi.toString().trim();
++System.out.println("PRINTOUT1 "+printout);
+ 
+             	return;
+         }
+ 
+         reqreq = XCommands.reqfile;
+-
++System.out.println("GOING-FM REQ"+reqreq);
+         String top = string + "HEADER";
+         String listfile = "Listings/" + dirname.replace('/', '_') +
+             ".zefmdir";
+@@ -157,9 +157,8 @@
+                 }
+             }
+ 
+-	//           printout = bufi.toString().trim();
+-	          ZConnection.out.write(bufi.toString().trim().getBytes());
+-
++	           printout = bufi.toString().trim();
++System.out.println("PRINTOUT "+printout);
+ 
+         } catch (Exception exception) {
+ //            XCommands.pushListing(dirname);
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

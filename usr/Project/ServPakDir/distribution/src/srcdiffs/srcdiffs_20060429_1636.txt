@@ -1,0 +1,15 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MySQL.java distribution/src/srcdiffs/ServPak/jv/MySQL.java
+--- ServPak/jv/MySQL.java	2006-04-29 16:36:47.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MySQL.java	2006-04-29 16:34:40.000000000 -0500
+@@ -37,7 +37,7 @@
+ 
+ //	DatabaseMetaData dmd = conn.getMetaData();
+ 
+-	rs = conn.createStatement().executeQuery("select * from "+postpre);
++	rs = conn.createStatement().executeQuery("use "+post);
+  	rsmd = rs.getMetaData();
+ 
+ 	rs.next();

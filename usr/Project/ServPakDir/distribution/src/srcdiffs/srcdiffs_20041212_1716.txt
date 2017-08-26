@@ -1,0 +1,53 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBM.java distribution/src/srcdiffs/ServPak/jv/DBM.java
+--- ServPak/jv/DBM.java	2004-12-12 17:16:30.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBM.java	2004-12-12 17:13:24.000000000 -0600
+@@ -78,7 +78,12 @@
+         }
+ 
+         dbasename = data.get("dbase");
+-
++/*
++            new Traxit("DB/" + dbasename + ".xml", "ServPak/xsl/db2csv.xsl");
++            buff = new BufferedReader(new InputStreamReader(
++                        new ByteArrayInputStream(Traxit.tabby)));
++            buff.readLine();      
++*/
+ 	try{
+ 	new NetsManager.Query(
+ 		new FileInputStream("DB/" + dbasename + ".xml"), "for $i in /*/* return $i");
+@@ -86,6 +91,7 @@
+ 
+ 	BufferedReader buff = new BufferedReader(
+ 		new StringReader(NetsManager.Query.qtabby.toString()));
++System.out.println(NetsManager.Query.qtabby.toString());
+ 
+         PrintWriter pw = new PrintWriter(new FileWriter("DB/" + dbasename + ".xml"), true);
+ 
+@@ -133,11 +139,17 @@
+ 
+             String entryname = data.get("entry");
+ 
++            sbuild.append("\n<" + entryname + ">\n");
++
+             while ((v = buff.readLine()) != null) {
+ 
+ 	ccc = (cc % numfields);
+ 	cc++;
+ 
++System.out.println("CC "+cc+" CCC "+ccc+" LINE "+v);
++
++////////////////////////////////////////////////////////////////////
++
+ if(ccc>0){
+ 
+    	   if(ccc==1) sbuild.append("\n<" + entryname + ">\n");
+@@ -163,7 +175,6 @@
+ 	}
+         }
+ 
+-        sbuild.append("</" + entryname + ">\n");
+         sbuild.append("\n</" + rootname + ">");
+         pw.print(sbuild.toString());
+         pw.close();
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

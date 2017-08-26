@@ -1,0 +1,21 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/Search.java distribution/src/srcdiffs/ServPak/jv/Search.java
+--- ServPak/jv/Search.java	2006-10-22 00:07:10.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/Search.java	2006-10-21 23:26:58.000000000 -0500
+@@ -87,13 +87,7 @@
+ 
+ /////// GET ROW ///////////
+ 	public static String getRow(String ttl){
+-
+-	String fdir = ttl.substring(0,ttl.lastIndexOf("/"));	
+-
+-	return 
+-	"<li><a href=\""+ttl+"\">"+ttl+"</a>&nbsp; To directory: "+
+-	"<a href=\""+fdir+"\">"+fdir+"</a>"+
+-	"</li>\n";
++		return "<li><a href=\""+ttl+"\">"+ttl+"</a></li>\n";
+ 	}
+ 
+ /////////// SORT RESULTS //////

@@ -1,0 +1,18 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2006-03-04 23:33:00.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2006-03-05 00:40:28.000000000 -0600
+@@ -68,8 +68,10 @@
+         }
+ 
+         reqreq = XCommands.reqfile;
+-        String listfile = dirname.replace('/', '_') + ".xml"; 
++	int pageno = 10*(1+Integer.parseInt(dirnum)/10);
+ 
++        String listfile = dirname.replace('/', '_') +"."+pageno+ ".xml"; 
++System.out.println("WITH "+dirnum+" AT LISTFILE "+listfile);
+         try {
+             int i = Xlster.counters.get(dirname);
+ 
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

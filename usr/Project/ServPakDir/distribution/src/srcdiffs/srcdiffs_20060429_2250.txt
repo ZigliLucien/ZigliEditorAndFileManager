@@ -1,0 +1,15 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MySQL.java distribution/src/srcdiffs/ServPak/jv/MySQL.java
+--- ServPak/jv/MySQL.java	2006-04-29 22:50:31.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MySQL.java	2006-04-29 22:48:10.000000000 -0500
+@@ -151,8 +151,6 @@
+ 		System.out.println(e.getMessage()); 
+     }
+ 
+-	} else if (string.contains("MAILLOG=")) {
+-		buf.append("HOWDY");
+ 	} else {
+ 
+ 	string = string.substring(string.indexOf("=")+1);

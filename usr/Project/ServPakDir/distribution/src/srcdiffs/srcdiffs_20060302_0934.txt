@@ -1,0 +1,23 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2006-03-02 09:33:59.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2006-03-02 09:28:58.000000000 -0600
+@@ -32,6 +32,8 @@
+ 
+     public GoFM(String linein) throws Exception {
+ 
++        goingFM = false;
++
+ if(linein !=null) dirname = linein.substring(0, linein.indexOf("^"));
+ 
+         dirname = URLDecoder.decode(dirname, "UTF-8");
+@@ -128,7 +130,6 @@
+ 	goingFM = true;
+             XCommands.pushListing(dirname);
+             XCommands.reqfile = reqreq;
+-System.out.println("BEHIND "+dirname+" reqreq "+reqreq+" LINEIN "+linein);
+             new GoFM(linein);
+ 
+         }
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

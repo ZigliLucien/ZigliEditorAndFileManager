@@ -1,0 +1,19 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/ReadClass.java distribution/src/srcdiffs/ServPak/jv/ReadClass.java
+--- ServPak/jv/ReadClass.java	2004-10-14 15:16:21.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/ReadClass.java	2004-10-14 15:12:36.000000000 -0500
+@@ -50,10 +50,11 @@
+ 
+         String v = "";
+ 
+-	Runtime ronny = Runtime.getRuntime();
++	ProcessBuilder pb = 
++new ProcessBuilder("java","sun.tools.javap.Main","-classpath ", classpath, effectiveFile);
+ 
+         try {
+-            dojavap = ronny.exec("java sun.tools.javap.Main -classpath "+classpath+" "+effectiveFile);
++            dojavap = pb.start();
+         } catch (Exception jpex) {
+             bufi.append(
+                 "Check your java installation for the Sun Tools package with the javap command.\n");

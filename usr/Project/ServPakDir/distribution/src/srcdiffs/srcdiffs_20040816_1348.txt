@@ -1,0 +1,13 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2004-08-16 13:48:09.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2004-08-16 13:44:34.000000000 -0500
+@@ -158,6 +158,7 @@
+ 		public void run(){
+ 		try{
+ 		                writeXML(filename, tableset);
++	            System.out.println("writing "+filename);
+ 		}catch(Exception e){}
+ 	}   //run
+    }; //thread
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

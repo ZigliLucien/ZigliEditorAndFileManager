@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBM.java distribution/src/srcdiffs/ServPak/jv/DBM.java
+--- ServPak/jv/DBM.java	2004-12-12 15:36:04.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBM.java	2004-12-12 15:34:38.000000000 -0600
+@@ -222,7 +222,7 @@
+ System.out.println(217+" CATZ LENGTH "+catz.length);// traceon
+         for (String w : catz) {
+ System.out.println(218);// traceon
+-            if (!w.equals(sortdef)) {
++            if (!v.equals(sortdef)) {
+ System.out.println(219);// traceon
+                 dbmbufr.append("<option value=" + w + "> " + DBgo.dataCheck(w) + " </option>\n");
+ System.out.println(220);// traceon
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

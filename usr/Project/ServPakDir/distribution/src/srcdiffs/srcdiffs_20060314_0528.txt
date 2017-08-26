@@ -1,0 +1,39 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/ShowNotes.java distribution/src/srcdiffs/ServPak/jv/ShowNotes.java
+--- ServPak/jv/ShowNotes.java	2006-03-14 05:13:26.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/ShowNotes.java	2006-03-12 12:52:56.000000000 -0600
+@@ -13,7 +13,6 @@
+ public class ShowNotes {
+     public String printout;
+                Connection conn;
+-	   ResultSet rs;
+ 
+     public ShowNotes(String string) throws Exception {
+ 
+@@ -27,17 +26,22 @@
+ 
+         postpre = DBM.converter(postpre);
+ 
++	byte[] bb = null;
++
+ try{
+-                  rs = conn.createStatement().executeQuery(
++          	Statement st = conn.createStatement();
++            ResultSet rs = st.executeQuery(
+ 		"SELECT data FROM notes WHERE filename='"+post+"' and link like '"+postpre+"'");
+ 
+ 	                                   rs.next();
++  		             bb   = rs.getBytes("data");
++
+     }catch( Exception e ) {            
+ 	System.out.println(e.getMessage()); 
+     }
+ 
+         StringBuilder stringbuffer = new StringBuilder("<?xml version=\"1.0\"?>\n <notesml>\n");
+-        stringbuffer.append(new String(rs.getBytes("data"), "UTF-8"));
++        stringbuffer.append(new String(bb, "UTF-8"));
+         stringbuffer.append("\n</notesml>");
+ 
+         new Traxit(stringbuffer, "ServPak/xsl/shownotes.xsl", postpre);

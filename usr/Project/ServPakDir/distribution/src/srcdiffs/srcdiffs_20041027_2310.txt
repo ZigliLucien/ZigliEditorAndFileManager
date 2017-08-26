@@ -1,0 +1,21 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/SendEmail.java distribution/src/srcdiffs/ServPak/jv/SendEmail.java
+--- ServPak/jv/SendEmail.java	2004-10-27 23:10:33.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/SendEmail.java	2004-10-27 23:00:04.000000000 -0500
+@@ -77,13 +77,13 @@
+                 stin.nextToken();
+             }
+ 
+-            subject = URLDecoder.decode(stin.nextToken(), "UTF-8");
++            subject = stin.nextToken().replace('+', ' ');
+ 
+             String linein = textin.substring(textin.indexOf("&s@@nd=") + 7);
+ 
+             int cutoff = linein.indexOf("&attachment=");
+ 
+-              contents = linein.substring(0, cutoff);System.out.println(contents);
++              contents = linein.substring(0, cutoff);
+ /*
+ 	for(int cut=-1;(cut=contents.indexOf("+++"))>=0;){
+ 	contents =new StringBuilder(contents).replace(cut,cut+3,"X@@@X").toString();	

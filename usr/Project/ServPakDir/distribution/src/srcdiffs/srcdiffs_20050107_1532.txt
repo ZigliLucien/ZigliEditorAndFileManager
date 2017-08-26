@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/SendEmail.java distribution/src/srcdiffs/ServPak/jv/SendEmail.java
+--- ServPak/jv/SendEmail.java	2005-01-07 15:32:01.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/SendEmail.java	2004-11-24 11:53:20.000000000 -0600
+@@ -76,7 +76,7 @@
+                 stin.nextToken();
+             }
+ 
+-            subject = DBM.converter(stin.nextToken()).replace('+',' ');
++            subject = DBM.converter(stin.nextToken());
+ 
+             String linein = textin.substring(textin.indexOf("&s@@nd=") + 7);
+ 

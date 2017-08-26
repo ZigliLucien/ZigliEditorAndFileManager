@@ -1,0 +1,24 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2006-03-09 23:24:52.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2006-03-09 18:52:10.000000000 -0600
+@@ -198,7 +198,7 @@
+ 	 Reader getStream(String filename, String db) throws Exception{
+ 
+    try{
+-     	 st = conn.createStatement();
++     	 st = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,                    			                           			       ResultSet.CONCUR_READ_ONLY);
+ 
+      rs = st.executeQuery("SELECT * " + "FROM "+db+" WHERE filename='"+filename+"'");
+ 
+@@ -218,7 +218,7 @@
+ 	 InputStream getBits(String filename, String db) throws Exception{
+ 
+    try{
+-     	 st = conn.createStatement();
++     	 st = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,                    			                           			       ResultSet.CONCUR_READ_ONLY);
+ 
+      rs = st.executeQuery("SELECT * " + "FROM "+db+" WHERE filename='"+filename+"'");
+ 
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

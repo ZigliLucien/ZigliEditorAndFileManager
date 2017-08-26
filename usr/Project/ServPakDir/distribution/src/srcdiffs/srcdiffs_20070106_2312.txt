@@ -1,0 +1,19 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2007-01-06 23:10:58.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2006-11-26 10:44:12.000000000 -0600
+@@ -134,12 +134,6 @@
+             XCommands.pushListing(dirname);
+             XCommands.reqfile = reqreq;
+ 
+-		String resume = 
+-"<html>\n<head><script>function go(){ location.reload(true);}</script></head>\n"
+-+"<body onload=\"go()\">\n\n";
+-
+-		ZConnection.out.write(resume.getBytes());
+-   	            ZConnection.out.flush();
+         }
+     }
+ 
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

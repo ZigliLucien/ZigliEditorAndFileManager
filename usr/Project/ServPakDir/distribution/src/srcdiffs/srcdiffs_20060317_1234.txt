@@ -1,0 +1,25 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2006-03-17 12:34:34.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2006-03-17 11:40:16.000000000 -0600
+@@ -203,7 +203,7 @@
+     }catch( Exception e ) {
+ 	            System.out.println(e.getMessage());
+     }
+-	return rs.getCharacterStream("data");
++	return rs.getClob("data").getCharacterStream();
+    }
+ 
+ 
+@@ -220,7 +220,7 @@
+     }catch( Exception e ) {
+ 	            System.out.println(e.getMessage());
+     }
+-	return rs.getBinaryStream("data");
++	return rs.getClob("data").getAsciiStream();
+   }
+ 
+ }
+\ No newline at end of file
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

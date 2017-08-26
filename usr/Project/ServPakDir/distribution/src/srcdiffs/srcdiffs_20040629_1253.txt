@@ -1,0 +1,36 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/Webgrep.java distribution/src/srcdiffs/ServPak/jv/Webgrep.java
+--- ServPak/jv/Webgrep.java	2004-06-29 12:53:17.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/Webgrep.java	2004-06-29 12:50:22.000000000 -0500
+@@ -135,22 +135,22 @@
+                     string_15_ = ZEFMServer.hexi(string_15_);
+ 	        stringbuffer.append("<font size=\"-1\">\n");
+                     stringbuffer.append("<a href=" + string_15_ +
+-                        "> <i>File Link</i>|</a>\n");
++                        "> See |</a>\n");
+ 
+                     stringbuffer.append("<a href=VVV?" + string_15_ +
+-                        "> <tt>V</tt>iew |</a>\n");
++                        "> <tt>View</tt> |</a>\n");
+                     stringbuffer.append("<a href=CCC?" + string_15_ +
+-                        "> <tt>C</tt>opy |</a>\n");
++                        "> Copy |</a>\n");
+                     stringbuffer.append("<a href=MMM?" + string_15_ +
+-                        "> <tt>M</tt>ove |</a>\n");
++                        "> Move |</a>\n");
+                     stringbuffer.append("<a href=XXX?" + string_15_ +
+-                        "> <tt>D</tt>elete |</a>\n");
++                        "> Delete |</a>\n");
+                     stringbuffer.append("<a href=EEE?" + string_15_ +
+-                        "> <tt>E</tt>dit |</a>\n");
++                        "> Edit |</a>\n");
+                     stringbuffer.append("<a href=QQQ?" + string_15_ +
+-                        "> <tt>Q</tt>uick<tt>E</tt>dit |</a>\n");
++                        "> QuickEdit |</a>\n");
+                     stringbuffer.append("<a href=AAA?" + string_15_ +
+-                        "> <tt>N</tt>otes  </a>\n");
++                        "> Notes  </a>\n");
+ 
+                     stringbuffer.append("<p>\n");
+                     stringbuffer.append(hashmap.get(dockeys[i_14_]) + "\n");

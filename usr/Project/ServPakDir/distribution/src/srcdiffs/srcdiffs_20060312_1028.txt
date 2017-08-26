@@ -1,0 +1,38 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/SendEmail.java distribution/src/srcdiffs/ServPak/jv/SendEmail.java
+--- ServPak/jv/SendEmail.java	2006-03-12 10:28:50.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/SendEmail.java	2006-03-12 00:06:42.000000000 -0600
+@@ -255,9 +255,6 @@
+         return "Please check your address.";
+     }
+ 
+-
+-	/////////////////// callPage //////////////////
+-
+     String callPage(String _filename) throws Exception {
+ 
+         String home = "http://" + NetsManager.ZEFMServer.localhost + ":" +
+@@ -279,8 +276,6 @@
+         buffy.append("<p/>&nbsp;<p/><hr/><p/><a href=" + home +"> Return To Home Page </a>");
+         buffy.append("</pre></body></html>");
+ 
+-        conn.close();       
+-
+         return buffy.toString();
+     }
+ }
+\ No newline at end of file
+diff -Bwaur ServPak/jv/WebEdit.java distribution/src/srcdiffs/ServPak/jv/WebEdit.java
+--- ServPak/jv/WebEdit.java	2006-03-12 10:25:20.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/WebEdit.java	2006-03-11 23:39:58.000000000 -0600
+@@ -44,8 +44,6 @@
+ 	ZEFMServer.goSave(conn, filename,contents,"annotations");
+             printout = goString();
+         }
+-
+-		conn.close();
+     }
+ 
+     String editFile(String _filename) throws Exception {

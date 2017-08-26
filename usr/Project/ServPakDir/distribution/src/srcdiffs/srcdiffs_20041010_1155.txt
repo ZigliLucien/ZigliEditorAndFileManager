@@ -1,0 +1,65 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBM.java distribution/src/srcdiffs/ServPak/jv/DBM.java
+--- ServPak/jv/DBM.java	2004-10-10 11:55:08.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBM.java	2004-10-09 22:05:54.000000000 -0500
+@@ -21,7 +21,7 @@
+     static BufferedReader bufferedreader;
+     public static final String zefmhome = "zefm@" + ZEFMServer.localhostname;
+     public String printout;
+-    HashMap<String,String> data = new HashMap<String,String>();
++    HashMap data = new HashMap();
+     HashSet keyfields = new HashSet();
+     int numlines = 0;
+     String dbasename;
+@@ -82,7 +82,7 @@
+             data.put(string_9_, string_10_);
+         }
+ 
+-        dbasename = data.get("dbase");
++        dbasename = data.get("dbase").toString();
+ 
+         Object object = null;
+ 
+@@ -98,9 +98,9 @@
+ 
+         PrintWriter printwriter = new PrintWriter(new FileWriter("DB/" +
+                     dbasename + ".xml"), true);
+-        String string_12_ = data.get("sortdefault");
+-        StringTokenizer stringtokenizer_13_ = 
+-		new StringTokenizer(data.get("categories"), ",");
++        String string_12_ = data.get("sortdefault").toString();
++        StringTokenizer stringtokenizer_13_ = new StringTokenizer(data.get(
++                    "categories").toString(), ",");
+         String[] strings = new String[stringtokenizer_13_.countTokens()];
+         int i = 0;
+ 
+@@ -118,7 +118,7 @@
+         if (bool) {
+             string_16_ = dbasename;
+         } else {
+-            string_16_ = data.get("root");
++            string_16_ = data.get("root").toString();
+         }
+ 
+         StringBuilder stringbuffer = new StringBuilder();
+@@ -126,8 +126,8 @@
+         stringbuffer.append("<?xml version=\"1.0\"?>\n");
+         stringbuffer.append("<" + string_16_ + ">\n");
+ 
+-        StringTokenizer stringtokenizer_17_ = 
+-	new StringTokenizer(data.get("fields"), ",");
++        StringTokenizer stringtokenizer_17_ = new StringTokenizer(data.get(
++                    "fields").toString(), ",");
+         String[] strings_18_ = new String[stringtokenizer_17_.countTokens()];
+ 
+         Arrays.fill(strings_18_, "");
+@@ -142,7 +142,7 @@
+         while ((string_21_ = bufferedreader.readLine()) != null) {
+             numlines++;
+ 
+-            String string_22_ = data.get("entry");
++            String string_22_ = data.get("entry").toString();
+ 
+             stringbuffer.append("\n<" + string_22_ + ">\n");
+ 
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

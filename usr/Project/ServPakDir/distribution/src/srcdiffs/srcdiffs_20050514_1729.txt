@@ -1,0 +1,70 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBrcops.java distribution/src/srcdiffs/ServPak/jv/DBrcops.java
+--- ServPak/jv/DBrcops.java	2005-05-14 17:29:13.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBrcops.java	2005-05-14 17:23:24.000000000 -0500
+@@ -146,12 +146,14 @@
+                             table2 = new String[numrows - i][numcols];
+ 
+ 		    int r = 0;
+-
++for(String v : tox35) System.out.println("XX "+v);
+                             for (int A = 0; A < numrows; A++) {
++System.out.println(Integer.parseInt(tox35[r].replace('+',' ').trim()));
+                                 if ( A == Integer.parseInt(tox35[r].replace('+',' ').trim()) ) {
+                                     r++;
+                                 } else {
+-                                    for (int B = 0; B < numcols; B++) {
++                                    for (int B = 0; B < numcols;
++                                            B++) {
+                                         table2[A - r][B] = table[A][B];
+                                     }
+                                 }
+@@ -226,7 +228,7 @@
+                         string_50_ = DBM.converter(string_50_);
+ 
+                         if (string_50_.indexOf(",") < 0) {
+-                            int i = Integer.parseInt(string_50_.replace('+',' ').trim());
++                            int i = Integer.parseInt(string_50_);
+ 
+                             numcols--;
+                             table2 = new String[numrows][numcols];
+@@ -243,22 +245,32 @@
+                                 }
+                             }
+                         } else {
+-
+-		    String[] tox55 = string_50_.trim().split(",");
+-		
+-                            int i = tox55.length;
++                            StringTokenizer stringtokenizer_55_ = new StringTokenizer(string_50_, ",");
++                            int i = stringtokenizer_55_.countTokens();
+ 
+                             table2 = new String[numrows][numcols - i];
+ 
++                            int[] is = new int[i + 2];
+                             int A = 0;
+ 
++                            is[A] = 0;
++
++                            while (stringtokenizer_55_.hasMoreTokens()) {
++                                A++;
++
++                                is[A] = Integer.parseInt(stringtokenizer_55_.nextToken());
++                            }
++
++                            A = 1;
++                            is[i + 1] = numrows;
++
+                             for (int B = 0; B < numcols; B++) {
+-                                if (B ==  Integer.parseInt(tox55[A].replace('+',' ').trim())) {
++                                if (B == is[A]) {
+                                     A++;
+                                 } else {
+                                     for (int C = 0; C < numrows;
+                                             C++) {
+-                                        table2[C][B - A] = table[C][B];
++                                        table2[C][B - A + 1] = table[C][B];
+                                     }
+                                 }
+                             }
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

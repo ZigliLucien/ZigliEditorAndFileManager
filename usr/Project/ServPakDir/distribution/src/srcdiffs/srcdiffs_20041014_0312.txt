@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/ShowNotes.java distribution/src/srcdiffs/ServPak/jv/ShowNotes.java
+--- ServPak/jv/ShowNotes.java	2004-10-14 03:12:46.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/ShowNotes.java	2004-10-14 03:10:24.000000000 -0500
+@@ -13,7 +13,7 @@
+ public class ShowNotes {
+     public String printout;
+ 
+-    public ShowNotes(String string) throws Exception {System.out.println("HELLO");
++    public ShowNotes(String string) throws Exception {
+         String pre = string.substring(string.indexOf("&") + 1);
+         String post = string.substring(string.indexOf("=") + 1,
+                 string.indexOf("&"));

@@ -1,0 +1,89 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2006-04-01 11:30:47.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2006-03-19 23:49:58.000000000 -0600
+@@ -33,7 +33,9 @@
+ 
+     public GoFM(String linein) throws Exception {
+ 
+-	conn = ZEdit.DOps.goMysql;
++            Class.forName("com.mysql.jdbc.Driver");
++	conn = DriverManager.getConnection(
++	"jdbc:mysql://localhost:3306/ZEFMdb?characterEncoding=utf8","zz", "zefm");
+ 
+          if(linein !=null) dirname = linein.substring(0, linein.indexOf("^"));
+ 
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/SendEmail.java distribution/src/srcdiffs/ServPak/jv/SendEmail.java
+--- ServPak/jv/SendEmail.java	2006-04-01 11:31:24.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/SendEmail.java	2006-03-15 21:07:44.000000000 -0600
+@@ -34,7 +34,9 @@
+ 
+     public SendEmail(String _textin) throws Exception {
+ 
+-           conn = ZEdit.DOps.goMysql;      
++           Class.forName("com.mysql.jdbc.Driver");
++           conn = DriverManager.getConnection(
++	"jdbc:mysql://localhost:3306/ZEFMdb?characterEncoding=utf8","zz", "zefm");       
+ 
+         textin = DBM.converter(_textin);
+ 
+@@ -278,17 +280,8 @@
+         buffy.append("<p/>&nbsp;<p/><hr/><p/><a href=" + home +"> Return To Home Page </a>");
+         buffy.append("</pre></body></html>");
+ 
++        conn.close();       
++
+         return buffy.toString();
+     }
+ }
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+diff -Bwaur ServPak/jv/ShowNotes.java distribution/src/srcdiffs/ServPak/jv/ShowNotes.java
+--- ServPak/jv/ShowNotes.java	2006-04-01 11:31:48.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/ShowNotes.java	2006-03-25 22:53:52.000000000 -0600
+@@ -17,7 +17,10 @@
+ 
+     public ShowNotes(String string) throws Exception {
+ 
+-	conn = ZEdit.DOps.goMysql;
++
++            Class.forName("com.mysql.jdbc.Driver");
++	conn = DriverManager.getConnection(
++		"jdbc:mysql://localhost:3306/ZEFMdb?characterEncoding=utf8","zz", "zefm");
+ 
+         String pre = string.substring(string.indexOf("&") + 1);
+         String post = string.substring(string.indexOf("=") + 1, string.indexOf("&"));
+diff -Bwaur ServPak/jv/WebEdit.java distribution/src/srcdiffs/ServPak/jv/WebEdit.java
+--- ServPak/jv/WebEdit.java	2006-04-01 11:32:19.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/WebEdit.java	2006-03-15 21:08:14.000000000 -0600
+@@ -22,7 +22,9 @@
+ 
+     public WebEdit(String _textin) throws Exception {
+ 
+-         conn = ZEdit.DOps.goMysql;
++        Class.forName("com.mysql.jdbc.Driver");
++         conn = DriverManager.getConnection(
++		"jdbc:mysql://localhost:3306/ZEFMdb?characterEncoding=utf8","zz", "zefm");
+ 
+         String textin = DBM.converter(_textin);
+ 
+@@ -43,6 +45,8 @@
+ 	ZEFMServer.goSave(conn, filename,contents,"annotations");
+             printout = goString();
+         }
++
++		conn.close();
+     }
+ 
+     String editFile(String _filename) throws Exception {

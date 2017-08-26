@@ -1,0 +1,16 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MySQL.java distribution/src/srcdiffs/ServPak/jv/MySQL.java
+--- ServPak/jv/MySQL.java	2006-04-29 14:54:31.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MySQL.java	2006-04-29 13:56:32.000000000 -0500
+@@ -114,8 +114,7 @@
+ 	System.out.println("Deleting "+string+" from "+postpre+" with result "+n);
+ 
+ 	if(n>0){
+-buf.append(
+-"<p/>&nbsp;<p/>&nbsp;<p/>Entry &nbsp; <tt>"+string+"</tt> &nbsp; has been deleted.<p/>\n");
++buf.append("<p/>&nbsp;<p/>&nbsp;<p/>Entry <tt>"+string+"</tt> has been deleted.<p/>\n");
+ 	} else {
+ buf.append(
+ 	"<p/>&nbsp;<p/>&nbsp;<p/>Entry <tt>"+string+"</tt> has <b>not</b> been deleted. "+ 

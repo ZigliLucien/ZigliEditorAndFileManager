@@ -1,0 +1,44 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MySQL.java distribution/src/srcdiffs/ServPak/jv/MySQL.java
+--- ServPak/jv/MySQL.java	2006-04-29 16:51:00.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MySQL.java	2006-04-29 16:48:02.000000000 -0500
+@@ -56,11 +56,9 @@
+ 		buf.append("<h2>"+postpre+"</h2><p/>&nbsp;<br/>");
+ 	  while(rs.next()){
+ 		String name = rs.getString(firstColumn);
+-System.out.println("A");
+ 		buf.append(
+ 		"<a href=MySQL.jav?ENTRY="+ZEFMServer.hexi(name)+">"+name+"</a><p/>\n");
+ 	}
+-System.out.println("B");
+ 		buf.append("</body>\n</html>");
+ 
+ 	} else  if  (string.contains("ENTRY=")){
+@@ -98,8 +96,10 @@
+ 		buf.append("</tr>\n</table>\n<p/>\n");
+ 	String str0 = string.substring(0,string.indexOf("."));
+ 	String fname = string;
+-
+-	if (string.contains(".")) {
++System.out.println("A");
++	if(str0.contains("/")){ 
++		fname = string;
++	} else if (string.contains(".")) {
+ 		            String str1 = string.substring(string.indexOf(".")+1);		
+ 	                        fname = str0.replace('_','/')+"/"+str1;
+ 	} else {
+@@ -103,9 +103,11 @@
+ 		            String str1 = string.substring(string.indexOf(".")+1);		
+ 	                        fname = str0.replace('_','/')+"/"+str1;
+ 	} else {
++
+ 			if(string.contains("_")) fname = string.replace('_','/');
+-	}
+ 
++	}
++System.out.println("B");
+ 		buf.append(
+ 		"<a href="+ZEFMServer.hexi(fname)+">See File</a><p/>\n");
+ 		buf.append(

@@ -1,0 +1,19 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2004-12-11 04:22:15.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2004-12-11 04:02:26.000000000 -0600
+@@ -301,12 +301,10 @@
+ 	String[] line = new String[i];
+ 	int cc = 0;
+ 	int ccc = 0;
+-	boolean blank = false;
++
+ 	
+ 
+ 	for(String v;(v=buff.readLine())!=null;){
+-	if(v.trim().length() == 0) { blank = true; continue; } 	
+-	if(blank)  blank = false;
+ 	
+ 	ccc = (cc % (i+1));
+ 	  cc++;
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

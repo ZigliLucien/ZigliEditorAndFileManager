@@ -1,0 +1,77 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBM.java distribution/src/srcdiffs/ServPak/jv/DBM.java
+--- ServPak/jv/DBM.java	2004-12-12 16:04:56.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBM.java	2004-12-12 15:59:30.000000000 -0600
+@@ -78,20 +78,20 @@
+         }
+ 
+         dbasename = data.get("dbase");
+-/*
++
+             new Traxit("DB/" + dbasename + ".xml", "ServPak/xsl/db2csv.xsl");
+             buff = new BufferedReader(new InputStreamReader(
+                         new ByteArrayInputStream(Traxit.tabby)));
+             buff.readLine();      
+-*/
+-	try{
+-	new NetsManager.Query(
+-		new FileInputStream("DB/" + dbasename + ".xml"), "for $i in /*/* return $i");
+-	}catch (Exception ee){ }
+-
+-	BufferedReader buff = new BufferedReader(
+-		new StringReader(NetsManager.Query.qtabby.toString()));
+-System.out.println(NetsManager.Query.qtabby.toString());
++
++//	try{
++//	new NetsManager.Query(
++//		new FileInputStream("DB/" + dbasename + ".xml"), "for $i in /*/* return $i");
++//	}catch (Exception ee){ }
++
++//	BufferedReader buff = new BufferedReader(
++//		new StringReader(NetsManager.Query.qtabby.toString()));
++
+ 
+         PrintWriter pw = new PrintWriter(new FileWriter("DB/" + dbasename + ".xml"), true);
+ 
+@@ -125,8 +125,8 @@
+ 
+         Arrays.fill(elements, "");
+ 
+-        for (int q=0;q<elements.length;q++) {
+-            	elements[q] = fieldstok.nextToken();
++        for (String w : elements) {
++            	w = fieldstok.nextToken();
+         }
+ 
+         String v;
+@@ -137,16 +137,12 @@
+             String entryname = data.get("entry");
+ 
+             sbuild.append("\n<" + entryname + ">\n");
+-////////////////////////////////////////////////////////////////////
+-  //          StringTokenizer line =  new StringTokenizer(v, ",");
+ 	
+-	     String[] line = v.split("\\s+");
+-		int qq = 0;
++            StringTokenizer line =  new StringTokenizer(v, ",");
+ 
+             for (String f : elements) {
+ 	    
+-//                String ky = line.nextToken();
+-	    String ky = line[qq];
++                String ky = line.nextToken();
+                 String kyref = XCommands.hexml(ky);
+ 
+                 ky = ZEdit.MailFiles.ampcheck(ky);
+@@ -157,9 +153,8 @@
+                 } else {
+                     sbuild.append("<" + f + ">" + ky + "</" + f + ">\n");
+                 }
+-		qq++;
+             }
+-////////////////////////////////////////////////////////////////////////////
++
+             sbuild.append("</" + entryname + ">\n");
+         }
+ 
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

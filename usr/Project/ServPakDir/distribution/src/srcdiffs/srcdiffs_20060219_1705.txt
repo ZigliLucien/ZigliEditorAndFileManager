@@ -1,0 +1,24 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2006-02-19 17:05:00.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2006-02-19 13:34:38.000000000 -0600
+@@ -150,17 +150,8 @@
+ 
+                     fillChecked(bufi, localprocess, dirname);
+ 
+-		String main = "";
+-
+-	if(dirname.equals(Xlster.cdir)) {
+-
+-	            main = Xlster.currentDir[Integer.parseInt(dirnum)];
+-System.out.println("RUNNING CACHE "+dirnum);	
+-
+-	} else {
+ 	        new NetsManager.Traxit(bout.toByteArray(),"ServPak/xsl/listit.xsl",dirnum);
+-		 main = new String(NetsManager.Traxit.tabby);
+-	}
++		String main = new String(NetsManager.Traxit.tabby);
+ 
+ 		int dirnumplus = Math.min(Integer.parseInt(dirnum)+1,i);
+ 		
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

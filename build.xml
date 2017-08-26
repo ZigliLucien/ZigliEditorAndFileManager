@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ServPak/xsl/ant.xsl"?>
+
+
+<project name="AntMaker" default="dodiffs" basedir=".">
+
+  <!-- set global properties for this build -->
+  <!-- on the command line use -Dsrc=xxx -DstubFile=yyy to set the properties src and stubFile -->
+   <property name="build" value="build"/>
+  <property name="dist"  value="distribution"/>
+
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${build}"/>
+     </target>
+
+  <target name="compile" depends="init">
+    <!-- Compile the java code from ${src} into ${build} -->
+<javac srcdir="${src}" destdir="${build}" includes="*.java"
+optimize="yes"  nowarn="yes" classpath="ZEFM.jar">
+	</javac>
+  </target>
+
+  <target name="dist" depends="compile">
+    <!-- Create the distribution directory -->
+    <mkdir dir="${dist}/lib"/>
+    <mkdir dir="${dist}/src"/>
+
+    <!-- Put everything in ${build} into a jar file -->
+<jar jarfile="${dist}/lib/distrib.jar"> <!--  manifest="${stubFile}" -->
+<fileset dir="${build}" includes="${src}/*.class"/>
+<fileset dir="${build}" includes="${src1}/*.class"/>
+</jar>
+
+   <jar jarfile="${src}.x.jar" basedir="${src}" includes="*.java"/>
+   <copy file="${src}.x.jar" tofile="${dist}/src/${src}_${DSTAMP}_${TSTAMP}_src.jar"/>
+   <copy file="${src}.x.jar" tofile="./${src}_ZEFM_src.jar"/>
+   </target>
+
+<target name="dodist">
+<zip zipfile="ZEFM.jar" basedir="TTT"/>
+<copy file="ZEFM.jar" todir="/usr/Project"/>
+</target>
+
+<!-- Make and save diffs from previous source files -->
+<target name="dodiffs" depends="dist">
+<mkdir dir="${dist}/src/srcdiffs"/>
+<exec executable="diff" output="${dist}/src/srcdiffs/srcdiffs_${DSTAMP}_${TSTAMP}.txt">
+<arg line="-Bw ${dist}/src/srcdiffs/${src} ${src}"/>
+</exec>
+<move file="${src}.x.jar" tofile="${dist}/src/srcdiffs/latest.jar"/>
+<unjar src="${dist}/src/srcdiffs/latest.jar" dest="${dist}/src/srcdiffs/${src}"/>
+</target>
+
+  <target name="clean">
+    <!-- Delete the ${build} and ${dist}/lib directory trees -->
+    <delete dir="${build}"/>
+    <delete dir="${dist}/lib"/>
+  </target>
+</project>

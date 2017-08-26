@@ -1,0 +1,15 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2004-12-31 13:05:14.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2004-12-30 22:03:12.000000000 -0600
+@@ -69,7 +69,8 @@
+                     ldir = ldir.replace('\\', '/');
+                 }
+ 
+-                String out0 = (ldir + "/DB/" + filename);
++                String out0 = (ldir + "/DB/" +
++                    filename.substring(filename.indexOf("DB") + 3));
+ 
+                 stringbuffer = new StringBuilder(
+ 	  "<html><head><meta http-equiv=\"refresh\" content=\"url=0;"+out0+".sdb\"></head>\n");
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

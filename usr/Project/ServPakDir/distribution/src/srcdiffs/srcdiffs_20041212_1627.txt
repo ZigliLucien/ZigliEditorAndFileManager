@@ -1,0 +1,30 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBM.java distribution/src/srcdiffs/ServPak/jv/DBM.java
+--- ServPak/jv/DBM.java	2004-12-12 16:27:30.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBM.java	2004-12-12 16:20:56.000000000 -0600
+@@ -128,21 +128,19 @@
+         for (int q=0;q<elements.length;q++) {
+             	elements[q] = fieldstok.nextToken();
+         }
+-
++System.out.println("NUM ELEMENTS "+elements.length);
+             String v;
+ 	String f = "";
+ 
+-	int numfields = elements.length;
+-
+ 	int cc = 0;
+ 	int ccc = 0;
+ 
+         while ((v = buff.readLine()) != null) {
+ 
+-	ccc = (cc % (numfields+1));
++	ccc = (cc % (elements.length+1));
+ 	cc++;
+ System.out.println("CC "+cc+" CCC "+ccc+" LINE "+v);
+-	if(cc % (numfields+1) == 0) continue;
++	if(ccc==0) continue;
+ 
+             numlines++;
+ 
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

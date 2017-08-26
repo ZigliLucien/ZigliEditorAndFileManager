@@ -1,0 +1,30 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2006-04-02 22:27:49.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2006-04-02 22:07:02.000000000 -0500
+@@ -100,11 +100,11 @@
+ 
+ 	String qry = new String(
+ "<html>\n<body>\n { let $part := \"HEADER"+dirnum+"\"\n for $i in //*[name()=$part]\n return $i/node()}\n</body>\n</html>");
+-
++System.out.println("A "+dirnum);
+ 		new NetsManager.Query(getBits(listfile,"xml"),qry,null,false);
+-
++System.out.println("B");
+ 		main = NetsManager.Query.qtabby.toString();
+-
++System.out.println("C");
+ 		int dirnumplus = Math.min(Integer.parseInt(dirnum)+1,i);
+ 
+ 		String refstrip = Xlster.reffout(dirname, XCommands.keyvalue, dirnumplus);
+@@ -215,7 +215,7 @@
+ 			"SELECT data " + "FROM "+db+" WHERE filename='"+filename+"'");
+ 
+ 	   	               rs.next();
+-
++System.out.println("OK "+filename);
+     }catch( Exception e ) {
+ 	            System.out.println(e.getMessage());
+     }
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

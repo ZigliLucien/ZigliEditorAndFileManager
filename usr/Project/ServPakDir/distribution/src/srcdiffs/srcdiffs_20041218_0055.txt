@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/Query.java distribution/src/srcdiffs/ServPak/jv/Query.java
+--- ServPak/jv/Query.java	2004-12-18 00:55:50.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/Query.java	2004-12-18 00:54:40.000000000 -0600
+@@ -79,7 +79,7 @@
+ 		String[] result = jk.split("\\n");
+ 
+ 		StringBuilder sb = new StringBuilder("<html><body>\n");
+-		for(String v : result) sb.append(ServPak.jv.DBM.fixgtlt(v)+"<br/>\n");
++		for(String v : result) sb.append(ServPak.jv.DBM.fixgtlt(v)+"\n");
+ 		sb.append("</body></html>");
+ 		printout = sb.toString();
+ 	    } else {

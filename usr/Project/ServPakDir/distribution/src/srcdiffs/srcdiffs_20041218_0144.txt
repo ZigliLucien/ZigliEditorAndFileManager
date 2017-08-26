@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/Query.java distribution/src/srcdiffs/ServPak/jv/Query.java
+--- ServPak/jv/Query.java	2004-12-18 01:43:59.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/Query.java	2004-12-18 01:38:48.000000000 -0600
+@@ -81,7 +81,7 @@
+ 
+ 		for(String v : rslt) sb.append(v);
+ 		sb.append("\n\n</qresult>");
+-		new NetsManager.Traxit(sb,"ServPak/xsl/dbresult.xsl",null);
++		new NetsManager.Traxit(sb,"ServPak/xsl/dbgeneric.xsl",null);
+ 		printout = new String(NetsManager.Traxit.tabby);
+ 	    } else {
+ 		

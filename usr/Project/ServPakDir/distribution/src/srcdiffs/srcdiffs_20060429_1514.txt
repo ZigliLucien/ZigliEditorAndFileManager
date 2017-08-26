@@ -1,0 +1,15 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MySQL.java distribution/src/srcdiffs/ServPak/jv/MySQL.java
+--- ServPak/jv/MySQL.java	2006-04-29 15:13:58.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MySQL.java	2006-04-29 15:08:42.000000000 -0500
+@@ -97,7 +97,7 @@
+ 		buf.append(
+ 		"<a href="+ZEFMServer.hexi(fname)+">See File</a><p/>\n");
+ 		buf.append(
+-   "<a href=MySQL.jav?DELETE="+ZEFMServer.hexi(string)+">Delete Entry from Database</a><p/>\n");
++		"<a href=MySQL.jav?DELETE="+string+">Delete Entry from Database</a><p/>\n");
+ 		buf.append("</body>\n</html>");
+  }catch( Exception e ) {           
+ 		System.out.println(e.getMessage()); 

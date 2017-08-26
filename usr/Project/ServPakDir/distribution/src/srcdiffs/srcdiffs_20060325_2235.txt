@@ -1,0 +1,17 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/ShowNotes.java distribution/src/srcdiffs/ServPak/jv/ShowNotes.java
+--- ServPak/jv/ShowNotes.java	2006-03-25 22:35:50.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/ShowNotes.java	2006-03-15 21:08:00.000000000 -0600
+@@ -80,8 +80,8 @@
+ 
+             String stylefile = "";
+ 
+-            if (!externalReference.endsWith(".tpml") &&
+-                    !externalReference.endsWith(".xml")) {
++            if (externalReference.endsWith(".html") |
++                    externalReference.endsWith(".htm")) {
+                 if (externalReference.startsWith("http://")) {
+                     try {
+                         URL url = new URL(externalReference);

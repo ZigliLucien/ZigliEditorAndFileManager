@@ -1,0 +1,58 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MySQL.java distribution/src/srcdiffs/ServPak/jv/MySQL.java
+--- ServPak/jv/MySQL.java	2006-04-29 16:32:39.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MySQL.java	2006-04-29 15:13:58.000000000 -0500
+@@ -15,9 +15,6 @@
+ 	   static String post;
+ 	   static String postpre;
+ 
+-	   static ResultSetMetaData rsmd;
+-	   static int numberOfColumns;
+-
+     public MySQL(String string) throws Exception {
+ 
+ 	StringBuffer buf = new StringBuffer(2050);
+@@ -35,15 +32,7 @@
+   	conn = DriverManager.getConnection(
+ 		"jdbc:mysql://localhost:63336/"+post+"?characterEncoding=utf8","root", "");
+ 
+-//	DatabaseMetaData dmd = conn.getMetaData();
+-
+-	rs = conn.createStatement().executeQuery("use "+post);
+- 	rsmd = rs.getMetaData();
+-
+-	rs.next();
+-            numberOfColumns = rsmd.getColumnCount();
+-
+-     rs = conn.createStatement().executeQuery("SELECT "+rsmd.getColumnLabel(1)+" FROM "+postpre);
++            rs = conn.createStatement().executeQuery("SELECT filename FROM "+postpre);
+ 
+     }catch( Exception e ) {           
+ 	new ZEdit.DOps(); 
+@@ -62,14 +51,23 @@
+ 
+ 	string = string.substring(string.indexOf("=")+1);
+ 
++	ResultSetMetaData rsmd = null;
++            int numberOfColumns = 0;
++
+ 	 buf.append("<html><header><title>"+post+"</title></header>\n<body>");
+ 
+ try{
+ 
+-	 int approx = (int)(100/(numberOfColumns+2));
++//	DatabaseMetaData dmd = conn.getMetaData();
+ 
+      rs = conn.createStatement().executeQuery(
+ 		"SELECT * FROM "+postpre+" where filename='"+string+"'");
++	rs.next();
++
++	 rsmd = rs.getMetaData();
++             numberOfColumns = rsmd.getColumnCount();
++	 int approx = (int)(100/(numberOfColumns+2));
++
+ 
+           		buf.append("<h2>"+string+"</h2><p/>&nbsp;<br/>");
+ 		buf.append("<table><tr>\n");

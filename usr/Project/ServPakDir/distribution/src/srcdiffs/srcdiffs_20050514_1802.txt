@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBrcops.java distribution/src/srcdiffs/ServPak/jv/DBrcops.java
+--- ServPak/jv/DBrcops.java	2005-05-14 18:02:43.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBrcops.java	2005-05-14 18:02:26.000000000 -0500
+@@ -162,7 +162,7 @@
+                                     r++;
+                                 } else {
+                                     for (int B = 0; B < numcols; B++) {
+-                                        table2[A - r][B] = table[A][B];int AA = A-r;System.out.println(AA+","+B);
++                                        table2[A - r][B] = table[A][B];int AA = A-r;System.out.println(AA+B);
+                                     }
+                                 }
+                             }
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

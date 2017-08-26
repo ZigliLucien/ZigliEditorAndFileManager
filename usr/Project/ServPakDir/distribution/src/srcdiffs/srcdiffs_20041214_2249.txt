@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/Query.java distribution/src/srcdiffs/ServPak/jv/Query.java
+--- ServPak/jv/Query.java	2004-12-14 22:49:19.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/Query.java	2004-12-14 22:45:08.000000000 -0600
+@@ -70,7 +70,7 @@
+ 		jack.write(new String("Error in "+query).getBytes());
+ 		printout = jack.toString();
+ 		}
+-System.out.println("QUICK "+quick);
++
+ 
+      if(quick){			
+ 		String jk = jack.toString();

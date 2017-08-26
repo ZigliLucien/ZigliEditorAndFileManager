@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/ShowFile.java distribution/src/srcdiffs/ServPak/jv/ShowFile.java
+--- ServPak/jv/ShowFile.java	2004-10-23 03:46:14.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/ShowFile.java	2004-10-23 03:44:20.000000000 -0500
+@@ -20,7 +20,7 @@
+ 	StringBuilder bufy = new StringBuilder("<html><head><title>"+input+"</title></head>");
+  
+             bufy.append("<body>size: " + String.valueOf(current.length()));
+-            bufy.append("<br/> last modified at "+ stf.format(d) +"<br/> on "+ sdf.format(d));
++            bufy.append("<p/> last modified at "+ stf.format(d) +"<p/> on "+ sdf.format(d));
+ 	bufy.append("</body></html>");
+  
+ 		printout = bufy.toString();

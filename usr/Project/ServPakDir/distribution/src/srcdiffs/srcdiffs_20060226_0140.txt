@@ -1,0 +1,31 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/WebEdit.java distribution/src/srcdiffs/ServPak/jv/WebEdit.java
+--- ServPak/jv/WebEdit.java	2006-02-26 01:40:34.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/WebEdit.java	2006-02-26 01:22:04.000000000 -0600
+@@ -1,7 +1,6 @@
+ package ServPak.jv;
+ 
+ import NetsManager.Traxit;
+-import NetsManager.ZEFMServer;
+ 
+ import ZEdit.MailFiles;
+ 
+@@ -35,7 +34,7 @@
+ 
+             contents = contents.replace('+', ' ');
+ 
+-	ZEFMServer.goSave(filename,contents,"annotations");
++	ZEdit.DOps.goSave(filename,contents,"annotations");
+             printout = goString();
+         }
+     }
+@@ -47,7 +46,7 @@
+         filename = _filename;
+ 
+           bin = new BufferedReader(new InputStreamReader(
+-		new ByteArrayInputStream(ZEFMServer.getFile(filename,"annotations"))));
++		new ByteArrayInputStream(ZEdit.DOps.getFile(filename,"annotations"))));
+ 
+         StringBuilder buffy = new StringBuilder();
+ 

@@ -1,0 +1,511 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBrcops.java distribution/src/srcdiffs/ServPak/jv/DBrcops.java
+--- ServPak/jv/DBrcops.java	2004-12-20 19:18:20.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBrcops.java	2004-12-11 03:28:28.000000000 -0600
+@@ -39,8 +39,8 @@
+             try {
+                 if (string.indexOf("show") > -1) {
+                     for (int i = 0; i < numrows; i++) {
+-                        for (int j = 0; j < numcols; j++) {
+-                            table2[i][j] = table[i][j];
++                        for (int i_20_ = 0; i_20_ < numcols; i_20_++) {
++                            table2[i][i_20_] = table[i][i_20_];
+                         }
+                     }
+                 }
+@@ -49,9 +49,9 @@
+                     String[][] strings = new String[numrows][numcols];
+ 
+                     for (int i = 1; i < numrows; i++) {
+-                        for (int j = 1; j < numcols; j++) {
+-                            strings[i][j] = "-";
+-                            table2[i][j] = table[i][j];
++                        for (int i_21_ = 1; i_21_ < numcols; i_21_++) {
++                            strings[i][i_21_] = "-";
++                            table2[i][i_21_] = table[i][i_21_];
+                         }
+                     }
+ 
+@@ -77,33 +77,36 @@
+                     printout = showTable(infilename);
+                 } else {
+                     if (string.indexOf("insertrow") > -1) {
+-                        StringTokenizer stringtokenizer = new StringTokenizer(string, "&");
++                        StringTokenizer stringtokenizer = new StringTokenizer(string,
++                                "&");
+ 
+                         stringtokenizer.nextToken();
+ 
+-                        String tokn = stringtokenizer.nextToken();
+-                        String toki = tokn.substring(tokn.indexOf("=") + 1);
+-                        int nmrws = Integer.parseInt(toki);
++                        String string_22_ = stringtokenizer.nextToken();
++                        String string_23_ = string_22_.substring(string_22_.indexOf(
++                                    "=") + 1);
++                        int i = Integer.parseInt(string_23_);
+ 
+-                        tokn = stringtokenizer.nextToken();
++                        string_22_ = stringtokenizer.nextToken();
+                         numrows++;
+                         table2 = new String[numrows][numcols];
+ 
+-                        for (int i = 0; i < nmrws; i++) {
+-                            for (int j = 0; j < numcols; j++) {
+-                                table2[i][j] = table[i][j];
++                        for (int i_24_ = 0; i_24_ < i; i_24_++) {
++                            for (int i_25_ = 0; i_25_ < numcols; i_25_++) {
++                                table2[i_24_][i_25_] = table[i_24_][i_25_];
+                             }
+                         }
+ 
+-                        table2[nmrws][0] = tokn.substring(tokn.indexOf("=") + 1);
++                        table2[i][0] = string_22_.substring(string_22_.indexOf(
++                                    "=") + 1);
+ 
+-                        for (int j = 1; j < numcols; j++) {
+-                            table2[nmrws][j] = "-";
++                        for (int i_26_ = 1; i_26_ < numcols; i_26_++) {
++                            table2[i][i_26_] = "-";
+                         }
+ 
+-                        for (int i = nmrws + 1; i < numrows; i++) {
+-                            for (int j = 0; j < numcols; j++) {
+-                                table2[i][j] = table[i - 1][j];
++                        for (int i_27_ = i + 1; i_27_ < numrows; i_27_++) {
++                            for (int i_28_ = 0; i_28_ < numcols; i_28_++) {
++                                table2[i_27_][i_28_] = table[i_27_ - 1][i_28_];
+                             }
+                         }
+ 
+@@ -111,12 +114,14 @@
+                     }
+ 
+                     if (string.indexOf("rowdel") > -1) {
+-                        StringTokenizer stringtokenizer = new StringTokenizer(string,"&");
++                        StringTokenizer stringtokenizer = new StringTokenizer(string,
++                                "&");
+ 
+                         stringtokenizer.nextToken();
+ 
+                         String string_29_ = stringtokenizer.nextToken();
+-                        String string_30_ = string_29_.substring(string_29_.indexOf("=") + 1);
++                        String string_30_ = string_29_.substring(string_29_.indexOf(
++                                    "=") + 1);
+ 
+                         string_30_ = DBM.converter(string_30_);
+ 
+@@ -126,45 +131,46 @@
+                             numrows--;
+                             table2 = new String[numrows][numcols];
+ 
+-                            for (int A = 0; A < i; A++) {
+-                                for (int B = 0; B < numcols; B++) {
+-                                    table2[A][B] = table[A][B];
++                            for (int i_31_ = 0; i_31_ < i; i_31_++) {
++                                for (int i_32_ = 0; i_32_ < numcols; i_32_++) {
++                                    table2[i_31_][i_32_] = table[i_31_][i_32_];
+                                 }
+                             }
+ 
+-                            for (int A = i + 1; A < (numrows + 1);
+-                                    A++) {
+-                                for (int B = 0; B < numcols; B++) {
+-                                    table2[A - 1][B] = table[A][B];
++                            for (int i_33_ = i + 1; i_33_ < (numrows + 1);
++                                    i_33_++) {
++                                for (int i_34_ = 0; i_34_ < numcols; i_34_++) {
++                                    table2[i_33_ - 1][i_34_] = table[i_33_][i_34_];
+                                 }
+                             }
+                         } else {
+-                            StringTokenizer stringtokenizer_35_ = new StringTokenizer(string_30_,",");
++                            StringTokenizer stringtokenizer_35_ = new StringTokenizer(string_30_,
++                                    ",");
+                             int i = stringtokenizer_35_.countTokens();
+ 
+                             table2 = new String[numrows - i][numcols];
+ 
+                             int[] is = new int[i + 2];
+-                            int r = 0;
++                            int i_36_ = 0;
+ 
+-                            is[r] = 0;
++                            is[i_36_] = 0;
+ 
+                             while (stringtokenizer_35_.hasMoreTokens()) {
+-                                r++;
++                                i_36_++;
+ 
+-                                is[r] = Integer.parseInt(stringtokenizer_35_.nextToken());
++                                is[i_36_] = Integer.parseInt(stringtokenizer_35_.nextToken());
+                             }
+ 
+-                            r = 1;
++                            i_36_ = 1;
+                             is[i + 1] = numrows;
+ 
+-                            for (int A = 0; A < numrows; A++) {
+-                                if (A == is[r]) {
+-                                    r++;
++                            for (int i_37_ = 0; i_37_ < numrows; i_37_++) {
++                                if (i_37_ == is[i_36_]) {
++                                    i_36_++;
+                                 } else {
+-                                    for (int B = 0; B < numcols;
+-                                            B++) {
+-                                        table2[A - r + 1][B] = table[A][B];
++                                    for (int i_38_ = 0; i_38_ < numcols;
++                                            i_38_++) {
++                                        table2[i_37_ - i_36_ + 1][i_38_] = table[i_37_][i_38_];
+                                     }
+                                 }
+                             }
+@@ -186,7 +192,8 @@
+ 
+                         string_39_ = stringtokenizer.nextToken();
+ 
+-                        string_40_ = string_39_.substring(string_39_.indexOf("=") + 1);
++                        string_40_ = string_39_.substring(string_39_.indexOf(
++                                    "=") + 1);
+ 
+                         int i_41_ = Integer.parseInt(string_40_);
+ 
+@@ -195,12 +202,14 @@
+                     }
+ 
+                     if (string.indexOf("insertcol") > -1) {
+-                        StringTokenizer stringtokenizer = new StringTokenizer(string, "&");
++                        StringTokenizer stringtokenizer = new StringTokenizer(string,
++                                "&");
+ 
+                         stringtokenizer.nextToken();
+ 
+                         String string_42_ = stringtokenizer.nextToken();
+-                        String string_43_ = string_42_.substring(string_42_.indexOf("=") + 1);
++                        String string_43_ = string_42_.substring(string_42_.indexOf(
++                                    "=") + 1);
+                         int i = Integer.parseInt(string_43_);
+ 
+                         string_42_ = stringtokenizer.nextToken();
+@@ -213,15 +222,16 @@
+                             }
+                         }
+ 
+-                        table2[0][i] = string_42_.substring(string_42_.indexOf("=") + 1);
++                        table2[0][i] = string_42_.substring(string_42_.indexOf(
++                                    "=") + 1);
+ 
+-                        for (int s = 1; s < numrows; s++) {
+-                            table2[s][i] = "-";
++                        for (int i_46_ = 1; i_46_ < numrows; i_46_++) {
++                            table2[i_46_][i] = "-";
+                         }
+ 
+-                        for (int p = 0; p < numrows; p++) {
+-                            for (int q = i + 1; q < numcols; q++) {
+-                                table2[p][q] = table[p][q - 1];
++                        for (int i_47_ = 0; i_47_ < numrows; i_47_++) {
++                            for (int i_48_ = i + 1; i_48_ < numcols; i_48_++) {
++                                table2[i_47_][i_48_] = table[i_47_][i_48_ - 1];
+                             }
+                         }
+ 
+@@ -229,12 +239,14 @@
+                     }
+ 
+                     if (string.indexOf("coldel") > -1) {
+-                        StringTokenizer stringtokenizer = new StringTokenizer(string, "&");
++                        StringTokenizer stringtokenizer = new StringTokenizer(string,
++                                "&");
+ 
+                         stringtokenizer.nextToken();
+ 
+                         String string_49_ = stringtokenizer.nextToken();
+-                        String string_50_ = string_49_.substring(string_49_.indexOf("=") + 1);
++                        String string_50_ = string_49_.substring(string_49_.indexOf(
++                                    "=") + 1);
+ 
+                         string_50_ = DBM.converter(string_50_);
+ 
+@@ -244,44 +256,46 @@
+                             numcols--;
+                             table2 = new String[numrows][numcols];
+ 
+-                            for (int p = 0; p < i; p++) {
+-                                for (int q = 0; q < numrows; q++) {
+-                                    table2[q][p] = table[q][p];
++                            for (int i_51_ = 0; i_51_ < i; i_51_++) {
++                                for (int i_52_ = 0; i_52_ < numrows; i_52_++) {
++                                    table2[i_52_][i_51_] = table[i_52_][i_51_];
+                                 }
+                             }
+ 
+-                            for (int p = i + 1; p < (numcols + 1); p++) {
+-                                for (int q = 0; q < numrows; q++) {
+-                                    table2[q][p - 1] = table[q][p];
++                            for (int i_53_ = i + 1; i_53_ < (numcols + 1);
++                                    i_53_++) {
++                                for (int i_54_ = 0; i_54_ < numrows; i_54_++) {
++                                    table2[i_54_][i_53_ - 1] = table[i_54_][i_53_];
+                                 }
+                             }
+                         } else {
+-                            StringTokenizer stringtokenizer_55_ = new StringTokenizer(string_50_, ",");
++                            StringTokenizer stringtokenizer_55_ = new StringTokenizer(string_50_,
++                                    ",");
+                             int i = stringtokenizer_55_.countTokens();
+ 
+                             table2 = new String[numrows][numcols - i];
+ 
+                             int[] is = new int[i + 2];
+-                            int A = 0;
++                            int i_56_ = 0;
+ 
+-                            is[A] = 0;
++                            is[i_56_] = 0;
+ 
+                             while (stringtokenizer_55_.hasMoreTokens()) {
+-                                A++;
++                                i_56_++;
+ 
+-                                is[A] = Integer.parseInt(stringtokenizer_55_.nextToken());
++                                is[i_56_] = Integer.parseInt(stringtokenizer_55_.nextToken());
+                             }
+ 
+-                            A = 1;
++                            i_56_ = 1;
+                             is[i + 1] = numrows;
+ 
+-                            for (int B = 0; B < numcols; B++) {
+-                                if (B == is[A]) {
+-                                    A++;
++                            for (int i_57_ = 0; i_57_ < numcols; i_57_++) {
++                                if (i_57_ == is[i_56_]) {
++                                    i_56_++;
+                                 } else {
+-                                    for (int C = 0; C < numrows;
+-                                            C++) {
+-                                        table2[C][B - A + 1] = table[C][B];
++                                    for (int i_58_ = 0; i_58_ < numrows;
++                                            i_58_++) {
++                                        table2[i_58_][i_57_ - i_56_ + 1] = table[i_58_][i_57_];
+                                     }
+                                 }
+                             }
+@@ -291,36 +305,42 @@
+                     }
+ 
+                     if (string.indexOf("xcols") > -1) {
+-                        StringTokenizer stringtokenizer = new StringTokenizer(string,"&");
++                        StringTokenizer stringtokenizer = new StringTokenizer(string,
++                                "&");
+ 
+                         stringtokenizer.nextToken();
+ 
+                         String string_59_ = stringtokenizer.nextToken();
+-                        String string_60_ = string_59_.substring(string_59_.indexOf("=") + 1);
++                        String string_60_ = string_59_.substring(string_59_.indexOf(
++                                    "=") + 1);
+                         int i = Integer.parseInt(string_60_);
+ 
+                         string_59_ = stringtokenizer.nextToken();
+ 
+-                        string_60_ = string_59_.substring(string_59_.indexOf("=") + 1);
++                        string_60_ = string_59_.substring(string_59_.indexOf(
++                                    "=") + 1);
+ 
+-                        int c = Integer.parseInt(string_60_);
++                        int i_61_ = Integer.parseInt(string_60_);
+ 
+-                        exCols(i, c);
++                        exCols(i, i_61_);
+                         realign(table2);
+                     }
+ 
+                     if (string.indexOf("colimport") > -1) {
+-                        StringTokenizer stringtokenizer = new StringTokenizer(string, "&");
++                        StringTokenizer stringtokenizer = new StringTokenizer(string,
++                                "&");
+ 
+                         stringtokenizer.nextToken();
+ 
+                         String string_62_ = stringtokenizer.nextToken();
+-                        String string_63_ = string_62_.substring(string_62_.indexOf("=") + 1);
++                        String string_63_ = string_62_.substring(string_62_.indexOf(
++                                    "=") + 1);
+ 
+                         string_63_ = DBM.converter(string_63_);
+                         string_62_ = stringtokenizer.nextToken();
+ 
+-                        String string_64_ = string_62_.substring(string_62_.indexOf("=") + 1);
++                        String string_64_ = string_62_.substring(string_62_.indexOf(
++                                    "=") + 1);
+                         		DBgo.getFields(string_64_);
+                         String[][] strings_65_ = DBgo.readXML(string_64_, DBgo.champs.length);
+ 
+@@ -333,17 +353,17 @@
+ 
+                             table2 = new String[numrows][numcols + 1];
+ 
+-                            for (int ii = 0; ii < numrows; ii++) {
+-                                for (int j = 0; j < numcols; j++) {
+-                                    table2[ii][j] = table[ii][j];
++                            for (int i_66_ = 0; i_66_ < numrows; i_66_++) {
++                                for (int i_67_ = 0; i_67_ < numcols; i_67_++) {
++                                    table2[i_66_][i_67_] = table[i_66_][i_67_];
+                                 }
+                             }
+ 
+-                            for (int A = 0; A < numrows; A++) {
+-                                if (bool && (A >= strings_65_.length)) {
+-                                    table2[A][numcols] = "-";
++                            for (int i_68_ = 0; i_68_ < numrows; i_68_++) {
++                                if (bool && (i_68_ >= strings_65_.length)) {
++                                    table2[i_68_][numcols] = "-";
+                                 } else {
+-                                    table2[A][numcols] = strings_65_[A][i];
++                                    table2[i_68_][numcols] = strings_65_[i_68_][i];
+                                 }
+                             }
+                         } else {
+@@ -353,9 +373,9 @@
+ 
+                             table2 = new String[numrows][numcols + i];
+ 
+-                            for (int A = 0; A < numrows; A++) {
+-                                for (int B = 0; B < numcols; B++) {
+-                                    table2[A][B] = table[A][B];
++                            for (int i_70_ = 0; i_70_ < numrows; i_70_++) {
++                                for (int i_71_ = 0; i_71_ < numcols; i_71_++) {
++                                    table2[i_70_][i_71_] = table[i_70_][i_71_];
+                                 }
+                             }
+ 
+@@ -367,9 +387,9 @@
+                                 i_72_++;
+                             }
+ 
+-                            for (int Q = 0; Q < i; Q++) {
+-                                for (int P = 0; P < numrows; P++) {
+-                                    table2[P][numcols + Q] = strings_65_[P][is[Q]];
++                            for (int i_73_ = 0; i_73_ < i; i_73_++) {
++                                for (int i_74_ = 0; i_74_ < numrows; i_74_++) {
++                                    table2[i_74_][numcols + i_73_] = strings_65_[i_74_][is[i_73_]];
+                                 }
+                             }
+                         }
+@@ -435,10 +455,10 @@
+ 
+             stringbuffer.append("\n<" + string_1_ + ">\n");
+ 
+-            for (int q = 0; q < strings_4_.length; q++) {
+-                String string_6_ = strings_2_[q].toLowerCase();
++            for (int i_5_ = 0; i_5_ < strings_4_.length; i_5_++) {
++                String string_6_ = strings_2_[i_5_].toLowerCase();
+ 
+-                stringbuffer.append("<" + string_6_ + ">" + strings_4_[q] +
++                stringbuffer.append("<" + string_6_ + ">" + strings_4_[i_5_] +
+                     "</" + string_6_ + ">\n");
+             }
+ 
+@@ -456,61 +476,62 @@
+         return new String(Traxit.tabby);
+     }
+ 
+-    static void exRows(int i, int s) {
++    static void exRows(int i, int i_7_) {
+         int[] is = new int[numrows];
+ 
+-        for (int q = 0; q < numrows; q++) {
+-            is[q] = q;
++        for (int i_8_ = 0; i_8_ < numrows; i_8_++) {
++            is[i_8_] = i_8_;
+ 
+-            if (q == i) {
+-                is[q] = s;
++            if (i_8_ == i) {
++                is[i_8_] = i_7_;
+             }
+ 
+-            if (q == s) {
+-                is[q] = i;
++            if (i_8_ == i_7_) {
++                is[i_8_] = i;
+             }
+         }
+ 
+-        for (int A = 0; A < numrows; A++) {
+-            for (int B = 0; B < numcols; B++) {
+-                table2[is[A]][B] = table[A][B];
++        for (int i_9_ = 0; i_9_ < numrows; i_9_++) {
++            for (int i_10_ = 0; i_10_ < numcols; i_10_++) {
++                table2[is[i_9_]][i_10_] = table[i_9_][i_10_];
+             }
+         }
+     }
+ 
+-    static void exCols(int i, int j) {
++    static void exCols(int i, int i_11_) {
+         int[] is = new int[numcols];
+ 
+-        for (int q = 0; q < numcols; q++) {
+-            is[q] = q;
++        for (int i_12_ = 0; i_12_ < numcols; i_12_++) {
++            is[i_12_] = i_12_;
+ 
+-            if (q == i) {
+-                is[q] = j;
++            if (i_12_ == i) {
++                is[i_12_] = i_11_;
+             }
+ 
+-            if (q == j) {
+-                is[q] = i;
++            if (i_12_ == i_11_) {
++                is[i_12_] = i;
+             }
+         }
+ 
+-        for (int A = 0; A < numrows; A++) {
+-            for (int B = 0; B < numcols; B++) {
+-                table2[A][is[B]] = table[A][B];
++        for (int i_13_ = 0; i_13_ < numrows; i_13_++) {
++            for (int i_14_ = 0; i_14_ < numcols; i_14_++) {
++                table2[i_13_][is[i_14_]] = table[i_13_][i_14_];
+             }
+         }
+     }
+ 
+     static String[][] transposed(String[][] strings) {
++        int i = numrows;
++        int i_15_ = numcols;
++        String[][] strings_16_ = new String[i_15_][i];
+ 
+-        String[][] strgs = new String[numcols][numrows];
+-
+-        for (int A = 0; A < numrows; A++) {
+-            for (int B = 0; B < numcols; B++) {
+-                strgs[B][A] = strings[A][B];
++        for (int i_17_ = 0; i_17_ < numrows; i_17_++) {
++            for (int i_18_ = 0; i_18_ < numcols; i_18_++) {
++                strings_16_[i_18_][i_17_] = strings[i_17_][i_18_];
+             }
+         }
+ 
+-        return strgs;
++        return strings_16_;
+     }
+ 
+     static void realign(String[][] strings) throws Exception {
+@@ -519,8 +540,8 @@
+         table = new String[numrows][numcols];
+ 
+         for (int i = 0; i < numrows; i++) {
+-            for (int j = 0; j < numcols; j++) {
+-                table[i][j] = strings[i][j];
++            for (int i_19_ = 0; i_19_ < numcols; i_19_++) {
++                table[i][i_19_] = strings[i][i_19_];
+             }
+         }
+     }
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

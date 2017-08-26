@@ -1,0 +1,23 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MySQL.java distribution/src/srcdiffs/ServPak/jv/MySQL.java
+--- ServPak/jv/MySQL.java	2006-04-29 23:20:34.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MySQL.java	2006-04-29 23:18:12.000000000 -0500
+@@ -157,8 +157,14 @@
+ 	buf.append("<html><header><title>From Mail Log</title></header>\n<body>\n<pre>");
+ 
+ 		String fname = string.substring(string.indexOf("MAILLOG=")+8);
+-		BufferedReader brdr = 
+-			new BufferedReader(ZEFMServer.getStream(conn, fname, postpre));
++System.out.println("FNAME "+fname+" from "+postpre);
++//		BufferedReader brdr = ZEFMServer.getZipFile(conn, fname, postpre);
++
++	rs = conn.createStatement().executeQuery(
++		"SELECT filename " + "FROM sentMail WHERE filename='"+fname+"'");
++                                  	          rs.next();
++	
++		BufferedReader brdr = new BufferedReader(new StringReader(rs.getString(1)));
+ 
+ 		for (String v; (v = brdr.readLine()) != null;) {
+ 			buf.append(v+"\n");

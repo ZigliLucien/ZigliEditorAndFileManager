@@ -1,0 +1,43 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2004-12-08 03:18:43.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2004-10-23 00:36:00.000000000 -0500
+@@ -4,11 +4,15 @@
+ package ServPak.jv;
+ 
+ import NetsManager.Traxit;
+-import NetsManager.Query;
+ import NetsManager.ZConnection;
+ import NetsManager.ZEFMServer;
+ 
+-import java.io.*;
++import java.io.ByteArrayOutputStream;
++import java.io.File;
++import java.io.FileOutputStream;
++import java.io.FileWriter;
++import java.io.InputStream;
++import java.io.PrintWriter;
+ 
+ import java.util.*;
+ 
+@@ -350,14 +354,11 @@
+         printwriter.close();
+     }
+ 
+-    static String showTable(String basename) throws Exception {
+-//        new Traxit("DB/" + basename + ".xml", "ServPak/xsl/dbgeneric.xsl", DBM.zefmhome);
+-	FileInputStream fins = new FileInputStream("DB/" + basename + ".xml");
+-	byte[] data = new byte[fins.available()];
+-	fins.read(data);
+-	new Query(new String(data,"UTF-8"),"ServPak/xql/dbgeneric.xql",DBM.zefmhome);
+-	return Query.qtabby.toString();
+-//        return new String(Traxit.tabby);
++    static String showTable(String string) throws Exception {
++        new Traxit("DB/" + string + ".xml", "ServPak/xsl/dbgeneric.xsl",
++            DBM.zefmhome);
++
++        return new String(Traxit.tabby);
+     }
+ 
+     public static HashMap<String,String> parseQuery(String string) {
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

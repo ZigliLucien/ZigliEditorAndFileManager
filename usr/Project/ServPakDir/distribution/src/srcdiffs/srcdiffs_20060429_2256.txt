@@ -1,0 +1,23 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MySQL.java distribution/src/srcdiffs/ServPak/jv/MySQL.java
+--- ServPak/jv/MySQL.java	2006-04-29 22:56:18.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MySQL.java	2006-04-29 22:50:32.000000000 -0500
+@@ -152,15 +152,7 @@
+     }
+ 
+ 	} else if (string.contains("MAILLOG=")) {
+-	buf.append("<html><header><title>From Mail Log</title></header>\n<body>\n<pre>");
+-
+-		String fname = string.substring(string.indexOf("MAILLOG="+8));
+-		BufferedReader brdr = ZEFMServer.getZipFile(conn, fname, postpre);
+-
+-		for (String v; (v = brdr.readLine()) != null;) {
+-			buf.append(v+"\n");
+-		}
+-		buf.append("\n</pre>\n</body>\n</html>");		
++		buf.append("HOWDY");
+ 	} else {
+ 
+ 	string = string.substring(string.indexOf("=")+1);

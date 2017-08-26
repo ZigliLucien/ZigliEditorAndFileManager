@@ -1,0 +1,27 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2004-12-12 23:31:13.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2004-12-12 23:23:46.000000000 -0600
+@@ -93,10 +93,12 @@
+ 
+             if (hashmap.containsKey("addfield")) {
+                 addField(filename, hashmap.get("addfield"));
++	    getFields(filename);
+                 bool = true;
+             }
+ 
+             if (hashmap.containsKey("change")) {
++	    getFields(filename);
+                 printout = changeMode(tableset).toString();
+                 return;
+             }
+@@ -190,7 +192,7 @@
+         new Traxit("DB/" + string + ".xml", "ServPak/xsl/newfield.xsl", fld);
+ 
+         FileOutputStream fts = new FileOutputStream("DB/" + string + ".xml");
+-System.out.println(Traxit.tabby.toString());
++
+         fts.write(Traxit.tabby);
+         fts.flush();
+         fts.close();
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

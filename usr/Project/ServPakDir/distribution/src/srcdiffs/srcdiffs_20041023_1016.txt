@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2004-10-23 10:16:41.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2004-10-23 05:19:38.000000000 -0500
+@@ -185,7 +185,7 @@
+     }
+ 
+     public static void fillChecked(StringBuilder _buf, String _localprocess) {
+-        _buf.append("<form action=\"FileOps.jav\" method=\"GET\" name=\"overall\">");
++        _buf.append("<form action=\"FileOps.jav\" method=\"GET\">");
+        
+ 	 _buf.append(vvv);
+ 
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

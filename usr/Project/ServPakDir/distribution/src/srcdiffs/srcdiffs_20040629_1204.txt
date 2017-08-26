@@ -1,0 +1,23 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/Webgrep.java distribution/src/srcdiffs/ServPak/jv/Webgrep.java
+--- ServPak/jv/Webgrep.java	2004-06-29 12:04:34.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/Webgrep.java	2004-06-29 12:03:32.000000000 -0500
+@@ -131,7 +131,7 @@
+ 
+                     stringbuffer.append("<hr></a>\n");
+                     stringbuffer.append("In <b>" + string_15_ +
+-                        "</b> &nbsp;&nbsp&bullet;&nbsp;");
++                        "</b> &nbsp;&nbsp&gt;&nbsp;");
+                     string_15_ = ZEFMServer.hexi(string_15_);
+ 	        stringbuffer.append("<font size=\"-1\">\n");
+                     stringbuffer.append("<a href=" + string_15_ +
+@@ -152,7 +152,7 @@
+                     stringbuffer.append("<a href=AAA?" + string_15_ +
+                         "> &nbsp;&nbsp; Notes  </a>\n");
+ 
+-                    stringbuffer.append("&nbsp;&bullet;<p>\n");
++                    stringbuffer.append("&nbsp;&lt;<p>\n");
+                     stringbuffer.append(hashmap.get(dockeys[i_14_]) + "\n");
+                 }
+ 

@@ -1,0 +1,28 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/SentMail.java distribution/src/srcdiffs/ServPak/jv/SentMail.java
+--- ServPak/jv/SentMail.java	2007-07-04 15:16:24.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/SentMail.java	2007-07-04 15:11:48.000000000 -0500
+@@ -45,9 +45,7 @@
+ 		out1 = "<mail>\n"+out1+"\n</mail>";
+ 		out = (new NetsManager.Traxit(out1.getBytes(),"ServPak/xsl/readSentMail.xsl",null)).tabby;
+ 
+-}catch(Exception ee){
+-			printout = "Check your database for well-formedness.";
+-		    }
++}catch(Exception ee){}
+ 
+ 		printout = new String(out);
+ 	} else {
+@@ -64,9 +62,7 @@
+ 
+ 
+ 		printout = (new NetsManager.Query(listing, "ServPak/xql/sentmail.xql", null, true)).qtabby.toString(); 
+-}catch(Exception eio){ 
+-			printout = "Check your database for well-formedness.";
+-		     }
++}catch(Exception eio){ }
+ 	}
+ 
+      }

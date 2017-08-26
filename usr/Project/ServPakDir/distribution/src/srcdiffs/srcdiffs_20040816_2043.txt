@@ -1,0 +1,144 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2004-07-20 14:49:54.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2004-08-16 20:41:18.000000000 -0500
+@@ -21,6 +21,7 @@
+     static String filename;
+     static String[][] tableset;
+      StringBuffer stringbuffer;
++     StringBuffer outt;
+      PrintWriter printwriter;
+     public String printout;
+     String[] champs;
+@@ -151,15 +152,24 @@
+                 tableset = addRow(tableset, newrow);
+             }
+ 
++                outt = writeXML(filename, tableset);	    
++
+             if (!bool) {
+-                writeXML(filename, tableset);
++            printwriter = new PrintWriter(new FileWriter("DB/" + filename + ".xml"), true);
++	printwriter.print(outt.toString());
++            printwriter.close();
+             }
+         }
+ 
+         if (showtable) {
++	if(!bool){
++         	    new Traxit(outt, "ServPak/xsl/dbgeneric.xsl",DBM.zefmhome);
++		printout = new String(Traxit.tabby);
++	}else{
+             printout = showTable(filename);
+         }
+     }
++    }
+ 
+     String[][] addRow(String[][] tablein) {
+         int cols = tablein[0].length;
+@@ -229,10 +239,10 @@
+         return stringbuffer;
+     }
+ 
+-    StringBuffer changeMode(String[][] strings) throws Exception {
++    StringBuffer changeMode(String[][] matrx) throws Exception {
+         stringbuffer = new StringBuffer();
+ 
+-        int i = strings[0].length;
++        int i = matrx[0].length;
+         int hsize = -2 + Math.round((float) (90 / i));
+ 
+         stringbuffer.append("<html>\n");
+@@ -250,11 +260,11 @@
+ 
+         stringbuffer.append("</tr>\n");
+ 
+-        for (int q = 0; q < strings.length; q++) {
++        for (int q = 0; q < matrx.length; q++) {
+             stringbuffer.append("<tr>");
+ 
+             for (int qq = 0; qq < i; qq++) {
+-                String string = strings[q][qq];
++                String string = matrx[q][qq];
+ 
+                 string = DBM.fixgtlt(string);
+                 stringbuffer.append("<td width=\"" + hsize +
+@@ -275,19 +285,18 @@
+ 
+     String[][] editMode(HashMap hashmap, int i, int j)
+         throws Exception {
+-        String[][] strings = new String[i][j];
+-        Object object = null;
++        String[][] matrx = new String[i][j];
+ 
+         for (int q = 0; q < i; q++) {
+             for (int q1 = 0; q1 < j; q1++) {
+                 String string = hashmap.get(String.valueOf(q) + "," +
+                         String.valueOf(q1)).toString();
+ 
+-                strings[q][q1] = string.replace('+', ' ');
++                matrx[q][q1] = string.replace('+', ' ');
+             }
+         }
+ 
+-        return strings;
++        return matrx;
+     }
+ 
+     public static String[][] readXML(String string, int i)
+@@ -297,8 +306,8 @@
+         StringTokenizer stringtokenizer = new StringTokenizer(new String(
+                     Traxit.tabby), "\n");
+         int rws = stringtokenizer.countTokens();
+-        Object object = null;
+-        String[][] strings = new String[rws][i];
++
++        String[][] matrx = new String[rws][i];
+         int rr = 0;
+ 
+         while (stringtokenizer.hasMoreTokens()) {
+@@ -311,21 +320,20 @@
+ 
+             for (int q = 0; q < i; q++) {
+                 if (tokk != null) {
+-                    strings[rr][q] = tokk.nextToken();
++                    matrx[rr][q] = tokk.nextToken();
+                 } else {
+-                    strings[rr][q] = tok;
++                    matrx[rr][q] = tok;
+                 }
+             }
+ 
+             rr++;
+         }
+ 
+-        return strings;
++        return matrx;
+     }
+ 
+-    void writeXML(String name, String[][] table) throws Exception {
+-        printwriter = new PrintWriter(new FileWriter("DB/" + name + ".xml"),
+-                true);
++    StringBuffer writeXML(String name, String[][] table) throws Exception {
++
+         stringbuffer = new StringBuffer();
+ 
+         String _name = name;
+@@ -352,13 +360,12 @@
+         }
+ 
+         stringbuffer.append("\n</" + _name + ">");
+-        printwriter.print(stringbuffer.toString());
+-        printwriter.close();
++
++	return stringbuffer;
+     }
+ 
+     static String showTable(String string) throws Exception {
+-        new Traxit("DB/" + string + ".xml", "ServPak/xsl/dbgeneric.xsl",
+-            DBM.zefmhome);
++        new Traxit("DB/" + string + ".xml", "ServPak/xsl/dbgeneric.xsl", DBM.zefmhome);
+ 
+         return new String(Traxit.tabby);
+     }
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

@@ -1,0 +1,83 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2004-12-08 19:20:28.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2004-12-08 03:29:20.000000000 -0600
+@@ -284,41 +284,37 @@
+         return strings;
+     }
+ 
+-    public static String[][] readXML(String basename, int i)
++    public static String[][] readXML(String string, int i)
+         throws Exception {
+-	try{
+-	new NetsManager.Query(
+-		new FileInputStream("DB/" + basename + ".xml"), "for $i in /*/* return $i");
+-	}catch (Exception ee){ }
++        new Traxit("DB/" + string + ".xml", "ServPak/xsl/db2csv.xsl");
+ 
+-	BufferedReader buff = new BufferedReader(
+-		new StringReader(NetsManager.Query.qtabby.toString()));
++        StringTokenizer stringtokenizer = new StringTokenizer(new String(
++                    Traxit.tabby), "\n");
++        int rws = stringtokenizer.countTokens();
+ 
+-	Stack<String[]> staci = new Stack<String[]>();
+-	String[] line = new String[i];
+-	int cc = 0;
+-	int ccc = 0;
++        String[][] strings = new String[rws][i];
++        int rr = 0;
+ 
+-	for(String v;(v=buff.readLine())!=null;){
+-	
+-	ccc = (cc % (i+1));
+-	  cc++;
++        while (stringtokenizer.hasMoreTokens()) {
++            String tok = stringtokenizer.nextToken();
++            StringTokenizer tokk = null;
+ 
+-	if(ccc>0){	
+-		line[ccc-1] = v;
++            if (tok.indexOf(",") > -1) {
++                tokk = new StringTokenizer(tok, ",");
+ 	}		
+ 
+-	if((cc % (i+1)) == 0) { 
+-			staci.push(line);
+-			line = new String[i]; 
++            for (int q = 0; q < i; q++) {
++                if (tokk != null) {
++                    strings[rr][q] = tokk.nextToken();
++                } else {
++                    strings[rr][q] = tok;
+ 		}
+ 	}
+ 
+-	           String[][] tbl = new String[staci.size()][i];
+-
+-		staci.toArray(tbl);
++            rr++;
++        }
+ 
+-   	            return tbl;
++        return strings;
+     }
+ 
+     void writeXML(String name, String[][] table) throws Exception {
+@@ -355,10 +351,13 @@
+     }
+ 
+     static String showTable(String basename) throws Exception {
+-
++//        new Traxit("DB/" + basename + ".xml", "ServPak/xsl/dbgeneric.xsl", DBM.zefmhome);
+ 	FileInputStream fins = new FileInputStream("DB/" + basename + ".xml");
+-	new Query(fins, new File("ServPak/xql/dbgeneric.xql"),DBM.zefmhome);
++	byte[] data = new byte[fins.available()];
++	fins.read(data);
++	new Query(new String(data,"UTF-8"),"ServPak/xql/dbgeneric.xql",DBM.zefmhome);
+ 	return Query.qtabby.toString();
++//        return new String(Traxit.tabby);
+     }
+ 
+     public static HashMap<String,String> parseQuery(String string) {
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

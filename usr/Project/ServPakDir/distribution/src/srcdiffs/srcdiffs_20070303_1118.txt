@@ -1,0 +1,25 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MKcal.java distribution/src/srcdiffs/ServPak/jv/MKcal.java
+--- ServPak/jv/MKcal.java	2007-03-03 11:18:39.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/MKcal.java	2007-03-03 11:09:58.000000000 -0600
+@@ -57,9 +57,7 @@
+ 
+         if ((inputString.indexOf("NEXT") > -1) ||
+                 (inputString.indexOf("BACK") > -1)) {
+-printout = inputString;
+-return;
+-/*
++
+             int cut = inputString.indexOf("=");
+             String pre = inputString.substring(0, cut);
+             String[] tox = pre.split("\\+");
+@@ -70,7 +68,6 @@
+             weekday = Integer.parseInt(tox[4]);
+             bool = true;
+ 	leapYearCheck(year);
+-*/
+         } else {
+             bool = false;
+ 

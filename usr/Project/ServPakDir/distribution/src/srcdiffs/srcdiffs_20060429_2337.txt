@@ -1,0 +1,48 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MySQL.java distribution/src/srcdiffs/ServPak/jv/MySQL.java
+--- ServPak/jv/MySQL.java	2006-04-29 23:37:23.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MySQL.java	2006-04-29 23:20:34.000000000 -0500
+@@ -128,9 +128,8 @@
+ 		buf.append("</tr>\n</table>\n<p/>\n");
+ 
+ 	String fname = string;
+-	String aux = "";
+ 
+-	if(!postpre.equals("sentMail") && !postpre.equals("listings")) {
++	if(!postpre.equals("sentMail")) {
+ 		if (string.contains(".") && ! string.contains("/")) {
+ 				String str0 = string.substring(0,string.indexOf("."));
+ 		            	String str1 = string.substring(string.indexOf(".")+1);		
+@@ -138,11 +137,11 @@
+ 		} else {
+ 				if(string.contains("_")) fname = string.replace('_','/');
+ 		}
+-
+-	} else {
+-				aux = "MySQL.jav?LOG=";
+ 	}	
+ 
++	String aux = "";
++	if(postpre.equals("sentMail")) aux = "MySQL.jav?MAILLOG=";
++
+ 		buf.append(
+ 		"<a href="+aux+ZEFMServer.hexi(fname)+">See File</a><p/>\n");
+ 		buf.append(
+@@ -152,12 +151,12 @@
+ 		System.out.println(e.getMessage()); 
+     }
+ 
+-	} else if (string.contains("LOG=")) {
++	} else if (string.contains("MAILLOG=")) {
+ try{
+ 
+-	buf.append("<html><header><title>From Logs/Listings</title></header>\n<body>\n<pre>");
++	buf.append("<html><header><title>From Mail Log</title></header>\n<body>\n<pre>");
+ 
+-		String fname = string.substring(string.indexOf("LOG=")+4);
++		String fname = string.substring(string.indexOf("MAILLOG=")+8);
+ 		BufferedReader brdr = 
+ 			new BufferedReader(ZEFMServer.getStream(conn, fname, postpre));
+ 

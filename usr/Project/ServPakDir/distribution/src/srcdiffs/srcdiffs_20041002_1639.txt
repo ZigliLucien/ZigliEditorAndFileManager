@@ -1,0 +1,47 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: DBM.class
+diff -Bwaur ServPak/jv/DBM.java distribution/src/srcdiffs/ServPak/jv/DBM.java
+--- ServPak/jv/DBM.java	2004-10-02 16:27:15.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBM.java	2003-08-24 23:30:18.000000000 -0500
+@@ -304,13 +304,9 @@
+         String string_40_ = (string_31_ + "/DB/" +
+             dbasename.substring(dbasename.lastIndexOf("/") + 1));
+ 
+-	stringbuffer = 
+-	new StringBuffer("<html><head><script>window.location=\""
+-			   +string_40_+".sdb\"</script></head>\n");
+-        stringbuffer.append("<html><body><p>&nbsp;<p>&nbsp;<p>&nbsp;<p><center> <a href=");
+-        stringbuffer.append(string_40_ + ".sdb> <font size=+2>Go To <b>");
+-        stringbuffer.append(dbasename.toUpperCase() + "</b></font></a></center></body></html>");
+-	printout = stringbuffer.toString();
++        printout = ("<html><body><p>&nbsp;<p>&nbsp;<p>&nbsp;<p><center> <a href=" +
++            string_40_ + ".sdb> <font size=+2>Go To <b>" +
++            dbasename.toUpperCase() + "</b></font></a></center></body></html>");
+     }
+ 
+     void savetable(String in) {
+Only in ServPak/jv: DBanalyze.class
+Only in ServPak/jv: DBgo.class
+Only in ServPak/jv: DBrcops.class
+Only in ServPak/jv: Diary.class
+Only in ServPak/jv: DiaryOut.class
+Only in ServPak/jv: Email.class
+Only in ServPak/jv: FileOps.class
+Only in ServPak/jv: FormEntry.class
+Only in ServPak/jv: GoFM.class
+Only in ServPak/jv: Install.class
+Only in ServPak/jv: InstallW.class
+Only in ServPak/jv: Logging.class
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+Only in ServPak/jv: MKcal.class
+Only in ServPak/jv: MakDox.class
+Only in ServPak/jv: ReadClass.class
+Only in ServPak/jv: Registering.class
+Only in ServPak/jv: SendEmail$1.class
+Only in ServPak/jv: SendEmail$2.class
+Only in ServPak/jv: SendEmail.class
+Only in ServPak/jv: ShowArgs.class
+Only in ServPak/jv: ShowNotes.class
+Only in ServPak/jv: Test.class
+Only in ServPak/jv: WebEdit.class
+Only in ServPak/jv: Webgrep.class

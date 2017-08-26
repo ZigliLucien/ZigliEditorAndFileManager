@@ -1,0 +1,29 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/SendEmail.java distribution/src/srcdiffs/ServPak/jv/SendEmail.java
+--- ServPak/jv/SendEmail.java	2004-11-24 11:50:41.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/SendEmail.java	2004-11-24 11:48:28.000000000 -0600
+@@ -79,7 +79,7 @@
+             subject = DBM.converter(stin.nextToken());
+ 
+             String linein = textin.substring(textin.indexOf("&s@@nd=") + 7);
+-
++System.out.println(textin);
+             int cutoff = linein.indexOf("&attachment=");
+ 
+               contents = linein.substring(0, cutoff);System.out.println(contents);
+@@ -91,12 +91,13 @@
+ 	for(int cut=-1;(cut=contents.indexOf("?"))>=0;){
+ 	contents =new StringBuilder(contents).replace(cut,cut+1,"=Z=Z").toString();	
+ 	}
+-
++System.out.println("2 "+contents);
+ 	contents = contents.replace('+',' ');
+ 
+ 	for(int cut=-1;(cut=contents.indexOf("X@@@X"))>=0;){
+ 	contents =new StringBuilder(contents).replace(cut,cut+5,"+").toString();	
+ 	}
++System.out.println("3 "+contents);
+ 
+ 	for(int cut=-1;(cut=contents.indexOf("..."))>=0;){
+ 	contents =new StringBuilder(contents).replace(cut,cut+3,"?").toString();	

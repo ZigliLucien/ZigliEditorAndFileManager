@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBM.java distribution/src/srcdiffs/ServPak/jv/DBM.java
+--- ServPak/jv/DBM.java	2004-12-30 22:26:55.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBM.java	2004-12-30 22:24:40.000000000 -0600
+@@ -289,7 +289,7 @@
+         fileinfo.store(fouts, "DB/" + dbasename + " properties");
+         fouts.close();
+ 
+-        String fileref = locdirec + "/DB/" + dbasename;
++        String fileref = (locdirec + "/DB/" + dbasename.substring(dbasename.indexOf("DB") + 3));
+ 
+ 	sbuild = 
+ 	new StringBuilder(
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

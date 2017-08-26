@@ -1,0 +1,22 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/Webgrep.java distribution/src/srcdiffs/ServPak/jv/Webgrep.java
+--- ServPak/jv/Webgrep.java	2004-06-24 00:44:54.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/Webgrep.java	2003-08-24 23:25:28.000000000 -0500
+@@ -32,7 +32,6 @@
+         String string_2_ = string_0_.substring(i + 1);
+         String query = string_1_.substring(string_1_.indexOf("=") + 1);
+         String string_4_ = string_2_.substring(0, string_2_.indexOf("="));
+-         String which = string_2_.substring(string_2_.indexOf("=")+1);	
+ 
+         query = query.replace('+', ' ');
+         query = DBM.converter(query);
+@@ -78,8 +77,6 @@
+                         }
+                     }
+ 
+-	if (which.equals("FindFile") ) continue;
+-
+                     bufferedreader = new BufferedReader(new FileReader(filename));
+ 
+                     Object object = null;

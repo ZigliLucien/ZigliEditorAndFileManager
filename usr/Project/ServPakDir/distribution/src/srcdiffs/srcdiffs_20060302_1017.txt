@@ -1,0 +1,15 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2006-03-02 10:17:48.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2006-03-02 09:50:56.000000000 -0600
+@@ -131,7 +131,7 @@
+             XCommands.pushListing(dirname);
+             XCommands.reqfile = reqreq;
+ 
+-//            new GoFM(linein);
++            new GoFM(linein);
+         }
+     }
+ 
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

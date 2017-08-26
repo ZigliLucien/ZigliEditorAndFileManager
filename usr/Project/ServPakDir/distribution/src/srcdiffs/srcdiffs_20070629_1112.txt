@@ -1,0 +1,19 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MySQL.java distribution/src/srcdiffs/ServPak/jv/MySQL.java
+--- ServPak/jv/MySQL.java	2007-06-29 11:12:01.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MySQL.java	2007-06-29 09:57:02.000000000 -0500
+@@ -117,12 +117,6 @@
+ 		String date = split2.substring(0,split2.indexOf('.'));
+ 		String split3 = split2.substring(split2.indexOf('.')+1);
+ 
+-		String check = date.substring(0,date.indexOf('@'));
+-		String postcheck = date.substring(date.indexOf('@')+1);
+-
+-		check = check.replaceAll("_","");
+-		date = check+'@'+postcheck;
+-
+ 		String yr = date.substring(date.lastIndexOf('_')+1);
+ 		String moday = date.substring(0,date.lastIndexOf('_'));
+ 

@@ -1,0 +1,28 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2004-08-16 11:28:22.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2004-07-20 14:49:54.000000000 -0500
+@@ -275,18 +275,19 @@
+ 
+     String[][] editMode(HashMap hashmap, int i, int j)
+         throws Exception {
+-        String[][] matrx = new String[i][j];
++        String[][] strings = new String[i][j];
++        Object object = null;
+ 
+         for (int q = 0; q < i; q++) {
+             for (int q1 = 0; q1 < j; q1++) {
+                 String string = hashmap.get(String.valueOf(q) + "," +
+                         String.valueOf(q1)).toString();
+ 
+-                matrx[q][q1] = string.replace('+', ' ');
++                strings[q][q1] = string.replace('+', ' ');
+             }
+         }
+ 
+-        return matrx;
++        return strings;
+     }
+ 
+     public static String[][] readXML(String string, int i)
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

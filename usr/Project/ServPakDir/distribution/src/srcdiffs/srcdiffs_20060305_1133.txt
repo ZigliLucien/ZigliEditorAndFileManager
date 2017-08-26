@@ -1,0 +1,15 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2006-03-05 11:33:43.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2006-03-05 11:29:34.000000000 -0600
+@@ -84,6 +84,8 @@
+ 
+              StringBuilder bufi = new StringBuilder(6145);
+ 
++	byte[] datain = ZEFMServer.getFile(listfile,"listings");
++
+ bufi.append("<html>\n");
+ bufi.append("<head>\n");
+ bufi.append("<link rel=\"stylesheet\" type=\"text/css\""); 
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

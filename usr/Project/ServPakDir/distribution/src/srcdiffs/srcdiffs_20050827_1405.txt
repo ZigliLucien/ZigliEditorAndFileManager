@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2005-08-27 13:59:34.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2005-08-27 13:58:52.000000000 -0500
+@@ -32,7 +32,7 @@
+         boolean bool = false;
+         boolean showtable = true;
+         HashMap<String,String> hashmap = parseQuery(string);
+-
++System.out.println("HASHING "+hashmap.size());
+         if (string.indexOf("tablename") > -1) {
+             filename = hashmap.get("tablename");
+ 
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

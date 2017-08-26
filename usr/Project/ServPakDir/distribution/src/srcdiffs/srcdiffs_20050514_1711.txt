@@ -1,0 +1,44 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBrcops.java distribution/src/srcdiffs/ServPak/jv/DBrcops.java
+--- ServPak/jv/DBrcops.java	2005-05-14 17:10:39.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBrcops.java	2004-12-20 19:31:30.000000000 -0600
+@@ -137,22 +137,32 @@
+                                 }
+                             }
+                         } else {
+-
+-		    String[] tox35 = string_30_.trim().split(",");
+-		
+-                            int i = tox35.length;
++                            StringTokenizer stringtokenizer_35_ = new StringTokenizer(string_30_,",");
++                            int i = stringtokenizer_35_.countTokens();
+ 
+                             table2 = new String[numrows - i][numcols];
+ 
++                            int[] is = new int[i + 2];
+ 		    int r = 0;
+ 
++                            is[r] = 0;
++
++                            while (stringtokenizer_35_.hasMoreTokens()) {
++                                r++;
++
++                                is[r] = Integer.parseInt(stringtokenizer_35_.nextToken());
++                            }
++
++                            r = 1;
++                            is[i + 1] = numrows;
++
+                             for (int A = 0; A < numrows; A++) {
+-                                if ( A == Integer.parseInt(tox35[r]) ) {
++                                if (A == is[r]) {
+                                     r++;
+                                 } else {
+                                     for (int B = 0; B < numcols;
+                                             B++) {
+-                                        table2[A - r][B] = table[A][B];
++                                        table2[A - r + 1][B] = table[A][B];
+                                     }
+                                 }
+                             }
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

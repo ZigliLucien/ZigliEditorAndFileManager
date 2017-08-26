@@ -1,0 +1,24 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MySQL.java distribution/src/srcdiffs/ServPak/jv/MySQL.java
+--- ServPak/jv/MySQL.java	2006-04-29 23:05:32.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MySQL.java	2006-04-29 23:02:52.000000000 -0500
+@@ -152,7 +152,6 @@
+     }
+ 
+ 	} else if (string.contains("MAILLOG=")) {
+-try{
+ // StartTrace
+ System.out.println(155);// traceon
+ 	buf.append("<html><header><title>From Mail Log</title></header>\n<body>\n<pre>");
+@@ -174,9 +173,6 @@
+ 			buf.append("\n</pre>\n</body>\n</html>");
+ System.out.println(164);// traceon
+ // StopTrace
+-}catch( Exception e ) {           
+-		System.out.println(e.getMessage()); 
+-    }
+ 	} else {
+ 
+ 	string = string.substring(string.indexOf("=")+1);

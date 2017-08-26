@@ -1,0 +1,71 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBM.java distribution/src/srcdiffs/ServPak/jv/DBM.java
+--- ServPak/jv/DBM.java	2005-08-27 13:05:16.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBM.java	2004-12-30 22:26:00.000000000 -0600
+@@ -5,7 +5,12 @@
+ import NetsManager.ZEFMServer;
+ 
+ import java.io.*;
+-import java.util.*;
++
++import java.util.Arrays;
++import java.util.HashMap;
++import java.util.HashSet;
++import java.util.Properties;
++import java.util.StringTokenizer;
+ import java.net.*;
+ 
+ 
+@@ -47,10 +52,13 @@
+             query = query.substring(0, query.indexOf("=GO"));
+ 
+             String subquery = query.substring(0, query.indexOf("&sortdefault"));
+-            String[] tok = subquery.split("&|=");
++            StringTokenizer tok = new StringTokenizer(subquery, "&=");
+             String cats = "";
+ 
+-	for(int q=0;q<tok.length;q=q+2) cats += tok[q] + ",";
++            while (tok.hasMoreTokens()) {
++                cats += (tok.nextToken() + ",");
++                tok.nextToken();
++            }
+ 
+             cats = cats.substring(0, cats.length() - 1);
+             data.put("categories", cats);
+@@ -82,9 +90,16 @@
+         PrintWriter pw = new PrintWriter(new FileWriter("DB/" + dbasename + ".xml"), true);
+ 
+         String sortdef = data.get("sortdefault");
+-        String[] catz = data.get("categories").split(",");
+-
+-        for(String v : catz) keyfields.add(v);
++        StringTokenizer tokk = new StringTokenizer(data.get("categories"), ",");
++        String[] catz = new String[tokk.countTokens()];
++        int i = 0;
++
++        while (tokk.hasMoreTokens()) {
++            String local = tokk.nextToken();
++            catz[i] = local;
++            keyfields.add(local);
++            i++;
++        }
+ 
+         String rootname;
+ 
+@@ -99,7 +114,14 @@
+         sbuild.append("<?xml version=\"1.0\"?>\n");
+         sbuild.append("<" + rootname + ">\n");
+ 
+-        String[] elements = data.get("fields").split(",");
++        StringTokenizer fieldstok = new StringTokenizer(data.get("fields"), ",");
++        String[] elements = new String[fieldstok.countTokens()];
++
++        Arrays.fill(elements, "");
++
++        for (int q=0;q<elements.length;q++) {
++            	elements[q] = fieldstok.nextToken();
++        }
+ 
+             String v;
+ 	String f = "";
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

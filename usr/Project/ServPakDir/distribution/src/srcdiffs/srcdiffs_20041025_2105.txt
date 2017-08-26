@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2004-10-25 21:05:02.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2004-10-24 23:39:52.000000000 -0500
+@@ -142,7 +142,7 @@
+                     bufi.append("</style>\n");
+                     bufi.append("	<script>\n");
+                     bufi.append("	function go(c,d){\n");
+-     bufi.append("window.location = c+\"/FileOps.jav?fileops=XXX&\"+d+\"@!!@x=Ops\"; \n");
++     bufi.append("window.location = c+\"/FileOps.jav?fileops=XXX&amp;\"+d+\"@!!@x=Ops\"; \n");
+                     bufi.append("	}\n");
+                     bufi.append("	</script>\n");
+                     bufi.append("</head>\n");
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

@@ -1,0 +1,24 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/SendEmail.java distribution/src/srcdiffs/ServPak/jv/SendEmail.java
+--- ServPak/jv/SendEmail.java	2004-05-02 13:01:58.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/SendEmail.java	2004-05-01 11:58:36.000000000 -0500
+@@ -83,17 +83,7 @@
+ 
+             int cutoff = linein.indexOf("&attachment=");
+ 
+-              contents = linein.substring(0, cutoff);
+-
+-	for(int cut=-1;(cut=contents.indexOf("+++"))>=0;){
+-	contents =new StringBuffer(contents).replace(cut,cut+3,"X@@@X").toString();	
+-	}
+-
+-	contents = contents.replace('+',' ');
+-
+-	for(int cut=-1;(cut=contents.indexOf("X@@@X"))>=0;){
+-	contents =new StringBuffer(contents).replace(cut,cut+5,"+").toString();	
+-	}
++            contents = linein.substring(0, cutoff).replace('+', ' ');
+ 
+             String rem = linein.substring(cutoff + 12);
+ 

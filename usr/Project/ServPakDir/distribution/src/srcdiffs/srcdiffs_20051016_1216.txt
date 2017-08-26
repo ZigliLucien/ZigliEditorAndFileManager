@@ -1,0 +1,17 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/SendEmail.java distribution/src/srcdiffs/ServPak/jv/SendEmail.java
+--- ServPak/jv/SendEmail.java	2005-10-16 12:15:59.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/SendEmail.java	2005-09-25 13:19:56.000000000 -0500
+@@ -99,11 +99,9 @@
+ 	contents =new StringBuilder(contents).replace(cut,cut+5,"+").toString();	
+ 	}
+ 
+-/*
+ 	for(int cut=-1;(cut=contents.indexOf("..."))>=0;){
+ 	contents =new StringBuilder(contents).replace(cut,cut+3,"?").toString();	
+ 	}
+-*/
+ 
+             String rem = linein.substring(cutoff + 12);
+ 

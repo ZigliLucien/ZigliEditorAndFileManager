@@ -1,0 +1,27 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/Query.java distribution/src/srcdiffs/ServPak/jv/Query.java
+--- ServPak/jv/Query.java	2004-12-14 22:58:57.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/Query.java	2004-12-14 22:56:48.000000000 -0600
+@@ -25,10 +25,11 @@
+ 
+ 	public static String printout;
+ 	String qry;
+- 	boolean quick;
++ static	boolean quick;
+ 
+ 	public Query(String in){
+ 	String query = "";
++	quick = false;
+ try{
+ if(in.endsWith("query=")){
+ 		quick = true;
+@@ -48,7 +49,7 @@
+ 	    }
+ 
+ 	
+-	    public void QResult(String query) throws Exception {
++	    public static void QResult(String query) throws Exception {
+ 
+ 	        final Configuration config = new Configuration();
+ 	        final StaticQueryContext sqc = new StaticQueryContext(config);

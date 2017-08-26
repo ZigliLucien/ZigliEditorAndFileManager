@@ -1,0 +1,36 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/Webgrep.java distribution/src/srcdiffs/ServPak/jv/Webgrep.java
+--- ServPak/jv/Webgrep.java	2004-06-29 12:17:17.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/Webgrep.java	2004-06-29 12:13:22.000000000 -0500
+@@ -135,22 +135,22 @@
+                     string_15_ = ZEFMServer.hexi(string_15_);
+ 	        stringbuffer.append("<font size=\"-1\">\n");
+                     stringbuffer.append("<a href=" + string_15_ +
+-                        "> See &nbsp;| </a>\n");
++                        "> See &nbsp;&nbsp;| </a>\n");
+ 
+                     stringbuffer.append("<a href=VVV?" + string_15_ +
+-                        "> &nbsp; View &nbsp;| </a>\n");
++                        "> &nbsp;&nbsp; View &nbsp;&nbsp;| </a>\n");
+                     stringbuffer.append("<a href=CCC?" + string_15_ +
+-                        "> &nbsp; Copy &nbsp;| </a>\n");
++                        "> &nbsp;&nbsp; Copy &nbsp;&nbsp;| </a>\n");
+                     stringbuffer.append("<a href=MMM?" + string_15_ +
+-                        "> &nbsp; Move &nbsp;| </a>\n");
++                        "> &nbsp;&nbsp; Move &nbsp;&nbsp;| </a>\n");
+                     stringbuffer.append("<a href=XXX?" + string_15_ +
+-                        "> &nbsp; Delete &nbsp;| </a>\n");
++                        "> &nbsp;&nbsp; Delete &nbsp;&nbsp;| </a>\n");
+                     stringbuffer.append("<a href=EEE?" + string_15_ +
+-                        "> &nbsp; Edit &nbsp;| </a>\n");
++                        "> &nbsp;&nbsp; Edit &nbsp;&nbsp;| </a>\n");
+                     stringbuffer.append("<a href=QQQ?" + string_15_ +
+-                        "> &nbsp; QuickEdit&nbsp;|  </a>");
++                        "> &nbsp;&nbsp; QuickEdit&nbsp;&nbsp;|  </a>");
+                     stringbuffer.append("<a href=AAA?" + string_15_ +
+-                        "> &nbsp; Notes  </a>\n");
++                        "> &nbsp;&nbsp; Notes  </a>\n");
+ 
+                     stringbuffer.append("&nbsp;<p>\n");
+                     stringbuffer.append(hashmap.get(dockeys[i_14_]) + "\n");

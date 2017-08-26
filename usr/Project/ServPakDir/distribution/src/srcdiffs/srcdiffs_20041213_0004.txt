@@ -1,0 +1,34 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2004-12-13 00:04:13.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2004-12-12 23:38:10.000000000 -0600
+@@ -86,7 +86,7 @@
+ 
+             	     getFields(filename);
+             tableset = readXML(filename, champs.length);
+-System.out.println("YYY "+champs.length);
++
+             if (hashmap.containsKey("addrow")) {
+                 tableset = addRow(tableset);
+             }
+@@ -94,11 +94,6 @@
+             if (hashmap.containsKey("addfield")) {
+                 addField(filename, hashmap.get("addfield"));
+                 bool = true;
+-	    Stack<String>staci = new Stack<String>();
+-		for(String v : champs) staci.push(v);
+-		staci.push(hashmap.get("addfield"));
+-		champs = new String[staci.size()];
+-		staci.toArray(champs);System.out.println("XXX "+champs.length);
+             }
+ 
+             if (hashmap.containsKey("change")) {
+@@ -200,6 +195,7 @@
+         fts.flush();
+         fts.close();
+ 
++	getFields(basename);
+     }
+ 
+     StringBuilder formEntry(String[] fields) throws Exception {
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

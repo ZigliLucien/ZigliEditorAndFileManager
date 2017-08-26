@@ -1,0 +1,30 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MySQL.java distribution/src/srcdiffs/ServPak/jv/MySQL.java
+--- ServPak/jv/MySQL.java	2006-04-29 23:53:06.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MySQL.java	2006-04-29 23:37:24.000000000 -0500
+@@ -15,7 +15,6 @@
+ 	   ResultSet rs;	   
+ 	   static String post;
+ 	   static String postpre;
+-		String pre;
+ 
+ 	   static String firstColumn;
+ 
+@@ -28,14 +27,9 @@
+ 
+ if(string.contains("basename=")) {
+ 
+-	if(string.contains("tablename=")) {
+-                     pre = string.substring(string.indexOf("&") + 1);
++           String pre = string.substring(string.indexOf("&") + 1);
+         	         post = string.substring(string.indexOf("=") + 1, string.indexOf("&"));
+ 	         postpre = pre.substring(pre.indexOf("=") + 1);
+-	} else {
+-        	         post = string.substring(string.indexOf("=") + 1);
+-	         postpre = "";
+-	}
+ 
+ 		if(postpre.equals("")) {
+ try{

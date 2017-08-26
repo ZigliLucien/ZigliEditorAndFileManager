@@ -1,0 +1,15 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/Dictionary.java distribution/src/srcdiffs/ServPak/jv/Dictionary.java
+--- ServPak/jv/Dictionary.java	2006-09-24 01:54:02.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/Dictionary.java	2006-09-24 00:35:02.000000000 -0500
+@@ -45,7 +45,7 @@
+ if(which.contains("data"))  from = "data"; 
+ 
+ String sql =    
+-"SELECT  *  FROM "+db+" WHERE lang='"+lang+"' and "+from+" regexp ? limit 100";
++"SELECT  *  FROM "+db+" WHERE lang='"+lang+"' and "+from+" regexp ?";
+ 
+  		PreparedStatement stmt = con.prepareStatement(sql); 
+ 
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

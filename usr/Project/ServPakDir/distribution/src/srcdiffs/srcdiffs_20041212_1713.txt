@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBM.java distribution/src/srcdiffs/ServPak/jv/DBM.java
+--- ServPak/jv/DBM.java	2004-12-12 17:13:24.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBM.java	2004-12-12 17:11:22.000000000 -0600
+@@ -133,7 +133,7 @@
+ 	String f = "";
+ 
+ 	int numfields = elements.length+1;
+-
++System.out.println("NUMFIELDS "+numfields);
+ 	int cc =  0;
+ 	int ccc = 0;
+ 
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

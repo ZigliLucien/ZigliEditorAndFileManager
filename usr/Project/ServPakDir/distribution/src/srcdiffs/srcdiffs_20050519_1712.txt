@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MKcal.java distribution/src/srcdiffs/ServPak/jv/MKcal.java
+--- ServPak/jv/MKcal.java	2005-05-19 17:12:56.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MKcal.java	2005-05-19 17:11:56.000000000 -0500
+@@ -38,7 +38,7 @@
+     public String printout;
+ 
+     public MKcal(String string) throws Exception {
+-System.out.println("HELLOOO");
++
+         int i = 0;
+         int indx = 0;
+         String[] strings = new String[7];

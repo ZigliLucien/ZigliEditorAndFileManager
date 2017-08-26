@@ -1,0 +1,24 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MySQL.java distribution/src/srcdiffs/ServPak/jv/MySQL.java
+--- ServPak/jv/MySQL.java	2006-09-16 11:49:26.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MySQL.java	2006-06-10 09:48:02.000000000 -0500
+@@ -86,7 +86,7 @@
+ 		buf.append("<html><header><title>"+post+"</title></header>\n<body>");
+ 		buf.append("<h2>"+postpre+"</h2><p/>&nbsp;<br/>");
+ 	  while(rs.next()){
+-		String name = rs.getString(firstColumn);
++		String name = rs.getObject(firstColumn).toString();
+ 
+ 		buf.append(
+ 		"<a href=MySQL.jav?ENTRY="+ZEFMServer.hexi(name)+">"+name+"</a><p/>\n");
+@@ -128,7 +128,7 @@
+ 	String align = "";
+ 	if(q==1) align="center";
+ 		buf.append(
+-	"<td align="+align+" width="+approx+"%><pre>"+(rs.getString(q))+"</pre></td>");
++	"<td align="+align+" width="+approx+"%><pre>"+(rs.getObject(q)).toString()+"</pre></td>");
+ 		if(q==1) buf.append("<td width="+approx+"%><br/></td>");
+ 	}
+ 		buf.append("</tr>\n</table>\n<p/>\n");

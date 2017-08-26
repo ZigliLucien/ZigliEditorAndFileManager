@@ -1,0 +1,29 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBM.java distribution/src/srcdiffs/ServPak/jv/DBM.java
+--- ServPak/jv/DBM.java	2004-12-12 15:56:41.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBM.java	2004-12-12 15:51:42.000000000 -0600
+@@ -85,10 +85,10 @@
+             buff.readLine();      
+ */
+ 
+-	try{
++//	try{
+ 	new NetsManager.Query(
+ 		new FileInputStream("DB/" + dbasename + ".xml"), "for $i in /*/* return $i");
+-	}catch (Exception ee){ }
++//	}catch (Exception ee){ }
+ 
+ 	BufferedReader buff = new BufferedReader(
+ 		new StringReader(NetsManager.Query.qtabby.toString()));
+@@ -126,8 +125,8 @@
+ 
+         Arrays.fill(elements, "");
+ 
+-        for (String w : elements) {
+-            	w = fieldstok.nextToken();
++        for (int q=0; q<elements.length;q++) {
++            	elements[q] = fieldstok.nextToken();
+         }
+ 
+         String v;
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

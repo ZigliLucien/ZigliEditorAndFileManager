@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MySQL.java distribution/src/srcdiffs/ServPak/jv/MySQL.java
+--- ServPak/jv/MySQL.java	2006-06-10 09:48:02.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MySQL.java	2006-05-31 18:29:30.000000000 -0500
+@@ -196,7 +196,6 @@
+ 	"<p/>&nbsp;<p/>&nbsp;<p/>Entry <tt>"+string+"</tt> has <b>not</b> been deleted. "+ 
+             "Check database permissions.<p/>\n");
+ 	}
+-		buf.append("<a onclick=\"history.go(-2)\"> Back </a>\n");
+ 		buf.append("</body>\n</html>");
+ 
+  }catch( Exception e ) {           

@@ -1,0 +1,473 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBM.java distribution/src/srcdiffs/ServPak/jv/DBM.java
+--- ServPak/jv/DBM.java	2004-10-09 22:05:54.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBM.java	2004-10-02 16:27:16.000000000 -0500
+@@ -31,7 +31,7 @@
+         if (string.indexOf("savetable") >= 0) {
+             savetable(string);
+ 
+-            StringBuilder prtout = new StringBuilder("<html>\n<head><title>" +
++            StringBuffer prtout = new StringBuffer("<html>\n<head><title>" +
+                     dbasename + "</title></head>\n<body>\n");
+ 
+             prtout.append(
+@@ -121,7 +121,7 @@
+             string_16_ = data.get("root").toString();
+         }
+ 
+-        StringBuilder stringbuffer = new StringBuilder();
++        StringBuffer stringbuffer = new StringBuffer();
+ 
+         stringbuffer.append("<?xml version=\"1.0\"?>\n");
+         stringbuffer.append("<" + string_16_ + ">\n");
+@@ -180,7 +180,7 @@
+ 
+         PrintWriter printwriter_29_ = new PrintWriter(new FileWriter("DB/" +
+                     dbasename + ".sdb"), true);
+-        StringBuilder dbmbufr = new StringBuilder();
++        StringBuffer dbmbufr = new StringBuffer();
+         String string_31_ = ZEFMServer.localdir;
+ 
+         if (string_31_.indexOf(":") > 0) {
+@@ -305,7 +305,7 @@
+             dbasename.substring(dbasename.lastIndexOf("/") + 1));
+ 
+ 	stringbuffer = 
+-	new StringBuilder("<html><head><script>window.location=\""
++	new StringBuffer("<html><head><script>window.location=\""
+ 			   +string_40_+".sdb\"</script></head>\n");
+         stringbuffer.append("<html><body><p>&nbsp;<p>&nbsp;<p>&nbsp;<p><center> <a href=");
+         stringbuffer.append(string_40_ + ".sdb> <font size=+2>Go To <b>");
+diff -Bwaur ServPak/jv/DBanalyze.java distribution/src/srcdiffs/ServPak/jv/DBanalyze.java
+--- ServPak/jv/DBanalyze.java	2004-10-09 22:05:54.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBanalyze.java	2004-07-20 15:38:00.000000000 -0500
+@@ -32,7 +32,7 @@
+     static double setmean;
+     static boolean renew;
+      PrintWriter printwriter;
+-     StringBuilder stringbuffer;
++     StringBuffer stringbuffer;
+     public String printout;
+     Matrix Out;
+     boolean transpose;
+@@ -330,7 +330,7 @@
+        void writeMatrix2XML(String string, String[][] strings)
+         throws Exception {
+         printwriter = new PrintWriter(new FileWriter(string + ".xml"), true);
+-        stringbuffer = new StringBuilder();
++        stringbuffer = new StringBuffer();
+ 
+         String string_0_ = "matrix";
+         String string_1_ = "entry";
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2004-10-09 22:05:54.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2004-09-25 15:14:32.000000000 -0500
+@@ -20,7 +20,7 @@
+ public class DBgo {
+     static String filename;
+     static String[][] tableset;
+-     StringBuilder stringbuffer;
++     StringBuffer stringbuffer;
+      PrintWriter printwriter;
+     public String printout;
+     String[] champs;
+@@ -52,7 +52,7 @@
+ 
+                 printwriter = new PrintWriter(new FileWriter("DB/" + filename +
+                             ".xml"), true);
+-                stringbuffer = new StringBuilder();
++                stringbuffer = new StringBuffer();
+ 
+                 stringbuffer.append("<?xml version=\"1.0\"?>\n");
+                 stringbuffer.append("<" + filename + ">\n");
+@@ -78,7 +78,7 @@
+                 String out0 = (ldir + "/DB/" +
+                     filename.substring(filename.lastIndexOf("/") + 1));
+ 
+-                stringbuffer = new StringBuilder(
++                stringbuffer = new StringBuffer(
+ 		"<html><head><script>window.location=\""+out0+".sdb\"</script></head>\n");
+ 	    stringbuffer.append("<body><h2> To " + filename + "</h2><p>\n");
+                 stringbuffer.append("<a href=" + out0 + ".sdb> Go to " +
+@@ -200,8 +200,8 @@
+         fileoutputstream.close();
+     }
+ 
+-    StringBuilder formEntry(String[] fields) throws Exception {
+-        stringbuffer = new StringBuilder();
++    StringBuffer formEntry(String[] fields) throws Exception {
++        stringbuffer = new StringBuffer();
+ 
+         stringbuffer.append("<html>\n");
+         stringbuffer.append("<head><title>" + filename + "</title>\n");
+@@ -230,8 +230,8 @@
+         return stringbuffer;
+     }
+ 
+-    StringBuilder changeMode(String[][] strings) throws Exception {
+-        stringbuffer = new StringBuilder();
++    StringBuffer changeMode(String[][] strings) throws Exception {
++        stringbuffer = new StringBuffer();
+ 
+         int i = strings[0].length;
+         int hsize = -2 + Math.round((float) (90 / i));
+@@ -327,7 +327,7 @@
+     void writeXML(String name, String[][] table) throws Exception {
+         printwriter = new PrintWriter(new FileWriter("DB/" + name + ".xml"),
+                 true);
+-        stringbuffer = new StringBuilder();
++        stringbuffer = new StringBuffer();
+ 
+         String _name = name;
+         String _entry = "entry";
+@@ -389,9 +389,9 @@
+         return hashmap;
+     }
+ 
+-    StringBuilder goSearch(String string, String[] strings)
++    StringBuffer goSearch(String string, String[] strings)
+         throws Exception {
+-        stringbuffer = new StringBuilder();
++        stringbuffer = new StringBuffer();
+ 
+         int i = strings.length;
+ 
+diff -Bwaur ServPak/jv/DBrcops.java distribution/src/srcdiffs/ServPak/jv/DBrcops.java
+--- ServPak/jv/DBrcops.java	2004-10-09 22:05:55.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBrcops.java	2004-07-20 15:39:12.000000000 -0500
+@@ -21,7 +21,7 @@
+     static int numcols;
+     static int numrows;
+     static boolean renew;
+-     StringBuilder stringbuffer;
++     StringBuffer stringbuffer;
+      PrintWriter printwriter;
+     public String printout;
+ 
+@@ -441,7 +441,7 @@
+      void writeMatrix2XML(String string, String[][] strings)
+         throws Exception {
+         printwriter = new PrintWriter(new FileWriter(string + ".xml"), true);
+-        stringbuffer = new StringBuilder();
++        stringbuffer = new StringBuffer();
+ 
+         String string_0_ = "array";
+         String string_1_ = "entry";
+diff -Bwaur ServPak/jv/Diary.java distribution/src/srcdiffs/ServPak/jv/Diary.java
+--- ServPak/jv/Diary.java	2004-10-09 22:05:55.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/Diary.java	2004-08-25 10:58:52.000000000 -0500
+@@ -13,7 +13,7 @@
+         int i = _lhs.indexOf("+");
+         String _day = _lhs.substring(0, i);
+         String _user = _lhs.substring(i + 1);
+-        StringBuilder stringbuffer = new StringBuilder();
++        StringBuffer stringbuffer = new StringBuffer();
+ 
+         stringbuffer.append("<html>\n");
+         stringbuffer.append("  <head>\n");
+diff -Bwaur ServPak/jv/Email.java distribution/src/srcdiffs/ServPak/jv/Email.java
+--- ServPak/jv/Email.java	2004-10-09 22:05:55.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/Email.java	2003-08-24 23:22:42.000000000 -0500
+@@ -15,7 +15,7 @@
+             String directory = NetsManager.ZEFMServer.userdir + "/INBOXES/" +
+                 yuser;
+ 
+-            StringBuilder bufi = new StringBuilder("<html><body><p><p><a href=\"" +
++            StringBuffer bufi = new StringBuffer("<html><body><p><p><a href=\"" +
+                     directory + "\"> To MAIL </a>");
+ 
+             if (morri.results != null) {
+diff -Bwaur ServPak/jv/FormEntry.java distribution/src/srcdiffs/ServPak/jv/FormEntry.java
+--- ServPak/jv/FormEntry.java	2004-10-09 22:05:55.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/FormEntry.java	2003-08-24 23:22:42.000000000 -0500
+@@ -27,7 +27,7 @@
+                 entry[q] = x.substring(x.indexOf("=") + 1).replace('+', ' ');
+             }
+ 
+-            StringBuilder bufv = new StringBuilder();
++            StringBuffer bufv = new StringBuffer();
+ 
+             FileWriter fwrite = new FileWriter(filename, true);
+             PrintWriter prt = new PrintWriter(fwrite, true);
+@@ -87,10 +87,10 @@
+         return temp;
+     }
+ 
+-    StringBuilder formEntry(String[] fields) throws Exception {
++    StringBuffer formEntry(String[] fields) throws Exception {
+         char[] cari = formatstring.toCharArray();
+ 
+-        StringBuilder stringbuffer = new StringBuilder();
++        StringBuffer stringbuffer = new StringBuffer();
+ 
+         stringbuffer.append("<html>\n");
+         stringbuffer.append("<head><title>" + filename + "</title>\n");
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2004-10-09 22:05:55.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2004-09-11 14:33:32.000000000 -0500
+@@ -48,7 +48,7 @@
+         }
+ 
+         if (dirnum.equals("0")) {
+-            StringBuilder bufi = new StringBuilder(6145);
++            StringBuffer bufi = new StringBuffer(6145);
+             buffr = new BufferedReader(new FileReader(lstfile));
+ 
+             for (String v = null; (v = buffr.readLine()) != null;) {
+@@ -76,7 +76,7 @@
+             boolean bool = false;
+             boolean test_ = false;
+ 
+-            StringBuilder bufi = new StringBuilder(6145);
++            StringBuffer bufi = new StringBuffer(6145);
+             FileInputStream fins = new FileInputStream(listfile);
+             buffr = new BufferedReader(new InputStreamReader(new GZIPInputStream(fins)));
+ 
+@@ -184,7 +184,7 @@
+         }
+     }
+ 
+-    public static void fillChecked(StringBuilder _buf, String _localprocess) {
++    public static void fillChecked(StringBuffer _buf, String _localprocess) {
+         _buf.append("<form action=\"FileOps.jav\" method=\"GET\">");
+        
+ 	 _buf.append(vvv);
+diff -Bwaur ServPak/jv/Install.java distribution/src/srcdiffs/ServPak/jv/Install.java
+--- ServPak/jv/Install.java	2004-10-09 22:05:55.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/Install.java	2003-10-12 23:11:02.000000000 -0500
+@@ -98,7 +98,7 @@
+ /////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////Building Page/////////////////////////////////////
+ 
+-StringBuilder bufi = new StringBuilder();
++StringBuffer bufi = new StringBuffer();
+ 
+ bufi.append("<html>\n");
+ bufi.append("<head><title> Running Zigli's FM </title>\n");
+diff -Bwaur ServPak/jv/InstallW.java distribution/src/srcdiffs/ServPak/jv/InstallW.java
+--- ServPak/jv/InstallW.java	2004-10-09 22:05:55.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/InstallW.java	2003-10-12 23:27:46.000000000 -0500
+@@ -63,7 +63,7 @@
+ /////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////Building Page/////////////////////////////////////
+ 
+-StringBuilder bufi = new StringBuilder();
++StringBuffer bufi = new StringBuffer();
+ 
+ bufi.append("<html>\n");
+ bufi.append("<head><title> Running Zigli's FM </title>\n");
+diff -Bwaur ServPak/jv/Logging.java distribution/src/srcdiffs/ServPak/jv/Logging.java
+--- ServPak/jv/Logging.java	2004-10-09 22:05:55.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/Logging.java	2004-07-20 14:50:34.000000000 -0500
+@@ -10,7 +10,7 @@
+ public class Logging {
+     static String filename;
+     static String dirname;
+-     StringBuilder buffy;
++     StringBuffer buffy;
+      PrintWriter pt;
+     static BufferedReader brd;
+     static String outf;
+@@ -31,7 +31,7 @@
+             String logout = "http://" + NetsManager.ZEFMServer.localhost + ":" +
+                 NetsManager.ZEFMServer.port + NetsManager.ZEFMServer.userdir;
+ 
+-            buffy = new StringBuilder(
++            buffy = new StringBuffer(
+                     "<html><head><title>ZEFM Logged Out</title></head><body>\n");
+             buffy.append(
+                 "<h2> Bye-Bye from Zigli's File Manager</h2>\n<blockquote><blockquote>");
+@@ -117,7 +117,7 @@
+             return;
+         }
+ 
+-        buffy = new StringBuilder(
++        buffy = new StringBuffer(
+                 "<html><head><title>ZEFM Logged In</title></head><body>\n");
+         buffy.append(
+             "<h2> Welcome to Zigli's File Manager</h2>\n<blockquote><blockquote>");
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MKcal.java distribution/src/srcdiffs/ServPak/jv/MKcal.java
+--- ServPak/jv/MKcal.java	2004-10-09 22:05:55.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MKcal.java	2004-09-03 16:34:56.000000000 -0500
+@@ -125,7 +125,7 @@
+             strings[q] = "<th>" + daynames[q] + "</th>";
+         }
+ 
+-        StringBuilder stringbuffer = new StringBuilder();
++        StringBuffer stringbuffer = new StringBuffer();
+ 
+         if (!bool) {
+             stringbuffer.append(dateinfo[1] + " " + dateinfo[2] +
+@@ -243,7 +243,7 @@
+         _day_ + "\">");
+         vvv += "</form>";
+ 
+-        StringBuilder buffy = new StringBuilder();
++        StringBuffer buffy = new StringBuffer();
+ 
+         buffy.append("<html>\n");
+         buffy.append("  <head>\n");
+diff -Bwaur ServPak/jv/MakDox.java distribution/src/srcdiffs/ServPak/jv/MakDox.java
+--- ServPak/jv/MakDox.java	2004-10-09 22:05:55.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MakDox.java	2003-10-11 15:01:36.000000000 -0500
+@@ -12,7 +12,7 @@
+     static FileOutputStream ff;
+     public String printout;
+     String filename;
+-    StringBuilder bufi;
++    StringBuffer bufi;
+ 
+     public MakDox(String in) {
+         boolean isMethod = false;
+@@ -41,7 +41,7 @@
+ 
+             printout = "";
+ 
+-            bufi = new StringBuilder("<?xml version=\"1.0\"?>\n<jdox>\n");
++            bufi = new StringBuffer("<?xml version=\"1.0\"?>\n<jdox>\n");
+ 
+             for (int q = 0; q < keys.length; q++) {
+                 temp = (hari.get(keys[q]) != null)
+diff -Bwaur ServPak/jv/ReadClass.java distribution/src/srcdiffs/ServPak/jv/ReadClass.java
+--- ServPak/jv/ReadClass.java	2004-10-09 22:05:55.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/ReadClass.java	2003-08-24 23:25:28.000000000 -0500
+@@ -26,7 +26,7 @@
+         String classpath = "";
+ 
+         String htmlstart = "<html><head><style>";
+-        StringBuilder bufi = new StringBuilder(htmlstart);
++        StringBuffer bufi = new StringBuffer(htmlstart);
+ 
+         if (_filename.indexOf("!") > 0) {
+             int cut = _filename.indexOf("!");
+diff -Bwaur ServPak/jv/Registering.java distribution/src/srcdiffs/ServPak/jv/Registering.java
+--- ServPak/jv/Registering.java	2004-10-09 22:05:55.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/Registering.java	2004-07-20 14:50:50.000000000 -0500
+@@ -11,7 +11,7 @@
+ 
+ public class Registering {
+     static String buffertext;
+-     StringBuilder buffy;
++     StringBuffer buffy;
+      PrintWriter pt;
+     static BufferedReader brd;
+     static String outf;
+@@ -22,7 +22,7 @@
+     public Registering(String textin) throws Exception {
+         ///////////////////// REGISTER NEW USER ///////////////////////
+         if (textin.equals("new")) {
+-            buffy = new StringBuilder(
++            buffy = new StringBuffer(
+                     "<html><head><title>Register </title></head><body>\n");
+             buffy.append("<h2> Register </h2>\n<blockquote><blockquote>");
+             buffy.append("<form action=Registering.jav method=GET>");
+@@ -92,7 +92,7 @@
+                 NetsManager.ZEFMServer.port + NetsManager.ZEFMServer.userdir +
+                 "/?home";
+ 
+-            buffy = new StringBuilder(
++            buffy = new StringBuffer(
+                     "<html><head><title>ZEFM Registered</title></head><body>\n");
+             buffy.append(
+                 "<h2> Welcome to Zigli's File Manager</h2>\n<blockquote><blockquote>");
+diff -Bwaur ServPak/jv/SendEmail.java distribution/src/srcdiffs/ServPak/jv/SendEmail.java
+--- ServPak/jv/SendEmail.java	2004-10-09 22:05:55.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/SendEmail.java	2004-08-21 16:16:12.000000000 -0500
+@@ -13,7 +13,7 @@
+     static boolean attachment;
+      FileOutputStream ft;
+     static byte[] data;
+-     StringBuilder buffy;
++     StringBuffer buffy;
+     static BufferedReader brd;
+     static Properties mailinfo = new Properties();
+     static String mailto;
+@@ -86,13 +86,13 @@
+               contents = linein.substring(0, cutoff);
+ 
+ 	for(int cut=-1;(cut=contents.indexOf("+++"))>=0;){
+-	contents =new StringBuilder(contents).replace(cut,cut+3,"X@@@X").toString();	
++	contents =new StringBuffer(contents).replace(cut,cut+3,"X@@@X").toString();	
+ 	}
+ 
+ 	contents = contents.replace('+',' ');
+ 
+ 	for(int cut=-1;(cut=contents.indexOf("X@@@X"))>=0;){
+-	contents =new StringBuilder(contents).replace(cut,cut+5,"+").toString();	
++	contents =new StringBuffer(contents).replace(cut,cut+5,"+").toString();	
+ 	}
+ 
+             String rem = linein.substring(cutoff + 12);
+@@ -135,7 +135,7 @@
+     String setUp(String reply2) { // //////////////////////// setUp //////////////////////////
+ 
+         //////////////////////////////////////////////////////////
+-        buffy = new StringBuilder();
++        buffy = new StringBuffer();
+ 
+         buffy.append("<html>\n");
+         buffy.append("<head><title>  Send EMail </title>\n");
+@@ -247,7 +247,7 @@
+             NetsManager.ZEFMServer.port + NetsManager.ZEFMServer.userdir +
+             "/?home";
+ 
+-        buffy = new StringBuilder("<html><body><pre>\n");
++        buffy = new StringBuffer("<html><body><pre>\n");
+         brd = new BufferedReader(new FileReader(_filename));
+ 
+         for (String v = null; (v = brd.readLine()) != null;) {
+diff -Bwaur ServPak/jv/ShowNotes.java distribution/src/srcdiffs/ServPak/jv/ShowNotes.java
+--- ServPak/jv/ShowNotes.java	2004-10-09 22:05:55.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/ShowNotes.java	2003-12-23 19:13:46.000000000 -0600
+@@ -31,7 +31,7 @@
+ 
+         String fileinput = new String(is, "UTF-8");
+ 
+-        StringBuilder stringbuffer = new StringBuilder(
++        StringBuffer stringbuffer = new StringBuffer(
+                 "<?xml version=\"1.0\"?>\n <notesml>\n");
+ 
+         stringbuffer.append(fileinput);
+diff -Bwaur ServPak/jv/WebEdit.java distribution/src/srcdiffs/ServPak/jv/WebEdit.java
+--- ServPak/jv/WebEdit.java	2004-10-09 22:05:55.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/WebEdit.java	2004-07-20 15:25:22.000000000 -0500
+@@ -58,7 +58,7 @@
+ 
+         bin = new BufferedReader(new InputStreamReader(filein, "UTF-8"));
+ 
+-        StringBuilder buffy = new StringBuilder();
++        StringBuffer buffy = new StringBuffer();
+ 
+         buffy.append("<html>\n");
+         buffy.append("<head><title>" + filename + "</title>\n");
+@@ -84,7 +84,7 @@
+     }
+ 
+     public static  String goString() {
+-        StringBuilder buffy = new StringBuilder();
++        StringBuffer buffy = new StringBuffer();
+ 
+         buffy.append("<html>\n<body>\n");
+         buffy.append("<pre>\n\nAnnotating " + NetsManager.XCommands.filepath +
+diff -Bwaur ServPak/jv/Webgrep.java distribution/src/srcdiffs/ServPak/jv/Webgrep.java
+--- ServPak/jv/Webgrep.java	2004-10-09 22:05:55.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/Webgrep.java	2004-09-25 15:07:02.000000000 -0500
+@@ -12,7 +12,7 @@
+ 
+ public class Webgrep {
+      BufferedReader bufferedreader;
+-     StringBuilder stringbuffer;
++     StringBuffer stringbuffer;
+     static HashMap hashmap;
+     public String printout;
+     public Object[] dockeys;
+@@ -107,7 +107,7 @@
+ 
+             int lgth = dockeys.length;
+ 
+-            stringbuffer = new StringBuilder(2049);
++            stringbuffer = new StringBuffer(2049);
+             stringbuffer.append("<html>\n");
+             stringbuffer.append("<head>\n<style> span.a{font-size: 80%}</style>\n");
+             stringbuffer.append("<title> Search Results on " + query +

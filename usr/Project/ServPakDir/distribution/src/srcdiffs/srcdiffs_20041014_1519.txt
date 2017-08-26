@@ -1,0 +1,15 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/ReadClass.java distribution/src/srcdiffs/ServPak/jv/ReadClass.java
+--- ServPak/jv/ReadClass.java	2004-10-14 15:19:38.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/ReadClass.java	2004-10-14 15:16:22.000000000 -0500
+@@ -97,7 +97,8 @@
+         String title = "";
+ 
+         if (v.indexOf("Compiled from") >= 0) {
+-            title = v.substring(v.indexOf("Compiled from") + 15, v.indexOf(".", v.indexOf("Compiled from")));
++            title = v.substring(v.indexOf("Compiled from") + 14,
++                    v.indexOf(".", v.indexOf("Compiled from")));
+         }
+ 
+         v = buf.readLine();

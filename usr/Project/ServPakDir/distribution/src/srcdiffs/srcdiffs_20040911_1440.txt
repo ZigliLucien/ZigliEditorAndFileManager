@@ -1,0 +1,85 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/Webgrep.java distribution/src/srcdiffs/ServPak/jv/Webgrep.java
+--- ServPak/jv/Webgrep.java	2004-09-11 14:39:47.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/Webgrep.java	2004-07-20 14:52:38.000000000 -0500
+@@ -105,7 +105,7 @@
+             dockeys = hashmap.keySet().toArray();
+             Arrays.sort(dockeys);
+ 
+-            int lgth = dockeys.length;
++            int i_12_ = dockeys.length;
+             String string_13_ = "Search Results";
+ 
+             stringbuffer = new StringBuffer();
+@@ -117,40 +117,40 @@
+             stringbuffer.append("<body bgcolor=ffffff>\n");
+             stringbuffer.append("<center><h1><b> Results </b></h1></center>\n");
+             stringbuffer.append("<p>\n");
+-            stringbuffer.append("Found " + lgth + " files containing <tt>" +
++            stringbuffer.append("Found " + i_12_ + " files containing <tt>" +
+                 query + "</tt>.<p>\n");
+ 
+-            if (lgth == 0) {
++            if (i_12_ == 0) {
+                 stringbuffer.append(strings[i_5_]);
+             } else {
+-                for (int qq = 0; qq < lgth; qq++) {
+-                    String datum = dockeys[qq].toString();
++                for (int i_14_ = 0; i_14_ < i_12_; i_14_++) {
++                    String string_15_ = dockeys[i_14_].toString();
+ 
+                     stringbuffer.append("<hr></a>\n");
+-                    stringbuffer.append("In <b>" + datum +
++                    stringbuffer.append("In <b>" + string_15_ +
+                         "</b>&nbsp;&nbsp;");
+-                    datum = ZEFMServer.hexi(datum);
++                    string_15_ = ZEFMServer.hexi(string_15_);
+ 	        stringbuffer.append("<span class=\"a\">\n");
+-                    stringbuffer.append("<a href=" + datum +
++                    stringbuffer.append("<a href=" + string_15_ +
+                         "> <i>See</i> |</a>\n");
+ 
+-                    stringbuffer.append("<a href=VVV?" + datum +
++                    stringbuffer.append("<a href=VVV?" + string_15_ +
+                         "> <tt>View</tt> |</a>\n");
+-                    stringbuffer.append("<a href=CCC?" + datum +
++                    stringbuffer.append("<a href=CCC?" + string_15_ +
+                         "> <tt>Copy</tt> |</a>\n");
+-                    stringbuffer.append("<a href=MMM?" + datum +
++                    stringbuffer.append("<a href=MMM?" + string_15_ +
+                         "> <tt>Move</tt> |</a>\n");
+-                    stringbuffer.append("<a href=XXX?" + datum +
++                    stringbuffer.append("<a href=XXX?" + string_15_ +
+                         "> <tt>Delete</tt> |</a>\n");
+-                    stringbuffer.append("<a href=EEE?" + datum +
++                    stringbuffer.append("<a href=EEE?" + string_15_ +
+                         "> <tt>Edit</tt> |</a>\n");
+-                    stringbuffer.append("<a href=QQQ?" + datum +
++                    stringbuffer.append("<a href=QQQ?" + string_15_ +
+                         "> <tt>QuickEdit</tt> |</a>\n");
+-                    stringbuffer.append("<a href=AAA?" + datum +
++                    stringbuffer.append("<a href=AAA?" + string_15_ +
+                         "> <tt>Notes</tt>  </a>\n");
+ 	        stringbuffer.append("</span>\n");
+                     stringbuffer.append("<p>\n");
+-                    stringbuffer.append(hashmap.get(dockeys[qq]) + "\n");
++                    stringbuffer.append(hashmap.get(dockeys[i_14_]) + "\n");
+                 }
+ 
+                 stringbuffer.append("</font>\n");
+@@ -164,13 +164,8 @@
+ 	pout.print(stringbuffer.toString());
+ 	pout.close();
+ 	
+-	if(lgth>5) {
+-            printout =
+-"<html></body><p/>&nbsp;<p/><p/>&nbsp;<p/><center><h2>--&gt;&gt; <a href=\""
++            printout ="<html></body><p/>&nbsp;<p/><p/>&nbsp;<p/><center><h2>--&gt;&gt; <a href=\""
+ +where+"/SearchResults.html\">Get Results </a>&lt;&lt;--</h2></center></body></html>" ;
+-		     } else {
+-				printout = stringbuffer.toString();
+-			   }
+         }
+     }
+ }

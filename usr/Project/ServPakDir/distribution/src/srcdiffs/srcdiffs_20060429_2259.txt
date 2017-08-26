@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MySQL.java distribution/src/srcdiffs/ServPak/jv/MySQL.java
+--- ServPak/jv/MySQL.java	2006-04-29 22:59:43.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MySQL.java	2006-04-29 22:58:08.000000000 -0500
+@@ -159,7 +159,6 @@
+ 
+ System.out.println(157);// traceon
+ 		String fname = string.substring(string.indexOf("MAILLOG="+8));
+-System.out.println("FAX "+fname+" "+postpre);
+ System.out.println(158);// traceon
+ 		BufferedReader brdr = ZEFMServer.getZipFile(conn, fname, postpre);
+ System.out.println(159);// traceon

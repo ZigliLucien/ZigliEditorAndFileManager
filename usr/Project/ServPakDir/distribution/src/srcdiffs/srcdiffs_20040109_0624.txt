@@ -1,0 +1,104 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MKcal.java distribution/src/srcdiffs/ServPak/jv/MKcal.java
+--- ServPak/jv/MKcal.java	2004-01-09 06:21:28.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/MKcal.java	2004-01-09 05:36:36.000000000 -0600
+@@ -39,6 +39,18 @@
+ 
+     public MKcal(String string) throws Exception {
+ 
++	Calendar cali = Calendar.getInstance();
++	int year = cali.get(Calendar.YEAR);
++	int mod4 = year % 4;
++	int modcent = year % 100;
++	int mod4cent = year % 400;
++
++	if(modcent==0){
++		if(mod4cent==0) lastday[1] = 29;
++		  } else {
++	if(mod4==0) lastday[1] = 29;
++		  }
++
+         int i = 0;
+         int indx = 0;
+         String[] strings = new String[7];
+@@ -53,7 +65,7 @@
+         String username;
+         int weekday;
+         int month;
+-        int year;
++        int _month;
+ 
+         if ((inputString.indexOf("NEXT") > -1) ||
+                 (inputString.indexOf("BACK") > -1)) {
+@@ -63,11 +75,10 @@
+ 
+             username = stringtokenizer.nextToken();
+             monthindex = Integer.parseInt(stringtokenizer.nextToken());
+-            year = Integer.parseInt(stringtokenizer.nextToken());
++            _month = Integer.parseInt(stringtokenizer.nextToken());
+             month = Integer.parseInt(stringtokenizer.nextToken());
+             weekday = Integer.parseInt(stringtokenizer.nextToken());
+             bool = true;
+-	leapYearCheck(year);
+         } else {
+             bool = false;
+ 
+@@ -81,8 +92,7 @@
+ 
+             weekday = dayindex;
+             month = Integer.parseInt(dateinfo[2]);
+-            year = Integer.parseInt(dateinfo[5]);
+-	leapYearCheck(year);
++            _month = Integer.parseInt(dateinfo[5]);
+         }
+ 
+         String mName = MONTHNAMES[monthindex];
+@@ -221,7 +231,7 @@
+         }
+ 
+         int shiftidx = (monthindex < 11) ? (monthindex + 1) : 0;
+-        int shftmonth = (shiftidx == 0) ? (year + 1) : year;
++        int shftmonth = (shiftidx == 0) ? (_month + 1) : _month;
+         int _idx_ = 1;
+ 
+         _v_ = "";
+@@ -232,7 +242,7 @@
+         "\">");
+ 
+         int _shiftidx = (monthindex > 0) ? (monthindex - 1) : 11;
+-        int _shftmonth = (_shiftidx == 11) ? (year - 1) : year;
++        int _shftmonth = (_shiftidx == 11) ? (_month - 1) : _month;
+         int _lday = lastday[_shiftidx];
+         int _day_ = _day;
+         String vvv = "";
+@@ -253,7 +263,7 @@
+         buffy.append("  <body> \n");
+         buffy.append(
+             "  <table align=center cellspacing=0 border=1 width=100% height=98%> \n");
+-        buffy.append("    <caption>" + mName + " " + year +
++        buffy.append("    <caption>" + mName + " " + _month +
+             " </caption>\n");
+         buffy.append("<tr>");
+ 
+@@ -310,19 +320,4 @@
+             DAYNAMES[dayindex] + ", " + MONTHNAMES[monthindex] + " " +
+             dateinfo[2] + ", " + dateinfo[5]);
+     }
+-
+-public static void leapYearCheck(int yr){
+-
+-	lastday[1] = 28;
+-
+-	int mod4 = yr % 4;
+-	int modcent = yr % 100;
+-	int mod4cent = yr % 400;
+-
+-	if(modcent==0){
+-		if(mod4cent==0) lastday[1] = 29;
+-		  } else {
+-	if(mod4==0) lastday[1] = 29;
+-		  }
+-	}
+ }
+\ No newline at end of file

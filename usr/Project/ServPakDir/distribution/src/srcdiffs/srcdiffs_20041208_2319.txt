@@ -1,0 +1,39 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2004-12-08 23:19:17.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2004-12-08 23:09:04.000000000 -0600
+@@ -19,7 +19,7 @@
+      StringBuilder stringbuffer;
+      PrintWriter printwriter;
+     public String printout;
+-    static String[] champs;
++    String[] champs;
+ 
+     /////////////////////////////////////////////////////////
+     ///////////////////// CONSTRUCTOR /////////////////////
+@@ -85,7 +85,7 @@
+         } else {
+             champs = getFields(filename);
+             tableset = readXML(filename, champs.length);
+-//            tableset[0] = champs;
++            tableset[0] = champs;
+ 
+             if (hashmap.containsKey("addrow")) {
+                 tableset = addRow(tableset);
+@@ -295,15 +295,10 @@
+ 		new StringReader(NetsManager.Query.qtabby.toString()));
+ 
+ 	Stack<String[]> staci = new Stack<String[]>();
+-
+-	staci.push(champs);
+-
+ 	String[] line = new String[i];
+ 	int cc = 0;
+ 	int ccc = 0;
+ 
+-	
+-
+ 	for(String v;(v=buff.readLine())!=null;){System.out.println("X "+v);
+ 	
+ 	ccc = (cc % (i+1));
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

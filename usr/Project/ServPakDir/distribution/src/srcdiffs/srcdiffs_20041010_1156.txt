@@ -1,0 +1,34 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2004-10-10 11:56:36.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2004-10-09 22:05:54.000000000 -0500
+@@ -35,7 +35,7 @@
+ 
+         boolean bool = false;
+         boolean showtable = true;
+-        HashMap<String,String> hashmap = parseQuery(string);
++        HashMap hashmap = parseQuery(string);
+ 
+         if (string.indexOf("tablename") > -1) {
+             filename = hashmap.get("tablename").toString();
+@@ -48,7 +48,7 @@
+             File file = new File("DB/" + filename + ".xml");
+ 
+             if (hashmap.get("newtable") != null) {
+-                String hmap = hashmap.get("newtable");
++                String hmap = hashmap.get("newtable").toString();
+ 
+                 printwriter = new PrintWriter(new FileWriter("DB/" + filename +
+                             ".xml"), true);
+@@ -364,8 +364,8 @@
+         return new String(Traxit.tabby);
+     }
+ 
+-    public static HashMap<String,String> parseQuery(String string) {
+-        HashMap<String,String> hashmap = new HashMap<String,String>();
++    public static HashMap parseQuery(String string) {
++        HashMap hashmap = new HashMap();
+         String query = string.substring(string.indexOf("?") + 1);
+ 
+         query = DBM.converter(query);
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

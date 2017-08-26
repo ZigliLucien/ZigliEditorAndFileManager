@@ -1,0 +1,24 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/Webgrep.java distribution/src/srcdiffs/ServPak/jv/Webgrep.java
+--- ServPak/jv/Webgrep.java	2004-10-22 23:37:12.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/Webgrep.java	2004-10-10 11:49:00.000000000 -0500
+@@ -4,7 +4,6 @@
+ package ServPak.jv;
+ 
+ import NetsManager.ZEFMServer;
+-import NetsManager.ZConnection;
+ 
+ import java.io.*;
+ import java.util.Arrays;
+@@ -171,10 +170,8 @@
+ "<html><head><script> window.location=\""+where+"/SearchResults.html\"</script></head>\n"
+ +"<body><p/>&nbsp;<p/><p/>&nbsp;<p/><center><h2>--&gt;&gt; <a href=\""
+ +where+"/SearchResults.html\">Get Results </a>&lt;&lt;--</h2></center></body></html>" ;
+-
+ 		     } else {
+ 				printout = stringbuffer.toString();
+-			    
+ 			   }
+         }
+     }

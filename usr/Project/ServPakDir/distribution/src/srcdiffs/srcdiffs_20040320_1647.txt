@@ -1,0 +1,36 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2004-03-20 16:47:17.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2004-03-20 16:44:00.000000000 -0600
+@@ -61,7 +61,9 @@
+                 bufi.append(v + "\n");
+             }
+ 
+-	         printout = bufi.toString().trim();
++  //          printout = bufi.toString().trim();
++	    ZConnection.out.write(bufi.toString().trim().getBytes());
++	     ZConnection.out.flush();
+ 
+             	return;
+         }
+@@ -155,14 +157,17 @@
+                     }
+                 }
+             }
+-	           printout = bufi.toString().trim();
++
++//            printout = bufi.toString().trim();
++	    ZConnection.out.write(bufi.toString().trim().getBytes());
++	     ZConnection.out.flush();
+ 
+         } catch (Exception exception) {
+ //            XCommands.pushListing(dirname);
+ 
+             GoFM gofm5 = new GoFM(string);
+ 
+-            printout = gofm5.printout;
++//            printout = gofm5.printout;
+             XCommands.reqfile = reqreq;
+ 	System.out.println("GoFM exception "+exception.getMessage());
+         }
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

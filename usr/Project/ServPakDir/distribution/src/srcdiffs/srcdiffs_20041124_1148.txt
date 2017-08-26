@@ -1,0 +1,31 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/SendEmail.java distribution/src/srcdiffs/ServPak/jv/SendEmail.java
+--- ServPak/jv/SendEmail.java	2004-11-24 11:48:28.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/SendEmail.java	2004-11-24 11:45:44.000000000 -0600
+@@ -3,6 +3,7 @@
+ import ZEdit.*;
+ 
+ import java.io.*;
++import java.net.*;
+ import java.util.*;
+ 
+ 
+@@ -30,6 +31,8 @@
+     public SendEmail(String _textin) throws Exception {
+         textin = DBM.converter(_textin);
+ 
++//	textin = URLDecoder.decode(_textin, "UTF-8");
++
+         InputStream infile = new FileInputStream("Mail.properties");
+ 
+         mailinfo.load(infile);
+@@ -76,7 +79,7 @@
+                 stin.nextToken();
+             }
+ 
+-            subject = DBM.converter(stin.nextToken());
++            subject = URLDecoder.decode(stin.nextToken(), "UTF-8");
+ 
+             String linein = textin.substring(textin.indexOf("&s@@nd=") + 7);
+ System.out.println(textin);

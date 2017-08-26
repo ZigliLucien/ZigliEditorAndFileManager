@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/FileOps.java distribution/src/srcdiffs/ServPak/jv/FileOps.java
+--- ServPak/jv/FileOps.java	2004-07-22 22:28:20.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/FileOps.java	2004-07-22 22:16:08.000000000 -0500
+@@ -30,7 +30,7 @@
+ 
+         XCommands cary = new XCommands(request);
+ 
+-        if (cary.returns != null) { 
++        if (cary.returns != null) { System.out.println("CARY RETURNS "+cary.returns);
+             printout = cary.returns;
+         }
+             whichproc = ZConnection.whichproc;
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

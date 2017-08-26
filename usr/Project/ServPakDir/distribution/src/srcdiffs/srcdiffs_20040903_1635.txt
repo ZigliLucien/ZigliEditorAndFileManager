@@ -1,0 +1,34 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DiaryOut.java distribution/src/srcdiffs/ServPak/jv/DiaryOut.java
+--- ServPak/jv/DiaryOut.java	2004-09-03 16:33:44.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DiaryOut.java	2003-08-24 23:22:42.000000000 -0500
+@@ -21,7 +21,7 @@
+         String string_4_ = stringtokenizer.nextToken();
+         String string_5_ = stringtokenizer.nextToken();
+         String user = stringtokenizer.nextToken();
+-        String string_7_ = MKcal.ldir + "/diary-" + user + ".txt";
++        String string_7_ = MKcal.ldir + "/diary_" + user + ".txt";
+         PrintWriter printwriter = new PrintWriter(new FileWriter(string_7_, true),
+                 true);
+ 
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MKcal.java distribution/src/srcdiffs/ServPak/jv/MKcal.java
+--- ServPak/jv/MKcal.java	2004-09-03 16:34:55.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MKcal.java	2004-01-09 06:21:28.000000000 -0600
+@@ -134,14 +134,14 @@
+ 
+         ldir = ZEFMServer.userdir;
+ 
+-        File file = new File(ldir + "/diary-" + username + ".txt");
++        File file = new File(ldir + "/diary_" + username + ".txt");
+ 
+         if (!file.exists()) {
+             file.createNewFile();
+         }
+ 
+         BufferedReader bufferedreader = new BufferedReader(new FileReader(ldir +
+-                    "/diary-" + username + ".txt"));
++                    "/diary_" + username + ".txt"));
+         String v;
+ 
+         while ((v = bufferedreader.readLine()) != null) {

@@ -1,0 +1,46 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/Query.java distribution/src/srcdiffs/ServPak/jv/Query.java
+--- ServPak/jv/Query.java	2004-12-14 22:45:07.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/Query.java	2004-12-14 22:40:08.000000000 -0600
+@@ -25,11 +25,10 @@
+ 
+ 	public static String printout;
+ 	String qry;
+- static	boolean quick;
++	boolean quick;
+ 
+ 	public Query(String in){
+ 	String query = "";
+-	quick = false;
+ try{
+ if(in.endsWith("query=")){
+ 		quick = true;
+@@ -49,7 +48,7 @@
+ 	    }
+ 
+ 	
+-	    public static void QResult(String query) throws Exception {
++	    public void QResult(String query) throws Exception {
+ 
+ 	        final Configuration config = new Configuration();
+ 	        final StaticQueryContext sqc = new StaticQueryContext(config);
+@@ -71,6 +70,7 @@
+ 		printout = jack.toString();
+ 		}
+ 
++		printout = jack.toString();
+ 
+      if(quick){			
+ 		String jk = jack.toString();
+@@ -80,10 +80,6 @@
+ 		for(String v : result) sb.append(v+"<p/>\n");
+ 		sb.append("</body></html>");
+ 		printout = sb.toString();
+-	    } else {
+-		
+-		printout = jack.toString();
+-
+ 	    }
+     	}
+ 

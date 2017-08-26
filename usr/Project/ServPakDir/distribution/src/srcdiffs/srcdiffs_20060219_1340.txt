@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2006-02-19 13:34:37.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2006-02-19 13:32:56.000000000 -0600
+@@ -152,7 +152,7 @@
+ 
+ 	        new NetsManager.Traxit(bout.toByteArray(),"ServPak/xsl/listit.xsl",dirnum);
+ 		String main = new String(NetsManager.Traxit.tabby);
+-
++	System.out.println("TOTAL OF "+i);
+ 		int dirnumplus = Math.min(Integer.parseInt(dirnum)+1,i);
+ 		
+ 		String refstrip = Xlster.reffout(dirname, XCommands.keyvalue, dirnumplus);
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

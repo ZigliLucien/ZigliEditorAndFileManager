@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/Query.java distribution/src/srcdiffs/ServPak/jv/Query.java
+--- ServPak/jv/Query.java	2004-12-18 00:46:26.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/Query.java	2004-12-18 00:39:56.000000000 -0600
+@@ -80,7 +80,7 @@
+ 
+ 		StringBuilder sb = new StringBuilder(
+ "<html><head><meta http-equiv=\"content-type\" content=\"text/xml\"></head>\n<body>\n");
+-		for(String v : result) sb.append(ServPak.jv.DBM.fixgtlt(v)+"\n");
++		for(String v : result) sb.append(v+"\n");
+ 		sb.append("</body></html>");
+ 		printout = sb.toString();
+ 	    } else {

@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2004-12-11 04:02:25.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2004-12-11 03:54:48.000000000 -0600
+@@ -288,7 +288,7 @@
+         throws Exception {
+ 	try{
+ 	new NetsManager.Query(
+-		new FileInputStream("DB/" + basename + ".xml"), "for $i in /*/* return $i/node()");
++		new FileInputStream("DB/" + basename + ".xml"), "for $i in /*/* return $i");
+ 	}catch (Exception ee){ }
+ 
+ 	BufferedReader buff = new BufferedReader(
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

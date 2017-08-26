@@ -1,0 +1,81 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/ShowNotes.java distribution/src/srcdiffs/ServPak/jv/ShowNotes.java
+--- ServPak/jv/ShowNotes.java	2004-10-14 03:22:54.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/ShowNotes.java	2004-10-14 03:12:46.000000000 -0500
+@@ -15,35 +15,55 @@
+ 
+     public ShowNotes(String string) throws Exception {System.out.println("HELLO");
+         String pre = string.substring(string.indexOf("&") + 1);
+-        String post = string.substring(string.indexOf("=") + 1, string.indexOf("&"));
++        String post = string.substring(string.indexOf("=") + 1,
++                string.indexOf("&"));
+         String postpre = pre.substring(pre.indexOf("=") + 1);
+ 
+         postpre = DBM.converter(postpre);
+-
++// StartTrace
++System.out.println(23);// traceon
+         String prepost = post.substring(0, post.lastIndexOf("/"));
+-
+-        String _filein = (prepost + "/." + post.substring(post.lastIndexOf("/") + 1) + ".notesml");
++System.out.println(24);// traceon
++        String _filein = (prepost + "/." +
++            post.substring(post.lastIndexOf("/") + 1) + ".notesml");
++System.out.println(26);// traceon
+         FileInputStream fileinputstream = new FileInputStream(_filein);
++System.out.println(27);// traceon
+         byte[] is = new byte[fileinputstream.available()];
++System.out.println(28);// traceon
+ 
++System.out.println(29);// traceon
+         fileinputstream.read(is);
++System.out.println(30);// traceon
+ 
++System.out.println(31);// traceon
+         String fileinput = new String(is, "UTF-8");
++System.out.println(32);// traceon
+ 
+-        StringBuilder stringbuffer = new StringBuilder("<?xml version=\"1.0\"?>\n <notesml>\n");
++System.out.println(33);// traceon
++        StringBuilder stringbuffer = new StringBuilder(
++                "<?xml version=\"1.0\"?>\n <notesml>\n");
++System.out.println(35);// traceon
++
++System.out.println(36);// traceon
+         stringbuffer.append(fileinput);
++System.out.println(37);// traceon
+         stringbuffer.append("\n</notesml>");
+-
++System.out.println(38);// traceon
++// StopTrace
+         new Traxit(stringbuffer, "ServPak/xsl/shownotes.xsl", postpre);
+-
++System.out.println(postpre);
+         BufferedReader bufr = new BufferedReader(new StringReader(new String(Traxit.tabby)));
++System.out.println(new String(Traxit.tabby));
+ 
++//        int counter = 0;
+         boolean istpml = false;
+ 
+         String externalReference = "";
+ 
+         for (String v = null; (v = bufr.readLine()) != null;) {
+             v = v.trim();
++//            counter++;
+ 
+             if (v.indexOf("<reference>") >= 0) {
+                 istpml = true;
+@@ -56,6 +76,12 @@
+ 
+                 break;
+             }
++
++/*
++            if (counter > 9) {
++                break;
++            }
++*/
+         }
+ 
+         byte[] fin = null;

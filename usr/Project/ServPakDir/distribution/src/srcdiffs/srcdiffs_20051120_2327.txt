@@ -1,0 +1,13 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2005-11-20 23:27:07.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2005-11-20 22:46:22.000000000 -0600
+@@ -94,6 +94,7 @@
+ 
+         reqreq = XCommands.reqfile;
+ 
++        String top = linein + "HEADER";
+         String listfile = "Listings/" + dirname.replace('/', '_') + ".xml.gz"; 
+         String cachefile = "Listings/" + dirname.replace('/', '_') +dirnum+".cache.html.gz"; 
+ 
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

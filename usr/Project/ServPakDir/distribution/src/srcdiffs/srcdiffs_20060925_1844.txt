@@ -1,0 +1,36 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MySQL.java distribution/src/srcdiffs/ServPak/jv/MySQL.java
+--- ServPak/jv/MySQL.java	2006-09-25 18:44:40.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MySQL.java	2006-09-20 21:18:28.000000000 -0500
+@@ -109,12 +109,8 @@
+ 
+ 	 int approx = (int)(100/(numberOfColumns+2));
+ 
+-   	String sql = 
+-		"SELECT * FROM "+postpre+" where "+firstColumn+"=?";
+-		PreparedStatement stmt = conn.prepareStatement(sql); 
+-
+-		stmt.setString(1,string);
+-	rs = stmt.executeQuery();
++             rs = conn.createStatement().executeQuery(
++		"SELECT * FROM "+postpre+" where "+firstColumn+"='"+string+"'");
+ 
+ 	rsmd = rs.getMetaData();
+ 	rs.next();
+@@ -187,12 +183,9 @@
+ 
+ try{
+ 
+- 	String sql = 
+-		"DELETE FROM "+postpre+" WHERE "+firstColumn+"=?";
+-		PreparedStatement stmt = conn.prepareStatement(sql); 
++     int n = conn.createStatement().executeUpdate(
++		"DELETE FROM "+postpre+" WHERE "+firstColumn+"='"+string+"'");
+ 
+-		stmt.setString(1,string);
+-	int n = stmt.executeUpdate();
+ 	System.out.println("Deleting "+string+" from "+postpre+" with result "+n);
+ 
+ 	if(n>0){

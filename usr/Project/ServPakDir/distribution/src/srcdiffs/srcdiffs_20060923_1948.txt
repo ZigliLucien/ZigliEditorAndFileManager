@@ -1,0 +1,19 @@
+Only in ServPak/jv: .Dictionary.java.swp
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/Dictionary.java distribution/src/srcdiffs/ServPak/jv/Dictionary.java
+--- ServPak/jv/Dictionary.java	2006-09-23 19:48:54.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/Dictionary.java	2006-09-23 19:48:12.000000000 -0500
+@@ -77,6 +77,11 @@
+ 
+ 		sb.append("</dictionaryResults>\n");		
+ 	
++	FileOutputStream fout = new FileOutputStream("DictResults.xml");
++		fout.write(sb.toString().getBytes("UTF-8"));
++		fout.flush();
++		fout.close();
++
+ 	byte[] xxx = new NetsManager.Traxit(sb, "ServPak/xsl/generic.xsl", null).tabby;
+ 
+ 		printout =  new String(xxx, "UTF-8");
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

@@ -1,0 +1,17 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2006-09-16 15:48:03.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2006-09-16 15:45:08.000000000 -0500
+@@ -48,8 +48,8 @@
+ 	String elements = new String(new Traxit(fname,"ServPak/xsl/listElements.xsl").tabby);
+ 
+ 	String[] elts = elements.split("!");
+-for(int q=0;q<5;q++){
+-	System.out.println(q+" "+elts[q].trim());}
++
++	System.out.println(elts[1].trim());
+ 
+             File file = new File(fname);
+ 
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

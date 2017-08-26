@@ -1,0 +1,42 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2007-01-21 11:28:27.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2007-01-21 11:27:48.000000000 -0600
+@@ -68,7 +68,7 @@
+                 stringbuffer = new StringBuilder();
+ 
+ 	    String xmlname = filename.substring(filename.lastIndexOf('/')+1);	
+-
++System.out.println("USING "+xmlname);
+                 stringbuffer.append("<?xml version=\"1.0\"?>\n");
+                 stringbuffer.append("<" + xmlname + ">\n\n");
+                 stringbuffer.append("<"+entryname+">\n");
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/SendEmail.java distribution/src/srcdiffs/ServPak/jv/SendEmail.java
+--- ServPak/jv/SendEmail.java	2007-02-08 20:53:28.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/SendEmail.java	2006-04-04 00:36:26.000000000 -0500
+@@ -157,7 +157,7 @@
+         buffy.append("</head>\n");
+         buffy.append("<body>\n");
+         buffy.append("<h2> Send EMail </h2>");
+-        buffy.append("<form action=\"\" method=\"get\">");
++        buffy.append("<form action=\"SendEmail.jav\" method=\"get\">");
+         buffy.append(
+             " Correspondent (or fill in address below):  <select name=\"toWhom\">\n");
+         buffy.append(
+@@ -170,11 +170,11 @@
+ 
+         buffy.append("</select><br/>\n");
+         buffy.append(
+-  "Enter e-mail address here:  <INPUT type=\"text\" name=\"towhom\" size=\"30\" value=\""+reply2+"\"><p/>\n");
++  "Enter e-mail address here:  <INPUT type=\"text\" name=\"toWhom\" size=\"30\" value=\""+reply2+"\"><p/>\n");
+         buffy.append("Subject: <INPUT type=\"text\" name=\"subject\"><p/>\n");
+-        buffy.append("<p><TEXTAREA name=\"mlxx\" rows=\"25\" cols=\"80\">");
++        buffy.append("<p><TEXTAREA name=\"s@@nd\" rows=\"25\" cols=\"80\">");
+         buffy.append("</TEXTAREA>\n");
+-        buffy.append("<INPUT type=\"button\" value=\"Send\" onclick='getText(this.form)'><p/>\n");
++        buffy.append("<INPUT type=\"submit\" value=\"Send\"><p/>\n");
+         buffy.append(
+             "To send an attachment. Insert the filename (full pathname) here: <INPUT type=\"text\" size=\"40\" name=\"attachment\"> <p/>");
+         buffy.append("<INPUT type=\"reset\">\n");

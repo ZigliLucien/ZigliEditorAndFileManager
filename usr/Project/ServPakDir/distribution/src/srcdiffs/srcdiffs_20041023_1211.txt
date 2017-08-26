@@ -1,0 +1,17 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/FileOps.java distribution/src/srcdiffs/ServPak/jv/FileOps.java
+--- ServPak/jv/FileOps.java	2004-10-23 12:11:00.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/FileOps.java	2004-10-09 22:05:00.000000000 -0500
+@@ -15,8 +15,10 @@
+             request = processcall + string;
+             ZConnection.whichproc = whichproc;
+         } else {
++            int cut = string.lastIndexOf("@!!@x=");
+ 
+-             request = string.replace('&', '?');
++            string = string.replace('&', '?');
++            request = string.substring(0, cut);
+ 
+             for (int q = 0; q < ZConnection.processes.length; q++) {
+                 if (request.indexOf(ZConnection.processes[q]) > 0) {
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

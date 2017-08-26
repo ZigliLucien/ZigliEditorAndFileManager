@@ -1,0 +1,26 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2004-03-20 19:03:29.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2004-03-20 18:59:50.000000000 -0600
+@@ -28,12 +28,8 @@
+     String reqreq;
+     String dirname;
+ 
+-	public static boolean goingFM;
+-
+     public GoFM(String string) throws Exception {
+ 
+-        goingFM = false;
+-
+         dirname = string.substring(0, string.indexOf("^"));
+         dirname = DBM.converter(dirname);
+ 
+@@ -164,7 +160,6 @@
+ 
+         } catch (Exception exception) {
+ 
+-	goingFM = true;
+             XCommands.pushListing(dirname);
+             XCommands.reqfile = reqreq;
+             new GoFM(string);
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

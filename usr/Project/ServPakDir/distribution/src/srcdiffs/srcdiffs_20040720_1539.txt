@@ -1,0 +1,150 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBanalyze.java distribution/src/srcdiffs/ServPak/jv/DBanalyze.java
+--- ServPak/jv/DBanalyze.java	2004-07-20 15:38:00.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBanalyze.java	2003-12-23 16:26:32.000000000 -0600
+@@ -31,8 +31,8 @@
+     static double setmax;
+     static double setmean;
+     static boolean renew;
+-     PrintWriter printwriter;
+-     StringBuffer stringbuffer;
++    static PrintWriter printwriter;
++    static StringBuffer stringbuffer;
+     public String printout;
+     Matrix Out;
+     boolean transpose;
+@@ -327,7 +327,7 @@
+         matty = new Matrix(ds);
+     }
+ 
+-       void writeMatrix2XML(String string, String[][] strings)
++    static void writeMatrix2XML(String string, String[][] strings)
+         throws Exception {
+         printwriter = new PrintWriter(new FileWriter(string + ".xml"), true);
+         stringbuffer = new StringBuffer();
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2004-07-20 14:49:54.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2003-12-23 16:08:36.000000000 -0600
+@@ -20,8 +20,8 @@
+ public class DBgo {
+     static String filename;
+     static String[][] tableset;
+-     StringBuffer stringbuffer;
+-     PrintWriter printwriter;
++    static StringBuffer stringbuffer;
++    static PrintWriter printwriter;
+     public String printout;
+     String[] champs;
+ 
+diff -Bwaur ServPak/jv/DBrcops.java distribution/src/srcdiffs/ServPak/jv/DBrcops.java
+--- ServPak/jv/DBrcops.java	2004-07-20 15:39:11.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBrcops.java	2003-12-23 16:21:42.000000000 -0600
+@@ -21,8 +21,8 @@
+     static int numcols;
+     static int numrows;
+     static boolean renew;
+-     StringBuffer stringbuffer;
+-     PrintWriter printwriter;
++    static StringBuffer stringbuffer;
++    static PrintWriter printwriter;
+     public String printout;
+ 
+     public DBrcops(String string) throws Exception {
+@@ -438,7 +438,7 @@
+         table2 = new String[table.length][table[0].length];
+     }
+ 
+-     void writeMatrix2XML(String string, String[][] strings)
++    static void writeMatrix2XML(String string, String[][] strings)
+         throws Exception {
+         printwriter = new PrintWriter(new FileWriter(string + ".xml"), true);
+         stringbuffer = new StringBuffer();
+diff -Bwaur ServPak/jv/Logging.java distribution/src/srcdiffs/ServPak/jv/Logging.java
+--- ServPak/jv/Logging.java	2004-07-20 14:50:33.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/Logging.java	2003-08-24 23:22:42.000000000 -0500
+@@ -10,8 +10,8 @@
+ public class Logging {
+     static String filename;
+     static String dirname;
+-     StringBuffer buffy;
+-     PrintWriter pt;
++    static StringBuffer buffy;
++    static PrintWriter pt;
+     static BufferedReader brd;
+     static String outf;
+     public static String user;
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/Registering.java distribution/src/srcdiffs/ServPak/jv/Registering.java
+--- ServPak/jv/Registering.java	2004-07-20 14:50:50.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/Registering.java	2003-08-24 23:24:38.000000000 -0500
+@@ -11,8 +11,8 @@
+ 
+ public class Registering {
+     static String buffertext;
+-     StringBuffer buffy;
+-     PrintWriter pt;
++    static StringBuffer buffy;
++    static PrintWriter pt;
+     static BufferedReader brd;
+     static String outf;
+     static int numtries;
+diff -Bwaur ServPak/jv/SendEmail.java distribution/src/srcdiffs/ServPak/jv/SendEmail.java
+--- ServPak/jv/SendEmail.java	2004-07-20 14:52:12.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/SendEmail.java	2004-05-02 13:01:58.000000000 -0500
+@@ -11,9 +11,9 @@
+     static String filename;
+     static String dirname;
+     static boolean attachment;
+-     FileOutputStream ft;
++    static FileOutputStream ft;
+     static byte[] data;
+-     StringBuffer buffy;
++    static StringBuffer buffy;
+     static BufferedReader brd;
+     static Properties mailinfo = new Properties();
+     static String mailto;
+diff -Bwaur ServPak/jv/WebEdit.java distribution/src/srcdiffs/ServPak/jv/WebEdit.java
+--- ServPak/jv/WebEdit.java	2004-07-20 15:25:21.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/WebEdit.java	2004-06-29 15:10:16.000000000 -0500
+@@ -12,7 +12,8 @@
+ public class WebEdit {
+     static String filename;
+     static String dirname;
+-     PrintWriter pout;
++    static PrintWriter pout;
++    static StringBuffer buffy;
+     static BufferedReader bin;
+     public String printout;
+ 
+@@ -58,7 +59,7 @@
+ 
+         bin = new BufferedReader(new InputStreamReader(filein, "UTF-8"));
+ 
+-        StringBuffer buffy = new StringBuffer();
++        buffy = new StringBuffer();
+ 
+         buffy.append("<html>\n");
+         buffy.append("<head><title>" + filename + "</title>\n");
+@@ -84,7 +85,7 @@
+     }
+ 
+     public static  String goString() {
+-        StringBuffer buffy = new StringBuffer();
++        buffy = new StringBuffer();
+ 
+         buffy.append("<html>\n<body>\n");
+         buffy.append("<pre>\n\nAnnotating " + NetsManager.XCommands.filepath +
+diff -Bwaur ServPak/jv/Webgrep.java distribution/src/srcdiffs/ServPak/jv/Webgrep.java
+--- ServPak/jv/Webgrep.java	2004-07-20 14:52:37.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/Webgrep.java	2004-06-29 13:31:40.000000000 -0500
+@@ -11,8 +11,8 @@
+ 
+ 
+ public class Webgrep {
+-     BufferedReader bufferedreader;
+-     StringBuffer stringbuffer;
++    static BufferedReader bufferedreader;
++    static StringBuffer stringbuffer;
+     static HashMap hashmap;
+     public String printout;
+     public Object[] dockeys;

@@ -1,0 +1,15 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/SendEmail.java distribution/src/srcdiffs/ServPak/jv/SendEmail.java
+--- ServPak/jv/SendEmail.java	2007-02-08 21:02:07.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/SendEmail.java	2007-02-08 21:00:36.000000000 -0600
+@@ -154,7 +154,7 @@
+ 
+         buffy.append("<html>\n");
+         buffy.append("<head><title>  Send EMail </title>\n");
+-        buffy.append("<script src='"+ZEFMServer.userdir+"/ServPak/js/mail.js'></script>\n");
++        buffy.append("script src='"+ZEFMServer.userdir+"/ServPak/js/mail.js'></script>\n;");
+         buffy.append("</head>\n");
+         buffy.append("<body>\n");
+         buffy.append("<h2> Send EMail </h2>");

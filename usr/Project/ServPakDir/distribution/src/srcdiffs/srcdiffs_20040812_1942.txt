@@ -1,0 +1,46 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2004-08-12 19:40:08.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2004-07-22 18:08:20.000000000 -0500
+@@ -13,6 +13,7 @@
+ public class GoFM {
+ 
+     static BufferedReader buffr;
++    static final String sss = "<input type=\"radio\" name=\"fileops\" value=\"SSS\"";
+     static final String vvv = "<input type=\"radio\" name=\"fileops\" value=\"VVV\"";
+     static final String ccc = "<input type=\"radio\" name=\"fileops\" value=\"CCC\"";
+     static final String mmm = "<input type=\"radio\" name=\"fileops\" value=\"MMM\"";
+@@ -44,7 +45,7 @@
+         String localprocess = ServPak.jv.FileOps.processcall;
+ 
+         if (localprocess == null) {
+-            localprocess = "VVV";
++            localprocess = "SSS";
+         }
+ 
+         if (dirnum.equals("0")) {
+@@ -87,6 +88,8 @@
+                     bufi.append("    <html>\n");
+                     bufi.append("	<head><title> Listing " + dirname + " </title>\n");
+                     bufi.append("<style type=\"text/css\">\n");
++                    bufi.append(" 	         span.s{font-variant: small-caps; color: gray;");
++                    bufi.append("		      font-weight: lighter}\n");
+                     bufi.append(" 	         span.v{font-variant: small-caps;");
+                     bufi.append("		      font-weight: lighter}\n");
+                     bufi.append(
+@@ -187,6 +190,14 @@
+     public static void fillChecked(StringBuffer _buf, String _localprocess) {
+         _buf.append("<form action=\"FileOps.jav\" method=\"GET\">");
+        
++	 _buf.append(sss);
++
++        if (_localprocess.startsWith("S")) {
++            _buf.append("  checked=\"yes\"");
++        }
++
++        _buf.append("/> <span class=\"s\">see</span> ");
++
+ 	 _buf.append(vvv);
+ 
+         if (_localprocess.startsWith("V")) {
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

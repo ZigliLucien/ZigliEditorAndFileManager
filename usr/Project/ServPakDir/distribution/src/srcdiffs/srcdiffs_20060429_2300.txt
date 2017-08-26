@@ -1,0 +1,37 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MySQL.java distribution/src/srcdiffs/ServPak/jv/MySQL.java
+--- ServPak/jv/MySQL.java	2006-04-29 23:00:51.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MySQL.java	2006-04-29 22:59:44.000000000 -0500
+@@ -152,16 +152,28 @@
+     }
+ 
+ 	} else if (string.contains("MAILLOG=")) {
+-
++// StartTrace
++System.out.println(155);// traceon
+ 	buf.append("<html><header><title>From Mail Log</title></header>\n<body>\n<pre>");
++System.out.println(156);// traceon
+ 
+-		String fname = string.substring(string.indexOf("MAILLOG=")+8);
++System.out.println(157);// traceon
++		String fname = string.substring(string.indexOf("MAILLOG="+8));
++System.out.println("FAX "+fname+" "+postpre);
++System.out.println(158);// traceon
+ 		BufferedReader brdr = ZEFMServer.getZipFile(conn, fname, postpre);
++System.out.println(159);// traceon
+ 
++System.out.println(160);// traceon
+ 		for (String v; (v = brdr.readLine()) != null;) {
++System.out.println(161);// traceon
+ 			buf.append(v+"\n");
++System.out.println(162);// traceon
+ 		}
++System.out.println(163);// traceon
+ 			buf.append("\n</pre>\n</body>\n</html>");
++System.out.println(164);// traceon
++// StopTrace		
+ 	} else {
+ 
+ 	string = string.substring(string.indexOf("=")+1);

@@ -1,0 +1,42 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/ShowFile.java distribution/src/srcdiffs/ServPak/jv/ShowFile.java
+--- ServPak/jv/ShowFile.java	2004-10-23 03:44:20.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/ShowFile.java	2004-10-23 01:28:14.000000000 -0500
+@@ -9,19 +9,28 @@
+ 	public String printout;
+ 
+    	static  final  SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yy");
+-   	static  final  SimpleDateFormat stf = new SimpleDateFormat("hh:mm:ss");
+-
++	static  final  SimpleDateFormat stf = new SimpleDateFormat("kk:mm");
+ 	Date d = new Date();
+ 
+-	public ShowFile(String input) throws Exception {
++	static long timet;
++
++	public ShowFile(String in) throws Exception {
++
++    	File current = new File(in);
+ 
+-	File current = new File(input);
++            timet = current.lastModified();
++            d.setTime(timet);
++
++            String filelement = "filename";
++
++            if (current.isDirectory()) {
++                filelement += " type=\"dir\"";
++            }
+ 
+-	StringBuilder bufy = new StringBuilder("<html><head><title>"+input+"</title></head>");
++	StringBuilder bufy = new StringBuilder(257);
+  
+-            bufy.append("<body>size: " + String.valueOf(current.length()));
+-            bufy.append("<p/> last modified at "+ stf.format(d) +"<p/> on "+ sdf.format(d));
+-	bufy.append("</body></html>");
++            bufy.append("size: " + String.valueOf(current.length()));
++            bufy.append(" last modified at "+ stf.format(d) +" on "+ sdf.format(d));
+  
+ 		printout = bufy.toString();
+ 	}

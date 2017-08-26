@@ -1,0 +1,15 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2006-11-26 10:44:12.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2006-09-25 18:06:42.000000000 -0500
+@@ -31,8 +31,6 @@
+       ResultSet rs;
+       Connection conn;
+ 
+-	public String printout="";
+-
+     public GoFM(String linein) throws Exception {
+ 
+ try{
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

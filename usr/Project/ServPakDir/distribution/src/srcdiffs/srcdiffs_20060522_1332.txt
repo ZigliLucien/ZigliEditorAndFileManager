@@ -1,0 +1,18 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2006-05-22 13:31:56.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2006-04-04 00:35:50.000000000 -0500
+@@ -33,11 +33,7 @@
+ 
+     public GoFM(String linein) throws Exception {
+ 
+-try{
+ 		conn = ZEdit.DOps.goMysql;
+-	}catch(Exception ee){
+-		new ZEdit.DOps();
+-	}
+ 
+          if(linein !=null) dirname = linein.substring(0, linein.indexOf("^"));
+ 
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

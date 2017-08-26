@@ -1,0 +1,17 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2006-02-19 19:06:41.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2006-02-19 17:36:44.000000000 -0600
+@@ -163,9 +163,9 @@
+ 	}
+ 
+ 		int dirnumplus = Math.min(Integer.parseInt(dirnum)+1,i);
+-System.out.println("AT "+dirnumplus+" OF "+i);
++		
+ 		String refstrip = Xlster.reffout(dirname, XCommands.keyvalue, dirnumplus);
+-System.out.println("MAIN "+main+" REFSTRIP "+refstrip);
++
+ 		main = main.replace("<main>","");
+ 		main = main.replace("<body>","");
+ 		main = main.replace("<html>","");
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

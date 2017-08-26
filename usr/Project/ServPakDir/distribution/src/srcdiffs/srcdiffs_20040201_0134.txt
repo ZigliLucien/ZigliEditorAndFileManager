@@ -1,0 +1,36 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/SendEmail.java distribution/src/srcdiffs/ServPak/jv/SendEmail.java
+--- ServPak/jv/SendEmail.java	2004-02-01 01:33:34.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/SendEmail.java	2003-09-28 13:33:04.000000000 -0500
+@@ -52,11 +52,7 @@
+         }
+ 
+         if (textin.indexOf("e@@it") >= 0) {
+-	String replyto = "";
+-	if(textin.indexOf("=")>0)
+-	    replyto = textin.substring(textin.indexOf("=")+1);
+-	
+-            printout = setUp(replyto);
++            printout = setUp();
+ 
+             return;
+         }
+@@ -122,7 +118,7 @@
+     }
+ 
+     ///////////////////////////////////////////////////////////
+-    String setUp(String reply2) { // //////////////////////// setUp //////////////////////////
++    String setUp() { // //////////////////////// setUp //////////////////////////
+ 
+         //////////////////////////////////////////////////////////
+         buffy = new StringBuffer();
+@@ -146,7 +142,7 @@
+ 
+         buffy.append("</select><br/>\n");
+         buffy.append(
+-  "Enter e-mail address here:  <INPUT type=\"text\" name=\"toWhom\" size=\"30\" value=\""+reply2+"\"><p/>\n");
++            "Enter e-mail address here:  <INPUT type=\"text\" name=\"toWhom\" size=\"30\" value=\"\"><p/>\n");
+         buffy.append("Subject: <INPUT type=\"text\" name=\"subject\"><p/>\n");
+         buffy.append("<p><TEXTAREA name=\"s@@nd\" rows=\"25\" cols=\"80\">");
+         buffy.append("</TEXTAREA>\n");

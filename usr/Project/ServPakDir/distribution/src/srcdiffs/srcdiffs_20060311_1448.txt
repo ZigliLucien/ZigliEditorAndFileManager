@@ -1,0 +1,55 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/ShowNotes.java distribution/src/srcdiffs/ServPak/jv/ShowNotes.java
+--- ServPak/jv/ShowNotes.java	2006-03-11 14:48:30.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/ShowNotes.java	2005-05-28 18:47:08.000000000 -0500
+@@ -8,40 +8,31 @@
+ import java.io.*;
+ 
+ import java.net.*;
+-import java.sql.*;
++
+ 
+ public class ShowNotes {
+     public String printout;
+-               Connection conn;
+ 
+     public ShowNotes(String string) throws Exception {
+ 
+-
+-            Class.forName("com.mysql.jdbc.Driver");
+-	conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/ZEFMdb","zz", "zefm");
+-
+         String pre = string.substring(string.indexOf("&") + 1);
+         String post = string.substring(string.indexOf("=") + 1, string.indexOf("&"));
+         String postpre = pre.substring(pre.indexOf("=") + 1);
+ 
+         postpre = DBM.converter(postpre);
+ 
+-	byte[] bb = null;
++        String prepost = post.substring(0, post.lastIndexOf("/"));
+ 
+-try{
+-          	Statement st = conn.createStatement();
+-            ResultSet rs = st.executeQuery(
+-		"SELECT data FROM notes WHERE filename='"+post+"' and link like '"+postpre+"'");
++        String _filein = (prepost + "/." + post.substring(post.lastIndexOf("/") + 1) + ".notesml");
++        FileInputStream fileinputstream = new FileInputStream(_filein);
++        byte[] is = new byte[fileinputstream.available()];
+ 
+-	                                   rs.next();
+-  		             bb   = rs.getBytes("data");
++        fileinputstream.read(is);
+ 
+-    }catch( Exception e ) {            
+-	System.out.println(e.getMessage()); 
+-    }
++        String fileinput = new String(is, "UTF-8");
+ 
+         StringBuilder stringbuffer = new StringBuilder("<?xml version=\"1.0\"?>\n <notesml>\n");
+-        stringbuffer.append(new String(bb, "UTF-8"));
++        stringbuffer.append(fileinput);
+         stringbuffer.append("\n</notesml>");
+ 
+         new Traxit(stringbuffer, "ServPak/xsl/shownotes.xsl", postpre);

@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2004-10-30 23:45:56.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2004-10-30 23:43:22.000000000 -0500
+@@ -92,7 +92,7 @@
+ bufi.append("<link rel=\"stylesheet\" type=\"text/css\""); 
+ bufi.append(" href=\""+ZEFMServer.userdir+"/ServPak/css/listing.css\"/>\n");
+ bufi.append("<script type=\"text/javascript\""); 
+-bufi.append(" src=\""+ZEFMServer.userdir+"/ServPak/js/listing.js\"/>");
++bufi.append(" href=\""+ZEFMServer.userdir+"/ServPak/js/listing.js\"/>");
+ bufi.append("</head>\n");
+ bufi.append("<body bgcolor=\"#ffffff\" oncontextmenu=\"return false\">");
+ 
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

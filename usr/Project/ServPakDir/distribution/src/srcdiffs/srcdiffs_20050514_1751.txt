@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBrcops.java distribution/src/srcdiffs/ServPak/jv/DBrcops.java
+--- ServPak/jv/DBrcops.java	2005-05-14 17:51:23.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBrcops.java	2005-05-14 17:49:46.000000000 -0500
+@@ -145,7 +145,7 @@
+ 
+                             table2 = new String[numrows - i][numcols];
+ 
+-		    int[] nums = new int[i-1];
++		    int[] nums = new int[i];
+ 
+ 		    int counter = 0;
+ 
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

@@ -1,0 +1,15 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2006-09-16 18:50:01.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2006-09-16 18:49:14.000000000 -0500
+@@ -49,7 +49,7 @@
+ 
+ 	String[] elts = elements.split("!");
+ 	
+-	entryname = elts[1].trim();
++	entryname = elts[1];
+ 
+             File file = new File(fname);
+ 
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

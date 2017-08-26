@@ -1,0 +1,66 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MySQL.java distribution/src/srcdiffs/ServPak/jv/MySQL.java
+--- ServPak/jv/MySQL.java	2007-06-29 08:16:27.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MySQL.java	2007-06-28 09:58:00.000000000 -0500
+@@ -83,7 +83,6 @@
+ 
+      rs = conn.createStatement().executeQuery("SELECT "+firstColumn+" FROM "+postpre);
+ 
+-	if(!postpre.equals("sentMail")) {
+ 		buf.append("<html><header><title>"+post+"</title></header>\n<body>");
+ 		buf.append("<h2>"+postpre+"</h2><p/>&nbsp;<br/>");
+ 	  while(rs.next()){
+@@ -93,51 +92,6 @@
+ 		"<a href=MySQL.jav?ENTRY="+ZEFMServer.hexi(name)+">"+name+"</a><p/>\n");
+ 	}
+ 		buf.append("</body>\n</html>");
+-	} else {
+-		buf.append("<?xml version='1.0'?>\n");
+-		buf.append("<sentmail>");
+-	  while(rs.next()){
+-		buf.append("<entry>");
+-		String name = rs.getObject(firstColumn).toString();
+-
+-		String towhom = name.substring(0,name.indexOf('_'));
+-		String split1 = name.substring(name.indexOf('_')+1);
+-
+-		buf.append("<towhom>\n");
+-		buf.append(towhom+"\n");
+-		buf.append("</towhom>\n");
+-
+-		String subject = split1.substring(0,split1.indexOf('_'));
+-		String split2 = split1.substring(split1.indexOf('_')+1);
+-
+-		buf.append("<subject>\n");
+-		buf.append(subject+"\n");
+-		buf.append("</subject>\n");
+-
+-		String date = split2.substring(0,split2.indexOf('.'));
+-		String split3 = split2.substring(split2.indexOf('.')+1);
+-
+-		date = date.replace('_','/');
+-
+-		buf.append("<date>\n");
+-		buf.append(date+"\n");
+-		buf.append("</date>\n");
+-
+-		String time = split3.substring(0,split3.indexOf('.'));
+-
+-		time = time.replace('_',':');
+-
+-		buf.append("<time>\n");
+-		buf.append(time+"\n");
+-		buf.append("</time>\n");
+-
+-		buf.append("<refname>\n");
+-		buf.append("<a href=MySQL.jav?ENTRY="+ZEFMServer.hexi(name)+">"+name+"</a><p/>\n");
+-		buf.append("</refname>");
+-		buf.append("</entry>");
+-	}
+-		buf.append("</sentmail>");
+-	}
+ 
+     }catch( Exception e ) {           
+ 	new ZEdit.DOps(); 

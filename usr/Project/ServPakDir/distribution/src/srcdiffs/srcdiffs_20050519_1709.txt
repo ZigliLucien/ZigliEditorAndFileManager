@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MKcal.java distribution/src/srcdiffs/ServPak/jv/MKcal.java
+--- ServPak/jv/MKcal.java	2005-05-19 17:09:17.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MKcal.java	2005-05-19 17:06:14.000000000 -0500
+@@ -181,7 +181,7 @@
+ 
+             String w = "";
+ 
+-	for( String vx : st ) {System.out.println(vx);
++	for( String vx : st ) {
+ 
+                 if (vx.equals("-1")) {
+                     w = "<br>";

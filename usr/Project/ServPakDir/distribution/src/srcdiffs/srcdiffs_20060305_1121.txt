@@ -1,0 +1,62 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2006-03-05 11:21:29.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2006-03-04 23:33:00.000000000 -0600
+@@ -8,11 +8,11 @@
+ 
+ import java.io.*;
+ import java.util.*;
+-import java.util.zip.*;
+ 
+-import java.sql.*;
++import java.util.zip.*;
+ import java.net.URLDecoder;
+ 
++
+ public class GoFM {
+ 
+     static BufferedReader buffr;
+@@ -28,17 +28,8 @@
+     public static String dirname;
+     public static String dirnum;
+ 
+-      static Statement st;
+-      static ResultSet rs;
+-      static Blob bb;
+-
+-      static Connection conn;
+-
+     public GoFM(String linein) throws Exception {
+ 
+-//           Class.forName("com.mysql.jdbc.Driver");
+-	conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/ZEFMdb","zz", "zefm");
+-
+ if(linein !=null) dirname = linein.substring(0, linein.indexOf("^"));
+ 
+         dirname = URLDecoder.decode(dirname, "UTF-8");
+@@ -197,22 +188,4 @@
+ 
+         _buf.append("/> <span class=\"a\">note</span><p/>\n");
+     }
+-
+-///////////// GET BLOB AS STREAM ////////////
+-
+-	 InputStream getStream(String filename, String db) throws Exception{
+-
+-   try{
+-     	 st = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,                    			                           			       ResultSet.CONCUR_READ_ONLY);
+-
+-     rs = st.executeQuery("SELECT * " + "FROM "+db+" WHERE filename='"+filename+"'");
+-
+-	   	               rs.next();
+-  		     bb   = rs.getBlob("data");	      
+-
+-    }catch( Exception e ) {e.printStackTrace(); }
+-
+-	return bb.getBinaryStream();
+-  }
+-
+ }
+\ No newline at end of file
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

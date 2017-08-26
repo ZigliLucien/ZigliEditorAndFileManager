@@ -1,0 +1,24 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MKcal.java distribution/src/srcdiffs/ServPak/jv/MKcal.java
+--- ServPak/jv/MKcal.java	2007-03-03 11:29:46.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/MKcal.java	2007-03-03 11:21:30.000000000 -0600
+@@ -218,7 +218,7 @@
+         _v_ = "";
+         _v_ += "<form action=MKcal.jav method=get>";
+ 
+-        _v_ += ("<input type=submit value=NEXT name=\"" +
++        _v_ += ("<input type=submit value=NEXT id=NEXT name=\"" +
+         (String) username + " " + shiftidx + " " + shftmonth + " " + _idx_ + " " + i + "\">");
+ 
+         int _shiftidx = (monthindex > 0) ? (monthindex - 1) : 11;
+@@ -228,7 +228,7 @@
+         String vvv = "";
+ 
+         vvv += "<form action=MKcal.jav method=post>";
+-        vvv += ("<input type=submit value=BACK name=\"" +
++        vvv += ("<input type=submit value=BACK id=BACK  name=\"" +
+         (String) username + " " + _shiftidx + " " + _shftmonth + " " + _lday + " " +
+         _day_ + "\">");
+         vvv += "</form>";

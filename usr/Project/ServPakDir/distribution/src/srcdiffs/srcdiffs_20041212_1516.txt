@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBM.java distribution/src/srcdiffs/ServPak/jv/DBM.java
+--- ServPak/jv/DBM.java	2004-12-12 15:16:18.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBM.java	2004-12-12 15:14:10.000000000 -0600
+@@ -161,7 +161,7 @@
+         String currentTable = new String(Traxit.tabby);
+ 
+         currentTable = currentTable.substring(currentTable.indexOf("?>") + 3);
+-System.out.println(currentTable);
++
+         PrintWriter prtw = new PrintWriter(new FileWriter("DB/" + dbasename + ".sdb"), true);
+ 
+         StringBuilder dbmbufr = new StringBuilder();
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

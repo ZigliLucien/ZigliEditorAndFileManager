@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2004-12-11 13:07:12.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2004-12-11 05:35:56.000000000 -0600
+@@ -470,7 +470,7 @@
+     }
+ 
+     public static String getFile(String fname) throws Exception {
+-        	InputStream din = ClassLoader.getSystemResourceAsStream(fname);
++        	InputStream din = ZEFMServer.wrapper(fname);
+ 
+ 	ByteArrayOutputStream bout = new ByteArrayOutputStream();
+ 
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

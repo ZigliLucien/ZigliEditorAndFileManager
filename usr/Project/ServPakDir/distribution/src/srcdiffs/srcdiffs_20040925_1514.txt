@@ -1,0 +1,17 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2004-09-25 15:14:31.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2004-08-21 16:10:30.000000000 -0500
+@@ -78,9 +78,8 @@
+                 String out0 = (ldir + "/DB/" +
+                     filename.substring(filename.lastIndexOf("/") + 1));
+ 
+-                stringbuffer = new StringBuffer(
+-		"<html><head><script>window.location=\""+out0+".sdb\"</script></head>\n");
+-	    stringbuffer.append("<body><h2> To " + filename + "</h2><p>\n");
++                stringbuffer = new StringBuffer("<html><body><h2> To " +
++                        filename + "</h2><p>\n");
+                 stringbuffer.append("<a href=" + out0 + ".sdb> Go to " +
+                     filename + "</a><p>\n</body></html>");
+                 printout = stringbuffer.toString();
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

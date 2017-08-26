@@ -1,0 +1,319 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBM.java distribution/src/srcdiffs/ServPak/jv/DBM.java
+--- ServPak/jv/DBM.java	2005-08-27 12:19:36.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBM.java	2004-12-30 22:26:56.000000000 -0600
+@@ -5,7 +5,12 @@
+ import NetsManager.ZEFMServer;
+ 
+ import java.io.*;
+-import java.util.*;
++
++import java.util.Arrays;
++import java.util.HashMap;
++import java.util.HashSet;
++import java.util.Properties;
++import java.util.StringTokenizer;
+ import java.net.*;
+ 
+ 
+@@ -47,10 +52,13 @@
+             query = query.substring(0, query.indexOf("=GO"));
+ 
+             String subquery = query.substring(0, query.indexOf("&sortdefault"));
+-            String[] tok = subquery.split("&|=");
++            StringTokenizer tok = new StringTokenizer(subquery, "&=");
+             String cats = "";
+ 
+-	for(int q=0;q<tok.length;q=q+2) cats += tok[q] + ",";
++            while (tok.hasMoreTokens()) {
++                cats += (tok.nextToken() + ",");
++                tok.nextToken();
++            }
+ 
+             cats = cats.substring(0, cats.length() - 1);
+             data.put("categories", cats);
+@@ -82,9 +90,16 @@
+         PrintWriter pw = new PrintWriter(new FileWriter("DB/" + dbasename + ".xml"), true);
+ 
+         String sortdef = data.get("sortdefault");
+-        String[] catz = data.get("categories").split(",");
+-
+-        for(String v : catz) keyfields.add(v);
++        StringTokenizer tokk = new StringTokenizer(data.get("categories"), ",");
++        String[] catz = new String[tokk.countTokens()];
++        int i = 0;
++
++        while (tokk.hasMoreTokens()) {
++            String local = tokk.nextToken();
++            catz[i] = local;
++            keyfields.add(local);
++            i++;
++        }
+ 
+         String rootname;
+ 
+@@ -99,7 +114,14 @@
+         sbuild.append("<?xml version=\"1.0\"?>\n");
+         sbuild.append("<" + rootname + ">\n");
+ 
+-        String[] elements = data.get("fields").split(",");
++        StringTokenizer fieldstok = new StringTokenizer(data.get("fields"), ",");
++        String[] elements = new String[fieldstok.countTokens()];
++
++        Arrays.fill(elements, "");
++
++        for (int q=0;q<elements.length;q++) {
++            	elements[q] = fieldstok.nextToken();
++        }
+ 
+             String v;
+ 	String f = "";
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2005-08-27 11:59:27.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2004-12-31 13:05:14.000000000 -0600
+@@ -135,12 +135,14 @@
+             if (hashmap.containsKey("formmode")) {
+                 string = DBM.converter(string);
+ 
+-                int q = 0;
+-                String[] newrow = string.split("&");
++                StringTokenizer vals = new StringTokenizer(string, "&");
++                int count = vals.countTokens();
++                String[] newrow = new String[count - 1];
++
++                for (int q = 0; q < (count - 1); q++) {
++                    String x = vals.nextToken();
+ 
+-                for (String x : newrow) {
+                     newrow[q] = x.substring(x.indexOf("=") + 1).replace('+', ' ');
+-	        q++;
+                 }
+ 
+                 tableset = addRow(tableset, newrow);
+@@ -365,9 +367,10 @@
+ 
+         query = DBM.converter(query);
+ 
+-        String[]querystring = query.split("&");
++        StringTokenizer stringtokenizer = new StringTokenizer(query, "&");
+ 
+-	for (String querybit : querystring){
++        while (stringtokenizer.hasMoreTokens()) {
++            String querybit = stringtokenizer.nextToken();
+             String testvalu = querybit.substring(0, querybit.indexOf("="));
+             String objectvalu;
+ 
+diff -Bwaur ServPak/jv/DBrcops.java distribution/src/srcdiffs/ServPak/jv/DBrcops.java
+--- ServPak/jv/DBrcops.java	2005-08-27 12:25:47.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBrcops.java	2005-05-14 18:10:14.000000000 -0500
+@@ -1,3 +1,6 @@
++/* DBrcops - Decompiled by JODE
++ * Visit http://jode.sourceforge.net/
++ */
+ package ServPak.jv;
+ 
+ import NetsManager.Traxit;
+@@ -72,13 +75,15 @@
+                     printout = showTable(infilename);
+                 } else {
+                     if (string.indexOf("insertrow") > -1) {
+-		String[] toks = string.split("&");
++                        StringTokenizer stringtokenizer = new StringTokenizer(string, "&");
+ 
+-                        String tokn = toks[1];
++                        stringtokenizer.nextToken();
++
++                        String tokn = stringtokenizer.nextToken();
+                         String toki = tokn.substring(tokn.indexOf("=") + 1);
+                         int nmrws = Integer.parseInt(toki);
+ 
+-                        tokn = toks[2];
++                        tokn = stringtokenizer.nextToken();
+                         numrows++;
+                         table2 = new String[numrows][numcols];
+ 
+@@ -104,9 +109,12 @@
+                     }
+ 
+                     if (string.indexOf("rowdel") > -1) {
+-		String[] toks = string.split("&");
++                        StringTokenizer stringtokenizer = new StringTokenizer(string,"&");
++
++                        stringtokenizer.nextToken();
+ 
+-                        String string_30_ = toks[1].substring(toks[1].indexOf("=") + 1);
++                        String string_29_ = stringtokenizer.nextToken();
++                        String string_30_ = string_29_.substring(string_29_.indexOf("=") + 1);
+ 
+                         string_30_ = DBM.converter(string_30_);
+ 
+@@ -165,25 +173,35 @@
+                     }
+ 
+                     if (string.indexOf("xrows") > -1) {
+-		        String[] toks = string.split("&");
++                        StringTokenizer stringtokenizer = new StringTokenizer(string,
++                                "&");
++
++                        stringtokenizer.nextToken();
+                         
+-                        String str1 = toks[1].substring(toks[1].indexOf("=") + 1);
+-                        int i = Integer.parseInt(str1);
++                        String string_39_ = stringtokenizer.nextToken();
++                        String string_40_ = string_39_.substring(string_39_.indexOf("=") + 1);
++                        int i = Integer.parseInt(string_40_);
+ 
+-                        str1 = toks[2].substring(toks[2].indexOf("=") + 1);
++                        string_39_ = stringtokenizer.nextToken();
+ 
+-                        int i1 = Integer.parseInt(str1);
++                        string_40_ = string_39_.substring(string_39_.indexOf("=") + 1);
+ 
+-                        exRows(i, i1);
++                        int i_41_ = Integer.parseInt(string_40_);
++
++                        exRows(i, i_41_);
+                         realign(table2);
+                     }
+ 
+                     if (string.indexOf("insertcol") > -1) {
+-                     	        String[] toks = string.split("&");
++                        StringTokenizer stringtokenizer = new StringTokenizer(string, "&");
++
++                        stringtokenizer.nextToken();
+ 
+-                        String string_43_ = toks[1].substring(toks[1].indexOf("=") + 1);
++                        String string_42_ = stringtokenizer.nextToken();
++                        String string_43_ = string_42_.substring(string_42_.indexOf("=") + 1);
+                         int i = Integer.parseInt(string_43_);
+ 
++                        string_42_ = stringtokenizer.nextToken();
+                         numcols++;
+                         table2 = new String[numrows][numcols];
+ 
+@@ -193,7 +211,7 @@
+                             }
+                         }
+ 
+-                        table2[0][i] = toks[2].substring(toks[2].indexOf("=") + 1);
++                        table2[0][i] = string_42_.substring(string_42_.indexOf("=") + 1);
+ 
+                         for (int s = 1; s < numrows; s++) {
+                             table2[s][i] = "-";
+@@ -209,9 +227,12 @@
+                     }
+ 
+                     if (string.indexOf("coldel") > -1) {
+-	        String[] toks = string.split("&");
++                        StringTokenizer stringtokenizer = new StringTokenizer(string, "&");
+ 
+-                        String string_50_ = toks[1].substring(toks[1].indexOf("=") + 1);
++                        stringtokenizer.nextToken();
++
++                        String string_49_ = stringtokenizer.nextToken();
++                        String string_50_ = string_49_.substring(string_49_.indexOf("=") + 1);
+ 
+                         string_50_ = DBM.converter(string_50_);
+ 
+@@ -270,27 +291,36 @@
+                     }
+ 
+                     if (string.indexOf("xcols") > -1) {
+-	        String[] toks = string.split("&");
++                        StringTokenizer stringtokenizer = new StringTokenizer(string,"&");
++
++                        stringtokenizer.nextToken();
++
++                        String string_59_ = stringtokenizer.nextToken();
++                        String string_60_ = string_59_.substring(string_59_.indexOf("=") + 1);
++                        int i = Integer.parseInt(string_60_);
+ 
+-                        String i1 = toks[1].substring(toks[1].indexOf("=") + 1);
+-                        int i = Integer.parseInt(i1);
++                        string_59_ = stringtokenizer.nextToken();
+ 
+-                        i1 = toks[2].substring(toks[2].indexOf("=") + 1);
++                        string_60_ = string_59_.substring(string_59_.indexOf("=") + 1);
+ 
+-                        int c = Integer.parseInt(i1);
++                        int c = Integer.parseInt(string_60_);
+ 
+                         exCols(i, c);
+                         realign(table2);
+                     }
+ 
+                     if (string.indexOf("colimport") > -1) {
+-	        String[] toks = string.split("&");
++                        StringTokenizer stringtokenizer = new StringTokenizer(string, "&");
+ 
+-                        String string_63_ = toks[1].substring(toks[1].indexOf("=") + 1);
++                        stringtokenizer.nextToken();
++
++                        String string_62_ = stringtokenizer.nextToken();
++                        String string_63_ = string_62_.substring(string_62_.indexOf("=") + 1);
+ 
+                         string_63_ = DBM.converter(string_63_);
++                        string_62_ = stringtokenizer.nextToken();
+ 
+-                        String string_64_ = toks[2].substring(toks[2].indexOf("=") + 1);
++                        String string_64_ = string_62_.substring(string_62_.indexOf("=") + 1);
+                         		DBgo.getFields(string_64_);
+                         String[][] strings_65_ = DBgo.readXML(string_64_, DBgo.champs.length);
+ 
+@@ -317,9 +347,11 @@
+                                 }
+                             }
+                         } else {
+-                           String[] tokk = string_63_.split(",");
++                            StringTokenizer stringtokenizer_69_ = new StringTokenizer(string_63_,
++                                    ",");
++                            int i = stringtokenizer_69_.countTokens();
+ 
+-                            table2 = new String[numrows][numcols + tokk.length];
++                            table2 = new String[numrows][numcols + i];
+ 
+                             for (int A = 0; A < numrows; A++) {
+                                 for (int B = 0; B < numcols; B++) {
+@@ -327,11 +359,15 @@
+                                 }
+                             }
+ 
+-                            int[] is = new int[tokk.length];
++                            int[] is = new int[i];
++                            int i_72_ = 0;
+ 
+-		for(int q=0; q<tokk.length; q++) is[q] = Integer.parseInt(tokk[q]);
++                            while (stringtokenizer_69_.hasMoreTokens()) {
++                                is[i_72_] = Integer.parseInt(stringtokenizer_69_.nextToken());
++                                i_72_++;
++                            }
+ 
+-                            for (int Q = 0; Q < tokk.length; Q++) {
++                            for (int Q = 0; Q < i; Q++) {
+                                 for (int P = 0; P < numrows; P++) {
+                                     table2[P][numcols + Q] = strings_65_[P][is[Q]];
+                                 }
+diff -Bwaur ServPak/jv/FormEntry.java distribution/src/srcdiffs/ServPak/jv/FormEntry.java
+--- ServPak/jv/FormEntry.java	2005-08-27 12:20:33.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/FormEntry.java	2005-05-19 16:43:26.000000000 -0500
+@@ -17,12 +17,14 @@
+         if (string.indexOf("formmode") >= 0) {
+             string = DBM.converter(string);
+ 
+-            String[] entry = string.split("&");
+-	int qq = 0;
++            StringTokenizer vals = new StringTokenizer(string, "&");
++            int count = vals.countTokens();
++            String[] entry = new String[count - 1];
+ 
+-            for (String x : entry) {
+-                entry[qq] = x.substring(x.indexOf("=") + 1).replace('+', ' ');
+-	    qq++;
++            for (int q = 0; q < (count - 1); q++) {
++                String x = vals.nextToken();
++
++                entry[q] = x.substring(x.indexOf("=") + 1).replace('+', ' ');
+             }
+ 
+             StringBuilder bufv = new StringBuilder();
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

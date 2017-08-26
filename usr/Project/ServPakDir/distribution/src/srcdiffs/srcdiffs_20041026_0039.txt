@@ -1,0 +1,96 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2004-10-26 00:39:16.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2004-10-25 21:05:02.000000000 -0500
+@@ -76,18 +76,6 @@
+             boolean bool = false;
+             boolean test_ = false;
+ 
+-	BufferedReader ff = new BufferedReader(new FileReader("ServPak/xsl/locsxorter.xsl"));
+-
+-	boolean flag = false;
+-	StringBuilder bb = new StringBuilder(2049);
+-
+-	for (String v = null; (v = ff.readLine()) != null;) {
+-		if(v.indexOf("<html>")>-1) flag = true;
+-		if(!flag) continue;
+-		bb.append(v+"\n");
+-		if(v.indexOf("<body bgcolor")>-1) break;
+-	}
+-
+             StringBuilder bufi = new StringBuilder(6145);
+             FileInputStream fins = new FileInputStream(listfile);
+             buffr = new BufferedReader(new InputStreamReader(new GZIPInputStream(fins)));
+@@ -96,7 +84,70 @@
+                 if (!bool && (v.indexOf(top) >= 0)) {
+                     bool = true;
+ 
+-	      bufi.append(bb.toString());    	
++                    bufi.append("    <html>\n");
++                    bufi.append("	<head><title> Listing " + dirname + " </title>\n");
++                    bufi.append("<style type=\"text/css\">\n");
++                    bufi.append(" 	         span.v{font-variant: small-caps;");
++                    bufi.append("		      font-weight: lighter}\n");
++                    bufi.append(
++                        "	         span.c{font-variant: small-caps; color: red;");
++                    bufi.append("		      font-weight: lighter}\n");
++                    bufi.append(
++                        "	         span.m{font-variant: small-caps; color: darkred;");
++                    bufi.append("		      font-weight: lighter}\n");
++                    bufi.append(
++                        "	         span.d{font-variant: small-caps; color: orange;");
++                    bufi.append("		      font-weight: lighter}\n");
++                    bufi.append(
++                        "	         span.e{font-variant: small-caps; color: blue;");
++                    bufi.append("		      font-weight: lighter}\n");
++                    bufi.append(
++                        "	         span.q{font-variant: small-caps; color: green;");
++                    bufi.append("		      font-weight: lighter}\n");
++                    bufi.append(
++                        "	         span.a{font-variant: small-caps; color: magenta;");
++                    bufi.append("		      font-weight: lighter}\n");
++		
++                    bufi.append(
++		"		input.x{background: #ffffff; color: #5555ff; font-size: 80%; border: 0}\n");
++                    bufi.append(
++		"		input.x:hover{color: #ee9909; text-decoration: underline}\n");
++                    bufi.append(
++		"	input.y{background: #eeeeee; color: #5555ff; font-size: 80%; border: 0}\n");
++                    bufi.append(
++		"		input.y:hover{color: #cc9908; text-decoration: underline}\n");
++
++		bufi.append(
++		"		a.d:link{ color: #5588ff; font-size: 90%; background: white}\n");
++		bufi.append(
++		"		a.d:visited{ color: #5588ff; font-size: 90%;}\n");
++		bufi.append(
++		"		a.d:hover{ color: #cc9908; text-decoration: underline;}\n");
++
++                    bufi.append(
++                        "		a.z:hover{ color: #cc9909; text-decoration: underline}\n");
++                    bufi.append("		a.z{ font-size: 80%}\n");
++                    bufi.append("		a.w:link{color: blue}");
++                    bufi.append("		a.w:visited{color: blue}");
++                    bufi.append("		a.w:hover{ color: #ffbb55;}\n");
++                    bufi.append("		td.z{ font-size: 80%}\n");
++                    bufi.append("        tr.a{background: #eeffff;}\n");
++                    bufi.append("        tr.b{background: #ffffee;}\n");
++                    bufi.append("	th{font-family: helvetica,sans-serif,arial;");
++                    bufi.append(
++                        "	    font-weight:lighter; font-variant: small-caps;}");
++                    bufi.append(
++                        "     td { font-family: Arial, Helvetica, sans-serif;\n");
++                    bufi.append("	    font-size: 100%;}\n");
++                    bufi.append("</style>\n");
++                    bufi.append("	<script>\n");
++                    bufi.append("	function go(c,d){\n");
++     bufi.append("window.location = c+\"/FileOps.jav?fileops=XXX&\"+d+\"@!!@x=Ops\"; \n");
++                    bufi.append("	}\n");
++                    bufi.append("	</script>\n");
++                    bufi.append("</head>\n");
++
++                    bufi.append("      <body bgcolor=\"ffffff\" oncontextmenu=\"return false\">\n");
+ 
+                     bufi.append(
+                         "<p align=right><a class=\"w\" href=\"GoFM.jav?" +
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

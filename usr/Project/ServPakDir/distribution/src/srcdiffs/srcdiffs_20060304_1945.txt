@@ -1,0 +1,15 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2006-03-04 19:45:36.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2006-03-04 19:44:44.000000000 -0600
+@@ -113,7 +113,7 @@
+ 
+ 		new NetsManager.Query(bout.toString(),qry,null,false);
+ 		main = NetsManager.Query.qtabby.toString();
+-System.out.println("AT "+dirnum+" GETTING "+main);
++
+ 		int dirnumplus = Math.min(Integer.parseInt(dirnum)+1,i);
+ 
+ 		String refstrip = Xlster.reffout(dirname, XCommands.keyvalue, dirnumplus);
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

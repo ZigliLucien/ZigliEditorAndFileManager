@@ -1,0 +1,17 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/Search.java distribution/src/srcdiffs/ServPak/jv/Search.java
+--- ServPak/jv/Search.java	2006-10-22 00:18:41.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/Search.java	2006-10-22 00:16:38.000000000 -0500
+@@ -49,9 +49,7 @@
+ 
+ 		sb.append("<h3>In Texts</h3>\n <ul>");
+ 		sb.append(
+-	"<table><tr><th align=\"left\" width=\"10%\">"+
+-	"File</th><th align=\"left\" width=\"10%\">Directory</th></tr>\n");
+-
++	"<table><tr><th align=\"left\">File</th><th align=\"left\">Directory</th></tr>\n");
+ 		for(String v : feeds) sb.append(getRow(v));
+ 		sb.append("</ul>\n<p/>&nbsp;<p/>");
+ 

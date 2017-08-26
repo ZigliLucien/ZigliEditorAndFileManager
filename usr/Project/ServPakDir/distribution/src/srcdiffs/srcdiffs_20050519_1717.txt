@@ -1,0 +1,17 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MKcal.java distribution/src/srcdiffs/ServPak/jv/MKcal.java
+--- ServPak/jv/MKcal.java	2005-05-19 17:17:10.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MKcal.java	2005-05-19 17:15:20.000000000 -0500
+@@ -57,10 +57,9 @@
+ 
+         if ((inputString.indexOf("NEXT") > -1) ||
+                 (inputString.indexOf("BACK") > -1)) {
+-
+             int cut = inputString.indexOf("=");
+             String pre = inputString.substring(0, cut);
+-            String[] tox = pre.split("\\+");
++            String[] tox = pre.split("+");
+ for(String v : tox) System.out.println("HELLO "+v);
+             username = tox[0];
+             monthindex = Integer.parseInt(tox[1]);

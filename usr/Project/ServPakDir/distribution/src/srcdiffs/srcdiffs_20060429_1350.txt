@@ -1,0 +1,28 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MySQL.java distribution/src/srcdiffs/ServPak/jv/MySQL.java
+--- ServPak/jv/MySQL.java	2006-04-29 13:49:52.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MySQL.java	2006-04-23 17:25:38.000000000 -0500
+@@ -55,7 +55,7 @@
+ 
+ try{
+ 
+-//	DatabaseMetaData dmd = conn.getMetaData();
++	DatabaseMetaData dmd = conn.getMetaData();
+ 
+      rs = conn.createStatement().executeQuery(
+ 		"SELECT * FROM "+postpre+" where filename='"+string+"'");
+@@ -81,12 +81,6 @@
+ 		if(q==1) buf.append("<td width="+approx+"%><br/></td>");
+ 	}
+ 		buf.append("</tr>\n</table>\n<p/>\n");
+-	String str0 = string.substring(0,string.indexOf("."));
+-            String str1 = string.substring(string.indexOf(".")+1);		
+-	String fname = str0.replace('_','/')+str1;
+-
+-		buf.append(
+-		"<a href="+fname+">See File</a><p/>\n");
+ 		buf.append(
+ 		"<a href=MySQL.jav?DELETE="+string+">Delete Entry from Database</a><p/>\n");
+ 		buf.append("</body>\n</html>");

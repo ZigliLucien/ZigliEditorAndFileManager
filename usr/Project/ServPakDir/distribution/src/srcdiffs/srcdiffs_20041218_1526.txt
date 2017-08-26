@@ -1,0 +1,134 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/Query.java distribution/src/srcdiffs/ServPak/jv/Query.java
+--- ServPak/jv/Query.java	2004-12-18 15:25:57.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/Query.java	2004-12-18 12:12:04.000000000 -0600
+@@ -22,29 +22,11 @@
+ 
+ public class Query {
+ 
+-	public String printout;
++	public static String printout;
+ 	String qry;
+  	boolean quick;
+-	static String result;
+-            Properties props = new Properties();
+ 
+ 	public Query(String in){
+-
+-	if(in.endsWith("view")) { 
+-		printout = view(result);
+-		return;
+-	}
+-
+-	if(in.startsWith("name=")) {
+-		String name = in.substring(in.indexOf("name=")+5);
+-		saveview(name);
+-try{
+-		DBgo go = new DBgo("tablename="+name+"&newtable=");
+-		printout = go.printout;
+-	}catch(Exception dbe){}
+-		return;
+-	}
+-
+ 	String query = "";
+ try{
+ if(in.endsWith("query=")){
+@@ -68,14 +50,20 @@
+ 	
+ 	    public void QResult(String query) throws Exception {
+ 
+-		props.setProperty(OutputKeys.METHOD, "html");
+-                        props.setProperty(OutputKeys.INDENT, "yes");
+-
+ 	        final Configuration config = new Configuration();
+ 	        final StaticQueryContext sqc = new StaticQueryContext(config);
+ 	        final XQueryExpression exp = sqc.compileQuery(query);
+ 
+ 	        final DynamicQueryContext dynamicContext = new DynamicQueryContext(config);
++
++	        final Properties props = new Properties();
++//	if(quick){ 
++		props.setProperty(OutputKeys.METHOD, "html");
++//		} else {
++//		props.setProperty(OutputKeys.METHOD, "xml");
++//		}
++	                       props.setProperty(OutputKeys.INDENT, "yes");
++
+ 		ByteArrayOutputStream jack = new ByteArrayOutputStream();
+ 	try{
+ 
+@@ -84,24 +72,21 @@
+ 		jack.write(new String("Error in "+query).getBytes());
+ 		printout = jack.toString();
+ 		}
++System.out.println(jack.toString());
++ //    if(quick){			
++		String[] rslt = (jack.toString()).split("\\n");
++		StringBuilder sb = new StringBuilder("<?xml version=\"1.0\"?>\n\n<qresult>\n\n");
++		for(String v : rslt) sb.append(v);
++		sb.append("\n\n</qresult>");
+ 
+-		result = jack.toString();
+-
+-       if(quick){			
+-
+-		printout = view(result);
+-
+-	    } else {		
+-		StringBuilder ss = new StringBuilder("<html><body>");
+-		ss.append("<a href=\"Query.jav?view\"> View Result </a><p/>\n");
+-     		ss.append("<form action=\"Query.jav\" method=\"get\"> Name &nbsp;");
+-		ss.append("<input type=\"text\" size=10 name=\"name\"/>&nbsp;");
+-ss.append(
+-"<input type=\"submit\" value=\"Save and View\"/></form>\n</body></html>");
++		new NetsManager.Traxit(sb,"ServPak/xsl/dbresult.xsl",null);
+ 
+-		printout = ss.toString();	
++		printout = new String(NetsManager.Traxit.tabby);
++//	    } 
+ 
+-	    }
++//		else {		
++//		printout = jack.toString();
++//	    }
+     	}
+ 
+ 	public static void main(String[] qubits){
+@@ -109,35 +94,4 @@
+ 		new Query(qubits[0]);
+ 
+ 	}
+-
+-	public static String view(String in){
+-		String[] rslt = in.split("\\n");
+-		StringBuilder sb = new StringBuilder("<?xml version=\"1.0\"?>\n\n<qresult>\n\n");
+-		for(String v : rslt) {
+-			sb.append(v.trim());
+-			if(v.trim().contains("</") || v.trim().endsWith("entry>")) sb.append("\n");
+-		}
+-		sb.append("\n\n</qresult>");
+-
+-		new NetsManager.Query(sb.toString(),"ServPak/xql/generic.xql",null,true);
+-		return NetsManager.Query.qtabby.toString();	
+-	}
+-
+-	public static void saveview(String name){
+-		String[] rslt = result.split("\\n");
+-		StringBuilder sb = new StringBuilder("<?xml version=\"1.0\"?>\n\n");
+-		sb.append("<"+name+">\n\n");
+-		for(String v : rslt) {
+-			sb.append(v.trim());
+-			if(v.trim().contains("</") || v.trim().endsWith("entry>")) sb.append("\n");
+-		}
+-		sb.append("\n\n</"+name+">");
+-try{
+-		FileOutputStream fout = new FileOutputStream("DB/"+name+".xml");
+-		fout.write(sb.toString().getBytes("UTF-8"));
+-		fout.flush();
+-		fout.close();
+-}catch(Exception fio){}
+-		System.out.println("Table written to "+"DB/"+name+".xml");
+-	}
+      }
+\ No newline at end of file

@@ -1,0 +1,15 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/Dictionary.java distribution/src/srcdiffs/ServPak/jv/Dictionary.java
+--- ServPak/jv/Dictionary.java	2006-09-23 19:28:51.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/Dictionary.java	2006-09-23 19:20:20.000000000 -0500
+@@ -63,7 +63,7 @@
+ 			results.append("<entry>\n");
+ 			results.append("<word>"+rs.getString("word")+"</word>\n");
+ 			results.append("<translation>"+
+-			new String(rs.getBytes("data"))+"</translation>\n");
++			new String(rs.getBytes("data"),"UTF-8")+"</translation>\n");
+ 			results.append("</entry>\n\n");
+ 		}
+ 	
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

@@ -1,0 +1,51 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DiaryOut.java distribution/src/srcdiffs/ServPak/jv/DiaryOut.java
+--- ServPak/jv/DiaryOut.java	Wed Jun 15 02:38:43 2005
++++ distribution/src/srcdiffs/ServPak/jv/DiaryOut.java	Thu May 19 16:47:56 2005
+@@ -19,7 +19,7 @@
+         String info = A.substring(i + 1);
+ 
+         String[] st = B.split("+");
+-for(String v : st) System.out.println("HERE "+v);
++
+         String out = MKcal.ldir + "/diary-" + st[2] + ".txt";
+         PrintWriter printwriter = new PrintWriter(new FileWriter(out, true), true);
+ 
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/ShowNotes.java distribution/src/srcdiffs/ServPak/jv/ShowNotes.java
+--- ServPak/jv/ShowNotes.java	Sat May 28 18:47:08 2005
++++ distribution/src/srcdiffs/ServPak/jv/ShowNotes.java	Sat May 28 17:45:00 2005
+@@ -20,7 +20,9 @@
+         String postpre = pre.substring(pre.indexOf("=") + 1);
+ 
+         postpre = DBM.converter(postpre);
+-
++FileOutputStream fff = new FileOutputStream("/home/ph/TESTIT");
++fff.write(postpre.getBytes());
++fff.close();
+         String prepost = post.substring(0, post.lastIndexOf("/"));
+ 
+         String _filein = (prepost + "/." + post.substring(post.lastIndexOf("/") + 1) + ".notesml");
+@@ -90,16 +92,19 @@
+ 
+                         Fileit.flush();
+                         printout = new String(Fileit.toByteArray());
+-                    } catch (Exception urlex) {}
++                    } catch (Exception urlex) {		
++                    }
+                 } else {
+                     printout = new String(fin);
+                 }
+             } else {
+-                BufferedReader src = new BufferedReader(new StringReader(new String(fin)));
++                BufferedReader src = new BufferedReader(new StringReader(
++                            new String(fin)));
+ 
+                 for (String v; (v = src.readLine()) != null;) {
+                     if (v.indexOf("?xml-stylesheet") > 0) {
+-                        stylefile = v.substring(v.indexOf("href=") + 6, v.lastIndexOf('"'));
++                        stylefile = v.substring(v.indexOf("href=") + 6,
++                                v.lastIndexOf('"'));
+ 
+                         break;
+                     }

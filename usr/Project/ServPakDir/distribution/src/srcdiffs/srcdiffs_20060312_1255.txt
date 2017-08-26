@@ -1,0 +1,15 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/ShowNotes.java distribution/src/srcdiffs/ServPak/jv/ShowNotes.java
+--- ServPak/jv/ShowNotes.java	2006-03-12 12:52:56.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/ShowNotes.java	2006-03-12 12:49:10.000000000 -0600
+@@ -52,7 +52,7 @@
+ 
+         String externalReference = "";
+ 
+-        for (String v; (v = bufr.readLine()) != null;) {
++        for (String v; (v = bufr.readLine()) != null;) {System.out.println(v);
+             v = v.trim();
+ 
+             if (v.indexOf("<reference>") >= 0) {

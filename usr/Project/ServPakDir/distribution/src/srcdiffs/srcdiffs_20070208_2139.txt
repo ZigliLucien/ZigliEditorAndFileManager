@@ -1,0 +1,85 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/SendEmail.java distribution/src/srcdiffs/ServPak/jv/SendEmail.java
+--- ServPak/jv/SendEmail.java	2006-04-04 00:36:00.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/SendEmail.java	2007-02-08 21:35:20.000000000 -0600
+@@ -37,6 +37,7 @@
+       	     conn = ZEdit.DOps.goMysql;      
+ 
+         textin = DBM.converter(_textin);
++        textin = textin.replace("&towhom=","&toWhom=");
+ 
+         InputStream infile = new FileInputStream("Mail.properties");
+ 
+@@ -68,7 +69,7 @@
+             return;
+         }
+ 
+-        if (textin.indexOf("s@@nd") >= 0) {
++        if (textin.indexOf("mxlxx") >= 0) {
+             String towhom;
+ 
+             StringTokenizer stin = new StringTokenizer(textin, "&=");
+@@ -86,7 +87,7 @@
+ 
+             subject = DBM.converter(stin.nextToken()).replace('+',' ');
+ 
+-            String linein = textin.substring(textin.indexOf("&s@@nd=") + 7);
++            String linein = textin.substring(textin.indexOf("&mxlxx=") + 7);
+ 
+             int cutoff = linein.indexOf("&attachment=");
+ 
+@@ -96,9 +97,11 @@
+ 	contents =new StringBuilder(contents).replace(cut,cut+3,"X@@@X").toString();	
+ 	}
+ 
++/*
+ 	for(int cut=-1;(cut=contents.indexOf("?"))>=0;){
+ 	contents =new StringBuilder(contents).replace(cut,cut+1,"=Z=Z").toString();	
+ 	}
++*/
+ 
+ 	contents = contents.replace('+',' ');
+ 
+@@ -106,10 +109,12 @@
+ 	contents =new StringBuilder(contents).replace(cut,cut+5,"+").toString();	
+ 	}
+ 
++
+ 	for(int cut=-1;(cut=contents.indexOf("..."))>=0;){
+ 	contents =new StringBuilder(contents).replace(cut,cut+3,"?").toString();	
+ 	}
+ 
++
+             String rem = linein.substring(cutoff + 12);
+ 
+             if (new File(rem).isFile()) {
+@@ -154,10 +159,11 @@
+ 
+         buffy.append("<html>\n");
+         buffy.append("<head><title>  Send EMail </title>\n");
++        buffy.append("<script src='"+ZEFMServer.userdir+"/ServPak/js/mail.js'></script>\n");
+         buffy.append("</head>\n");
+         buffy.append("<body>\n");
+         buffy.append("<h2> Send EMail </h2>");
+-        buffy.append("<form action=\"SendEmail.jav\" method=\"get\">");
++        buffy.append("<form action=\"\" method=\"get\">");
+         buffy.append(
+             " Correspondent (or fill in address below):  <select name=\"toWhom\">\n");
+         buffy.append(
+@@ -170,11 +176,11 @@
+ 
+         buffy.append("</select><br/>\n");
+         buffy.append(
+-  "Enter e-mail address here:  <INPUT type=\"text\" name=\"toWhom\" size=\"30\" value=\""+reply2+"\"><p/>\n");
++  "Enter e-mail address here:  <INPUT type=\"text\" name=\"towhom\" size=\"30\" value=\""+reply2+"\"><p/>\n");
+         buffy.append("Subject: <INPUT type=\"text\" name=\"subject\"><p/>\n");
+-        buffy.append("<p><TEXTAREA name=\"s@@nd\" rows=\"25\" cols=\"80\">");
++        buffy.append("<p><TEXTAREA name=\"mxlxx\" rows=\"25\" cols=\"80\">");
+         buffy.append("</TEXTAREA>\n");
+-        buffy.append("<INPUT type=\"submit\" value=\"Send\"><p/>\n");
++        buffy.append("<INPUT type=\"button\" value=\"Send\" onclick='getText(this.form)'><p/>\n");
+         buffy.append(
+             "To send an attachment. Insert the filename (full pathname) here: <INPUT type=\"text\" size=\"40\" name=\"attachment\"> <p/>");
+         buffy.append("<INPUT type=\"reset\">\n");

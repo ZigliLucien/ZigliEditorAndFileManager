@@ -1,0 +1,60 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBrcops.java distribution/src/srcdiffs/ServPak/jv/DBrcops.java
+--- ServPak/jv/DBrcops.java	2005-05-14 17:39:42.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBrcops.java	2005-05-14 17:29:14.000000000 -0500
+@@ -9,7 +9,7 @@
+ import java.io.FileWriter;
+ import java.io.PrintWriter;
+ 
+-import java.util.*;
++import java.util.StringTokenizer;
+ 
+ 
+ public class DBrcops {
+@@ -145,21 +145,10 @@
+ 
+                             table2 = new String[numrows - i][numcols];
+ 
+-		    int[] nums = new int[i];
+-
+-		    int counter = 0;
+-
+-		    for (String v : tox35) {
+-				nums[counter] = Integer.parseInt(v.replace('+',' ').trim());
+-				counter++;
+-			}
+-
+-		   Arrays.sort(nums);
+-
+ 		    int r = 0;
+ 
+                             for (int A = 0; A < numrows; A++) {
+-                                if ( A == nums[r] ) {
++                                if ( A == Integer.parseInt(tox35[r].replace('+',' ').trim()) ) {
+                                     r++;
+                                 } else {
+                                     for (int B = 0; B < numcols; B++) {
+@@ -261,21 +250,10 @@
+ 
+                             table2 = new String[numrows][numcols - i];
+ 
+-		    int[] nums = new int[i];
+-
+-		    int counter = 0;
+-
+-		    for (String v : tox55) {
+-				nums[counter] = Integer.parseInt(v.replace('+',' ').trim());
+-				counter++;
+-			}
+-
+-		   Arrays.sort(nums);
+-
+                             int A = 0;
+ 
+                             for (int B = 0; B < numcols; B++) {
+-                                if (B == nums[A] ) {
++                                if (B ==  Integer.parseInt(tox55[A].replace('+',' ').trim())) {
+                                     A++;
+                                 } else {
+                                     for (int C = 0; C < numrows;
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

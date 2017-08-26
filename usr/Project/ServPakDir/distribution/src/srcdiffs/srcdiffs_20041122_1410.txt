@@ -1,0 +1,28 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/Install.java distribution/src/srcdiffs/ServPak/jv/Install.java
+--- ServPak/jv/Install.java	2004-11-22 14:10:03.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/Install.java	2004-10-10 12:03:00.000000000 -0500
+@@ -85,8 +85,7 @@
+ 
+ PrintWriter prt = new PrintWriter(new FileWriter("/usr/local/ZigliFM/zserv"),true);
+ prt.println("cd /usr/local/ZigliFM");
+-prt.println(javapath+
+-"java -classpath "+FMfile+" NetsManager.ZEFMServer "+data.get("portnumber")+editonly+logout);
++prt.println(javapath+"java -jar "+FMfile+"  "+data.get("portnumber")+editonly+logout);
+ prt.close();
+ 
+ try{
+diff -Bwaur ServPak/jv/InstallW.java distribution/src/srcdiffs/ServPak/jv/InstallW.java
+--- ServPak/jv/InstallW.java	2004-11-22 14:10:02.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/InstallW.java	2004-10-10 12:04:00.000000000 -0500
+@@ -55,8 +55,7 @@
+ if(!(logout.length()>0)) logout =  "";
+ 
+ prt.println("cd \\zefm\\ZigliFM");
+-prt.println("java -classpath "+
+-FMfile+" NetsManager.ZEFMServer "+data.get("portnumber")+editonly+logout);
++prt.println("java -jar "+FMfile+"  "+data.get("portnumber")+editonly+logout);
+ 
+ prt.close();
+ 
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

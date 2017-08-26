@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBrcops.java distribution/src/srcdiffs/ServPak/jv/DBrcops.java
+--- ServPak/jv/DBrcops.java	2005-05-14 17:18:52.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBrcops.java	2005-05-14 17:10:40.000000000 -0500
+@@ -148,7 +147,7 @@
+ 		    int r = 0;
+ 
+                             for (int A = 0; A < numrows; A++) {
+-                                if ( A == Integer.parseInt(tox35[r].replace('+',' ').trim()) ) {
++                                if ( A == Integer.parseInt(tox35[r]) ) {
+                                     r++;
+                                 } else {
+                                     for (int B = 0; B < numcols;
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

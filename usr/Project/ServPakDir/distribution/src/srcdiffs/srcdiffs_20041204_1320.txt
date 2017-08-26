@@ -1,0 +1,15 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+Only in ServPak/jv: Query.java
+diff -Bwaur ServPak/jv/WebEdit.java distribution/src/srcdiffs/ServPak/jv/WebEdit.java
+--- ServPak/jv/WebEdit.java	2004-12-04 13:19:37.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/WebEdit.java	2004-10-09 22:05:00.000000000 -0500
+@@ -37,7 +37,7 @@
+             pout = new PrintWriter(new OutputStreamWriter(ft, "UTF-8"), true);
+             contents = contents.replace('+', ' ');
+ 
+-            ByteArrayInputStream contsin = new ByteArrayInputStream(contents.getBytes("UTF-8"));
++            ByteArrayInputStream contsin = new ByteArrayInputStream(contents.getBytes());
+ 
+             bin = new BufferedReader(new InputStreamReader(contsin, "UTF-8"));
+ 

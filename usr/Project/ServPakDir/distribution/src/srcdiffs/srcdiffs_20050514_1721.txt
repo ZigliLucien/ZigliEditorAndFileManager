@@ -1,0 +1,16 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBrcops.java distribution/src/srcdiffs/ServPak/jv/DBrcops.java
+--- ServPak/jv/DBrcops.java	2005-05-14 17:21:32.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBrcops.java	2005-05-14 17:18:52.000000000 -0500
+@@ -146,9 +146,8 @@
+                             table2 = new String[numrows - i][numcols];
+ 
+ 		    int r = 0;
+-for(String v : tox35) System.out.println("XX "+v);
++
+                             for (int A = 0; A < numrows; A++) {
+-System.out.println(Integer.parseInt(tox35[r].replace('+',' ').trim()));
+                                 if ( A == Integer.parseInt(tox35[r].replace('+',' ').trim()) ) {
+                                     r++;
+                                 } else {
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

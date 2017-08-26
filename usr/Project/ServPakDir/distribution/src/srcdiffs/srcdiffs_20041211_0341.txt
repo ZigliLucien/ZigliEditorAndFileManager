@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2004-12-11 03:41:12.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2004-12-11 03:35:46.000000000 -0600
+@@ -451,7 +451,7 @@
+ 		if(v.contains("<entry>")) { flag = true; continue; }
+ 		if(!flag) continue;
+ 		String[] line = v.split("\\s+|<|>");
+-		staci.push(line[1]);System.out.println(" X "+line[1]);
++		staci.push(line[1]);System.out.println(line[0]+" X "+line[1]);
+ 	}
+ 
+ 		champs = new String[staci.size()];
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

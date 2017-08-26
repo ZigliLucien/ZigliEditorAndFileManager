@@ -1,0 +1,45 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/ShowFile.java distribution/src/srcdiffs/ServPak/jv/ShowFile.java
+--- ServPak/jv/ShowFile.java	2004-10-23 01:24:33.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/ShowFile.java	2004-10-23 01:13:28.000000000 -0500
+@@ -1,37 +1,14 @@
+ package ServPak.jv;
+ 
+-import java.io.*;
+-import java.text.*;
+-import java.util.*;
+-
+ public class ShowFile{
+ 
+ 	public String printout;
+ 
+-   	static  final  SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yy");
+-	static  final  SimpleDateFormat stf = new SimpleDateFormat("kk:mm");
+-	Date d = new Date();
+-
+-	static long timet;
+-
+ 	public ShowFile(String in) throws Exception {
+ 
+-    	File current = new File(in);
+-
+-            timet = current.lastModified();
+-            d.setTime(timet);
+-
+-            String filelement = "filename";
+-
+-            if (current.isDirectory()) {
+-                filelement += " type=\"dir\"";
+-            }
+ 
+-	StringBuilder bufy = new StringBuilder(257);
+  
+-            bufy.append("size=\"" + String.valueOf(current.length()) +"\" ");
+-            bufy.append("time=\"" + stf.format(d) + "\">" + sdf.format(d));
+  
+-		printout = bufy.toString();
++		printout = in;
+ 	}
+      }
+\ No newline at end of file

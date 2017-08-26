@@ -1,0 +1,35 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2004-12-09 00:15:10.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2004-12-09 00:02:36.000000000 -0600
+@@ -440,22 +440,18 @@
+         return stringbuffer;
+     }
+ 
+-    static String[] getFields(String basename) throws Exception {
++    static String[] getFields(String string) throws Exception {
++        new Traxit("DB/" + string + ".xml", "ServPak/xsl/dbextract.xsl");
+ 
+-//        new Traxit("DB/" + basename + ".xml", "ServPak/xsl/dbextract.xsl");
+-
+- new Query(
+-		new FileInputStream("DB/" + basename + ".xml"), 
+-			"for $k in /*/*[position()=1]/* let $l:=name($k) return $l");
+-
+-        StringTokenizer stringtokenizer = new StringTokenizer(Query.qtabby.toString(), "\n");
+-        String[] fields = new String[stringtokenizer.countTokens()];
++        StringTokenizer stringtokenizer = new StringTokenizer(new String(Traxit.tabby), "\n");
++        String[] strings = new String[stringtokenizer.countTokens()];
+         int i = 0;
+ 
+         while (stringtokenizer.hasMoreTokens()) {
+-            fields[i++] = stringtokenizer.nextToken();
++            strings[i++] = stringtokenizer.nextToken();
+         }	
+-	        return fields;
++
++        return strings;
+     }
+ 
+     static String dataCheck(String string) {
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

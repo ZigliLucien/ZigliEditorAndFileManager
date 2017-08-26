@@ -1,0 +1,188 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DiaryOut.java distribution/src/srcdiffs/ServPak/jv/DiaryOut.java
+--- ServPak/jv/DiaryOut.java	2005-05-19 16:47:56.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DiaryOut.java	2004-10-09 22:05:00.000000000 -0500
+@@ -13,19 +13,21 @@
+     public String printout;
+ 
+     public DiaryOut(String string) throws Exception {
+-        String A = string.substring(0, string.indexOf("&"));
+-        int i = A.indexOf("=");
+-        String B = A.substring(0, i);
+-        String info = A.substring(i + 1);
+-
+-        String[] st = B.split("+");
+-
+-        String out = MKcal.ldir + "/diary-" + st[2] + ".txt";
+-        PrintWriter printwriter = new PrintWriter(new FileWriter(out, true), true);
+-
+-        info = info.replace('+', ' ');
+-        info = DBM.converter(info);
+-        printwriter.println(st[0] + " " + st[1] + " | " + info);
++        String string_1_ = string.substring(0, string.indexOf("&"));
++        int i = string_1_.indexOf("=");
++        String string_2_ = string_1_.substring(0, i);
++        String string_3_ = string_1_.substring(i + 1);
++        StringTokenizer stringtokenizer = new StringTokenizer(string_2_, "+");
++        String string_4_ = stringtokenizer.nextToken();
++        String string_5_ = stringtokenizer.nextToken();
++        String user = stringtokenizer.nextToken();
++        String string_7_ = MKcal.ldir + "/diary-" + user + ".txt";
++        PrintWriter printwriter = new PrintWriter(new FileWriter(string_7_, true),
++                true);
++
++        string_3_ = string_3_.replace('+', ' ');
++        string_3_ = DBM.converter(string_3_);
++        printwriter.println(string_4_ + " " + string_5_ + " | " + string_3_);
+ 
+         MKcal calUpdated = new MKcal(MKcal.inputString);
+ 
+diff -Bwaur ServPak/jv/FormEntry.java distribution/src/srcdiffs/ServPak/jv/FormEntry.java
+--- ServPak/jv/FormEntry.java	2005-05-19 16:43:25.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/FormEntry.java	2004-10-09 22:05:00.000000000 -0500
+@@ -71,7 +71,15 @@
+ 
+             if (v.indexOf(":") >= 0) {
+                 System.out.println(v);
+-                temp = v.split(":");
++
++                StringTokenizer stin = new StringTokenizer(v, ":");
++                int count = stin.countTokens();
++
++                temp = new String[count];
++
++                for (int q = 0; q < count; q++) {
++                    temp[q] = stin.nextToken();
++                }
+             }
+         } catch (Exception ex) {
+         }
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MKcal.java distribution/src/srcdiffs/ServPak/jv/MKcal.java
+--- ServPak/jv/MKcal.java	2005-05-19 17:00:12.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MKcal.java	2004-10-10 12:05:00.000000000 -0500
+@@ -59,13 +59,13 @@
+                 (inputString.indexOf("BACK") > -1)) {
+             int cut = inputString.indexOf("=");
+             String pre = inputString.substring(0, cut);
+-            String[] tox = pre.split("+");
++            StringTokenizer stringtokenizer = new StringTokenizer(pre, "+");
+ 
+-            username = tox[0];
+-            monthindex = Integer.parseInt(tox[1]);
+-            year = Integer.parseInt(tox[2]);
+-            month = Integer.parseInt(tox[3]);
+-            weekday = Integer.parseInt(tox[4]);
++            username = stringtokenizer.nextToken();
++            monthindex = Integer.parseInt(stringtokenizer.nextToken());
++            year = Integer.parseInt(stringtokenizer.nextToken());
++            month = Integer.parseInt(stringtokenizer.nextToken());
++            weekday = Integer.parseInt(stringtokenizer.nextToken());
+             bool = true;
+ 	leapYearCheck(year);
+         } else {
+@@ -153,12 +153,21 @@
+         String _v_;
+ 
+         while ((_v_ = bfrder.readLine()) != null) {
+-            if (!_v_.startsWith("#") &&((_v_.indexOf(_mname) > -1) ||(_v_.indexOf("All") > -1))) {
++            if (!_v_.startsWith("#") &&
++                    ((_v_.indexOf(_mname) > -1) ||
++                    (_v_.indexOf("All") > -1))) {
++                String pre_v = _v_.substring(0,
++                        _v_.indexOf("|"));
++                String post_v = _v_.substring(_v_.indexOf("|") +
++                        1);
++                StringTokenizer stringtokenizer = new StringTokenizer(pre_v);
++                String vv = "";
+ 
+-                String pre_v = _v_.substring(0, _v_.indexOf("|"));
+-                String post_v = _v_.substring(_v_.indexOf("|") + 1);
++                while (stringtokenizer.hasMoreTokens()) {
++                    vv += stringtokenizer.nextToken();
++                }
+ 
+-                pre_v = pre_v.replace(" ","");
++                pre_v = vv;
+ 
+                 String preprev = pre_v.substring(0, 3);
+                 String postprev = pre_v.substring(3);
+@@ -175,18 +184,22 @@
+         }
+ 
+         for (int q = 0; q < wkwk.length; q++) {
+-            String[] st = wkwk[q].split("\\s+");
++            StringTokenizer stringtokenizer = new StringTokenizer(wkwk[q]);
+ 
+             monmon[q] = "<tr>";
+ 
++            String vx = "";
+             String w = "";
+ 
+-	for( String vx : st ) {
++            while (stringtokenizer.hasMoreTokens()) {
++                vx = stringtokenizer.nextToken();
+ 
+                 if (vx.equals("-1")) {
+                     w = "<br>";
+                 } else {
+-	         w = ("<a href=Diary.jav?" + _mname + "+" + username + "=" + vx + ">" + vx +"</a>");
++                    w = ("<a href=Diary.jav?" + _mname + "+" +
++                        username + "=" + vx + ">" + vx +
++                        "</a>");
+                 }
+ 
+                 String _line;
+@@ -198,8 +211,11 @@
+                 } else {
+                     _line = "";
+                 }
+-       monmon[q] += ("<td valign=top width=9% height=15%>" + (String) w + (String) _line + "</td>\n");
++
++                monmon[q] += ("<td valign=top width=9% height=15%>" +
++                (String) w + (String) _line + "</td>\n");
+ 	}
++
+ 	       monmon[q] += "</tr>\n";
+         }
+ 
+@@ -211,7 +227,8 @@
+         _v_ += "<form action=MKcal.jav method=get>";
+ 
+         _v_ += ("<input type=submit value=NEXT name=\"" +
+-        (String) username + " " + shiftidx + " " + shftmonth + " " + _idx_ + " " + i + "\">");
++        (String) username + " " + shiftidx + " " + shftmonth + " " + _idx_ + " " + i +
++        "\">");
+ 
+         int _shiftidx = (monthindex > 0) ? (monthindex - 1) : 11;
+         int _shftmonth = (_shiftidx == 11) ? (year - 1) : year;
+@@ -260,12 +277,18 @@
+     }
+ 
+     public static void cal() {
++        StringTokenizer stringtokenizer = new StringTokenizer(new Date().toString());
++        int i = 0;
+ 
+-        String[] dateinfo = new Date().toString().split("\\s+");
++        while (stringtokenizer.hasMoreTokens()) {
++            dateinfo[i] = stringtokenizer.nextToken();
++            i++;
++        }
+ 
+-        for (int i = 0; i < monthnames.length; i++) {
++        for (i = 0; i < monthnames.length; i++) {
+             if (monthnames[i].equals(dateinfo[1])) {
+                 monthindex = i;
++
+                 break;
+             }
+         }
+@@ -270,7 +293,7 @@
+             }
+         }
+ 
+-        for (int i = 0; i < daynames.length; i++) {
++        for (i = 0; i < daynames.length; i++) {
+             if (daynames[i].equals(dateinfo[0])) {
+                 dayindex = i;
+ 

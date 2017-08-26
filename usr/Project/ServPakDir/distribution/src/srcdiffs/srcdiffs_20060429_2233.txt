@@ -1,0 +1,15 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MySQL.java distribution/src/srcdiffs/ServPak/jv/MySQL.java
+--- ServPak/jv/MySQL.java	2006-04-29 22:33:27.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MySQL.java	2006-04-29 22:30:30.000000000 -0500
+@@ -129,7 +129,7 @@
+ 
+ 	String fname = string;
+ 
+-	if (string.contains(".") && ! string.contains("/")) {
++	if (string.contains(".")) {
+ 			String str0 = string.substring(0,string.indexOf("."));
+ 		            String str1 = string.substring(string.indexOf(".")+1);		
+ 	                        fname = str0.replace('_','/')+"/"+str1;

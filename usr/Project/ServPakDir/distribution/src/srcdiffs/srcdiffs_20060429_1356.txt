@@ -1,0 +1,22 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MySQL.java distribution/src/srcdiffs/ServPak/jv/MySQL.java
+--- ServPak/jv/MySQL.java	2006-04-29 13:56:32.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MySQL.java	2006-04-29 13:52:02.000000000 -0500
+@@ -82,14 +82,8 @@
+ 	}
+ 		buf.append("</tr>\n</table>\n<p/>\n");
+ 	String str0 = string.substring(0,string.indexOf("."));
+-	String fname = "";
+-
+-	if(str0.contains("/")){ 
+-		fname = string;
+-	} else {
+             String str1 = string.substring(string.indexOf(".")+1);		
+-	       fname = str0.replace('_','/')+"/"+str1;
+-	}
++	String fname = str0.replace('_','/')+"/"+str1;
+ 
+ 		buf.append(
+ 		"<a href="+fname+">See File</a><p/>\n");

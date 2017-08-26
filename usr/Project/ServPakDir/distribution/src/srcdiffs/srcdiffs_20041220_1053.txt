@@ -1,0 +1,33 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/Query.java distribution/src/srcdiffs/ServPak/jv/Query.java
+--- ServPak/jv/Query.java	2004-12-20 10:51:24.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/Query.java	2004-12-18 21:58:10.000000000 -0600
+@@ -30,6 +30,11 @@
+ 
+ 	public Query(String in){
+ 
++	if(in.endsWith("view")) { 
++		printout = view(result);
++		return;
++	}
++
+ 	if(in.startsWith("name=")) {
+ 		String name = in.substring(in.indexOf("name=")+5);
+ 		saveview(name);
+@@ -87,10 +92,12 @@
+ 		printout = view(result);
+ 
+ 	    } else {		
+-	StringBuilder ss = new StringBuilder(view(result));
+-ss.append("\n\n<html>\n<body>\n\n<p/><form action=\"Query.jav\" method=\"get\"> Name &nbsp;");
++		StringBuilder ss = new StringBuilder("<html><body>");
++		ss.append("<a href=\"Query.jav?view\"> View Result </a><p/>\n");
++     		ss.append("<form action=\"Query.jav\" method=\"get\"> Name &nbsp;");
+ 	ss.append("<input type=\"text\" size=10 name=\"name\"/>&nbsp;");
+-	ss.append("<input type=\"submit\" value=\"Save\"/></form>\n</body>\n</html>");
++ss.append(
++"<input type=\"submit\" value=\"Save and View\"/></form>\n</body></html>");
+ 
+ 		printout = ss.toString();	
+ 

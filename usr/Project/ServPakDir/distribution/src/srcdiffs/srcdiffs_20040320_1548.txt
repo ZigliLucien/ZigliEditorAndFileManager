@@ -1,0 +1,42 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2004-03-20 15:48:23.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2003-12-23 19:11:16.000000000 -0600
+@@ -6,7 +6,6 @@
+ import NetsManager.XCommands;
+ import NetsManager.Xlster;
+ import NetsManager.ZEFMServer;
+-import NetsManager.ZConnection;
+ 
+ import java.io.*;
+ 
+@@ -60,8 +59,7 @@
+                 bufi.append(v + "\n");
+             }
+ 
+-  //          printout = bufi.toString().trim();
+-	    ZConnection.out.write(bufi.toString().trim().getBytes());
++            printout = bufi.toString().trim();
+ 
+             return;
+         }
+@@ -156,15 +154,13 @@
+                 }
+             }
+ 
+-//            printout = bufi.toString().trim();
+-	    ZConnection.out.write(bufi.toString().trim().getBytes());
+-
++            printout = bufi.toString().trim();
+         } catch (Exception exception) {
+-//            XCommands.pushListing(dirname);
++            XCommands.pushListing(dirname);
+ 
+             GoFM gofm5 = new GoFM(string);
+ 
+-//            printout = gofm5.printout;
++            printout = gofm5.printout;
+             XCommands.reqfile = reqreq;
+         }
+     }
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

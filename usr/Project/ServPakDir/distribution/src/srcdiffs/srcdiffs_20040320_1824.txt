@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2004-03-20 18:24:38.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2004-03-20 18:21:08.000000000 -0600
+@@ -32,7 +32,7 @@
+ 
+         dirname = string.substring(0, string.indexOf("^"));
+         dirname = DBM.converter(dirname);
+-System.out.println("GOING-FM "+dirname);
++
+         String dirnum = string.substring(string.indexOf("^") + 1);
+ 
+         String lstfile = "Listings/" + dirname.replace('/', '_') +
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

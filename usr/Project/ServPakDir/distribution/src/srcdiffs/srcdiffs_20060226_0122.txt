@@ -1,0 +1,22 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/WebEdit.java distribution/src/srcdiffs/ServPak/jv/WebEdit.java
+--- ServPak/jv/WebEdit.java	2006-02-26 01:22:03.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/WebEdit.java	2006-02-26 01:19:22.000000000 -0600
+@@ -11,7 +11,7 @@
+ 
+ public class WebEdit {
+     static String filename;
+-
++    static String dirname;
+      PrintWriter pout;
+     static BufferedReader bin;
+     public String printout;
+@@ -25,6 +25,7 @@
+ 
+             String filein = textin.substring(textin.indexOf("=") + 1);
+ System.out.println("INCOMING "+filein);
++            dirname = filein.substring(0, filein.lastIndexOf("/"));
+             printout = editFile(filein);
+ System.out.println("HERE???");
+         }

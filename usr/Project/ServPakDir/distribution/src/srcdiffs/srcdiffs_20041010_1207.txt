@@ -1,0 +1,165 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/Install.java distribution/src/srcdiffs/ServPak/jv/Install.java
+--- ServPak/jv/Install.java	2004-10-10 12:03:49.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/Install.java	2004-10-09 22:05:56.000000000 -0500
+@@ -7,7 +7,7 @@
+ 
+     public String printout;
+ 
+-    HashMap <String,String>data = new HashMap<String,String>();
++    HashMap data = new HashMap();
+ 
+     public Install(String queryline) throws Exception {
+ 	//Constructor
+@@ -45,7 +45,7 @@
+ 
+ PrintWriter pout = new PrintWriter(new FileWriter("Modesprops"));
+ 
+-String javapath = data.get("pathtojava");
++String javapath = data.get("pathtojava").toString();
+ 
+ if(!javapath.startsWith("/")) javapath ="/"+javapath;
+ if(!javapath.endsWith("/")) javapath +="/";
+@@ -72,20 +72,20 @@
+ 
+ new File("Modesprops").delete();
+ 
+-String runedit = data.get("query");
++String runedit = data.get("query").toString();
+ 
+ String FMfile =  "ZEFM.jar";
+ String editonly = (runedit.startsWith("n")) 
+-                  ? " noedit":" +\""+data.get("hostname")+"\"";
++                  ? " noedit":" +\""+data.get("hostname").toString()+"\"";
+ 
+-String logout =data.get("logfile");
++String logout =data.get("logfile").toString();
+ 
+-if(logout.length()>0) logout = " > "+data.get("logfile")+" 2>&1&";
++if(logout.length()>0) logout = " > "+data.get("logfile").toString()+" 2>&1&";
+ if(!(logout.length()>0)) logout =  "";
+ 
+ PrintWriter prt = new PrintWriter(new FileWriter("/usr/local/ZigliFM/zserv"),true);
+ prt.println("cd /usr/local/ZigliFM");
+-prt.println(javapath+"java -jar "+FMfile+"  "+data.get("portnumber")+editonly+logout);
++prt.println(javapath+"java -jar "+FMfile+"  "+data.get("portnumber").toString()+editonly+logout);
+ prt.close();
+ 
+ try{
+diff -Bwaur ServPak/jv/InstallW.java distribution/src/srcdiffs/ServPak/jv/InstallW.java
+--- ServPak/jv/InstallW.java	2004-10-10 12:04:43.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/InstallW.java	2004-10-09 22:05:56.000000000 -0500
+@@ -7,7 +7,7 @@
+ 
+     public String printout;
+ 
+-    HashMap <String,String>data = new HashMap<String,String>();
++    HashMap data = new HashMap();
+ 
+     public InstallW(String queryline) throws Exception {
+ 	//Constructor
+@@ -43,19 +43,19 @@
+ 
+ PrintWriter prt = new PrintWriter(new FileWriter("zserv.bat"),true);
+   
+-String runedit = data.get("query");
++String runedit = data.get("query").toString();
+ 
+ String FMfile =  "ZEFM.jar";
+ String editonly = (runedit.startsWith("n")) 
+-                  ? " noedit":" +\""+data.get("hostname")+"\"";
++                  ? " noedit":" +\""+data.get("hostname").toString()+"\"";
+ 
+-String logout =data.get("logfile");
++String logout =data.get("logfile").toString();
+ 
+-if(logout.length()>0) logout = " > "+data.get("logfile")+" 2>&1&";
++if(logout.length()>0) logout = " > "+data.get("logfile").toString()+" 2>&1&";
+ if(!(logout.length()>0)) logout =  "";
+ 
+ prt.println("cd \\zefm\\ZigliFM");
+-prt.println("java -jar "+FMfile+"  "+data.get("portnumber")+editonly+logout);
++prt.println("java -jar "+FMfile+"  "+data.get("portnumber").toString()+editonly+logout);
+ 
+ prt.close();
+ 
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MKcal.java distribution/src/srcdiffs/ServPak/jv/MKcal.java
+--- ServPak/jv/MKcal.java	2004-10-10 12:05:50.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MKcal.java	2004-10-09 22:05:56.000000000 -0500
+@@ -44,7 +44,7 @@
+         String[] strings = new String[7];
+         String[] monmon = new String[35];
+         String[] wkwk = new String[6];
+-        HashMap <String,String>hashmap = new HashMap<String,String>();
++        HashMap hashmap = new HashMap();
+ 
+         cal();
+         inputString = string;
+@@ -178,7 +178,8 @@
+ 
+                 if ((preprev.indexOf(_mname) > -1) ||
+                         (_v_.indexOf("All") > -1)) {
+-                    hashmap.put(postprev, hashmap.get(postprev) + post_v);
++                    hashmap.put(postprev, hashmap.get(postprev) +
++                        post_v);
+                 }
+             }
+         }
+@@ -205,7 +206,7 @@
+                 String _line;
+ 
+                 if (hashmap.containsKey(vx)) {
+-                    String data = hashmap.get(vx);
++                    String data = hashmap.get(vx).toString();
+ 
+                     _line = "<font size=-1>" + data + "</font>";
+                 } else {
+diff -Bwaur ServPak/jv/MakDox.java distribution/src/srcdiffs/ServPak/jv/MakDox.java
+--- ServPak/jv/MakDox.java	2004-10-10 12:07:33.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MakDox.java	2004-10-09 22:05:56.000000000 -0500
+@@ -31,10 +31,8 @@
+ 	 if (!new File("DOX/UnCommCopy").exists()) 
+                	 new File("DOX/UnCommCopy").mkdirs();
+ 
+-            HashMap<String,String> hari = DBgo.parseQuery(in);
+-            String[] keys = new String[hari.keySet().size()];
+-	hari.keySet().toArray(keys);
+-
++            HashMap hari = DBgo.parseQuery(in);
++            Object[] keys = hari.keySet().toArray();
+             String quality = "";
+             String name = "";
+             String key = "";
+@@ -47,8 +45,8 @@
+ 
+             for (int q = 0; q < keys.length; q++) {
+                 temp = (hari.get(keys[q]) != null)
+-                    ? clear(hari.get(keys[q])) : "";
+-                key = clear(keys[q]);
++                    ? clear(hari.get(keys[q]).toString()) : "";
++                key = clear(keys[q].toString());
+ 
+                 if (key.indexOf("!") < 0) {
+                     continue;
+@@ -72,16 +70,16 @@
+ 
+             bufi.append("\n<class>\n");
+ 
+-            temp = (hari.get("class") != null)
+-                ? clear(hari.get("class")) : "";
++            temp = (hari.get("class").toString() != null)
++                ? clear(hari.get("class").toString()) : "";
+             bufi.append("\n<comment>" + temp + "</comment>");
+ 
+             temp = (hari.get("author") != null)
+-                ? clear(hari.get("author")) : "";
++                ? clear(hari.get("author").toString()) : "";
+             bufi.append("\n<author>" + temp + "</author>");
+ 
+             temp = (hari.get("version") != null)
+-                ? clear(hari.get("version")) : "";
++                ? clear(hari.get("version").toString()) : "";
+             bufi.append("\n<version>" + temp + "</version>");
+ 
+             bufi.append("\n</class>\n");

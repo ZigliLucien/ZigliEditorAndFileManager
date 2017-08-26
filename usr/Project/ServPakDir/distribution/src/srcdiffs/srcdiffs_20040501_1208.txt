@@ -1,0 +1,35 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/SendEmail.java distribution/src/srcdiffs/ServPak/jv/SendEmail.java
+--- ServPak/jv/SendEmail.java	2004-05-01 11:58:36.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/SendEmail.java	2004-02-01 01:33:34.000000000 -0600
+@@ -199,24 +199,13 @@
+                 String maillog = "";
+ 
+                 if (fileattachment.length() > 0) {
+-                    jmc = new JMailClient(mailFrom, mailer, mailto, contents, subject, fileattachment);
++                    jmc = new JMailClient(mailFrom, mailer, mailto, contents,
++                            subject, fileattachment);
+                     maillog = JMailClient.outfile;
+                 } else {      	
+-	      mailer = mailinfo.getProperty("~~_by");
+-
+-	Thread th = new Thread(){
+-	
+-		public void run(){
+-	try{
+-             		 smc = new SMailClient(mailFrom, mailer, mailto, contents, subject);
+-	}catch(Exception e){
+-		      System.out.println("MailServer not found.");
+-	}
+-            }
+-   };
+-	 	th.start();
+-		th.join(25000);	
+-                            maillog = smc.filename;
++                    jmc = new JMailClient(mailFrom, mailer, mailto, contents,
++                            subject);
++                    maillog = JMailClient.outfile;
+                 }
+ 
+                 fileattachment = "";

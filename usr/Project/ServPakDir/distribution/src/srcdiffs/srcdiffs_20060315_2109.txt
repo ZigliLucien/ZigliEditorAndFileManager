@@ -1,0 +1,55 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2006-03-15 21:07:33.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2006-03-14 05:09:48.000000000 -0600
+@@ -34,8 +34,7 @@
+     public GoFM(String linein) throws Exception {
+ 
+             Class.forName("com.mysql.jdbc.Driver");
+-	conn = DriverManager.getConnection(
+-	"jdbc:mysql://localhost:3306/ZEFMdb?characterEncoding=utf8","zz", "zefm");
++	conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/ZEFMdb","zz", "zefm");
+ 
+          if(linein !=null) dirname = linein.substring(0, linein.indexOf("^"));
+ 
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/SendEmail.java distribution/src/srcdiffs/ServPak/jv/SendEmail.java
+--- ServPak/jv/SendEmail.java	2006-03-15 21:07:43.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/SendEmail.java	2006-03-12 10:28:50.000000000 -0600
+@@ -35,8 +35,7 @@
+     public SendEmail(String _textin) throws Exception {
+ 
+            Class.forName("com.mysql.jdbc.Driver");
+-           conn = DriverManager.getConnection(
+-	"jdbc:mysql://localhost:3306/ZEFMdb?characterEncoding=utf8","zz", "zefm");       
++           conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/ZEFMdb","zz", "zefm");       
+ 
+         textin = DBM.converter(_textin);
+ 
+diff -Bwaur ServPak/jv/ShowNotes.java distribution/src/srcdiffs/ServPak/jv/ShowNotes.java
+--- ServPak/jv/ShowNotes.java	2006-03-15 21:07:59.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/ShowNotes.java	2006-03-14 05:13:26.000000000 -0600
+@@ -19,8 +19,7 @@
+ 
+ 
+             Class.forName("com.mysql.jdbc.Driver");
+-	conn = DriverManager.getConnection(
+-		"jdbc:mysql://localhost:3306/ZEFMdb?characterEncoding=utf8","zz", "zefm");
++	conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/ZEFMdb","zz", "zefm");
+ 
+         String pre = string.substring(string.indexOf("&") + 1);
+         String post = string.substring(string.indexOf("=") + 1, string.indexOf("&"));
+diff -Bwaur ServPak/jv/WebEdit.java distribution/src/srcdiffs/ServPak/jv/WebEdit.java
+--- ServPak/jv/WebEdit.java	2006-03-15 21:08:13.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/WebEdit.java	2006-03-12 10:25:20.000000000 -0600
+@@ -23,8 +23,7 @@
+     public WebEdit(String _textin) throws Exception {
+ 
+         Class.forName("com.mysql.jdbc.Driver");
+-         conn = DriverManager.getConnection(
+-		"jdbc:mysql://localhost:3306/ZEFMdb?characterEncoding=utf8","zz", "zefm");
++         conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/ZEFMdb","zz", "zefm");
+ 
+         String textin = DBM.converter(_textin);
+ 

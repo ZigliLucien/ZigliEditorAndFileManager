@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2006-02-19 13:19:10.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2006-02-19 13:15:50.000000000 -0600
+@@ -152,7 +152,7 @@
+ 
+ 	        new NetsManager.Traxit(bout.toByteArray(),"ServPak/xsl/listit.xsl",dirnum);
+ 		String main = new String(NetsManager.Traxit.tabby);
+-System.out.println("WE ARE HERE AT MAIN ONE"+main);
++
+ 		main = main.replace("<main>","");
+ 		main = main.replace("<body>","");
+ 		main = main.replace("<html>","");
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

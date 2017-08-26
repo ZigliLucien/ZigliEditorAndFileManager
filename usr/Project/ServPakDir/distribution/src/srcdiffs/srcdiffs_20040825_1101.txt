@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/Diary.java distribution/src/srcdiffs/ServPak/jv/Diary.java
+--- ServPak/jv/Diary.java	2004-08-25 10:58:52.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/Diary.java	2003-12-20 23:58:32.000000000 -0600
+@@ -25,7 +25,7 @@
+         stringbuffer.append(" <H1>Diary Entry</H1>\n");
+         stringbuffer.append(" <P>\n");
+         stringbuffer.append("\n");
+-        stringbuffer.append("     <form action=\"DiaryOut.jav\" method=post>\n");
++        stringbuffer.append("     <form action=\"DiaryOut.jav\" method=get>\n");
+         stringbuffer.append("\n");
+         stringbuffer.append("<b>" + _user +
+             ", enter the appointment information for " + _day + " " +
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

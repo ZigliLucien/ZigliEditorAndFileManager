@@ -1,0 +1,33 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MySQL.java distribution/src/srcdiffs/ServPak/jv/MySQL.java
+--- ServPak/jv/MySQL.java	2006-05-31 18:29:29.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MySQL.java	2006-04-29 23:53:06.000000000 -0500
+@@ -1,7 +1,7 @@
+ package ServPak.jv;
+ 
+ import NetsManager.ZEFMServer;
+-import ZEdit.DBStart;
++
+ import java.io.*;
+ 
+ import java.net.*;
+@@ -42,7 +42,7 @@
+ 	Class.forName("com.mysql.jdbc.Driver");
+ 
+   	conn = DriverManager.getConnection(
+-	"jdbc:mysql://localhost:"+ZEdit.DBStart.dataport+"/"+post+"?characterEncoding=utf8","root", "");
++		"jdbc:mysql://localhost:63336/"+post+"?characterEncoding=utf8","root", "");
+ 
+ 	DatabaseMetaData dmd = conn.getMetaData();
+ 	
+@@ -73,7 +73,7 @@
+ 	Class.forName("com.mysql.jdbc.Driver");
+ 
+   	conn = DriverManager.getConnection(
+-	"jdbc:mysql://localhost:"+ZEdit.DBStart.dataport+"/"+post+"?characterEncoding=utf8","root", "");
++		"jdbc:mysql://localhost:63336/"+post+"?characterEncoding=utf8","root", "");
+ 
+ 	rs = conn.createStatement().executeQuery("select * from "+postpre+" limit 1");
+  	rsmd = rs.getMetaData();

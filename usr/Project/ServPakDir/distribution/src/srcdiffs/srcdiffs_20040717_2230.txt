@@ -1,0 +1,33 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: DBM.class
+Only in ServPak/jv: DBanalyze.class
+Only in ServPak/jv: DBgo.class
+Only in ServPak/jv: DBrcops.class
+Only in ServPak/jv: FileOps.class
+Only in ServPak/jv: GoFM.class
+Only in ServPak/jv: Logging.class
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+Only in ServPak/jv: ReadClass.class
+Only in ServPak/jv: Registering.class
+Only in ServPak/jv: Test.class
+Only in ServPak/jv: WebEdit.class
+diff -Bwaur ServPak/jv/WebEdit.java distribution/src/srcdiffs/ServPak/jv/WebEdit.java
+--- ServPak/jv/WebEdit.java	2004-06-29 15:10:15.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/WebEdit.java	2003-08-24 23:22:42.000000000 -0500
+@@ -70,6 +70,16 @@
+             "<form action=\"WebEdit.jav\" method=\"post\"><table width=\"100%\">");
+         buffy.append("<p><TEXTAREA name=\"s@@ve\" rows=\"25\" cols=\"80\">\n");
+ 
++        /*
++         StringBuffer paragraph = new StringBuffer();
++         paragraph.append("<?xml version=\"1.0\"?>\n");
++         paragraph.append(
++         "<!DOCTYPE notes [<!ENTITY % tpwsymbols SYSTEM \"file:ServPak/xsl/TPW\"> %tpwsymbols;]>\n");
++         paragraph.append("<annotes>\n");
++         for(String v=null;(v=bin.readLine())!=null;)        paragraph.append(checkUTF(v)+"\n");
++         paragraph.append("</annotes>\n");
++         buffy.append(new String(new Traxit(paragraph,"ServPak/xsl/clearit.xsl",null).tabby));
++         */
+         for (String v = null; (v = bin.readLine()) != null;) {
+             buffy.append(checkUTF(v) + "\n");
+         }

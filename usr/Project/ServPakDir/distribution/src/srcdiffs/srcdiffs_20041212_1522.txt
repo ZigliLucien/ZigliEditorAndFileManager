@@ -1,0 +1,35 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBM.java distribution/src/srcdiffs/ServPak/jv/DBM.java
+--- ServPak/jv/DBM.java	2004-12-12 15:22:07.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBM.java	2004-12-12 15:16:18.000000000 -0600
+@@ -161,9 +161,9 @@
+         String currentTable = new String(Traxit.tabby);
+ 
+         currentTable = currentTable.substring(currentTable.indexOf("?>") + 3);
+-
++System.out.println(currentTable);
+         PrintWriter prtw = new PrintWriter(new FileWriter("DB/" + dbasename + ".sdb"), true);
+-System.out.println("CHECKZERO ");
++
+         StringBuilder dbmbufr = new StringBuilder();
+         String locdirec = ZEFMServer.localdir;
+ 
+@@ -190,7 +190,7 @@
+         dbmbufr.append("<form method=\"get\">\n");
+ 
+         Arrays.sort(catz);
+-System.out.println("CHECKONE "+dbmbufr.toString());
++
+         LineNumberReader linenumberreader = 
+ 		new LineNumberReader(new StringReader(currentTable));
+ 
+@@ -214,7 +214,7 @@
+             linenumberreader.setLineNumber(0);
+             dbmbufr.append("</select>&nbsp;&nbsp;&nbsp;&nbsp;\n");
+         }
+-System.out.println("CHECKTWO "+dbmbufr.toString());
++
+         dbmbufr.append("<p>&nbsp;<br>\n");
+         dbmbufr.append("Primary Sort: <select name=\"Sort\">\n");
+         dbmbufr.append("<option value=" + sortdef + "> " +
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

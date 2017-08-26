@@ -1,0 +1,54 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBrcops.java distribution/src/srcdiffs/ServPak/jv/DBrcops.java
+--- ServPak/jv/DBrcops.java	2005-05-14 18:10:13.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBrcops.java	2005-05-14 18:06:12.000000000 -0500
+@@ -154,21 +154,22 @@
+ 				nums[counter] = Integer.parseInt(v.replace('+',' ').trim());
+ 				counter++;
+ 			}
+-
++System.out.println("LENGTH IS "+i);
+ 		   Arrays.sort(nums);
+-
++for(int x : nums) System.out.println(x);
+ 		    int r = 0;
+-
++System.out.println("SKIP");
+                             for (int A = 0; A < numrows; A++) {
+-                                if ( A == nums[r] ) {
++                                if ( A == nums[r] ) {System.out.println("AT "+r+" WITH "+nums[r]);
+                                     r++;
+                                 } else {
+                                     for (int B = 0; B < numcols; B++) {
+-                                        table2[A - r][B] = table[A][B];
++                                        table2[A - r][B] = table[A][B];int AA = A-r;System.out.println(AA+","+B);
+                                     }
+                                 }
+                             }
+                         }
++System.out.println("YIKES");
+                         realign(table2);
+                     }
+ 
+@@ -261,9 +262,7 @@
+ 
+                             table2 = new String[numrows][numcols - i];
+ 
+-		    int[] nums = new int[i+1];
+-
+-		    nums[i] = numcols;
++		    int[] nums = new int[i];
+ 
+ 		    int counter = 0;
+ 
+@@ -280,7 +279,8 @@
+                                 if (B == nums[A] ) {
+                                     A++;
+                                 } else {
+-                                    for (int C = 0; C < numrows; C++) {
++                                    for (int C = 0; C < numrows;
++                                            C++) {
+                                         table2[C][B - A] = table[C][B];
+                                     }
+                                 }
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

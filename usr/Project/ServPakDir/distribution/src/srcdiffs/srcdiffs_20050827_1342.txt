@@ -1,0 +1,62 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2005-08-27 13:09:11.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2005-08-27 13:09:12.000000000 -0500
+@@ -80,7 +80,7 @@
+ 
+                 return;
+             }
+-        } else {System.out.println("GETTING IT");
++        } else {
+             	     getFields(filename);
+             tableset = readXML(filename, champs.length);
+ 
+@@ -135,12 +135,14 @@
+             if (hashmap.containsKey("formmode")) {
+                 string = DBM.converter(string);
+ 
+-                int q = 0;
+-                String[] newrow = string.split("&");
++                StringTokenizer vals = new StringTokenizer(string, "&");
++                int count = vals.countTokens();
++                String[] newrow = new String[count - 1];
++
++                for (int q = 0; q < (count - 1); q++) {
++                    String x = vals.nextToken();
+ 
+-                for (String x : newrow) {
+                     newrow[q] = x.substring(x.indexOf("=") + 1).replace('+', ' ');
+-	        q++;
+                 }
+ 
+                 tableset = addRow(tableset, newrow);
+@@ -279,10 +281,8 @@
+     }
+ 
+ 	//////////////// READXML //////////////////////////////
+-    public static String[][] readXML(String basename, int i) throws Exception {
+-
+-System.out.println("READING "+basename+" with integer arg "+i);
+-
++    public static String[][] readXML(String basename, int i)
++        throws Exception {
+ 	try{
+ 	new NetsManager.Query(
+ 		new FileInputStream("DB/" + basename + ".xml"), "for $i in /*/* return $i");
+@@ -367,11 +367,12 @@
+ 
+         query = DBM.converter(query);
+ 
+-        String[]querystring = query.split("&");
++        StringTokenizer stringtokenizer = new StringTokenizer(query, "&");
+ 
+-	for (String querybit : querystring){
++        while (stringtokenizer.hasMoreTokens()) {
++            String querybit = stringtokenizer.nextToken();
+             String testvalu = querybit.substring(0, querybit.indexOf("="));
+-            String objectvalu = "";
++            String objectvalu;
+ 
+             if (!querybit.endsWith("=")) {
+                 objectvalu = querybit.substring(querybit.indexOf("=") + 1);
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

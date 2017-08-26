@@ -1,0 +1,15 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/Webgrep.java distribution/src/srcdiffs/ServPak/jv/Webgrep.java
+--- ServPak/jv/Webgrep.java	2004-06-29 13:27:58.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/Webgrep.java	2004-06-29 13:18:28.000000000 -0500
+@@ -164,8 +164,7 @@
+ 	pout.print(stringbuffer.toString());
+ 	pout.close();
+ 	
+-            printout ="<html></body><p/>&nbsp;<p/><center><h2><a href=\""
+-		+where+"/SearchResults.html\"> Get Results</a></h2></center></body></html>" ;
++            printout ="<a href=\""+where+"/SearchResults.html\"> Get Results</a>" ;
+         }
+     }
+ }

@@ -1,0 +1,86 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MySQL.java distribution/src/srcdiffs/ServPak/jv/MySQL.java
+--- ServPak/jv/MySQL.java	2006-04-29 16:55:54.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MySQL.java	2006-04-29 16:54:30.000000000 -0500
+@@ -69,43 +69,75 @@
+ 	 buf.append("<html><header><title>"+post+"</title></header>\n<body>");
+ 
+ try{
+-
++// StartTrace
++System.out.println(72);// traceon
+ 	 int approx = (int)(100/(numberOfColumns+2));
++System.out.println(73);// traceon
+ 
++System.out.println(74);// traceon
+      rs = conn.createStatement().executeQuery(
+ 		"SELECT * FROM "+postpre+" where "+firstColumn+"='"+string+"'");
++System.out.println(76);// traceon
+ 
++System.out.println(77);// traceon
+ 	rsmd = rs.getMetaData();
++System.out.println(78);// traceon
+ 	rs.next();
++System.out.println(79);// traceon
+ 
++System.out.println(80);// traceon
+             numberOfColumns = rsmd.getColumnCount();
++System.out.println(81);// traceon
+ 
++System.out.println(82);// traceon
+           		buf.append("<h2>"+string+"</h2><p/>&nbsp;<br/>");
++System.out.println(83);// traceon
+ 		buf.append("<table><tr>\n");
++System.out.println(84);// traceon
+ 	for(int q=1;q<=numberOfColumns;q++) {
++System.out.println(85);// traceon
+ 		buf.append("<th width="+approx+"%>"+rsmd.getColumnLabel(q)+"</th>");
++System.out.println(86);// traceon
+ 		if(q==1) buf.append("<td width="+approx+"%><br/></td>");
++System.out.println(87);// traceon
+ 	}
++System.out.println(88);// traceon
+ 		buf.append("</tr><tr>\n");
++System.out.println(89);// traceon
+ 	for(int q=1;q<=numberOfColumns;q++) {
++System.out.println(90);// traceon
+ 	String align = "";
++System.out.println(91);// traceon
+ 	if(q==1) align="center";
++System.out.println(92);// traceon
+ 		buf.append(
+ 	"<td align="+align+" width="+approx+"%><pre>"+(rs.getObject(q)).toString()+"</pre></td>");
++System.out.println(94);// traceon
+ 		if(q==1) buf.append("<td width="+approx+"%><br/></td>");
++System.out.println(95);// traceon
+ 	}
++System.out.println(96);// traceon
+ 		buf.append("</tr>\n</table>\n<p/>\n");
+-
++System.out.println(97);// traceon
++	String str0 = string.substring(0,string.indexOf("."));
++System.out.println(98);// traceon
+ 	String fname = string;
++System.out.println(99);// traceon
+ 
++System.out.println(100);// traceon
+ 	if (string.contains(".")) {
+-			String str0 = string.substring(0,string.indexOf("."));
++System.out.println(101);// traceon
+ 		            String str1 = string.substring(string.indexOf(".")+1);		
++System.out.println(102);// traceon
+ 	                        fname = str0.replace('_','/')+"/"+str1;
++System.out.println(103);// traceon
+ 	} else {
++System.out.println(104);// traceon
+ 			if(string.contains("_")) fname = string.replace('_','/');
++System.out.println(105);// traceon
+ 	}
+-
++System.out.println(106);// traceon
++// StopTrace
+ 		buf.append(
+ 		"<a href="+ZEFMServer.hexi(fname)+">See File</a><p/>\n");
+ 		buf.append(

@@ -1,0 +1,107 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2006-09-16 14:40:51.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2006-09-16 14:35:02.000000000 -0500
+@@ -221,46 +221,82 @@
+     }
+ 
+     StringBuilder changeMode(String[][] strings) throws Exception {	
+-
++// StartTrace
++System.out.println(224);// traceon
+         stringbuffer = new StringBuilder();
++System.out.println(225);// traceon
+ 
++System.out.println(226);// traceon
+         int i = strings[0].length;
++System.out.println(227);// traceon
+         int hsize = -2 + Math.round((float) (90 / i));
++System.out.println(228);// traceon
+ 
++System.out.println(229);// traceon
+         stringbuffer.append("<html>\n");
++System.out.println(230);// traceon
+         stringbuffer.append("<head><title>" + filename + "</title>\n");
++System.out.println(231);// traceon
+         stringbuffer.append("</head>\n");
++System.out.println(232);// traceon
+         stringbuffer.append("<body>\n");
++System.out.println(233);// traceon
+         stringbuffer.append("<h2> Editing " + filename + "</h2>");
++System.out.println(234);// traceon
+         stringbuffer.append(
+             "<form action=\"DBgo.jav\" method=\"get\"><table width=\"90%\">");
++System.out.println(236);// traceon
+         stringbuffer.append("<tr>");
++System.out.println(237);// traceon
+ 
++System.out.println(238);// traceon
+         for (int q = 0; q < i; q++) {
++System.out.println(239);// traceon
+             stringbuffer.append("<th>" + champs[q] + "</th>");
++System.out.println(240);// traceon
+         }
++System.out.println(241);// traceon
+ 
++System.out.println(242);// traceon
+         stringbuffer.append("</tr>\n");
++System.out.println(243);// traceon
+ 
++System.out.println(244);// traceon
+         for (int q = 0; q < strings.length; q++) {
++System.out.println(245);// traceon
+             stringbuffer.append("<tr>");
++System.out.println(246);// traceon
+ 
++System.out.println(247);// traceon
+             for (int qq = 0; qq < i; qq++) {
++System.out.println(248);// traceon
+                 String string = strings[q][qq];
++System.out.println(249);// traceon
+ 
++System.out.println(250);// traceon
+                 string = DBM.fixgtlt(string);
++System.out.println(251);// traceon
+                 stringbuffer.append(
+ 	"<td width=\"" + hsize + "%\"><input name=\"" + q + "," + qq + "\" value=\"" +
+                 string + "\" size=\"" + hsize + "\"></td>\n");
++System.out.println(254);// traceon
+             }
++System.out.println(255);// traceon
+ 
++System.out.println(256);// traceon
+             stringbuffer.append("</tr>\n");
++System.out.println(257);// traceon
+         }
++System.out.println(258);// traceon
+ 
++System.out.println(259);// traceon
+         stringbuffer.append("</table><input type=submit value=GO name=editmode></form>");
++System.out.println(260);// traceon
+         stringbuffer.append("</body>\n");
++System.out.println(261);// traceon
+         stringbuffer.append("</html>\n");
+-
++System.out.println(262);// traceon
++// StopTrace
+         return stringbuffer;
+     }
+ 
+@@ -280,13 +316,11 @@
+ 
+ 	//////////////// READXML //////////////////////////////
+     public static String[][] readXML(String basename, int i) throws Exception {
+-System.out.println("AT "+basename);
++
+ 	try{
+ 	new NetsManager.Query(
+ 		new FileInputStream("DB/" + basename + ".xml"), "for $i in /*/* return data($i)");
+-	}catch (Exception ee){
+-		ee.printStackTrace();
+-	 }
++	}catch (Exception ee){ }
+ 
+ 	BufferedReader buff = new BufferedReader(
+ 		new StringReader(NetsManager.Query.qtabby.toString()));
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

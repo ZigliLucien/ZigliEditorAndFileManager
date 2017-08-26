@@ -1,0 +1,15 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2007-03-09 08:22:11.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2007-03-09 08:18:42.000000000 -0600
+@@ -97,7 +97,7 @@
+                         "<p align=right><a class=\"w\" href=\"GoFM.jav?" +
+                         dirname + "^0\"> Top </a></p>\n");
+                     bufi.append("<p align=right><a class=\"w\" href=GoFM.jav?" +
+-                        dirname + "^" + i + "> Bottom </a><br/><div id='time' style='float:right'></div></p>\n");
++                        dirname + "^" + i + "> Bottom </a><br/><div id='time'></div></p>\n");
+                     bufi.append("<h2>" + dirname + " : Listing " + dirnum + "</h2>\n");
+ 
+                     fillChecked(bufi, localprocess, dirname);
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

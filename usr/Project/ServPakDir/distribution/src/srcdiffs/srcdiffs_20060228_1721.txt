@@ -1,0 +1,137 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2006-02-28 17:20:59.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2006-02-19 22:24:32.000000000 -0600
+@@ -28,10 +28,32 @@
+     static String dirname;
+     static String dirnum;
+ 
++	 static Vector<String> cachefiles = new Vector<String>();
++
+ 	public static boolean goingFM;
++	static boolean initialized;
+ 
+     public GoFM(String linein) throws Exception {
+ 
++	int cap = 20;
++
++if(!initialized){
++
++		int cutt = 0;		
++
++		String[] dlist = new File("Listings").list();
++		for(String v : dlist){
++			if(v.endsWith(".cache.html.gz")) {
++				if(cutt<=cap){
++					cachefiles.add("Listings/"+v);
++					cutt++;
++				} else {
++					new File("Listings/"+v).delete();
++				}
++			}
++		}
++		initialized = true;
++}
+         goingFM = false;
+ 
+ if(linein !=null) dirname = linein.substring(0, linein.indexOf("^"));
+@@ -40,7 +62,10 @@
+ 
+         if(linein != null) dirnum = linein.substring(linein.indexOf("^") + 1);
+ 
+-        String lstfile = dirname.replace('/', '_') + ".listing.html";
++        String lstfile = "Listings/" + dirname.replace('/', '_') + ".listing.html";
++        String reflstfile = "http://" + ZEFMServer.localhost + ":" +
++            ZEFMServer.port + ZEFMServer.userdir + "/" +
++            ZEFMServer.hexi(lstfile);
+ 
+         String localprocess = ServPak.jv.FileOps.processcall;
+ 
+@@ -50,11 +75,7 @@
+ 
+         if (dirnum.equals("0")) {
+             StringBuilder bufi = new StringBuilder(6145);
+-
+-	byte[] data = ZEFMServer.getFile(lstfile, "listings");
+-	InputStreamReader  insr = 
+-			new InputStreamReader(new ByteArrayInputStream(data));
+-	buffr = new BufferedReader(insr);
++            buffr = new BufferedReader(new FileReader(lstfile));
+ 
+             for (String v; (v = buffr.readLine()) != null;) {
+                 if (v.indexOf("form action=\"FileOps.jav") >= 0) {
+@@ -72,16 +93,38 @@
+         }
+ 
+         reqreq = XCommands.reqfile;
++
+         String listfile = "Listings/" + dirname.replace('/', '_') + ".xml.gz"; 
++        String cachefile = "Listings/" + dirname.replace('/', '_') +dirnum+".cache.html.gz"; 
++
++	if(cachefiles.size() > cap) {
++
++		String v = cachefiles.elementAt(0);
++		cachefiles.remove(0);
++		boolean removed = new File(v).delete();
++		System.out.println("REMOVED cache file "+v+" "+removed);
++	}
++
++	if( new File(cachefile).exists() 
++		&& new File(cachefile).lastModified() > new File(listfile).lastModified() ) {
++
++		FileInputStream fins = new FileInputStream(cachefile);
++	InputStream zipin = new GZIPInputStream(fins);
++            ByteArrayOutputStream bout = new ByteArrayOutputStream();
++
++            for (int qq = 0; (qq = zipin.read()) != -1;) {
++                bout.write(qq);
++            }
++			          ZConnection.out.write(bout.toByteArray());
++		return;
++	}
+ 
+         try {
+             int i = Xlster.counters.get(dirname);
+ 
+              StringBuilder bufi = new StringBuilder(6145);
+ 
+-	byte[] datain = ZEFMServer.getFile(listfile,"listings");
+-
+-	InputStream zipin = new GZIPInputStream(new ByteArrayInputStream(datain));
++	InputStream zipin = new GZIPInputStream(new FileInputStream(listfile));
+             ByteArrayOutputStream bout = new ByteArrayOutputStream();
+ 
+               for (int qq = 0; (qq = zipin.read()) != -1;) {
+@@ -109,8 +152,14 @@
+ 
+ 		String main = "";
+ 
++	if(dirname.equals(Xlster.cdir) && !(localprocess.equals("XXX?")) ) {
++	            main = Xlster.currentDir[Integer.parseInt(dirnum)-1];
++		System.out.println("READING CACHE "+dirnum);	
++
++	} else {
+ 	        new NetsManager.Traxit(bout.toByteArray(),"ServPak/xsl/listit.xsl",dirnum);
+ 		 main = new String(NetsManager.Traxit.tabby);
++	}
+ 
+ 		int dirnumplus = Math.min(Integer.parseInt(dirnum)+1,i);
+ 
+@@ -124,8 +173,15 @@
+ 
+ 		bufi.append(main);
+ 
++		GZIPOutputStream gzout = new GZIPOutputStream(new FileOutputStream(cachefile));
++		if(!cachefiles.contains(cachefile)) cachefiles.add(cachefile);
++
+ 		String buffout = bufi.toString().trim();
+ 
++		gzout.write(buffout.getBytes());
++            	gzout.flush();
++	            gzout.close();
++
+    	            ZConnection.out.write(buffout.getBytes());
+ 
+         } catch (Exception exception) {
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

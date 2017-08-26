@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2004-10-26 00:42:04.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2004-10-26 00:39:16.000000000 -0500
+@@ -76,7 +76,7 @@
+             boolean bool = false;
+             boolean test_ = false;
+ 
+-	BufferedReader ff = new BufferedReader(new FileReader("ServPak/xsl/locxsorter.xsl"));
++	BufferedReader ff = new BufferedReader(new FileReader("ServPak/xsl/locsxorter.xsl"));
+ 
+ 	boolean flag = false;
+ 	StringBuilder bb = new StringBuilder(2049);
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

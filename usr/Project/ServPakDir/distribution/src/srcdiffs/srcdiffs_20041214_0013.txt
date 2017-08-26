@@ -1,0 +1,20 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2004-12-14 00:13:29.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2004-12-13 00:09:54.000000000 -0600
+@@ -50,12 +50,12 @@
+                 stringbuffer = new StringBuilder();
+ 
+                 stringbuffer.append("<?xml version=\"1.0\"?>\n");
+-                stringbuffer.append("<" + filename + ">\n\n");
++                stringbuffer.append("<" + filename + ">\n");
+                 stringbuffer.append("<entry>\n");
+                 stringbuffer.append("<" + hmap + "> - </" + hmap +
+                     ">\n");
+                 stringbuffer.append("\n</entry>");
+-                stringbuffer.append("\n\n</" + filename + ">");
++                stringbuffer.append("\n</" + filename + ">");
+                 printwriter.print(stringbuffer.toString());
+                 printwriter.close();
+             }
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

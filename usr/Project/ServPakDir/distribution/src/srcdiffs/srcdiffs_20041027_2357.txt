@@ -1,0 +1,83 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBM.java distribution/src/srcdiffs/ServPak/jv/DBM.java
+--- ServPak/jv/DBM.java	2004-10-27 23:57:50.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBM.java	2004-10-23 00:36:00.000000000 -0500
+@@ -14,7 +14,6 @@
+ import java.util.HashSet;
+ import java.util.Properties;
+ import java.util.StringTokenizer;
+-import java.net.*;
+ 
+ 
+ public class DBM {
+@@ -336,7 +335,6 @@
+ 
+     //////////////// CONVERTER /////////////////////
+     public static String converter(String string) {
+-/*
+         String string_0_;
+         String string_1_;
+         String string_2_;
+@@ -356,16 +354,6 @@
+         }
+ 
+         return string;
+-*/
+-
+-	String out = "";
+-
+-	try{
+-		out = URLDecoder.decode(string, "UTF-8");
+-	} catch(Exception e) {}
+-
+-	return out;	
+-
+     }
+ 
+     /////////////////////// FIXGTLT //////////////////////
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2004-10-27 23:45:28.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2004-10-26 01:27:40.000000000 -0500
+@@ -8,7 +8,6 @@
+ import java.io.*;
+ 
+ import java.util.zip.GZIPInputStream;
+-import java.net.URLDecoder;
+ 
+ 
+ public class GoFM {
+@@ -32,9 +31,7 @@
+         goingFM = false;
+ 
+         dirname = linein.substring(0, linein.indexOf("^"));
+-//        dirname = DBM.converter(dirname);
+-
+-        dirname = URLDecoder.decode(dirname, "UTF-8");
++        dirname = DBM.converter(dirname);
+ 
+         String dirnum = linein.substring(linein.indexOf("^") + 1);
+ 
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/SendEmail.java distribution/src/srcdiffs/ServPak/jv/SendEmail.java
+--- ServPak/jv/SendEmail.java	2004-10-27 23:43:55.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/SendEmail.java	2004-10-27 23:36:18.000000000 -0500
+@@ -29,9 +29,7 @@
+     SMailClient smc;
+ 
+     public SendEmail(String _textin) throws Exception {
+-//        textin = DBM.converter(_textin);
+-
+-	textin = URLDecoder.decode(_textin, "UTF-8");
++        textin = DBM.converter(_textin);
+ 
+         InputStream infile = new FileInputStream("Mail.properties");
+ 
+@@ -107,6 +105,8 @@
+ 	}
+ 
+ 
++//	contents = URLDecoder.decode(contents,"UTF-8");
++
+             String rem = linein.substring(cutoff + 12);
+ 
+             if (new File(rem).isFile()) {

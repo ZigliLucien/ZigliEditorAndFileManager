@@ -1,0 +1,17 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2004-12-11 05:35:55.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2004-12-11 05:13:20.000000000 -0600
+@@ -125,11 +125,6 @@
+                 showtable = false;
+             }
+ 
+-    	 if (hashmap.containsKey("goquery")) {
+-                printout = getFile("HTML/query.html");
+-                showtable = false;
+-            }
+-
+             if (hashmap.containsKey("formentry")) {
+                 printout = formEntry(champs).toString();
+ 
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

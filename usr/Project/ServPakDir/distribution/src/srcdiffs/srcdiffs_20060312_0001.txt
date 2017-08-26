@@ -1,0 +1,23 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/SendEmail.java distribution/src/srcdiffs/ServPak/jv/SendEmail.java
+--- ServPak/jv/SendEmail.java	2006-03-12 00:01:01.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/SendEmail.java	2006-03-11 23:39:40.000000000 -0600
+@@ -252,8 +252,6 @@
+     }
+ 
+     String callPage(String _filename) throws Exception {
+-System.out.println("GETTING FROM "+_filename);
+-
+         String home = "http://" + NetsManager.ZEFMServer.localhost + ":" +
+             NetsManager.ZEFMServer.port + NetsManager.ZEFMServer.userdir +
+             "/?home";
+@@ -262,7 +260,6 @@
+         brd = new BufferedReader(ZEFMServer.getStream(conn, _filename,"sentMail"));
+ 
+         for (String v; (v = brd.readLine()) != null;) {
+-System.out.println("READING "+v);
+             if (v.toCharArray().length > 0) {
+                 v = ServPak.jv.DBM.fixgtlt(v);
+             }

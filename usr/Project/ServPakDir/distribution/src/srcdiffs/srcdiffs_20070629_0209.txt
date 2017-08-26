@@ -1,0 +1,15 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/SentMail.java distribution/src/srcdiffs/ServPak/jv/SentMail.java
+--- ServPak/jv/SentMail.java	2007-06-29 02:09:45.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/SentMail.java	2007-06-29 02:09:08.000000000 -0500
+@@ -27,7 +27,7 @@
+ 		listing = listing.replaceAll("align=center","align='center'");
+ try{
+ 		byte[] out1 = (new NetsManager.Query(listing, query, null, false)).qtabby.toByteArray(); 
+-		System.out.println(new String(out1));
++		System.out.println(out1);
+ 		out = (new NetsManager.Traxit(out1,"ServPak/xsl/readSentMail.xsl",null)).tabby;
+ 
+ }catch(Exception ee){}

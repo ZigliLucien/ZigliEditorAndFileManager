@@ -1,0 +1,187 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBM.java distribution/src/srcdiffs/ServPak/jv/DBM.java
+--- ServPak/jv/DBM.java	2004-12-12 15:51:41.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBM.java	2004-12-12 15:36:04.000000000 -0600
+@@ -78,23 +78,14 @@
+         }
+ 
+         dbasename = data.get("dbase");
+-/*
++
+               new Traxit("DB/" + dbasename + ".xml", "ServPak/xsl/db2csv.xsl");
+             buff = new BufferedReader(new InputStreamReader(
+                         new ByteArrayInputStream(Traxit.tabby)));
+             buff.readLine();      
+-*/
+-
+-//	try{
+-	new NetsManager.Query(
+-		new FileInputStream("DB/" + dbasename + ".xml"), "for $i in /*/* return $i");
+-//	}catch (Exception ee){ }
+-
+-	BufferedReader buff = new BufferedReader(
+-		new StringReader(NetsManager.Query.qtabby.toString()));
+-
+-        PrintWriter pw = new PrintWriter(new FileWriter("DB/" + dbasename + ".xml"), true);
+ 
++        PrintWriter printwriter = 
++			new PrintWriter(new FileWriter("DB/" + dbasename + ".xml"), true);
+         String sortdef = data.get("sortdefault");
+         StringTokenizer tokk = new StringTokenizer(data.get("categories"), ",");
+         String[] catz = new String[tokk.countTokens()];
+@@ -121,12 +112,12 @@
+         sbuild.append("<" + rootname + ">\n");
+ 
+         StringTokenizer fieldstok = new StringTokenizer(data.get("fields"), ",");
+-        String[] elements = new String[fieldstok.countTokens()];
++        String[] flds = new String[fieldstok.countTokens()];
+ 
+-        Arrays.fill(elements, "");
++        Arrays.fill(flds, "");
+ 
+-        for (int q=0; q<elements.length;q++) {
+-            	elements[q] = fieldstok.nextToken();
++        for (int q=0; q<flds.length;q++) {
++            	flds[q] = fieldstok.nextToken();
+         }
+ 
+         String v;
+@@ -134,13 +125,13 @@
+         while ((v = buff.readLine()) != null) {
+             numlines++;
+ 
+-            String entryname = data.get("entry");
++            String element = data.get("entry");
+ 
+-            sbuild.append("\n<" + entryname + ">\n");
++            sbuild.append("\n<" + element + ">\n");
+ 
+             StringTokenizer line =  new StringTokenizer(v, ",");
+ 
+-            for (String f : elements) {
++            for (String f : flds) {
+ 
+                 String ky = line.nextToken();
+                 String kyref = XCommands.hexml(ky);
+@@ -155,12 +146,12 @@
+                 }
+             }
+ 
+-            sbuild.append("</" + entryname + ">\n");
++            sbuild.append("</" + element + ">\n");
+         }
+ 
+         sbuild.append("\n</" + rootname + ">");
+-        pw.print(sbuild.toString());
+-        pw.close();
++        printwriter.print(sbuild.toString());
++        printwriter.close();
+         new Traxit("DB/" + dbasename + ".xml", "ServPak/xsl/dbmrun.xsl");
+ 
+         String currentTable = new String(Traxit.tabby);
+@@ -219,47 +210,81 @@
+             linenumberreader.setLineNumber(0);
+             dbmbufr.append("</select>&nbsp;&nbsp;&nbsp;&nbsp;\n");
+         }
+-
++// StartTrace
++System.out.println(213);// traceon
+         dbmbufr.append("<p>&nbsp;<br>\n");
++System.out.println(214);// traceon
+         dbmbufr.append("Primary Sort: <select name=\"Sort\">\n");
++System.out.println(215);// traceon
+         dbmbufr.append("<option value=" + sortdef + "> " + DBgo.dataCheck(sortdef) + " </option>\n");
+-
++System.out.println(216);// traceon
++System.out.println("XXXXXXX "+dbmbufr.toString());
++System.out.println(217+" CATZ LENGTH "+catz.length);// traceon
+         for (String w : catz) {
++System.out.println(218);// traceon
+             if (!w.equals(sortdef)) {
++System.out.println(219);// traceon
+                 dbmbufr.append("<option value=" + w + "> " + DBgo.dataCheck(w) + " </option>\n");
++System.out.println(220);// traceon
+             }
++System.out.println(221);// traceon
+         }
++System.out.println(222);// traceon
+ 
++System.out.println(223);// traceon
+         dbmbufr.append("</select>&nbsp;&nbsp;&nbsp;&nbsp;\n");
++System.out.println(224);// traceon
+         dbmbufr.append("Secondary Sort: <select name=\"Sort\">\n");
++System.out.println(225);// traceon
+         dbmbufr.append("<option value=" + sortdef + ">" + DBgo.dataCheck(sortdef) + "</option>\n");
++System.out.println(226);// traceon
+ 
++System.out.println(227);// traceon
+         for (String w : catz) {
++System.out.println(228);// traceon
+             if (!w.equals(sortdef)) {
++System.out.println(229);// traceon
+                 dbmbufr.append("<option value=" + w + "> " + DBgo.dataCheck(w) + " </option>\n");
++System.out.println(230);// traceon
+             }
++System.out.println(231);// traceon
+         }
++System.out.println(232);// traceon
+ 
++System.out.println(233);// traceon
+         dbmbufr.append("</select>\n");
++System.out.println(234);// traceon
+         dbmbufr.append("<p>&nbsp;<br>\n");
++System.out.println(235);// traceon
+         dbmbufr.append(
+             "<center><input type=submit value=\"SEARCH/VIEW\"></center><p><input type=reset class=res>\n");
++System.out.println(237);// traceon
+         dbmbufr.append("</form>\n");
++System.out.println(238);// traceon
+ 
++System.out.println(239);// traceon
+         if (bool) {
++System.out.println(240);// traceon
+             dbmbufr.append(
+ 		"<p/>&nbsp;<p><a href=DBM.jav?savetable=" + dbasename + ">");
++System.out.println(242);// traceon
+             dbmbufr.append(
+                 "\\/\\/\\/\\ <b>Save</b> Sorted Table to Original File (<i> overwrites original table </i>) /\\/\\/\\/ ");
++System.out.println(244);// traceon
+             dbmbufr.append("</a><p/>");
++System.out.println(245);// traceon
+ 
++System.out.println(246);// traceon
+ dbmbufr.append("<a href=\"DBgo.jav?tablename=" + dbasename 
+ 		   + "&newtable=\">Back to Edit Table</a><p>\n");
++System.out.println(248);// traceon
+             dbmbufr.append("<a href=\"" + locdirec +
+                 "/HTML/zserve.html\"> Back to " + zefmhome + "</a><p>\n");
++System.out.println(250);// traceon
+         }
+-
+-
++System.out.println(251);// traceon
++// StopTrace
++System.out.println("CHECKZERO "+dbmbufr.toString());
+         dbmbufr.append("</body>\n");
+         dbmbufr.append("</html>\n");
+         prtw.print(dbmbufr.toString());
+@@ -276,12 +301,14 @@
+ 
+         fileinfo.setProperty("epsilon", "2");
+ 
+-        FileOutputStream fouts = new FileOutputStream("DB/" + dbasename + ".properties");
++        FileOutputStream fileoutputstream = 
++		new FileOutputStream("DB/" + dbasename + ".properties");
+ 
+-        fileinfo.store(fouts, "DB/" + dbasename + " properties");
+-        fouts.close();
++        fileinfo.store(fileoutputstream, "DB/" + dbasename + " properties");
++        fileoutputstream.close();
+ 
+-        String fileref = (locdirec + "/DB/" + dbasename.substring(dbasename.lastIndexOf("/") + 1));
++        String fileref = (locdirec + "/DB/" +
++            dbasename.substring(dbasename.lastIndexOf("/") + 1));
+ 
+ 	sbuild = 
+ 	new StringBuilder(
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

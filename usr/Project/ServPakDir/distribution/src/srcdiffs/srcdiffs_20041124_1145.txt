@@ -1,0 +1,17 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/SendEmail.java distribution/src/srcdiffs/ServPak/jv/SendEmail.java
+--- ServPak/jv/SendEmail.java	2004-11-24 11:45:44.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/SendEmail.java	2004-11-24 11:41:42.000000000 -0600
+@@ -29,9 +29,9 @@
+     SMailClient smc;
+ 
+     public SendEmail(String _textin) throws Exception {
+-        textin = DBM.converter(_textin);
++//        textin = DBM.converter(_textin);
+ 
+-//	textin = URLDecoder.decode(_textin, "UTF-8");
++	textin = URLDecoder.decode(_textin, "UTF-8");
+ 
+         InputStream infile = new FileInputStream("Mail.properties");
+ 

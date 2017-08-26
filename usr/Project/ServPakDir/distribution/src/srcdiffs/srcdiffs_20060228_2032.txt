@@ -1,0 +1,53 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2006-02-28 20:32:36.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2006-02-28 19:45:04.000000000 -0600
+@@ -39,7 +39,7 @@
+         dirname = URLDecoder.decode(dirname, "UTF-8");
+ 
+         if(linein != null) dirnum = linein.substring(linein.indexOf("^") + 1);
+-
++System.out.println("AT "+dirnum+" FOR "+dirname);
+         String lstfile = dirname.replace('/', '_') + ".listing.html";
+ 
+         String localprocess = ServPak.jv.FileOps.processcall;
+@@ -51,10 +51,10 @@
+         if (dirnum.equals("0")) {
+             StringBuilder bufi = new StringBuilder(6145);
+ 
+-	buffr = new BufferedReader(
+-		new InputStreamReader(
+-		new ByteArrayInputStream(ZEFMServer.getFile(lstfile, "listings"))));
+-
++	byte[] data = ZEFMServer.getFile(lstfile, "listings");
++	InputStreamReader  insr = 
++			new InputStreamReader(new ByteArrayInputStream(data));
++	buffr = new BufferedReader(insr);
+ 
+             for (String v; (v = buffr.readLine()) != null;) {
+                 if (v.indexOf("form action=\"FileOps.jav") >= 0) {
+@@ -81,9 +82,11 @@
+ 	byte[] datain = ZEFMServer.getFile(listfile,"listings");
+ 
+ 	InputStream zipin = new GZIPInputStream(new ByteArrayInputStream(datain));
+-	byte[] bout = new byte[zipin.available()];
++            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+ 
+-	zipin.read(bout);
++              for (int qq = 0; (qq = zipin.read()) != -1;) {
++                  bout.write(qq);
++              }
+ 
+ bufi.append("<html>\n");
+ bufi.append("<head>\n");
+@@ -106,7 +109,7 @@
+ 
+ 		String main = "";
+ 
+-	        new NetsManager.Traxit(bout,"ServPak/xsl/listit.xsl",dirnum);
++	        new NetsManager.Traxit(bout.toByteArray(),"ServPak/xsl/listit.xsl",dirnum);
+ 		 main = new String(NetsManager.Traxit.tabby);
+ 
+ 		int dirnumplus = Math.min(Integer.parseInt(dirnum)+1,i);
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

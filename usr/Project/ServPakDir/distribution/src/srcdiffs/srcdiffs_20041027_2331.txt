@@ -1,0 +1,15 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/SendEmail.java distribution/src/srcdiffs/ServPak/jv/SendEmail.java
+--- ServPak/jv/SendEmail.java	2004-10-27 23:31:34.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/SendEmail.java	2004-10-27 23:29:56.000000000 -0500
+@@ -154,8 +154,7 @@
+         buffy.append("</head>\n");
+         buffy.append("<body>\n");
+         buffy.append("<h2> Send EMail </h2>");
+-buffy.append(
+-"<form action=\"SendEmail.jav\" method=\"get\" enctype=\"application/octet-stream\">");
++buffy.append("<form action=\"SendEmail.jav\" method=\"get\" enctype=\"text/plain\">");
+         buffy.append("<table width=\"100%\">");
+         buffy.append(
+             " Correspondent (or fill in address below):  <select name=\"toWhom\">\n");

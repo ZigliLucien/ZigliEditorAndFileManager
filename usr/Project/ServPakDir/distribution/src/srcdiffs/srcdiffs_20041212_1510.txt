@@ -1,0 +1,433 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBM.java distribution/src/srcdiffs/ServPak/jv/DBM.java
+--- ServPak/jv/DBM.java	2004-12-12 15:10:16.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBM.java	2004-12-09 00:45:56.000000000 -0600
+@@ -19,7 +19,7 @@
+ 
+ public class DBM {
+     static Properties fileinfo = new Properties();
+-    static BufferedReader buff;
++    static BufferedReader bufferedreader;
+     public static final String zefmhome = "zefm@" + ZEFMServer.localhostname;
+     public String printout;
+     HashMap<String,String> data = new HashMap<String,String>();
+@@ -28,9 +28,9 @@
+     String dbasename;
+ 
+     /////////////////////// DBM /////////////////////////////////
+-    public DBM(String query) throws Exception {
+-        if (query.indexOf("savetable") >= 0) {
+-            savetable(query);
++    public DBM(String string) throws Exception {
++        if (string.indexOf("savetable") >= 0) {
++            savetable(string);
+ 
+             StringBuilder prtout = new StringBuilder("<html>\n<head><title>" +
+                     dbasename + "</title></head>\n<body>\n");
+@@ -52,133 +52,149 @@
+ 
+         boolean bool = false;
+ 
+-        if (query.endsWith("=GO")) {
+-            query = query.substring(0, query.indexOf("=GO"));
++        if (string.endsWith("=GO")) {
++            string = string.substring(0, string.indexOf("=GO"));
+ 
+-            String subquery = query.substring(0, query.indexOf("&sortdefault"));
+-            StringTokenizer tok = new StringTokenizer(subquery, "&=");
+-            String cats = "";
++            String string_6_ = string.substring(0, string.indexOf("&sortdefault"));
++            StringTokenizer stringtokenizer = new StringTokenizer(string_6_, "&=");
++            String string_7_ = "";
+ 
+-            while (tok.hasMoreTokens()) {
+-                cats += (tok.nextToken() + ",");
+-                tok.nextToken();
++            while (stringtokenizer.hasMoreTokens()) {
++                string_7_ += (stringtokenizer.nextToken() + ",");
++                stringtokenizer.nextToken();
+             }
+ 
+-            cats = cats.substring(0, cats.length() - 1);
+-            data.put("categories", cats);
++            string_7_ = string_7_.substring(0, string_7_.length() - 1);
++            data.put("categories", string_7_);
+             bool = true;
+         }
+ 
+-        query = converter(query);
++        string = converter(string);
+ 
+-        StringTokenizer tok = new StringTokenizer(query, "&");
++        StringTokenizer stringtokenizer = new StringTokenizer(string, "&");
+ 
+-        while (tok.hasMoreTokens()) {
+-            String mark = tok.nextToken();
+-            String kee = mark.substring(0, mark.indexOf("="));
+-            String valu = mark.substring(mark.indexOf("=") + 1);
++        while (stringtokenizer.hasMoreTokens()) {
++            String string_8_ = stringtokenizer.nextToken();
++            String string_9_ = string_8_.substring(0, string_8_.indexOf("="));
++            String string_10_ = string_8_.substring(string_8_.indexOf("=") + 1);
+ 
+-            data.put(kee, valu);
++            data.put(string_9_, string_10_);
+         }
+ 
+         dbasename = data.get("dbase");
+ 
++        Object object = null;
++
++        if (new File("DB/" + dbasename + ".csv").exists()) {
++            bufferedreader = new BufferedReader(new FileReader("DB/" +
++                        dbasename + ".csv"));
++        } else {
+               new Traxit("DB/" + dbasename + ".xml", "ServPak/xsl/db2csv.xsl");
+-            buff = new BufferedReader(new InputStreamReader(
++            bufferedreader = new BufferedReader(new InputStreamReader(
+                         new ByteArrayInputStream(Traxit.tabby)));
+-            buff.readLine();      
++            bufferedreader.readLine();
++        }
+ 
+-        PrintWriter printwriter = 
+-			new PrintWriter(new FileWriter("DB/" + dbasename + ".xml"), true);
+-        String sortdef = data.get("sortdefault");
+-        StringTokenizer tokk = new StringTokenizer(data.get("categories"), ",");
+-        String[] catz = new String[tokk.countTokens()];
++        PrintWriter printwriter = new PrintWriter(new FileWriter("DB/" +
++                    dbasename + ".xml"), true);
++        String string_12_ = data.get("sortdefault");
++        StringTokenizer stringtokenizer_13_ = 
++		new StringTokenizer(data.get("categories"), ",");
++        String[] strings = new String[stringtokenizer_13_.countTokens()];
+         int i = 0;
+ 
+-        while (tokk.hasMoreTokens()) {
+-            String local = tokk.nextToken();
+-            catz[i] = local;
+-            keyfields.add(local);
++        while (stringtokenizer_13_.hasMoreTokens()) {
++            String string_14_ = stringtokenizer_13_.nextToken();
++
++            strings[i] = string_14_;
++            keyfields.add(string_14_);
+             i++;
+         }
+ 
+-        String rootname;
++        Object object_15_ = null;
++        String string_16_;
+ 
+         if (bool) {
+-            rootname = dbasename;
++            string_16_ = dbasename;
+         } else {
+-            rootname = data.get("root");
++            string_16_ = data.get("root");
+         }
+ 
+-        StringBuilder sbuild = new StringBuilder();
++        StringBuilder stringbuffer = new StringBuilder();
+ 
+-        sbuild.append("<?xml version=\"1.0\"?>\n");
+-        sbuild.append("<" + rootname + ">\n");
++        stringbuffer.append("<?xml version=\"1.0\"?>\n");
++        stringbuffer.append("<" + string_16_ + ">\n");
+ 
+-        StringTokenizer fieldstok = new StringTokenizer(data.get("fields"), ",");
+-        String[] flds = new String[fieldstok.countTokens()];
++        StringTokenizer stringtokenizer_17_ = 
++	new StringTokenizer(data.get("fields"), ",");
++        String[] strings_18_ = new String[stringtokenizer_17_.countTokens()];
+ 
+-        Arrays.fill(flds, "");
++        Arrays.fill(strings_18_, "");
+ 
+-        for (String w : flds) {
+-            	w = fieldstok.nextToken();
++        for (int i_19_ = 0; i_19_ < strings_18_.length; i_19_++) {
++            strings_18_[i_19_] = stringtokenizer_17_.nextToken();
+         }
+ 
+-        String v;
++        Object object_20_ = null;
++        String string_21_;
+ 
+-        while ((v = buff.readLine()) != null) {
++        while ((string_21_ = bufferedreader.readLine()) != null) {
+             numlines++;
+ 
+-            String element = data.get("entry");
+-
+-            sbuild.append("\n<" + element + ">\n");
++            String string_22_ = data.get("entry");
+ 
+-            StringTokenizer line =  new StringTokenizer(v, ",");
++            stringbuffer.append("\n<" + string_22_ + ">\n");
+ 
+-            for (String f : flds) {
++            StringTokenizer stringtokenizer_23_ = new StringTokenizer(string_21_,
++                    ",");
+ 
+-                String ky = line.nextToken();
+-                String kyref = XCommands.hexml(ky);
++            for (int i_24_ = 0; i_24_ < strings_18_.length; i_24_++) {
++                String string_25_ = strings_18_[i_24_];
++                String string_26_ = stringtokenizer_23_.nextToken();
++                String string_27_ = XCommands.hexml(string_26_);
+ 
+-                ky = ZEdit.MailFiles.ampcheck(ky);
++                string_26_ = ZEdit.MailFiles.ampcheck(string_26_);
+ 
+-                if (keyfields.contains(f)) {
+-                    sbuild.append(
+-			       "<" + f + " key=\"" + f + kyref + "\">" + ky + "</" + f + ">\n");
++                if (keyfields.contains(strings_18_[i_24_])) {
++                    stringbuffer.append("<" + string_25_ + " key=\"" +
++                        string_25_ + string_27_ + "\">" + string_26_ + "</" +
++                        string_25_ + ">\n");
+                 } else {
+-                    sbuild.append("<" + f + ">" + ky + "</" + f + ">\n");
++                    stringbuffer.append("<" + string_25_ + ">" + string_26_ +
++                        "</" + string_25_ + ">\n");
+                 }
+             }
+ 
+-            sbuild.append("</" + element + ">\n");
++            stringbuffer.append("</" + string_22_ + ">\n");
+         }
+ 
+-        sbuild.append("\n</" + rootname + ">");
+-        printwriter.print(sbuild.toString());
++        stringbuffer.append("\n</" + string_16_ + ">");
++        printwriter.print(stringbuffer.toString());
+         printwriter.close();
+         new Traxit("DB/" + dbasename + ".xml", "ServPak/xsl/dbmrun.xsl");
+ 
+-        String currentTable = new String(Traxit.tabby);
++        String string_28_ = new String(Traxit.tabby);
+ 
+-        currentTable = currentTable.substring(currentTable.indexOf("?>") + 3);
+-
+-        PrintWriter prtw = new PrintWriter(new FileWriter("DB/" + dbasename + ".sdb"), true);
++        string_28_ = string_28_.substring(string_28_.indexOf("?>") + 3);
+ 
++        PrintWriter printwriter_29_ = new PrintWriter(new FileWriter("DB/" +
++                    dbasename + ".sdb"), true);
+         StringBuilder dbmbufr = new StringBuilder();
+-        String locdirec = ZEFMServer.localdir;
++        String string_31_ = ZEFMServer.localdir;
+ 
+-        if (locdirec.indexOf(":") > 0) {
+-            int q = locdirec.indexOf(":");
++        if (string_31_.indexOf(":") > 0) {
++            int i_32_ = string_31_.indexOf(":");
+ 
+-            locdirec = locdirec.substring(q + 1);
+-            locdirec = locdirec.replace('\\', '/');
++            string_31_ = string_31_.substring(i_32_ + 1);
++            string_31_ = string_31_.replace('\\', '/');
+         }
+ 
+         dbmbufr.append("<html>\n");
+         dbmbufr.append("<head><title> Search " + dbasename + " </title>\n");
+         dbmbufr.append("<style type=\"text/css\">\n");
+         dbmbufr.append("input { color: green; background-color: white}\n");
+-        dbmbufr.append("input.res { color: darkblue; background-color: white}\n");
++        dbmbufr.append(
++            "input.res { color: darkblue; background-color: white}\n");
+         dbmbufr.append("option { color: white; background-color: blue}\n");
+         dbmbufr.append("</style>\n");
+         dbmbufr.append("</head>\n");
+@@ -189,25 +205,26 @@
+         dbmbufr.append("<p>\n");
+         dbmbufr.append("<form method=\"get\">\n");
+ 
+-        Arrays.sort(catz);
++        Arrays.sort(strings);
+ 
+-        LineNumberReader linenumberreader = 
+-		new LineNumberReader(new StringReader(currentTable));
++        LineNumberReader linenumberreader = new LineNumberReader(new StringReader(
++                    string_28_));
+ 
+-        for (String w : catz) {
++        for (int i_33_ = 0; i_33_ < strings.length; i_33_++) {
++            String string_34_ = strings[i_33_];
+ 
+             dbmbufr.append("<span style=\"background-color:white\"> &#160;" +
+-                DBgo.dataCheck(w) + " &#160; </span> \n");
+-            dbmbufr.append("<select name=\"" + w + "\">\n");
++                DBgo.dataCheck(string_34_) + " &#160; </span> \n");
++            dbmbufr.append("<select name=\"" + string_34_ + "\">\n");
+             dbmbufr.append("<option> ALL </option>\n");
+ 
+             HashSet hashset = new HashSet();
+ 
+             while (linenumberreader.getLineNumber() < numlines) {
+-                String countLine = linenumberreader.readLine();
++                String string_35_ = linenumberreader.readLine();
+ 
+-                if (hashset.add(countLine)) {
+-                    dbmbufr.append(countLine + "\n");
++                if (hashset.add(string_35_)) {
++                    dbmbufr.append(string_35_ + "\n");
+                 }
+             }
+ 
+@@ -217,25 +234,29 @@
+ 
+         dbmbufr.append("<p>&nbsp;<br>\n");
+         dbmbufr.append("Primary Sort: <select name=\"Sort\">\n");
+-        dbmbufr.append("<option value=" + sortdef + "> " +
+-            DBgo.dataCheck(sortdef) + " </option>\n");
++        dbmbufr.append("<option value=" + string_12_ + "> " +
++            DBgo.dataCheck(string_12_) + " </option>\n");
++
++        for (int i_36_ = 0; i_36_ < strings.length; i_36_++) {
++            String string_37_ = strings[i_36_];
+ 
+-        for (String w : catz) {
+-            if (!v.equals(sortdef)) {
+-                dbmbufr.append("<option value=" + w + "> " +
+-                    DBgo.dataCheck(w) + " </option>\n");
++            if (!string_37_.equals(string_12_)) {
++                dbmbufr.append("<option value=" + string_37_ + "> " +
++                    DBgo.dataCheck(string_37_) + " </option>\n");
+             }
+         }
+ 
+         dbmbufr.append("</select>&nbsp;&nbsp;&nbsp;&nbsp;\n");
+         dbmbufr.append("Secondary Sort: <select name=\"Sort\">\n");
+-        dbmbufr.append("<option value=" + sortdef + ">" +
+-            DBgo.dataCheck(sortdef) + "</option>\n");
++        dbmbufr.append("<option value=" + string_12_ + ">" +
++            DBgo.dataCheck(string_12_) + "</option>\n");
+ 
+-        for (String w : catz) {
+-            if (!w.equals(sortdef)) {
+-                dbmbufr.append("<option value=" + w + "> " +
+-                    DBgo.dataCheck(w) + " </option>\n");
++        for (int i_38_ = 0; i_38_ < strings.length; i_38_++) {
++            String string_39_ = strings[i_38_];
++
++            if (!string_39_.equals(string_12_)) {
++                dbmbufr.append("<option value=" + string_39_ + "> " +
++                    DBgo.dataCheck(string_39_) + " </option>\n");
+             }
+         }
+ 
+@@ -254,15 +275,14 @@
+ 
+             dbmbufr.append("<a href=\"DBgo.jav?tablename=" + dbasename +
+                 "&newtable=\">Back to Edit Table</a><p>\n");
+-            dbmbufr.append("<a href=\"" + locdirec +
++            dbmbufr.append("<a href=\"" + string_31_ +
+                 "/HTML/zserve.html\"> Back to " + zefmhome + "</a><p>\n");
+         }
+ 
+         dbmbufr.append("</body>\n");
+         dbmbufr.append("</html>\n");
+-        prtw.print(dbmbufr.toString());
+-        prtw.close();
+-  
++        printwriter_29_.print(dbmbufr.toString());
++        printwriter_29_.close();
+         fileinfo.setProperty("datafile", "DB/" + dbasename + ".xml");
+         fileinfo.setProperty("stringProcessFile", "XSL/xmlquery.xsl");
+ 
+@@ -274,22 +294,22 @@
+ 
+         fileinfo.setProperty("epsilon", "2");
+ 
+-        FileOutputStream fileoutputstream = 
+-		new FileOutputStream("DB/" + dbasename + ".properties");
++        FileOutputStream fileoutputstream = new FileOutputStream("DB/" +
++                dbasename + ".properties");
+ 
+         fileinfo.store(fileoutputstream, "DB/" + dbasename + " properties");
+         fileoutputstream.close();
+ 
+-        String fileref = (locdirec + "/DB/" +
++        String string_40_ = (string_31_ + "/DB/" +
+             dbasename.substring(dbasename.lastIndexOf("/") + 1));
+ 
+-	sbuild = 
++	stringbuffer = 
+ 	new StringBuilder(
+-"<html><head><meta http-equiv=\"refresh\" content=\"url=0;"+fileref+".sdb\"></head>\n");
+-        sbuild.append("<html><body><p>&nbsp;<p>&nbsp;<p>&nbsp;<p><center> <a href=");
+-        sbuild.append(fileref + ".sdb> <font size=+2>Go To <b>");
+-        sbuild.append(dbasename.toUpperCase() + "</b></font></a></center></body></html>");
+-	printout = sbuild.toString();
++"<html><head><meta http-equiv=\"refresh\" content=\"url=0;"+string_40_+".sdb\"></head>\n");
++        stringbuffer.append("<html><body><p>&nbsp;<p>&nbsp;<p>&nbsp;<p><center> <a href=");
++        stringbuffer.append(string_40_ + ".sdb> <font size=+2>Go To <b>");
++        stringbuffer.append(dbasename.toUpperCase() + "</b></font></a></center></body></html>");
++	printout = stringbuffer.toString();
+     }
+ 
+     void savetable(String in) {
+@@ -315,22 +335,22 @@
+     //////////////// CONVERTER /////////////////////
+     public static String converter(String string) {
+ 
+-        String x;
+-        String y;
+-        String z;
++        String string_0_;
++        String string_1_;
++        String string_2_;
+ 
+         for (/**/; string.indexOf("%") >= 0;
+-                string = x + y + z) {
++                string = string_0_ + string_1_ + string_2_) {
+             int i = string.indexOf("%");
+ 
+-            x = string.substring(0, i);
+-            y = string.substring(i + 1, i + 3);
+-            z = string.substring(i + 3);
++            string_0_ = string.substring(0, i);
++            string_1_ = string.substring(i + 1, i + 3);
++            string_2_ = string.substring(i + 3);
+ 
+-            int q = ((16 * Byte.parseByte(y.substring(0, 1), 16)) +
+-                Byte.parseByte(y.substring(1, 2), 16));
++            int i_3_ = ((16 * Byte.parseByte(string_1_.substring(0, 1), 16)) +
++                Byte.parseByte(string_1_.substring(1, 2), 16));
+ 
+-            y = String.valueOf((char) q);
++            string_1_ = String.valueOf((char) i_3_);
+         }
+ 
+         return string;
+@@ -340,20 +360,20 @@
+     /////////////////////// FIXGTLT //////////////////////
+     public static String fixgtlt(String string) {
+         char[] cs = string.toCharArray();
+-        String y = "";
++        String string_5_ = "";
+ 
+         for (int i = 0; i < cs.length; i++) {
+             if (cs[i] == '<') {
+-                y += "&lt;";
++                string_5_ += "&lt;";
+             } else if (cs[i] == '>') {
+-                y += "&gt;";
++                string_5_ += "&gt;";
+             } else if (cs[i] == '\"') {
+-                y += "&quot;";
++                string_5_ += "&quot;";
+             } else {
+-                y += String.valueOf(cs[i]);
++                string_5_ += String.valueOf(cs[i]);
+             }
+         }
+ 
+-        return y;
++        return string_5_;
+     }
+ }
+\ No newline at end of file
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

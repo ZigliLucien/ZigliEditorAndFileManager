@@ -1,0 +1,15 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/Dictionary.java distribution/src/srcdiffs/ServPak/jv/Dictionary.java
+--- ServPak/jv/Dictionary.java	2006-09-23 19:35:27.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/Dictionary.java	2006-09-23 19:32:10.000000000 -0500
+@@ -81,7 +81,7 @@
+ 		fout.write(sb.toString().getBytes("UTF-8"));
+ 		fout.flush();
+ 		fout.close();
+-System.out.println("HERE");
++
+ printout =  new String
+ 		(new NetsManager.Traxit(
+ 			sb.toString().getBytes(), "ServPak/xsl/generic.xsl", null).tabby, "UTF-8");
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

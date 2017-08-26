@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2004-10-24 23:39:51.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2004-10-24 23:38:02.000000000 -0500
+@@ -147,7 +147,7 @@
+                     bufi.append("	</script>\n");
+                     bufi.append("</head>\n");
+ 
+-                    bufi.append("      <body bgcolor=\"ffffff\" oncontextmenu=\"return false\">\n");
++                    bufi.append("      <body bgcolor=\"ffffff\">\n");
+ 
+                     bufi.append(
+                         "<p align=right><a class=\"w\" href=\"GoFM.jav?" +
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

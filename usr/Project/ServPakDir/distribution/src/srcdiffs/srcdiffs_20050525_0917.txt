@@ -1,0 +1,89 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/Install.java distribution/src/srcdiffs/ServPak/jv/Install.java
+--- ServPak/jv/Install.java	2005-05-25 08:50:12.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/Install.java	2004-11-22 14:10:04.000000000 -0600
+@@ -50,7 +50,7 @@
+ if(!javapath.startsWith("/")) javapath ="/"+javapath;
+ if(!javapath.endsWith("/")) javapath +="/";
+ 
+-for(String v;(v=bin.readLine())!=null;) {
++for(String v=null;(v=bin.readLine())!=null;) {
+ if(! v.startsWith("Java=")) {
+ pout.println(v);
+ continue;
+diff -Bwaur ServPak/jv/Logging.java distribution/src/srcdiffs/ServPak/jv/Logging.java
+--- ServPak/jv/Logging.java	2005-05-25 08:49:52.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/Logging.java	2004-10-09 22:05:00.000000000 -0500
+@@ -93,7 +93,7 @@
+         brd = new BufferedReader(new InputStreamReader(
+                     new ByteArrayInputStream(filedata)));
+ 
+-        for (String v; (v = brd.readLine()) != null;) {
++        for (String v = null; (v = brd.readLine()) != null;) {
+             if (ZEFMServer.word.length() > 0) {
+                 v += ZEFMServer.word;
+             }
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/ReadClass.java distribution/src/srcdiffs/ServPak/jv/ReadClass.java
+--- ServPak/jv/ReadClass.java	2005-05-25 09:17:33.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/ReadClass.java	2004-10-14 15:21:00.000000000 -0500
+@@ -66,7 +66,7 @@
+ 
+ 	BufferedReader err = new BufferedReader(new InputStreamReader(dojavap.getErrorStream()));
+ 
+-        for (String vv; (vv = err.readLine()) != null;) {
++        for (String vv = null; (vv = err.readLine()) != null;) {
+             System.out.println(vv);
+ 
+             if (vv.startsWith("Error")) {
+@@ -110,7 +110,7 @@
+         bufi.append("\n<h3><span class=b>Fields</span></h3>\n");
+         bufi.append("<table>\n");
+ 
+-        while ((v = buf.readLine()).indexOf("(") < 0) {
++        for (v = null; (v = buf.readLine()).indexOf("(") < 0;) {
+             bufi.append("<tr><td>");
+ 
+             String[] vv = doString(v, false);
+@@ -129,7 +129,7 @@
+         bufi.append("<span class=e>" + vvv[0] + "</span>");
+         bufi.append(" <span class=d><tt>" + vvv[1] + "</tt></span>\n<p>");
+ 
+-        while ((v = buf.readLine()).indexOf('}') < 0) {
++        for (v = null; (v = buf.readLine()).indexOf('}') < 0;) {
+             String[] vv = doString(v, true);
+ 
+             bufi.append("<span class=e>" + vv[0] + "</span>");
+diff -Bwaur ServPak/jv/SendEmail.java distribution/src/srcdiffs/ServPak/jv/SendEmail.java
+--- ServPak/jv/SendEmail.java	2005-05-25 08:49:23.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/SendEmail.java	2005-01-07 15:32:02.000000000 -0600
+@@ -256,7 +256,7 @@
+         buffy = new StringBuilder("<html><body><pre>\n");
+         brd = new BufferedReader(new FileReader(_filename));
+ 
+-        for (String v; (v = brd.readLine()) != null;) {
++        for (String v = null; (v = brd.readLine()) != null;) {
+             if (v.toCharArray().length > 0) {
+                 v = ServPak.jv.DBM.fixgtlt(v);
+             }
+diff -Bwaur ServPak/jv/WebEdit.java distribution/src/srcdiffs/ServPak/jv/WebEdit.java
+--- ServPak/jv/WebEdit.java	2005-05-25 08:48:56.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/WebEdit.java	2004-12-04 13:19:38.000000000 -0600
+@@ -41,7 +41,7 @@
+ 
+             bin = new BufferedReader(new InputStreamReader(contsin, "UTF-8"));
+ 
+-            for (String v; (v = bin.readLine()) != null;) {
++            for (String v = null; (v = bin.readLine()) != null;) {
+                 pout.println(ZEdit.MailFiles.ampcheck(v));
+             }
+ 
+@@ -69,7 +69,7 @@
+             "<form action=\"WebEdit.jav\" method=\"post\"><table width=\"100%\">");
+         buffy.append("<p><TEXTAREA name=\"s@@ve\" rows=\"25\" cols=\"80\">\n");
+ 
+-        for (String v; (v = bin.readLine()) != null;) {
++        for (String v = null; (v = bin.readLine()) != null;) {
+             buffy.append(checkUTF(v) + "\n");
+         }
+ 

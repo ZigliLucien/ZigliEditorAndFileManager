@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/Webgrep.java distribution/src/srcdiffs/ServPak/jv/Webgrep.java
+--- ServPak/jv/Webgrep.java	2004-06-29 11:58:29.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/Webgrep.java	2004-06-29 11:45:02.000000000 -0500
+@@ -129,7 +129,7 @@
+                 for (int i_14_ = 0; i_14_ < i_12_; i_14_++) {
+                     String string_15_ = dockeys[i_14_].toString();
+ 
+-                    stringbuffer.append("<hr></a><font size=\"-1\">\n");
++                    stringbuffer.append("<hr></a><font>\n");
+                     stringbuffer.append("In <b>" + string_15_ +
+                         "</b> &nbsp;&nbsp&gt;&gt;&nbsp;");
+                     string_15_ = ZEFMServer.hexi(string_15_);

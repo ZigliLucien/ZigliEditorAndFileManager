@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2006-03-04 20:02:54.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2006-03-04 19:52:04.000000000 -0600
+@@ -105,6 +105,7 @@
+ 
+ 	String qry = new String(
+ "<html>\n<body>\n { let $part := \"HEADER"+dirnum+"\"\n for $i in //*[name()=$part]\n return $i/node()}\n</body>\n</html>");
++System.out.println("QUERY "+qry);
+ 
+ 		new NetsManager.Query(bout.toString(),qry,null,false);
+ 		main = NetsManager.Query.qtabby.toString();
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

@@ -1,0 +1,54 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2006-09-16 14:47:24.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2006-09-16 14:44:14.000000000 -0500
+@@ -280,7 +280,7 @@
+ 
+ 	//////////////// READXML //////////////////////////////
+     public static String[][] readXML(String basename, int i) throws Exception {
+-
++System.out.println("AT "+basename);
+ 	try{
+ 	new NetsManager.Query(
+ 		new FileInputStream("DB/" + basename + ".xml"), "for $i in /*/* return data($i)");
+@@ -436,21 +436,37 @@
+ 	
+ 	/////// GET FIELDS ////////
+     static void getFields(String basename) throws Exception {
+-
++// StartTrace
++System.out.println(439);// traceon
+ 	BufferedReader buf = new BufferedReader(new FileReader("DB/" + basename + ".xml"));
++System.out.println(440);// traceon
+ 
++System.out.println(441);// traceon
+ 	boolean flag = false;
++System.out.println(442);// traceon
+ 	Stack<String> staci = new Stack<String>();
++System.out.println(443);// traceon
+ 
++System.out.println(444);// traceon
+ 	for(String v;!(v=buf.readLine()).contains("</entry>");) {
++System.out.println(445);// traceon
+ 		if(v.contains("<entry>")) { flag = true; continue; }
++System.out.println(446);// traceon
+ 		if(!flag) continue;
++System.out.println(447);// traceon
+ 		String[] line = v.trim().split("\\s+|<|>");
++System.out.println(448);// traceon
+ 		staci.push(line[1]);
++System.out.println(449);// traceon
+ 	}
++System.out.println(450);// traceon
+ 
++System.out.println(451);// traceon
+ 		champs = new String[staci.size()];
++System.out.println(452);// traceon
+ 		staci.toArray(champs);
++System.out.println(453);// traceon
++// StopTrace
+     }
+ 
+ /////////////// DATACHECK /////////
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

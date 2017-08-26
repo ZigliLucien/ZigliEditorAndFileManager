@@ -1,0 +1,44 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2004-12-11 05:26:22.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2004-11-22 13:24:16.000000000 -0600
+@@ -54,7 +54,7 @@
+             StringBuilder bufi = new StringBuilder(6145);
+             buffr = new BufferedReader(new FileReader(lstfile));
+ 
+-            for (String v; (v = buffr.readLine()) != null;) {
++            for (String v = null; (v = buffr.readLine()) != null;) {
+                 if (v.indexOf("form action=\"FileOps.jav") >= 0) {
+                     fillChecked(bufi, localprocess, dirname);
+ 
+@@ -83,7 +83,7 @@
+             FileInputStream fins = new FileInputStream(listfile);
+             buffr = new BufferedReader(new InputStreamReader(new GZIPInputStream(fins)));
+ 
+-            for (String v; (v = buffr.readLine()) != null;) {
++            for (String v = null; (v = buffr.readLine()) != null;) {
+                 if (!bool && (v.indexOf(top) >= 0)) {
+                     bool = true;
+ 
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/ShowNotes.java distribution/src/srcdiffs/ServPak/jv/ShowNotes.java
+--- ServPak/jv/ShowNotes.java	2004-12-11 05:26:40.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/ShowNotes.java	2004-12-04 13:46:56.000000000 -0600
+@@ -43,7 +43,7 @@
+ 
+         String externalReference = "";
+ 
+-        for (String v; (v = bufr.readLine()) != null;) {
++        for (String v = null; (v = bufr.readLine()) != null;) {
+             v = v.trim();
+ 
+             if (v.indexOf("<reference>") >= 0) {
+@@ -99,7 +99,7 @@
+                 BufferedReader src = new BufferedReader(new StringReader(
+                             new String(fin)));
+ 
+-                for (String v; (v = src.readLine()) != null;) {
++                for (String v = null; (v = src.readLine()) != null;) {
+                     if (v.indexOf("?xml-stylesheet") > 0) {
+                         stylefile = v.substring(v.indexOf("href=") + 6,
+                                 v.lastIndexOf('"'));

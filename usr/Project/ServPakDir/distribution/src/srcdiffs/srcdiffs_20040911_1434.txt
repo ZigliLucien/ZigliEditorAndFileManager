@@ -1,0 +1,55 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2004-09-11 14:33:31.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2004-08-12 19:40:08.000000000 -0500
+@@ -48,7 +48,7 @@
+         }
+ 
+         if (dirnum.equals("0")) {
+-            StringBuffer bufi = new StringBuffer(6145);
++            StringBuffer bufi = new StringBuffer(4096);
+             buffr = new BufferedReader(new FileReader(lstfile));
+ 
+             for (String v = null; (v = buffr.readLine()) != null;) {
+@@ -76,7 +76,7 @@
+             boolean bool = false;
+             boolean test_ = false;
+ 
+-            StringBuffer bufi = new StringBuffer(6145);
++            StringBuffer bufi = new StringBuffer(4096);
+             FileInputStream fins = new FileInputStream(listfile);
+             buffr = new BufferedReader(new InputStreamReader(new GZIPInputStream(fins)));
+ 
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/Webgrep.java distribution/src/srcdiffs/ServPak/jv/Webgrep.java
+--- ServPak/jv/Webgrep.java	2004-09-11 14:34:13.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/Webgrep.java	2004-09-11 14:39:48.000000000 -0500
+@@ -84,10 +84,10 @@
+ 
+                     while ((v = bufferedreader.readLine()) != null) {
+                         if (v.indexOf(query) > -1) {
+-                            int locq = v.indexOf(query);
++                            int i_11_ = v.indexOf(query);
+ 
+-                            v = (v.substring(0, locq) + "<em>" + query +
+-                                "</em>" + v.substring(locq + query.length()));
++                            v = (v.substring(0, i_11_) + "<em>" + query +
++                                "</em>" + v.substring(i_11_ + query.length()));
+ 
+                             if (!hashmap.containsKey(filename)) {
+                                 hashmap.put(filename,
+@@ -106,11 +106,12 @@
+             Arrays.sort(dockeys);
+ 
+             int lgth = dockeys.length;
++            String string_13_ = "Search Results";
+ 
+-            stringbuffer = new StringBuffer(2049);
++            stringbuffer = new StringBuffer();
+             stringbuffer.append("<html>\n");
+             stringbuffer.append("<head>\n<style> span.a{font-size: 80%}</style>\n");
+-            stringbuffer.append("<title> Search Results on " + query +
++            stringbuffer.append("<title>" + string_13_ + " on " + query +
+                 " </title>\n");
+             stringbuffer.append("</head>\n");
+             stringbuffer.append("<body bgcolor=ffffff>\n");

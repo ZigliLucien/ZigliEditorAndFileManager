@@ -1,0 +1,15 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/ShowNotes.java distribution/src/srcdiffs/ServPak/jv/ShowNotes.java
+--- ServPak/jv/ShowNotes.java	2006-03-25 22:53:52.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/ShowNotes.java	2006-03-25 22:52:28.000000000 -0600
+@@ -27,7 +27,7 @@
+         String postpre = pre.substring(pre.indexOf("=") + 1);
+ 
+         postpre = DBM.converter(postpre);
+-
++System.out.println("POSTPRE "+postpre);
+ try{
+                   rs = conn.createStatement().executeQuery(
+ 		"SELECT data FROM notes WHERE filename='"+post+"' and link like '"+postpre+"'");

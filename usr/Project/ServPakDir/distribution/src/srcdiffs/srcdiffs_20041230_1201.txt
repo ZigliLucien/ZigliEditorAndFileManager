@@ -1,0 +1,62 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBM.java distribution/src/srcdiffs/ServPak/jv/DBM.java
+--- ServPak/jv/DBM.java	2004-12-30 12:00:55.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBM.java	2004-12-12 17:20:16.000000000 -0600
+@@ -67,10 +67,10 @@
+ 
+         query = converter(query);
+ 
+-        String[] toks = query.split("&");
+-
+-	for (String mark : toks) {
++        StringTokenizer tok = new StringTokenizer(query, "&");
+ 
++        while (tok.hasMoreTokens()) {
++            String mark = tok.nextToken();
+             String kee = mark.substring(0, mark.indexOf("="));
+             String valu = mark.substring(mark.indexOf("=") + 1);
+ 
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2004-12-30 11:56:49.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2004-12-14 00:17:06.000000000 -0600
+@@ -208,8 +208,10 @@
+ 
+         for (int q = 0; q < fields.length; q++) {
+             stringbuffer.append("<tr>");
+-            stringbuffer.append("<th align=right>" + dataCheck(champs[q]) + "&nbsp;&nbsp;</th>");
+-            stringbuffer.append("<td><input name=" + champs[q] + " size=20></td></tr>\n");
++            stringbuffer.append("<th align=right>" + dataCheck(champs[q]) +
++                "&nbsp;&nbsp;</th>");
++            stringbuffer.append("<td><input name=" + champs[q] +
++                " size=20></td></tr>\n");
+             stringbuffer.append("<tr><th><br></th><td><br></td></tr>\n");
+         }
+ 
+@@ -252,8 +254,8 @@
+                 String string = strings[q][qq];
+ 
+                 string = DBM.fixgtlt(string);
+-                stringbuffer.append(
+-	"<td width=\"" + hsize + "%\"><input name=\"" + q + "," + qq + "\" value=\"" +
++                stringbuffer.append("<td width=\"" + hsize +
++                    "%\"><input name=\"" + q + "," + qq + "\" value=\"" +
+                 string + "\" size=\"" + hsize + "\"></td>\n");
+             }
+ 
+@@ -267,12 +269,13 @@
+         return stringbuffer;
+     }
+ 
+-    String[][] editMode(HashMap<String, String> hashmap, int i, int j) throws Exception {
++    String[][] editMode(HashMap hashmap, int i, int j)
++        throws Exception {
+         String[][] strings = new String[i][j];
+ 
+         for (int q = 0; q < i; q++) {
+             for (int q1 = 0; q1 < j; q1++) {
+-	    String string = hashmap.get(String.valueOf(q) + "," + String.valueOf(q1));
++	    String string = hashmap.get(String.valueOf(q) + "," + String.valueOf(q1)).toString();
+ 
+                 strings[q][q1] = string.replace('+', ' ');
+             }
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

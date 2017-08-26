@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/ReadClass.java distribution/src/srcdiffs/ServPak/jv/ReadClass.java
+--- ServPak/jv/ReadClass.java	2004-10-14 15:12:36.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/ReadClass.java	2004-10-14 15:11:12.000000000 -0500
+@@ -51,7 +51,7 @@
+         String v = "";
+ 
+ 	ProcessBuilder pb = 
+-new ProcessBuilder("java","sun.tools.javap.Main","-classpath ", classpath, effectiveFile);
++new ProcessBuilder("java","sun.tools.javap.Main","-classpath "+classpath,effectiveFile);
+ 
+         try {
+             dojavap = pb.start();

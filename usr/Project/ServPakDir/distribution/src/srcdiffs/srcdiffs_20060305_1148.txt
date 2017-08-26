@@ -1,0 +1,29 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2006-03-05 11:47:31.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2006-03-05 11:33:44.000000000 -0600
+@@ -57,7 +57,9 @@
+             StringBuilder bufi = new StringBuilder(6145);
+ 
+ 	buffr = new BufferedReader(
+-		new InputStreamReader(ZEFMServer.getStream(lstfile, "listings")));
++		new InputStreamReader(
++		new ByteArrayInputStream(ZEFMServer.getFile(lstfile, "listings"))));
++
+ 
+             for (String v; (v = buffr.readLine()) != null;) {
+                 if (v.indexOf("form action=\"FileOps.jav") >= 0) {
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/WebEdit.java distribution/src/srcdiffs/ServPak/jv/WebEdit.java
+--- ServPak/jv/WebEdit.java	2006-03-05 11:48:18.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/WebEdit.java	2006-02-26 19:15:20.000000000 -0600
+@@ -44,7 +44,7 @@
+         filename = _filename;
+ 
+           bin = new BufferedReader(new InputStreamReader(
+-			        ZEFMServer.getStream(filename,"annotations")));
++		new ByteArrayInputStream(ZEFMServer.getFile(filename,"annotations"))));
+ 
+         StringBuilder buffy = new StringBuilder();
+ 

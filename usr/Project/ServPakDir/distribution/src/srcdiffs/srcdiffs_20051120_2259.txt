@@ -1,0 +1,97 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2005-11-20 22:46:21.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2005-11-20 06:08:20.000000000 -0600
+@@ -7,9 +7,8 @@
+ import NetsManager.Traxit;
+ 
+ import java.io.*;
+-import java.util.*;
+ 
+-import java.util.zip.*;
++import java.util.zip.GZIPInputStream;
+ import java.net.URLDecoder;
+ 
+ 
+@@ -28,32 +27,10 @@
+     static String dirname;
+     static String dirnum;
+ 
+-	 static Vector<String> cachefiles = new Vector<String>();
+-
+ 	public static boolean goingFM;
+-	static boolean initialized;
+ 
+     public GoFM(String linein) throws Exception {
+ 
+-	int cap = 20;
+-
+-if(!initialized){
+-
+-		int cutt = 0;		
+-
+-		String[] dlist = new File("Listings").list();
+-		for(String v : dlist){
+-			if(v.endsWith(".cache.html.gz")) {
+-				if(cutt<=cap){
+-					cachefiles.add("Listings/"+v);
+-					cutt++;
+-				} else {
+-					new File("Listings/"+v).delete();
+-				}
+-			}
+-		}
+-		initialized = true;
+-}
+         goingFM = false;
+ 
+ if(linein !=null) dirname = linein.substring(0, linein.indexOf("^"));
+@@ -96,29 +73,6 @@
+ 
+         String top = linein + "HEADER";
+         String listfile = "Listings/" + dirname.replace('/', '_') + ".xml.gz"; 
+-        String cachefile = "Listings/" + dirname.replace('/', '_') +dirnum+".cache.html.gz"; 
+-
+-	if(cachefiles.size() > cap) {
+-
+-		String v = cachefiles.elementAt(0);
+-		cachefiles.remove(0);
+-		boolean removed = new File(v).delete();
+-		System.out.println("REMOVED cache file "+v+" "+removed);
+-	}
+-
+-	if( new File(cachefile).exists() 
+-		&& new File(cachefile).lastModified() > new File(listfile).lastModified() ) {
+-
+-		FileInputStream fins = new FileInputStream(cachefile);
+-	InputStream zipin = new GZIPInputStream(fins);
+-            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+-
+-            for (int qq = 0; (qq = zipin.read()) != -1;) {
+-                bout.write(qq);
+-            }
+-			          ZConnection.out.write(bout.toByteArray());
+-		return;
+-	}
+ 
+         try {
+             int i = Xlster.counters.get(dirname);
+@@ -163,16 +117,7 @@
+ 
+ 		bufi.append(main);
+ 
+-		GZIPOutputStream gzout = new GZIPOutputStream(new FileOutputStream(cachefile));
+-		if(!cachefiles.contains(cachefile)) cachefiles.add(cachefile);
+-
+-		String buffout = bufi.toString().trim();
+-
+-		gzout.write(buffout.getBytes());
+-            	gzout.flush();
+-	            gzout.close();
+-
+-   	            ZConnection.out.write(buffout.getBytes());
++	          ZConnection.out.write(bufi.toString().trim().getBytes());
+ 
+         } catch (Exception exception) {
+ 
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

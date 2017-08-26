@@ -1,0 +1,35 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2004-10-31 11:40:52.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2004-10-31 10:39:28.000000000 -0600
+@@ -56,7 +56,7 @@
+ 
+             for (String v = null; (v = buffr.readLine()) != null;) {
+                 if (v.indexOf("form action=\"FileOps.jav") >= 0) {
+-                    fillChecked(bufi, localprocess, dirname);
++                    fillChecked(bufi, localprocess);
+ 
+                     continue;
+                 }
+@@ -105,7 +105,7 @@
+                     bufi.append("<h2>" + dirname + " : Listing " + dirnum +
+                         "</h2>\n");
+ 
+-                    fillChecked(bufi, localprocess, dirname);
++                    fillChecked(bufi, localprocess);
+                 } else if (bool) {
+                     if (v.indexOf("<comment") >= 0) {
+                         test_ = false;
+@@ -139,9 +139,9 @@
+ 
+ 	///////////// FILL CHECKED //////////////////
+ 
+-    public static void fillChecked(StringBuilder _buf, String _localprocess, String dirctry) {
++    public static void fillChecked(StringBuilder _buf, String _localprocess) {
+ _buf.append("<form action=\"FileOps.jav\" method=\"GET\" name=\"overall\"");
+-_buf.append(" id=\""+dirctry+"\">");
++_buf.append(" id=\""+dirname+"\">");
+         
+        
+ 	 _buf.append(vvv);
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

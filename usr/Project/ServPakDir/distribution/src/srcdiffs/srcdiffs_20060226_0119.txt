@@ -1,0 +1,26 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/WebEdit.java distribution/src/srcdiffs/ServPak/jv/WebEdit.java
+--- ServPak/jv/WebEdit.java	2006-02-26 01:19:22.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/WebEdit.java	2006-02-26 01:16:22.000000000 -0600
+@@ -22,12 +22,17 @@
+         printout = textin;
+ 
+         if (textin.indexOf("e@@it") >= 0) {
+-
++// StartTrace
++System.out.println(25);// traceon
+             String filein = textin.substring(textin.indexOf("=") + 1);
+-System.out.println("INCOMING "+filein);
++System.out.println(26);// traceon
++
++System.out.println(27);// traceon
+             dirname = filein.substring(0, filein.lastIndexOf("/"));
++System.out.println(28);// traceon
+             printout = editFile(filein);
+-System.out.println("HERE???");
++System.out.println(29);// traceon
++// StopTrace
+         }
+ 
+         if (textin.indexOf("s@@ve") >= 0) {

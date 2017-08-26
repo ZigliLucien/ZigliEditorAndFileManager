@@ -1,0 +1,23 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2004-10-31 02:19:46.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2004-10-31 01:53:56.000000000 -0600
+@@ -31,7 +31,7 @@
+ 
+         goingFM = false;
+ 
+-if(linein !=null) dirname = linein.substring(0, linein.indexOf("^"));
++        dirname = linein.substring(0, linein.indexOf("^"));
+ //        dirname = DBM.converter(dirname);
+ 
+         dirname = URLDecoder.decode(dirname, "UTF-8");
+@@ -137,8 +137,6 @@
+         }
+     }
+ 
+-	///////////// FILL CHECKED //////////////////
+-
+     public static void fillChecked(StringBuilder _buf, String _localprocess) {
+ _buf.append("<form action=\"FileOps.jav\" method=\"GET\" name=\"overall\"");
+ _buf.append(" id=\""+dirname+"\">");
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

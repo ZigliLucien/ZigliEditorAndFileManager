@@ -1,0 +1,15 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MySQL.java distribution/src/srcdiffs/ServPak/jv/MySQL.java
+--- ServPak/jv/MySQL.java	2006-04-29 22:36:39.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MySQL.java	2006-04-29 22:33:28.000000000 -0500
+@@ -51,7 +51,7 @@
+ 		Arrays.sort(tables);
+    
+ 		buf.append("<html><header><title>"+post+"</title></header>\n<body>");
+-		buf.append("<h2>Tables in database \""+post+"\"</h2><p/>&nbsp;<br/>");
++		buf.append("<h2>Tables in database "+post+"</h2><p/>&nbsp;<br/>");
+ 	 for (String v : tables) {
+ 		buf.append(
+ "<a href=MySQL.jav?basename="+post+"&tablename="+ZEFMServer.hexi(v)+">"+v+"</a><p/>\n");

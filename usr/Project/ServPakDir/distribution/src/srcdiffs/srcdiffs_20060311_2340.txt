@@ -1,0 +1,76 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/SendEmail.java distribution/src/srcdiffs/ServPak/jv/SendEmail.java
+--- ServPak/jv/SendEmail.java	2006-03-11 23:39:39.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/SendEmail.java	2006-03-09 08:19:32.000000000 -0600
+@@ -6,8 +6,6 @@
+ import java.io.*;
+ import java.util.*;
+ 
+-import java.sql.*;
+-
+ 
+ public class SendEmail {
+     static String filename;
+@@ -30,8 +28,6 @@
+     int direct;
+     SMailClient smc;
+ 
+-    Connection conn;
+-
+     public SendEmail(String _textin) throws Exception {
+         textin = DBM.converter(_textin);
+ 
+@@ -257,7 +253,7 @@
+             "/?home";
+ 
+         buffy = new StringBuilder("<html><body><pre>\n");
+-        brd = new BufferedReader(ZEFMServer.getStream(conn, _filename,"sentMail"));
++        brd = new BufferedReader(ZEFMServer.getStream(_filename,"sentMail"));
+ 
+         for (String v; (v = brd.readLine()) != null;) {
+             if (v.toCharArray().length > 0) {
+diff -Bwaur ServPak/jv/WebEdit.java distribution/src/srcdiffs/ServPak/jv/WebEdit.java
+--- ServPak/jv/WebEdit.java	2006-03-11 23:39:57.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/WebEdit.java	2006-03-09 08:20:00.000000000 -0600
+@@ -6,7 +6,6 @@
+ import ZEdit.MailFiles;
+ 
+ import java.io.*;
+-import java.sql.*;
+ 
+ import java.lang.Character.UnicodeBlock;
+ 
+@@ -18,13 +17,7 @@
+     static BufferedReader bin;
+     public String printout;
+ 
+-    Connection conn;
+-
+     public WebEdit(String _textin) throws Exception {
+-
+-        Class.forName("com.mysql.jdbc.Driver");
+-         conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/ZEFMdb","zz", "zefm");
+-
+         String textin = DBM.converter(_textin);
+ 
+         printout = textin;
+@@ -41,7 +34,7 @@
+ 
+             contents = contents.replace('+', ' ');
+ 
+-	ZEFMServer.goSave(conn, filename,contents,"annotations");
++	ZEFMServer.goSave(filename,contents,"annotations");
+             printout = goString();
+         }
+     }
+@@ -50,7 +43,7 @@
+ 
+         filename = _filename;
+ 
+-          bin = new BufferedReader(ZEFMServer.getStream(conn, filename,"annotations"));
++          bin = new BufferedReader(ZEFMServer.getStream(filename,"annotations"));
+ 
+         StringBuilder buffy = new StringBuilder();
+ 

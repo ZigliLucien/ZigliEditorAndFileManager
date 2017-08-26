@@ -1,0 +1,23 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2004-03-20 18:32:15.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2004-03-20 18:24:38.000000000 -0600
+@@ -46,7 +46,7 @@
+         if (localprocess == null) {
+             localprocess = "VVV";
+         }
+-System.out.println("GOING-FM 0");
++
+         if (dirnum.equals("0")) {
+             bufi = new StringBuffer();
+             bufferedreader = new BufferedReader(new FileReader(lstfile));
+@@ -68,7 +68,7 @@
+         }
+ 
+         reqreq = XCommands.reqfile;
+-System.out.println("GOING-FM REQ"+reqreq);
++
+         String top = string + "HEADER";
+         String listfile = "Listings/" + dirname.replace('/', '_') +
+             ".zefmdir";
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

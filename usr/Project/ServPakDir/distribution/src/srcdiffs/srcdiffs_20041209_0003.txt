@@ -1,0 +1,25 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2004-12-09 00:02:36.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2004-12-08 23:25:06.000000000 -0600
+@@ -83,9 +83,9 @@
+                 return;
+             }
+         } else {
+-
+             champs = getFields(filename);
+             tableset = readXML(filename, champs.length);
++//            tableset[0] = champs;
+ 
+             if (hashmap.containsKey("addrow")) {
+                 tableset = addRow(tableset);
+@@ -362,7 +362,7 @@
+     static String showTable(String basename) throws Exception {
+ 
+ 	FileInputStream fins = new FileInputStream("DB/" + basename + ".xml");
+-	new Query(fins, "ServPak/xql/dbgeneric.xql", DBM.zefmhome, true);
++	new Query(fins, new File("ServPak/xql/dbgeneric.xql"),DBM.zefmhome);
+ 	return Query.qtabby.toString();
+     }
+ 
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

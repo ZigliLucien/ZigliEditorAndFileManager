@@ -1,0 +1,23 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MKcal.java distribution/src/srcdiffs/ServPak/jv/MKcal.java
+--- ServPak/jv/MKcal.java	2005-05-19 17:10:54.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MKcal.java	2005-05-19 17:10:04.000000000 -0500
+@@ -37,7 +37,7 @@
+     static int[] lastday = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+     public String printout;
+ 
+-    public MKcal(String string) throws Exception {
++    public MKcal(String string) throws Exception {System.out.println("HELLLLOOOOOO");
+ 
+         int i = 0;
+         int indx = 0;
+@@ -84,7 +84,7 @@
+             year = Integer.parseInt(dateinfo[5]);
+ 	leapYearCheck(year);
+         }
+-System.out.println("HELLLLOOOOOO");
++
+         String mName = MONTHNAMES[monthindex];
+         String _mname = monthnames[monthindex];
+         int lday = lastday[monthindex];

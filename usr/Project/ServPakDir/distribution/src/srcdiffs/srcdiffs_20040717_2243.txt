@@ -1,0 +1,14 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/FileOps.java distribution/src/srcdiffs/ServPak/jv/FileOps.java
+--- ServPak/jv/FileOps.java	2003-08-24 23:22:00.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/FileOps.java	2004-07-17 22:31:24.000000000 -0500
+@@ -9,7 +9,7 @@
+     public String printout;
+     String request;
+ 
+-    public FileOps(String string) throws Exception {
++    public FileOps(String string) throws Exception {System.out.println("STRING "+string);
+         if (string.endsWith("C=GO") || string.endsWith("X=GO") ||
+                 string.endsWith("M=GO")) {
+             request = processcall + string;
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

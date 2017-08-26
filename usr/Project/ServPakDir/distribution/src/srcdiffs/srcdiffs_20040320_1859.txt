@@ -1,0 +1,43 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2004-03-20 18:59:49.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2004-03-20 18:55:14.000000000 -0600
+@@ -24,7 +24,7 @@
+     static final String eee = "<input type=\"radio\" name=\"fileops\" value=\"EEE\"";
+     static final String qqq = "<input type=\"radio\" name=\"fileops\" value=\"QQQ\"";
+     static final String aaa = "<input type=\"radio\" name=\"fileops\" value=\"AAA\"";
+- //   public String printout;
++    public String printout;
+     String reqreq;
+     String dirname;
+ 
+@@ -61,6 +61,7 @@
+                 bufi.append(v + "\n");
+             }
+ 
++//	         printout = bufi.toString().trim();	
+ 	          ZConnection.out.write(bufi.toString().trim().getBytes());
+ 
+             	return;
+@@ -156,14 +157,17 @@
+                 }
+             }
+ 
++	//           printout = bufi.toString().trim();
+ 	          ZConnection.out.write(bufi.toString().trim().getBytes());
+ 
+-        } catch (Exception exception) {
+ 
++        } catch (Exception exception) {System.out.println("YES IM HERE");
+             XCommands.pushListing(dirname);
+-            XCommands.reqfile = reqreq;
+-            new GoFM(string);
+ 
++            GoFM gofm5 = new GoFM(string);
++
++            printout = gofm5.printout;
++            XCommands.reqfile = reqreq;
+         }
+     }
+ 
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

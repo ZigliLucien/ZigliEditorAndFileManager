@@ -1,0 +1,25 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/WebEdit.java distribution/src/srcdiffs/ServPak/jv/WebEdit.java
+--- ServPak/jv/WebEdit.java	2006-03-11 13:11:40.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/WebEdit.java	2006-03-09 08:20:18.000000000 -0600
+@@ -6,7 +6,6 @@
+ import ZEdit.MailFiles;
+ 
+ import java.io.*;
+-import java.sql.*;
+ 
+ import java.lang.Character.UnicodeBlock;
+ 
+@@ -19,10 +18,6 @@
+     public String printout;
+ 
+     public WebEdit(String _textin) throws Exception {
+-
+-	ZEFMServer.conn = 
+-		DriverManager.getConnection("jdbc:mysql://localhost:3306/ZEFMdb","zz", "zefm");
+-
+         String textin = DBM.converter(_textin);
+ 
+         printout = textin;

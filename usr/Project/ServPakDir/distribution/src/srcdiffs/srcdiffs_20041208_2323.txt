@@ -1,0 +1,23 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2004-12-08 23:23:07.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2004-12-08 23:19:18.000000000 -0600
+@@ -304,7 +304,7 @@
+ 
+ 	
+ 
+-	for(String v;(v=buff.readLine())!=null;){
++	for(String v;(v=buff.readLine())!=null;){System.out.println("X "+v);
+ 	
+ 	ccc = (cc % (i+1));
+ 	  cc++;
+@@ -360,7 +360,7 @@
+     }
+ 
+     static String showTable(String basename) throws Exception {
+-System.out.println("HERE "+basename);
++
+ 	FileInputStream fins = new FileInputStream("DB/" + basename + ".xml");
+ 	new Query(fins, new File("ServPak/xql/dbgeneric.xql"),DBM.zefmhome);
+ 	return Query.qtabby.toString();
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

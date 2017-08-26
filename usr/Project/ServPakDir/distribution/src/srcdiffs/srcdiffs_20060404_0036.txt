@@ -1,0 +1,22 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2006-04-04 00:35:50.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2006-04-02 22:27:50.000000000 -0500
+@@ -201,7 +201,6 @@
+ 
+     }catch( Exception e ) {
+ 	            System.out.println(e.getMessage());
+-		new ZEdit.DOps();
+     }
+ 	return rs.getCharacterStream("data");
+    }
+@@ -219,7 +218,6 @@
+ 
+     }catch( Exception e ) {
+ 	            System.out.println(e.getMessage());
+-		new ZEdit.DOps();
+     }
+ 	return new GZIPInputStream(rs.getBinaryStream("data"));
+   }
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

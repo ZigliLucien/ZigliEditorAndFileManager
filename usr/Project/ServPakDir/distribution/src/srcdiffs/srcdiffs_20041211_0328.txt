@@ -1,0 +1,101 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBM.java distribution/src/srcdiffs/ServPak/jv/DBM.java
+--- ServPak/jv/DBM.java	2004-12-09 00:45:56.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBM.java	2004-10-28 00:19:00.000000000 -0500
+@@ -55,8 +55,10 @@
+         if (string.endsWith("=GO")) {
+             string = string.substring(0, string.indexOf("=GO"));
+ 
+-            String string_6_ = string.substring(0, string.indexOf("&sortdefault"));
+-            StringTokenizer stringtokenizer = new StringTokenizer(string_6_, "&=");
++            String string_6_ = string.substring(0,
++                    string.indexOf("&sortdefault"));
++            StringTokenizer stringtokenizer = new StringTokenizer(string_6_,
++                    "&=");
+             String string_7_ = "";
+ 
+             while (stringtokenizer.hasMoreTokens()) {
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2004-12-11 03:25:10.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2004-12-09 00:19:40.000000000 -0600
+@@ -84,7 +84,7 @@
+             }
+         } else {
+ 
+-            	     getFields(filename);
++            champs = getFields(filename);
+             tableset = readXML(filename, champs.length);
+ 
+             if (hashmap.containsKey("addrow")) {
+@@ -183,11 +183,12 @@
+     }
+ 
+     void addField(String string, String fld) throws Exception {
+-        new Traxit("DB/" + string + ".xml", "ServPak/xsl/newfield.xsl", fld);
++        new Traxit("DB/" + string + ".xml", "ServPak/xsl/newfield.xsl",
++            fld);
+ 
+         byte[] is = Traxit.tabby;
+-        FileOutputStream fileoutputstream = 
+-			new FileOutputStream("DB/" + string + ".xml");
++        FileOutputStream fileoutputstream = new FileOutputStream("DB/" +
++                string + ".xml");
+ 
+         fileoutputstream.write(is);
+         fileoutputstream.flush();
+@@ -283,7 +284,6 @@
+         return strings;
+     }
+ 
+-	//////////////// READXML //////////////////////////////
+     public static String[][] readXML(String basename, int i)
+         throws Exception {
+ 	try{
+@@ -440,22 +440,14 @@
+         return stringbuffer;
+     }
+ 
+-    static void getFields(String basename) throws Exception {
++    static String[] getFields(String basename) throws Exception {
+ 
+-	BufferedReader buf = new BufferedReader(new FileReader("DB/" + basename + ".xml"));
++//        new Traxit("DB/" + basename + ".xml", "ServPak/xsl/dbextract.xsl");
+ 
+-	boolean flag = false;
+-	Stack<String> staci = new Stack<String>();
+-
+-	for(String v;(v=buf.readLine()).contains("</entry>");) {
+-		if(v.contains("<entry>")) { flag = true; continue; }
+-		if(!flag) continue;
+-		String[] line = v.split("\\s+|<");
+-		staci.push(line[1]);System.out.println(line[0]+" X "+line[1]);
+-	}
+-
+-		champs = new String[staci.size()];
+-		staci.toArray(champs);
++ new Query(
++		new FileInputStream("DB/" + basename + ".xml"), 
++			"for $k in /*/*[position()=1]/* let $l:=name($k) return $l");
++	            return Query.qtabby.toString().split("\\s+");
+     }
+ 
+     static String dataCheck(String string) {
+diff -Bwaur ServPak/jv/DBrcops.java distribution/src/srcdiffs/ServPak/jv/DBrcops.java
+--- ServPak/jv/DBrcops.java	2004-12-11 03:28:27.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBrcops.java	2004-10-09 22:05:00.000000000 -0500
+@@ -341,10 +341,11 @@
+ 
+                         String string_64_ = string_62_.substring(string_62_.indexOf(
+                                     "=") + 1);
+-                        		DBgo.getFields(string_64_);
+-                        String[][] strings_65_ = DBgo.readXML(string_64_, DBgo.champs.length);
++                        String[] strings = DBgo.getFields(string_64_);
++                        String[][] strings_65_ = DBgo.readXML(string_64_,
++                                strings.length);
+ 
+-                        strings_65_[0] = DBgo.champs;
++                        strings_65_[0] = strings;
+ 
+                         boolean bool = strings_65_.length < numrows;
+ 
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

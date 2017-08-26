@@ -1,0 +1,50 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBM.java distribution/src/srcdiffs/ServPak/jv/DBM.java
+--- ServPak/jv/DBM.java	2004-12-12 16:14:11.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBM.java	2004-12-12 16:04:56.000000000 -0600
+@@ -130,17 +130,8 @@
+         }
+ 
+         String v;
+-	String f = "";
+-	int cc = 0;
+-	int ccc = 0;
+ 
+         while ((v = buff.readLine()) != null) {
+-
+-	ccc = (cc % (elements.length+1));
+-	  cc++;
+-
+-	if(ccc==0) continue;
+-
+             numlines++;
+ 
+             String entryname = data.get("entry");
+@@ -149,12 +140,13 @@
+ ////////////////////////////////////////////////////////////////////
+   //          StringTokenizer line =  new StringTokenizer(v, ",");
+ 	
+-//               for (String f : elements) {
++	     String[] line = v.split("\\s+");
++		int qq = 0;
+ 		
+-                  	if(ccc>0)  f = elements[ccc-1];
++            for (String f : elements) {
+     
+ //                String ky = line.nextToken();
+-	    String ky = v;
++	    String ky = line[qq];
+                 String kyref = XCommands.hexml(ky);
+ 
+                 ky = ZEdit.MailFiles.ampcheck(ky);
+@@ -165,7 +157,8 @@
+                 } else {
+                     sbuild.append("<" + f + ">" + ky + "</" + f + ">\n");
+                 }
+-//        }
++		qq++;
++            }
+ ////////////////////////////////////////////////////////////////////////////
+             sbuild.append("</" + entryname + ">\n");
+         }
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

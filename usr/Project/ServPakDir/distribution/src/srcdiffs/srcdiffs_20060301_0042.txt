@@ -1,0 +1,15 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2006-03-01 00:42:08.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2006-03-01 00:40:00.000000000 -0600
+@@ -82,7 +82,7 @@
+ 
+ 	InputStream zipin = new GZIPInputStream(new ByteArrayInputStream(datain));
+ 	ByteArrayOutputStream bout = new ByteArrayOutputStream();
+-System.out.println("ZIPIN "+zipin.available());
++
+ 	for (int q=0;(q=zipin.read())!=-1;) bout.write(q);
+ 
+ bufi.append("<html>\n");
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

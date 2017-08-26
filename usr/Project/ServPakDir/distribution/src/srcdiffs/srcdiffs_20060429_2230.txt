@@ -1,0 +1,24 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MySQL.java distribution/src/srcdiffs/ServPak/jv/MySQL.java
+--- ServPak/jv/MySQL.java	2006-04-29 22:30:30.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MySQL.java	2006-04-29 22:28:46.000000000 -0500
+@@ -44,7 +44,7 @@
+ 
+ 		Stack staci = new Stack<String>();	
+ 
+-		while(rs.next()) staci.push(rs.getString(3));
++		while(rs.next()) staci.push(rs.getString(1));
+ 	
+ 		 String[] tables  = new String[staci.size()];
+ 		staci.toArray(tables);
+@@ -54,7 +54,7 @@
+ 		buf.append("<h2>Tables in database "+post+"</h2><p/>&nbsp;<br/>");
+ 	 for (String v : tables) {
+ 		buf.append(
+-"<a href=MySQL.jav?basename="+post+"&tablename="+ZEFMServer.hexi(v)+">"+v+"</a><p/>\n");
++"<a href=MySQL.jav?basename="+post+" tablename="+ZEFMServer.hexi(v)+">"+v+"</a><p/>\n");
+ 	}
+ 		buf.append("</body>\n</html>");
+ 

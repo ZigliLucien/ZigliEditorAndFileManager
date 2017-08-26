@@ -1,0 +1,16 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2006-02-19 19:57:09.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2006-02-19 19:53:14.000000000 -0600
+@@ -152,7 +152,9 @@
+ 
+ 		String main = "";
+ 
+-	if(dirname.equals(Xlster.cdir) && !(localprocess.equals("XXX?")) ) {
++		boolean procupdate = ( localprocess.equals("XXX?") );
++
++	if(dirname.equals(Xlster.cdir) && !procupdate) {
+ 	            main = Xlster.currentDir[Integer.parseInt(dirnum)-1];
+ 		System.out.println("READING CACHE "+dirnum);	
+ 
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

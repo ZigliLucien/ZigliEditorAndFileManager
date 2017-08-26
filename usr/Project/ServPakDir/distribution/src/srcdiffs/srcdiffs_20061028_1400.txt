@@ -1,0 +1,39 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MySQL.java distribution/src/srcdiffs/ServPak/jv/MySQL.java
+--- ServPak/jv/MySQL.java	2006-10-28 14:00:37.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MySQL.java	2006-10-28 13:52:24.000000000 -0500
+@@ -121,6 +121,7 @@
+ 
+             numberOfColumns = rsmd.getColumnCount();
+ 
++//////////////
+           		buf.append("<h2>"+string+"</h2><p/>&nbsp;<br/>");
+ 		buf.append("<table border=\"1\">\n");
+ 	for(int q=1;q<numberOfColumns;q++) {
+@@ -129,6 +130,24 @@
+ 		String out = rs.getObject(q).toString();
+ 		buf.append("<td align="+align+" width="+50+"%><pre>"+out+"</pre></td>");
+ 		buf.append("</tr>\n");
++///////////////
++
++/*
++          		buf.append("<h2>"+string+"</h2><p/>&nbsp;<br/>");
++		buf.append("<table><tr>\n");
++	for(int q=1;q<=numberOfColumns;q++) {
++		buf.append("<th width="+approx+"%>"+rsmd.getColumnLabel(q)+"</th>");
++		if(q==1) buf.append("<td width="+approx+"%><br/></td>");
++	}
++		buf.append("</tr><tr>\n");
++	for(int q=1;q<=numberOfColumns;q++) {
++	String align = "";
++	if(q==1) align="center";
++		buf.append(
++	"<td align="+align+" width="+approx+"%><pre>"+(rs.getObject(q)).toString()+"</pre></td>");
++		if(q==1) buf.append("<td width="+approx+"%><br/></td>");
++*/
++
+ 	}
+ 		buf.append("</tr>\n</table>\n<p/>\n");
+ 

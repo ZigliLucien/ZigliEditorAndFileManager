@@ -1,0 +1,35 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/Search.java distribution/src/srcdiffs/ServPak/jv/Search.java
+--- ServPak/jv/Search.java	2006-10-22 00:14:00.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/Search.java	2006-10-22 00:07:10.000000000 -0500
+@@ -48,14 +48,10 @@
+ 		String[] feeds = sortedResults(rs);
+ 
+ 		sb.append("<h3>In Texts</h3>\n <ul>");
+-		sb.append("<table>\n");
+ 		for(String v : feeds) sb.append(getRow(v));
+ 		sb.append("</ul>\n<p/>&nbsp;<p/>");
+ 
+-	if(feeds.length==0) sb.append(
+-		"<tr><td><tt>No matches found.</tt><td><br/></td></tr><p/>");
+-
+-		sb.append("</table>\n");
++	if(feeds.length==0) sb.append("<tt>No matches found.</tt><p/>");
+ 
+ 	printout += sb.toString()+"\n</body>\n</html>";
+ 
+@@ -95,9 +91,9 @@
+ 	String fdir = ttl.substring(0,ttl.lastIndexOf("/"));	
+ 
+ 	return 
+-	"<tr><td align=\"left\" width=\"20%\"><a href=\""+ttl+"\">"+ttl+"</a></td> "+
+-	"<td align=\"left\"  width=\"20%\"><a href=\""+fdir+"\">"+fdir+"</a></td>"+
+-	"</tr>\n";
++	"<li><a href=\""+ttl+"\">"+ttl+"</a>&nbsp; To directory: "+
++	"<a href=\""+fdir+"\">"+fdir+"</a>"+
++	"</li>\n";
+ 	}
+ 
+ /////////// SORT RESULTS //////

@@ -1,0 +1,32 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/Search.java distribution/src/srcdiffs/ServPak/jv/Search.java
+--- ServPak/jv/Search.java	2006-10-22 00:20:37.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/Search.java	2006-10-22 00:18:42.000000000 -0500
+@@ -50,14 +50,13 @@
+ 		sb.append("<h3>In Texts</h3>\n <ul>");
+ 		sb.append(
+ 	"<table><tr><th align=\"left\" width=\"10%\">"+
+-	"File</th><th align=\"left\" width=\"10%\">Directory</th>"+
+-	"<th align=\"left\" width=\"10%\"><br/></th></tr>\n");
++	"File</th><th align=\"left\" width=\"10%\">Directory</th></tr>\n");
+ 
+ 		for(String v : feeds) sb.append(getRow(v));
+ 		sb.append("</ul>\n<p/>&nbsp;<p/>");
+ 
+ 	if(feeds.length==0) sb.append(
+-"<tr><td><tt>No matches found.</tt></td><td><br/></td><td><br/></td></tr><p/>");
++		"<tr><td><tt>No matches found.</tt><td><br/></td></tr><p/>");
+ 
+ 		sb.append("</table>\n");
+ 
+@@ -101,7 +100,7 @@
+ 	return 
+ 	"<tr><td align=\"left\" width=\"10%\"><a href=\""+ttl+"\">"+ttl+"</a></td> "+
+ 	"<td align=\"left\"  width=\"10%\"><a href=\""+fdir+"\">"+fdir+"</a></td>"+
+-	"<td align=\"left\"  width=\"10%\"><br/></td></tr>\n";
++	"</tr>\n";
+ 	}
+ 
+ /////////// SORT RESULTS //////

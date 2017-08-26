@@ -1,0 +1,32 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/Webgrep.java distribution/src/srcdiffs/ServPak/jv/Webgrep.java
+--- ServPak/jv/Webgrep.java	2004-10-10 11:49:08.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/Webgrep.java	2004-10-10 11:44:54.000000000 -0500
+@@ -15,7 +15,7 @@
+      StringBuilder stringbuffer;
+     static HashMap <File,String> hashmap;
+     public String printout;
+-    public File[] dockeys;
++    public String[] dockeys;
+ 
+     public Webgrep(String string) throws Exception {
+         hashmap = new HashMap<File,String>();
+@@ -102,7 +102,7 @@
+                 }
+             }
+ 
+-	dockeys = new File[hashmap.keySet().size()];
++	dockeys = new String[hashmap.keySet().size()];
+ 
+             hashmap.keySet().toArray(dockeys);
+             Arrays.sort(dockeys);
+@@ -125,7 +125,7 @@
+                 stringbuffer.append(strings[i_5_]);
+             } else {
+                 for (int qq = 0; qq < lgth; qq++) {
+-                    String datum = dockeys[qq].toString();
++                    String datum = dockeys[qq];
+ 
+                     stringbuffer.append("<hr></a>\n");
+                     stringbuffer.append("In <b>" + datum +

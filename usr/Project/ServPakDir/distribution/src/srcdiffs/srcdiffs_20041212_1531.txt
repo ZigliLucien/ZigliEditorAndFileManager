@@ -1,0 +1,106 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBM.java distribution/src/srcdiffs/ServPak/jv/DBM.java
+--- ServPak/jv/DBM.java	2004-12-12 15:31:20.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBM.java	2004-12-12 15:26:14.000000000 -0600
+@@ -192,8 +192,8 @@
+ 
+         for (String w : catz) {
+ 
+-            dbmbufr.append(
+-"<span style=\"background-color:white\"> &#160;" + DBgo.dataCheck(w) + " &#160; </span> \n");
++            dbmbufr.append("<span style=\"background-color:white\"> &#160;" +
++                DBgo.dataCheck(w) + " &#160; </span> \n");
+             dbmbufr.append("<select name=\"" + w + "\">\n");
+             dbmbufr.append("<option> ALL </option>\n");
+ 
+@@ -210,80 +210,48 @@
+             linenumberreader.setLineNumber(0);
+             dbmbufr.append("</select>&nbsp;&nbsp;&nbsp;&nbsp;\n");
+         }
+-// StartTrace
+-System.out.println(213);// traceon
++
+         dbmbufr.append("<p>&nbsp;<br>\n");
+-System.out.println(214);// traceon
+         dbmbufr.append("Primary Sort: <select name=\"Sort\">\n");
+-System.out.println(215);// traceon
+-        dbmbufr.append("<option value=" + sortdef + "> " + DBgo.dataCheck(sortdef) + " </option>\n");
+-System.out.println(216);// traceon
++        dbmbufr.append("<option value=" + sortdef + "> " +
++            DBgo.dataCheck(sortdef) + " </option>\n");
+ 
+-System.out.println(217);// traceon
+         for (String w : catz) {
+-System.out.println(218);// traceon
+             if (!v.equals(sortdef)) {
+-System.out.println(219);// traceon
+-                dbmbufr.append("<option value=" + w + "> " + DBgo.dataCheck(w) + " </option>\n");
+-System.out.println(220);// traceon
++                dbmbufr.append("<option value=" + w + "> " +
++                    DBgo.dataCheck(w) + " </option>\n");
+             }
+-System.out.println(221);// traceon
+         }
+-System.out.println(222);// traceon
+ 
+-System.out.println(223);// traceon
+         dbmbufr.append("</select>&nbsp;&nbsp;&nbsp;&nbsp;\n");
+-System.out.println(224);// traceon
+         dbmbufr.append("Secondary Sort: <select name=\"Sort\">\n");
+-System.out.println(225);// traceon
+         dbmbufr.append("<option value=" + sortdef + ">" + DBgo.dataCheck(sortdef) + "</option>\n");
+-System.out.println(226);// traceon
+ 
+-System.out.println(227);// traceon
+         for (String w : catz) {
+-System.out.println(228);// traceon
+             if (!w.equals(sortdef)) {
+-System.out.println(229);// traceon
+-                dbmbufr.append("<option value=" + w + "> " + DBgo.dataCheck(w) + " </option>\n");
+-System.out.println(230);// traceon
++                dbmbufr.append("<option value=" + w + "> " +
++                    DBgo.dataCheck(w) + " </option>\n");
+             }
+-System.out.println(231);// traceon
+         }
+-System.out.println(232);// traceon
+ 
+-System.out.println(233);// traceon
+         dbmbufr.append("</select>\n");
+-System.out.println(234);// traceon
+         dbmbufr.append("<p>&nbsp;<br>\n");
+-System.out.println(235);// traceon
+         dbmbufr.append(
+             "<center><input type=submit value=\"SEARCH/VIEW\"></center><p><input type=reset class=res>\n");
+-System.out.println(237);// traceon
+         dbmbufr.append("</form>\n");
+-System.out.println(238);// traceon
+ 
+-System.out.println(239);// traceon
+         if (bool) {
+-System.out.println(240);// traceon
+             dbmbufr.append(
+ 		"<p/>&nbsp;<p><a href=DBM.jav?savetable=" + dbasename + ">");
+-System.out.println(242);// traceon
+             dbmbufr.append(
+                 "\\/\\/\\/\\ <b>Save</b> Sorted Table to Original File (<i> overwrites original table </i>) /\\/\\/\\/ ");
+-System.out.println(244);// traceon
+             dbmbufr.append("</a><p/>");
+-System.out.println(245);// traceon
+ 
+-System.out.println(246);// traceon
+-dbmbufr.append("<a href=\"DBgo.jav?tablename=" + dbasename 
+-		   + "&newtable=\">Back to Edit Table</a><p>\n");
+-System.out.println(248);// traceon
++            dbmbufr.append("<a href=\"DBgo.jav?tablename=" + dbasename +
++                "&newtable=\">Back to Edit Table</a><p>\n");
+             dbmbufr.append("<a href=\"" + locdirec +
+                 "/HTML/zserve.html\"> Back to " + zefmhome + "</a><p>\n");
+-System.out.println(250);// traceon
+         }
+-System.out.println(251);// traceon
+-// StopTrace
+ System.out.println("CHECKZERO "+dbmbufr.toString());
+         dbmbufr.append("</body>\n");
+         dbmbufr.append("</html>\n");
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

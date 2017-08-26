@@ -1,0 +1,20 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/MySQL.java distribution/src/srcdiffs/ServPak/jv/MySQL.java
+--- ServPak/jv/MySQL.java	2006-04-29 22:48:10.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/MySQL.java	2006-04-29 22:44:56.000000000 -0500
+@@ -138,12 +138,8 @@
+ 				if(string.contains("_")) fname = string.replace('_','/');
+ 		}
+ 	}
+-
+-	String aux = "";
+-	if(postpre.equals("sentMail")) aux = "MySQL.jav?MAILLOG=";
+-
+ 		buf.append(
+-		"<a href="+aux+ZEFMServer.hexi(fname)+">See File</a><p/>\n");
++		"<a href="+ZEFMServer.hexi(fname)+">See File</a><p/>\n");
+ 		buf.append(
+    "<a href=MySQL.jav?DELETE="+ZEFMServer.hexi(string)+">Delete Entry from Database</a><p/>\n");
+ 		buf.append("</body>\n</html>");

@@ -1,0 +1,58 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2006-09-16 18:47:34.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2006-09-16 15:48:04.000000000 -0500
+@@ -48,8 +48,8 @@
+ 	String elements = new String(new Traxit(fname,"ServPak/xsl/listElements.xsl").tabby);
+ 
+ 	String[] elts = elements.split("!");
+-	
+-	entryname = elts[1];
++for(int q=0;q<5;q++){
++	System.out.println(q+" "+elts[q].trim());}
+ 
+             File file = new File(fname);
+ 
+@@ -63,9 +63,9 @@
+ 
+                 stringbuffer.append("<?xml version=\"1.0\"?>\n");
+                 stringbuffer.append("<" + filename + ">\n\n");
+-                stringbuffer.append("<"+entryname+">\n");
++                stringbuffer.append("<entry>\n");
+                 stringbuffer.append("<" + hmap + "> - </" + hmap + ">");
+-                stringbuffer.append("\n</"+entryname+">");
++                stringbuffer.append("\n</entry>");
+                 stringbuffer.append("\n\n</" + filename + ">");
+                 printwriter.print(stringbuffer.toString());
+                 printwriter.close();
+@@ -346,7 +346,7 @@
+         stringbuffer = new StringBuilder();
+ 
+         String _name = name.substring(name.lastIndexOf("/")+1);
+-        String _entry = entryname;
++        String _entry = "entry";
+         String[] _row = table[0];
+ 
+         stringbuffer.append("<?xml version=\"1.0\"?>\n");
+@@ -444,7 +444,7 @@
+         stringbuffer.append(
+             "<tr><td> <b>View</b> (check one)</td><td> <input type=radio name=style value=search> Directory style<br><input type=radio name=style value=table>Table style</td></tr>");
+         stringbuffer.append("</table><input type=submit value=GO name=\"dbase=" +
+-            string + "&entry="+entryname+"&fields=");
++            string + "&entry=entry&fields=");
+ 
+         for (int q = 0; q < (i - 1); q++) {
+             stringbuffer.append(strings[q] + ",");
+@@ -465,8 +465,8 @@
+ 	boolean flag = false;
+ 	Stack<String> staci = new Stack<String>();
+ 
+-	for(String v;!(v=buf.readLine()).contains("</"+entryname+">");) {
+-		if(v.contains("<"+entryname+">")) { flag = true; continue; }
++	for(String v;!(v=buf.readLine()).contains("</entry>");) {
++		if(v.contains("<entry>")) { flag = true; continue; }
+ 		if(!flag) continue;
+ 		String[] line = v.trim().split("\\s+|<|>");
+ 		staci.push(line[1]);
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

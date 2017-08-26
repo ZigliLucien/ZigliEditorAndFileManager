@@ -1,0 +1,15 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2006-09-16 18:49:13.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2006-09-16 18:47:34.000000000 -0500
+@@ -53,7 +53,7 @@
+ 
+             File file = new File(fname);
+ 
+-	System.out.println("OK "+entryname);
++	
+ 
+             if (hashmap.get("newtable") != null) {
+                 String hmap = hashmap.get("newtable");
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

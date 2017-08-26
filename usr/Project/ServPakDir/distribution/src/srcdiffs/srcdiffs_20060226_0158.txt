@@ -1,0 +1,25 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/WebEdit.java distribution/src/srcdiffs/ServPak/jv/WebEdit.java
+--- ServPak/jv/WebEdit.java	2006-02-26 01:58:28.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/WebEdit.java	2006-02-26 01:40:34.000000000 -0600
+@@ -25,8 +25,9 @@
+         if (textin.indexOf("e@@it") >= 0) {
+ 
+             String filein = textin.substring(textin.indexOf("=") + 1);
+-
++System.out.println("INCOMING "+filein);
+             printout = editFile(filein);
++System.out.println("HERE???");
+         }
+ 
+         if (textin.indexOf("s@@ve") >= 0) {
+@@ -41,6 +42,8 @@
+ 
+     String editFile(String _filename) throws Exception {
+ 
++System.out.println("WORKING "+_filename);
++
+         filename = _filename;
+ 
+           bin = new BufferedReader(new InputStreamReader(

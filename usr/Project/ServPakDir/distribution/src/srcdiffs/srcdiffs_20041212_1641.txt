@@ -1,0 +1,23 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBM.java distribution/src/srcdiffs/ServPak/jv/DBM.java
+--- ServPak/jv/DBM.java	2004-12-12 16:41:16.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBM.java	2004-12-12 16:40:10.000000000 -0600
+@@ -137,8 +137,6 @@
+ 	int cc = 0;
+ 	int ccc = 0;
+ 
+-	buff.readLine();
+-
+         while ((v = buff.readLine()) != null) {
+ 
+ 	ccc = (cc % numfields);
+@@ -146,7 +144,7 @@
+ 
+ System.out.println("CC "+cc+" CCC "+ccc+" LINE "+v);
+ 
+-	if( (cc % numfields) == 0 ) continue;
++	if( ccc==0 || (cc % numfields) == 0 ) continue;
+ 
+             String entryname = data.get("entry");
+ 
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

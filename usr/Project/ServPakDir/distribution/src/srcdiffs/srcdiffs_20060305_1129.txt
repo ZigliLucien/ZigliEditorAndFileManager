@@ -1,0 +1,15 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2006-03-05 11:29:34.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2006-03-05 11:27:42.000000000 -0600
+@@ -36,7 +36,7 @@
+ 
+     public GoFM(String linein) throws Exception {
+ 
+-            Class.forName("com.mysql.jdbc.Driver");
++//         Class.forName("com.mysql.jdbc.Driver");
+ 	conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/ZEFMdb","zz", "zefm");
+ 
+ if(linein !=null) dirname = linein.substring(0, linein.indexOf("^"));
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

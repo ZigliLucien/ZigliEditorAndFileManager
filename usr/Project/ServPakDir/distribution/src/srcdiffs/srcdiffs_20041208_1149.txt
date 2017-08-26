@@ -1,0 +1,37 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2004-12-08 03:29:19.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2004-12-08 03:18:44.000000000 -0600
+@@ -437,7 +437,8 @@
+     static String[] getFields(String string) throws Exception {
+         new Traxit("DB/" + string + ".xml", "ServPak/xsl/dbextract.xsl");
+ 
+-        StringTokenizer stringtokenizer = new StringTokenizer(new String(Traxit.tabby), "\n");
++        StringTokenizer stringtokenizer = new StringTokenizer(new String(
++                    Traxit.tabby), "\n");
+         String[] strings = new String[stringtokenizer.countTokens()];
+         int i = 0;
+ 
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/Query.java distribution/src/srcdiffs/ServPak/jv/Query.java
+--- ServPak/jv/Query.java	2004-12-08 11:46:35.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/Query.java	2004-12-02 20:54:42.000000000 -0600
+@@ -52,15 +52,11 @@
+ 	        props.setProperty(OutputKeys.INDENT, "yes");
+ 
+ 		ByteArrayOutputStream jack = new ByteArrayOutputStream();
+-	try{
++
+ 	        exp.run(dynamicContext, new StreamResult(jack), props);
+-	}catch (Exception ee){ 
+-		jack.write(new String("Error in "+query).getBytes());
+-			}
+-	finally{
+-		printout = jack.toString();
+-	}
++
+ 		printout = jack.toString();
++
+     	}
+ 
+ 	public static void main(String[] qubits){

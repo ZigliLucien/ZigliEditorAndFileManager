@@ -1,0 +1,16 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2004-08-16 20:41:17.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2004-08-16 20:39:52.000000000 -0500
+@@ -152,9 +152,8 @@
+                 tableset = addRow(tableset, newrow);
+             }
+ 
+-                outt = writeXML(filename, tableset);	    
+-
+             if (!bool) {
++                outt = writeXML(filename, tableset);	    
+             printwriter = new PrintWriter(new FileWriter("DB/" + filename + ".xml"), true);
+ 	printwriter.print(outt.toString());
+             printwriter.close();
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

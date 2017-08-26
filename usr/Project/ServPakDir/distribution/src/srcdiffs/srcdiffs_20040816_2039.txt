@@ -1,0 +1,22 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2004-08-16 20:39:51.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2004-08-16 20:38:02.000000000 -0500
+@@ -21,7 +21,6 @@
+     static String filename;
+     static String[][] tableset;
+      StringBuffer stringbuffer;
+-     StringBuffer outt;
+      PrintWriter printwriter;
+     public String printout;
+     String[] champs;
+@@ -38,6 +37,8 @@
+         boolean showtable = true;
+         HashMap hashmap = parseQuery(string);
+ 
++	StringBuffer outt = new StringBuffer(4097);
++
+         if (string.indexOf("tablename") > -1) {
+             filename = hashmap.get("tablename").toString();
+ 
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

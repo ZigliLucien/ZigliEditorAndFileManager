@@ -1,0 +1,45 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBrcops.java distribution/src/srcdiffs/ServPak/jv/DBrcops.java
+--- ServPak/jv/DBrcops.java	2004-12-20 19:31:30.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/DBrcops.java	2004-12-20 19:18:20.000000000 -0600
+@@ -59,12 +59,14 @@
+                     table2[0][0] = table[0][0];
+ 
+                     for (int i = 1; i < numcols; i++) {
+-                        strings[0][i] = "COL-" + String.valueOf(i) + "-" + table[0][i];
++                        strings[0][i] = "COL-" + String.valueOf(i) + "-" +
++                            table[0][i];
+                         table2[0][i] = table[0][i];
+                     }
+ 
+                     for (int i = 1; i < numrows; i++) {
+-                        strings[i][0] = "ROW-" + String.valueOf(i) + "-" + table[i][0];
++                        strings[i][0] = "ROW-" + String.valueOf(i) + "-" +
++                            table[i][0];
+                         table2[i][0] = table[i][0];
+                     }
+ 
+@@ -178,7 +180,8 @@
+                         stringtokenizer.nextToken();
+ 
+                         String string_39_ = stringtokenizer.nextToken();
+-                        String string_40_ = string_39_.substring(string_39_.indexOf("=") + 1);
++                        String string_40_ = string_39_.substring(string_39_.indexOf(
++                                    "=") + 1);
+                         int i = Integer.parseInt(string_40_);
+ 
+                         string_39_ = stringtokenizer.nextToken();
+@@ -204,9 +207,9 @@
+                         numcols++;
+                         table2 = new String[numrows][numcols];
+ 
+-                        for (int A = 0; A < numrows; A++) {
+-                            for (int B = 0; B < i; B++) {
+-                                table2[A][B] = table[A][B];
++                        for (int i_44_ = 0; i_44_ < numrows; i_44_++) {
++                            for (int i_45_ = 0; i_45_ < i; i_45_++) {
++                                table2[i_44_][i_45_] = table[i_44_][i_45_];
+                             }
+                         }
+ 
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

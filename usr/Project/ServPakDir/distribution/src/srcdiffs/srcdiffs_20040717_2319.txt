@@ -1,0 +1,18 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2004-07-17 23:19:27.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2004-05-16 14:53:48.000000000 -0500
+@@ -114,12 +114,6 @@
+                     bufi.append(
+                         "	         span.a{font-variant: small-caps; color: magenta;");
+                     bufi.append("		      font-weight: lighter}\n");
+-		
+-                    bufi.append("input.x{background: #ffffff; color: #5555ff; font-size: 80%}\n");
+-                    bufi.append("input.x:hover{color: #ee9909; text-decoration: underline}\n");
+-                    bufi.append("input.y{background: #888888; color: #000000; font-size: 80%}\n");
+-                    bufi.append("input.y:hover{color: #cc9908; text-decoration: underline}\n");
+-
+                     bufi.append(
+                         "		a.z:hover{ color: #cc9909; text-decoration: underline}\n");
+                     bufi.append("		a.z{ font-size: 80%}\n");
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

@@ -1,0 +1,50 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBM.java distribution/src/srcdiffs/ServPak/jv/DBM.java
+--- ServPak/jv/DBM.java	2004-10-23 00:36:21.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBM.java	2004-10-10 11:55:00.000000000 -0500
+@@ -305,8 +305,8 @@
+             dbasename.substring(dbasename.lastIndexOf("/") + 1));
+ 
+ 	stringbuffer = 
+-	new StringBuilder(
+-"<html><head><meta http-equiv=\"refresh\" content=\"url=0;"+string_40_+".sdb\"></head>\n");
++	new StringBuilder("<html><head><script>window.location=\""
++			   +string_40_+".sdb\"</script></head>\n");
+         stringbuffer.append("<html><body><p>&nbsp;<p>&nbsp;<p>&nbsp;<p><center> <a href=");
+         stringbuffer.append(string_40_ + ".sdb> <font size=+2>Go To <b>");
+         stringbuffer.append(dbasename.toUpperCase() + "</b></font></a></center></body></html>");
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2004-10-23 00:36:48.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2004-10-10 12:02:00.000000000 -0500
+@@ -78,7 +78,7 @@
+                     filename.substring(filename.lastIndexOf("/") + 1));
+ 
+                 stringbuffer = new StringBuilder(
+-	  "<html><head><meta http-equiv=\"refresh\" content=\"url=0;"+out0+".sdb\"></head>\n");
++		"<html><head><script>window.location=\""+out0+".sdb\"</script></head>\n");
+ 	    stringbuffer.append("<body><h2> To " + filename + "</h2><p>\n");
+                 stringbuffer.append("<a href=" + out0 + ".sdb> Go to " +
+                     filename + "</a><p>\n</body></html>");
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/Webgrep.java distribution/src/srcdiffs/ServPak/jv/Webgrep.java
+--- ServPak/jv/Webgrep.java	2004-10-23 00:35:08.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/Webgrep.java	2004-10-23 00:25:50.000000000 -0500
+@@ -169,11 +169,16 @@
+ 	if(lgth>5) {
+ 
+             printout =
+-
+-"<html><head><meta http-equiv=\"refresh\" content=\"url=0;"+where+"/SearchResults.html\"> </head>\n"
++"<html><head><META http-equiv=\"refresh\" content=\"url=0;"+where+"/SearchResults.html\"> </head>\n"
+ +"<body><p/>&nbsp;<p/><p/>&nbsp;<p/><center><h2>--&gt;&gt; <a href=\""
+ +where+"/SearchResults.html\">Get Results </a>&lt;&lt;--</h2></center></body></html>" ;
+ 
++/*
++            printout =
++"<html><head><script> window.location=\""+where+"/SearchResults.html\"</script></head>\n"
+++"<body><p/>&nbsp;<p/><p/>&nbsp;<p/><center><h2>--&gt;&gt; <a href=\""
+++where+"/SearchResults.html\">Get Results </a>&lt;&lt;--</h2></center></body></html>" ;
++*/
+ 		     } else {
+ 				printout = stringbuffer.toString();
+ 			    

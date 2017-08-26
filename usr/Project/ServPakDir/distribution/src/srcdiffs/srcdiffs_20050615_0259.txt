@@ -1,0 +1,31 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DiaryOut.java distribution/src/srcdiffs/ServPak/jv/DiaryOut.java
+--- ServPak/jv/DiaryOut.java	Wed Jun 15 02:57:38 2005
++++ distribution/src/srcdiffs/ServPak/jv/DiaryOut.java	Wed Jun 15 02:56:22 2005
+@@ -8,20 +8,20 @@
+     public String printout;
+ 
+     public DiaryOut(String string) throws Exception {
+-
++System.out.println("INCOMING "+string);
+         String A = string.substring(0, string.indexOf("&"));
+         int i = A.indexOf("=");
+         String B = A.substring(0, i);
+         String info = A.substring(i + 1);
+-
++System.out.println("AT B "+B);
+         String[] st = B.split("\\+");
+-
++for(String v : st) System.out.println("HERE "+v);
+         String out = MKcal.ldir + "/diary-" + st[2] + ".txt";
+         PrintWriter printwriter = new PrintWriter(new FileWriter(out, true), true);
+-
++System.out.println("INFO1 "+info);
+         info = info.replace('+', ' ');
+         info = DBM.converter(info);
+-
++System.out.println("INFO2 "+info);
+         printwriter.println(st[0] + " " + st[1] + " | " + info);
+ 
+         MKcal calUpdated = new MKcal(MKcal.inputString);
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

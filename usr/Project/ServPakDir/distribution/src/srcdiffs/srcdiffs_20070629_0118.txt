@@ -1,0 +1,24 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/SentMail.java distribution/src/srcdiffs/ServPak/jv/SentMail.java
+--- ServPak/jv/SentMail.java	2007-06-29 01:18:17.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/SentMail.java	2007-06-28 09:59:12.000000000 -0500
+@@ -17,16 +17,13 @@
+ 		ServPak.jv.MySQL data = new ServPak.jv.MySQL("MySQL.jav?"+cmd);	
+ 		String listing = data.printout;	
+ 
+-		String query = "for $i in //tr let $k:=$i//th/node() let $j:=$i//td//pre/node() return element{$k}{$j}";
+-
+-		
+ 		listing = "<?xml version=\"1.0\"?>\n"+listing;
+ 
+ 		listing = listing.replaceAll("&nbsp;"," ");
+ 		listing = listing.replaceAll("<br>","<br/>");
+ 		listing = listing.replaceAll("align=center","align='center'");
+ try{
+-		out = (new NetsManager.Query(listing, query, null, false)).qtabby.toByteArray(); 
++		out = (new NetsManager.Query(listing, "ServPak/xql/sentmail.xql", null, true)).qtabby.toByteArray(); 
+ 
+ }catch(Exception ee){}
+ 

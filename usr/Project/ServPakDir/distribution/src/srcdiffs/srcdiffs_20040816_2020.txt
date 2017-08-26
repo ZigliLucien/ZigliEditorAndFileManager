@@ -1,0 +1,76 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2004-08-16 20:20:29.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2004-08-16 20:01:48.000000000 -0500
+@@ -37,8 +37,6 @@
+         boolean showtable = true;
+         HashMap hashmap = parseQuery(string);
+ 
+-	StringBuffer outt = new StringBuffer(4097);
+-
+         if (string.indexOf("tablename") > -1) {
+             filename = hashmap.get("tablename").toString();
+ 
+@@ -154,22 +152,14 @@
+             }
+ 
+             if (!bool) {
+-                outt = writeXML(filename, tableset);	    
++                writeXML(filename, tableset);	    
+             }
+         }
+ 
+-        if (showtable) {
+-	if(!bool){
+-	new Traxit(outt, "ServPak/xsl/dbgeneric.xsl",DBM.zefmhome);
+-	printout = new String(Traxit.tabby);
+-            printwriter = new PrintWriter(new FileWriter("DB/" + filename + ".xml"), true);
+-	printwriter.print(outt.toString());
+-            printwriter.close();
+-	}else{
++        if (showtable) {Thread.sleep(4000);
+             printout = showTable(filename);
+ 	}
+         }
+-    }
+ 
+     String[][] addRow(String[][] tablein) {
+         int cols = tablein[0].length;
+@@ -332,8 +322,9 @@
+         return matrx;
+     }
+ 
+-    StringBuffer writeXML(String name, String[][] table) throws Exception {
+-
++    void writeXML(String name, String[][] table) throws Exception {
++        printwriter = new PrintWriter(new FileWriter("DB/" + name + ".xml"),
++                true);
+         stringbuffer = new StringBuffer();
+ 
+         String _name = name;
+@@ -360,12 +351,13 @@
+         }
+ 
+         stringbuffer.append("\n</" + _name + ">");
+-
+-	return stringbuffer;
++        printwriter.print(stringbuffer.toString());
++        printwriter.close();
+     }
+ 
+     static String showTable(String string) throws Exception {
+-        new Traxit("DB/" + string + ".xml", "ServPak/xsl/dbgeneric.xsl", DBM.zefmhome);
++        new Traxit("DB/" + string + ".xml", "ServPak/xsl/dbgeneric.xsl",
++            DBM.zefmhome);
+ 
+         return new String(Traxit.tabby);
+     }
+@@ -391,6 +383,7 @@
+ 
+             hashmap.put(testvalu, objectvalu);
+         }
++System.out.println("HASHING "+query.length());
+             return hashmap;
+     }
+ 
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

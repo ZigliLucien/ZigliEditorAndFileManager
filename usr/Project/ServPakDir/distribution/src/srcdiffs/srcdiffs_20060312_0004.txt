@@ -1,0 +1,57 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/SendEmail.java distribution/src/srcdiffs/ServPak/jv/SendEmail.java
+--- ServPak/jv/SendEmail.java	2006-03-12 00:04:15.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/SendEmail.java	2006-03-12 00:01:02.000000000 -0600
+@@ -252,43 +252,28 @@
+     }
+ 
+     String callPage(String _filename) throws Exception {
+-// StartTrace
+-System.out.println(255);// traceon
++System.out.println("GETTING FROM "+_filename);
++
+         String home = "http://" + NetsManager.ZEFMServer.localhost + ":" +
+             NetsManager.ZEFMServer.port + NetsManager.ZEFMServer.userdir +
+             "/?home";
+-System.out.println(258);// traceon
+ 
+-System.out.println(259);// traceon
+         buffy = new StringBuilder("<html><body><pre>\n");
+-System.out.println(260);// traceon
+         brd = new BufferedReader(ZEFMServer.getStream(conn, _filename,"sentMail"));
+-System.out.println(261);// traceon
+ 
+-System.out.println(262);// traceon
+         for (String v; (v = brd.readLine()) != null;) {
+-System.out.println(263);// traceon
+-
+-System.out.println(264);// traceon
++System.out.println("READING "+v);
+             if (v.toCharArray().length > 0) {
+-System.out.println(265);// traceon
+                 v = ServPak.jv.DBM.fixgtlt(v);
+-System.out.println(266);// traceon
+             }
+-System.out.println(267);// traceon
+ 
+-System.out.println(268);// traceon
+             buffy.append(v + "\n");
+-System.out.println(269);// traceon
+         }
+-System.out.println(270);// traceon
+ 
+-System.out.println(271);// traceon
+-buffy.append("<p/>&nbsp;<p/><hr/><p/><a href=" + home +"> Return To Home Page </a>");
+-System.out.println(273);// traceon
++        buffy.append("<p/>&nbsp;<p/><hr/><p/><a href=" + home +
++            "> Return To Home Page </a>");
+         buffy.append("</pre></body></html>");
+-System.out.println(274);// traceon
+-// StopTrace
++
+         return buffy.toString();
+     }
+ }
+\ No newline at end of file

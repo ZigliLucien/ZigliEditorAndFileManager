@@ -1,0 +1,162 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2006-09-16 15:31:12.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2006-09-16 14:47:24.000000000 -0500
+@@ -20,8 +20,6 @@
+      PrintWriter printwriter;
+     public String printout;
+     static  String[] champs;
+-	static String fname;
+-	public static String entryname;
+ 
+     /////////////////////////////////////////////////////////
+     ///////////////////// CONSTRUCTOR /////////////////////
+@@ -43,21 +41,12 @@
+             filename = filename.substring(i + 1);
+             filename = filename.replace('+', '_');
+ 
+-	 fname = "DB/" + filename + ".xml";
+-
+-	String elements = new String(new Traxit(fname,"ServPak/xsl/listElements.xsl").tabby);
+-
+-	String[] elts = elements.split("\\s");
+-	for(int q=0;q<elts.length;q++){ System.out.println(q+" "+elts[q]);}
+-
+-            File file = new File(fname);
+-
+-	
++            File file = new File("DB/" + filename + ".xml");
+ 
+             if (hashmap.get("newtable") != null) {
+                 String hmap = hashmap.get("newtable");
+ 
+-                printwriter = new PrintWriter(new FileWriter(fname), true);
++                printwriter = new PrintWriter(new FileWriter("DB/" + filename + ".xml"), true);
+                 stringbuffer = new StringBuilder();
+ 
+                 stringbuffer.append("<?xml version=\"1.0\"?>\n");
+@@ -92,15 +81,15 @@
+                 return;
+             }
+         } else {
+-            	     getFields(fname);
+-            tableset = readXML(fname, champs.length);
++            	     getFields(filename);
++            tableset = readXML(filename, champs.length);
+ 
+             if (hashmap.containsKey("addrow")) {
+                 tableset = addRow(tableset);
+             }
+ 
+             if (hashmap.containsKey("addfield")) {
+-                addField(fname, hashmap.get("addfield"));
++                addField(filename, hashmap.get("addfield"));
+                 bool = true;
+             }
+ 
+@@ -163,11 +152,10 @@
+         }
+ 
+         if (showtable) {
+-            printout = showTable(fname);
++            printout = showTable(filename);
+         }
+     }
+ 
+-///////////// ADDROW /////////
+     String[][] addRow(String[][] tablein) {
+         int cols = tablein[0].length;
+         String[] newrow = new String[cols];
+@@ -193,11 +181,10 @@
+         return localtable;
+     }
+ 
+-//////// ADDFIELD ////////////
+     void addField(String basename, String fld) throws Exception {
+-        new Traxit(basename, "ServPak/xsl/newfield.xsl", fld);
++        new Traxit("DB/" + basename + ".xml", "ServPak/xsl/newfield.xsl", fld);
+         
+-        FileOutputStream fts = new FileOutputStream(basename);
++        FileOutputStream fts = new FileOutputStream("DB/" + basename + ".xml");
+ 
+         fts.write(Traxit.tabby);
+         fts.flush();
+@@ -205,7 +192,6 @@
+ 
+     }
+ 
+-/////////// FORMENTRY //////
+     StringBuilder formEntry(String[] fields) throws Exception {
+         stringbuffer = new StringBuilder();
+ 
+@@ -234,7 +220,6 @@
+         return stringbuffer;
+     }
+ 
+-////// CHANGEMODE /////
+     StringBuilder changeMode(String[][] strings) throws Exception {	
+ 
+         stringbuffer = new StringBuilder();
+@@ -279,8 +264,6 @@
+         return stringbuffer;
+     }
+ 
+-/////////// EDITMODE /////////
+-
+     String[][] editMode(HashMap<String, String> hashmap, int i, int j) throws Exception {
+         String[][] strings = new String[i][j];
+ 
+@@ -300,7 +283,7 @@
+ 
+ 	try{
+ 	new NetsManager.Query(
+-		new FileInputStream(basename), "for $i in /*/* return data($i)");
++		new FileInputStream("DB/" + basename + ".xml"), "for $i in /*/* return data($i)");
+ 	}catch (Exception ee){
+ 		ee.printStackTrace();
+ 	 }
+@@ -338,7 +321,6 @@
+    	            return tbl;
+     }
+ 
+-///////// WRITEXML ////////
+     void writeXML(String name, String[][] table) throws Exception {
+         printwriter = new PrintWriter(new FileWriter("DB/" + name + ".xml"),
+                 true);
+@@ -372,15 +354,13 @@
+         printwriter.close();
+     }
+ 
+-//////// SHOWTABLE /////////
+     static String showTable(String basename) throws Exception {
+ 
+-	FileInputStream fins = new FileInputStream(basename);
++	FileInputStream fins = new FileInputStream("DB/" + basename + ".xml");
+ 	new Query(fins, "ServPak/xql/dbgeneric.xql", DBM.zefmhome, true);
+ 	return Query.qtabby.toString();
+     }
+ 
+-////// HASHMAP ///////
+     public static HashMap<String,String> parseQuery(String string) {
+         HashMap<String,String> hashmap = new HashMap<String,String>();
+         String query = string.substring(string.indexOf("?") + 1);
+@@ -405,8 +385,6 @@
+         return hashmap;
+     }
+ 
+-/////////// GOSEARCH /////
+-
+     StringBuilder goSearch(String string, String[] strings)
+         throws Exception {
+         stringbuffer = new StringBuilder();
+@@ -459,7 +437,7 @@
+ 	/////// GET FIELDS ////////
+     static void getFields(String basename) throws Exception {
+ 
+-	BufferedReader buf = new BufferedReader(new FileReader(basename));
++	BufferedReader buf = new BufferedReader(new FileReader("DB/" + basename + ".xml"));
+ 
+ 	boolean flag = false;
+ 	Stack<String> staci = new Stack<String>();
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

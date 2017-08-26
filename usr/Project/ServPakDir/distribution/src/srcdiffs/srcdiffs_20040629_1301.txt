@@ -1,0 +1,35 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/Webgrep.java distribution/src/srcdiffs/ServPak/jv/Webgrep.java
+--- ServPak/jv/Webgrep.java	2004-06-29 13:01:18.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/Webgrep.java	2004-06-29 12:54:54.000000000 -0500
+@@ -113,7 +113,7 @@
+ 
+             stringbuffer = new StringBuffer();
+             stringbuffer.append("<html>\n");
+-            stringbuffer.append("<head>\n<style> span.a{font-size: 80%}</style>\n");
++            stringbuffer.append("<head>\n");
+             stringbuffer.append("<title>" + string_13_ + " on " + query +
+                 " </title>\n");
+             stringbuffer.append("</head>\n");
+@@ -133,7 +133,7 @@
+                     stringbuffer.append("In <b>" + string_15_ +
+                         "</b>&nbsp;&nbsp;");
+                     string_15_ = ZEFMServer.hexi(string_15_);
+-	        stringbuffer.append("<span class=\"a\">\n");
++	        stringbuffer.append("<font size=\"-1\">\n");
+                     stringbuffer.append("<a href=" + string_15_ +
+                         "> <i>See</i> |</a>\n");
+ 
+@@ -151,9 +151,10 @@
+                         "> <tt>Q</tt>uick<tt>E</tt>dit |</a>\n");
+                     stringbuffer.append("<a href=AAA?" + string_15_ +
+                         "> <tt>N</tt>otes  </a>\n");
+-	        stringbuffer.append("</span>\n");
++
+                     stringbuffer.append("<p>\n");
+                     stringbuffer.append(hashmap.get(dockeys[i_14_]) + "\n");
++	        stringbuffer.append("</font>\n");
+                 }
+ 
+                 stringbuffer.append("</font>\n");

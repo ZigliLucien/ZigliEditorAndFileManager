@@ -1,0 +1,46 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2005-08-27 12:50:44.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2005-08-27 12:43:26.000000000 -0500
+@@ -137,8 +137,8 @@
+ 
+                 int q = 0;
+                 String[] newrow = string.split("&");
+-
+-                for (String x : newrow) {
++System.out.println("NEW "+newrow.length);
++                for (String x : newrow) {System.out.println("In NEWROW "+x);
+                     newrow[q] = x.substring(x.indexOf("=") + 1).replace('+', ' ');
+ 	        q++;
+                 }
+@@ -279,10 +279,8 @@
+     }
+ 
+ 	//////////////// READXML //////////////////////////////
+-    public static String[][] readXML(String basename, int i) throws Exception {
+-
+-System.out.println("READING "+basename+" with integer arg "+i);
+-
++    public static String[][] readXML(String basename, int i)
++        throws Exception {
+ 	try{
+ 	new NetsManager.Query(
+ 		new FileInputStream("DB/" + basename + ".xml"), "for $i in /*/* return $i");
+@@ -366,13 +364,13 @@
+         String query = string.substring(string.indexOf("?") + 1);
+ 
+         query = DBM.converter(query);
+-
++System.out.println("A");
+         String[]querystring = query.split("&");
+-
++System.out.println("B");
+ 	for (String querybit : querystring){
+             String testvalu = querybit.substring(0, querybit.indexOf("="));
+             String objectvalu = "";
+-
++System.out.println("OBJ "+objectvalu);
+             if (!querybit.endsWith("=")) {
+                 objectvalu = querybit.substring(querybit.indexOf("=") + 1);
+             } else {
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

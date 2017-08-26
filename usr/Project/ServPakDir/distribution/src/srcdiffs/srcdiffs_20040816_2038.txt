@@ -1,0 +1,21 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2004-08-16 20:38:02.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2004-08-16 20:30:10.000000000 -0500
+@@ -155,6 +155,7 @@
+ 
+             if (!bool) {
+                 outt = writeXML(filename, tableset);	    
++  	    new Traxit(outt, "ServPak/xsl/dbgeneric.xsl",DBM.zefmhome);
+             printwriter = new PrintWriter(new FileWriter("DB/" + filename + ".xml"), true);
+ 	printwriter.print(outt.toString());
+             printwriter.close();
+@@ -163,7 +164,6 @@
+ 
+         if (showtable) {
+ 	if(!bool){
+-         	    new Traxit(outt, "ServPak/xsl/dbgeneric.xsl",DBM.zefmhome);
+ 		printout = new String(Traxit.tabby);
+ 	}else{
+             	printout = showTable(filename);
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

@@ -1,0 +1,16 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
+diff -Bwaur ServPak/jv/Query.java distribution/src/srcdiffs/ServPak/jv/Query.java
+--- ServPak/jv/Query.java	2004-12-18 01:09:44.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/Query.java	2004-12-18 01:08:20.000000000 -0600
+@@ -74,9 +74,8 @@
+ 		}
+ 
+      if(quick){			
+-		StringBuilder sb = new StringBuilder("<?xml \"version=1.0\"?>\n<qresult>");
++		StringBuilder sb = new StringBuilder("<?xml \"version=1.0\"?>\n");
+ 		sb.append(jack.toString());
+-		sb.append("\n</qresult>");		
+ 		new NetsManager.Query(sb.toString(),"ServPak/xql/generic.xql",null,true);
+ 		printout = NetsManager.Query.qtabby.toString();
+ 	    } else {

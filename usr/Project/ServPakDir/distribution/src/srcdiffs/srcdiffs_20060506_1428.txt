@@ -1,0 +1,38 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBM.java distribution/src/srcdiffs/ServPak/jv/DBM.java
+--- ServPak/jv/DBM.java	2006-05-06 14:27:58.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBM.java	2005-08-27 13:05:16.000000000 -0500
+@@ -10,7 +10,7 @@
+ 
+ 
+ public class DBM {
+-
++    static Properties fileinfo = new Properties();
+     static BufferedReader buff;
+     public static final String zefmhome = "zefm@" + ZEFMServer.localhostname;
+     public String printout;
+@@ -251,6 +251,22 @@
+         prtw.print(dbmbufr.toString());
+         prtw.close();
+   
++        fileinfo.setProperty("datafile", "DB/" + dbasename + ".xml");
++        fileinfo.setProperty("stringProcessFile", "XSL/xmlquery.xsl");
++
++        if (data.containsValue("search")) {
++            fileinfo.setProperty("sortFile", "XSL/sorter.xsl");
++        } else {
++            fileinfo.setProperty("sortFile", "XSL/xrunit.xsl");
++        }
++
++        fileinfo.setProperty("epsilon", "2");
++
++        FileOutputStream fouts = new FileOutputStream("DB/" + dbasename + ".properties");
++
++        fileinfo.store(fouts, "DB/" + dbasename + " properties");
++        fouts.close();
++
+         String fileref = locdirec + "/DB/" + dbasename;
+ 
+ 	sbuild = 
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

@@ -1,0 +1,90 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2005-11-20 06:08:19.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2004-12-11 05:26:22.000000000 -0600
+@@ -4,7 +4,6 @@
+ import NetsManager.Xlster;
+ import NetsManager.ZEFMServer;
+ import NetsManager.ZConnection;
+-import NetsManager.Traxit;
+ 
+ import java.io.*;
+ 
+@@ -39,7 +38,8 @@
+ 
+         if(linein != null) dirnum = linein.substring(linein.indexOf("^") + 1);
+ 
+-        String lstfile = "Listings/" + dirname.replace('/', '_') + ".listing.html";
++        String lstfile = "Listings/" + dirname.replace('/', '_') +
++            ".listing.html";
+         String reflstfile = "http://" + ZEFMServer.localhost + ":" +
+             ZEFMServer.port + ZEFMServer.userdir + "/" +
+             ZEFMServer.hexi(lstfile);
+@@ -72,19 +72,20 @@
+         reqreq = XCommands.reqfile;
+ 
+         String top = linein + "HEADER";
+-        String listfile = "Listings/" + dirname.replace('/', '_') + ".xml.gz";
++        String listfile = "Listings/" + dirname.replace('/', '_') + ".zefmdir";
+ 
+         try {
+             int i = Xlster.counters.get(dirname);
++            boolean bool = false;
++            boolean test_ = false;
+ 
+              StringBuilder bufi = new StringBuilder(6145);
++            FileInputStream fins = new FileInputStream(listfile);
++            buffr = new BufferedReader(new InputStreamReader(new GZIPInputStream(fins)));
+ 
+-	InputStream zipin = new GZIPInputStream(new FileInputStream(listfile));
+-            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+-
+-              for (int qq = 0; (qq = zipin.read()) != -1;) {
+-                  bout.write(qq);
+-              }
++            for (String v; (v = buffr.readLine()) != null;) {
++                if (!bool && (v.indexOf(top) >= 0)) {
++                    bool = true;
+ 
+ bufi.append("<html>\n");
+ bufi.append("<head>\n");
+@@ -101,21 +102,28 @@
+                         dirname + "^0\"> Top </a></p>\n");
+                     bufi.append("<p align=right><a class=\"w\" href=GoFM.jav?" +
+                         dirname + "^" + i + "> Bottom </a></p>\n");
+-                    bufi.append("<h2>" + dirname + " : Listing " + dirnum + "</h2>\n");
++                    bufi.append("<h2>" + dirname + " : Listing " + dirnum +
++                        "</h2>\n");
+ 
+                     fillChecked(bufi, localprocess, dirname);
++                } else if (bool) {
++                    if (v.indexOf("<comment") >= 0) {
++                        test_ = false;
++                    }
+ 
+-	        new NetsManager.Traxit(bout.toByteArray(),"ServPak/xsl/listit.xsl",dirnum);
+-		String main = new String(NetsManager.Traxit.tabby);
++                    if (v.indexOf("<comment id=\"EOF") >= 0) {
++                        test_ = true;
++                    }
+ 
+-		main = main.replace("<main>","");
+-		main = main.replace("<body>","");
+-		main = main.replace("<html>","");
+-		main = main.replace("</main>","</form>");
+-		main = main.replace("<reference>","<p/>");
+-		main = main.replace("</reference>","<p/>");
++                    if (!test_) {
++                        bufi.append(v + "\n");
+ 
+-		bufi.append(main);
++                        if (bool && (v.indexOf("</html>") >= 0)) {
++                            break;
++                        }
++                    }
++                }
++            }
+ 
+ 	          ZConnection.out.write(bufi.toString().trim().getBytes());
+ 
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

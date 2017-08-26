@@ -1,0 +1,63 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/DBgo.java distribution/src/srcdiffs/ServPak/jv/DBgo.java
+--- ServPak/jv/DBgo.java	2004-08-16 11:31:05.000000000 -0500
++++ distribution/src/srcdiffs/ServPak/jv/DBgo.java	2004-08-16 11:28:22.000000000 -0500
+@@ -229,10 +229,10 @@
+         return stringbuffer;
+     }
+ 
+-    StringBuffer changeMode(String[][] matrx) throws Exception {
++    StringBuffer changeMode(String[][] strings) throws Exception {
+         stringbuffer = new StringBuffer();
+ 
+-        int i = matrx[0].length;
++        int i = strings[0].length;
+         int hsize = -2 + Math.round((float) (90 / i));
+ 
+         stringbuffer.append("<html>\n");
+@@ -250,11 +250,11 @@
+ 
+         stringbuffer.append("</tr>\n");
+ 
+-        for (int q = 0; q < matrx.length; q++) {
++        for (int q = 0; q < strings.length; q++) {
+             stringbuffer.append("<tr>");
+ 
+             for (int qq = 0; qq < i; qq++) {
+-                String string = matrx[q][qq];
++                String string = strings[q][qq];
+ 
+                 string = DBM.fixgtlt(string);
+                 stringbuffer.append("<td width=\"" + hsize +
+@@ -296,8 +296,8 @@
+         StringTokenizer stringtokenizer = new StringTokenizer(new String(
+                     Traxit.tabby), "\n");
+         int rws = stringtokenizer.countTokens();
+-
+-        String[][] matrx = new String[rws][i];
++        Object object = null;
++        String[][] strings = new String[rws][i];
+         int rr = 0;
+ 
+         while (stringtokenizer.hasMoreTokens()) {
+@@ -310,16 +310,16 @@
+ 
+             for (int q = 0; q < i; q++) {
+                 if (tokk != null) {
+-                    matrx[rr][q] = tokk.nextToken();
++                    strings[rr][q] = tokk.nextToken();
+                 } else {
+-                    matrx[rr][q] = tok;
++                    strings[rr][q] = tok;
+                 }
+             }
+ 
+             rr++;
+         }
+ 
+-        return matrx;
++        return strings;
+     }
+ 
+     void writeXML(String name, String[][] table) throws Exception {
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF

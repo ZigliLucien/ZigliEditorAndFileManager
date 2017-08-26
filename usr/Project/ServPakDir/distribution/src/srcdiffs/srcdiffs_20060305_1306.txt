@@ -1,0 +1,15 @@
+Only in distribution/src/srcdiffs/ServPak/jv: CDDBC.java
+diff -Bwaur ServPak/jv/GoFM.java distribution/src/srcdiffs/ServPak/jv/GoFM.java
+--- ServPak/jv/GoFM.java	2006-03-05 12:54:29.000000000 -0600
++++ distribution/src/srcdiffs/ServPak/jv/GoFM.java	2006-03-05 11:47:32.000000000 -0600
+@@ -57,7 +57,7 @@
+             StringBuilder bufi = new StringBuilder(6145);
+ 
+ 	buffr = new BufferedReader(
+-		new InputStreamReader(getStream(lstfile, "listings")));
++		new InputStreamReader(ZEFMServer.getStream(lstfile, "listings")));
+ 
+             for (String v; (v = buffr.readLine()) != null;) {
+                 if (v.indexOf("form action=\"FileOps.jav") >= 0) {
+Only in ServPak/jv: GoFM.java.macros
+Only in distribution/src/srcdiffs/ServPak/jv: META-INF
