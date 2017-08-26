@@ -1,0 +1,34 @@
+Only in ZEdit: DOps.java.macros
+Only in ZEdit: DOps.java.tmp
+Only in distribution/src/srcdiffs/ZEdit: index.html
+Only in ZEdit: MailFiles.tags
+Only in distribution/src/srcdiffs/ZEdit: META-INF
+diff -Bw distribution/src/srcdiffs/ZEdit/RemoteClient.java ZEdit/RemoteClient.java
+63,65c63,65
+<             if (!reply.equals("Ready")) {
+<                 System.out.println("Check again!!");
+<                 server.close();
+---
+> //            if (!reply.equals("Ready")) {
+> //                System.out.println("Check again!!");
+> //                server.close();
+67,68c67,68
+<                 return;
+<             } else {
+---
+> //                return;
+>  //           } else {
+70c70
+<             }
+---
+> //            }
+80c80
+<             if (reply.equals("Proceed")) {
+---
+>   //          if (reply.equals("Proceed")) {
+85c85
+<             }
+---
+>     //        }
+Only in ZEdit: tags
+Only in ZEdit: TPEditorX.java.macros

@@ -1,0 +1,19 @@
+Only in NetsManager: CmdsData
+Only in NetsManager: Commands.java.macros
+diff -Bw distribution/src/srcdiffs/NetsManager/FileUpConnection.java NetsManager/FileUpConnection.java
+107,108c107
+<         return (ZConnection.loggedin &&
+<         ZConnection.currentclient.equals(addr.getHostAddress()));
+---
+>         return true; 
+Only in distribution/src/srcdiffs/NetsManager: index.html
+Only in distribution/src/srcdiffs/NetsManager: META-INF
+Only in distribution/src/srcdiffs/NetsManager: ProcessSVG.java
+Only in distribution/src/srcdiffs/NetsManager: ProcessTeX.java
+Only in distribution/src/srcdiffs/NetsManager: ProcessXML.java
+Only in NetsManager: ProcessXML.java.macros
+Only in distribution/src/srcdiffs/NetsManager: ReadProperties.java
+Only in NetsManager: XCommands.java.macros
+Only in NetsManager: Xlster.java.macros
+Only in distribution/src/srcdiffs/NetsManager: xx
+Only in NetsManager: ZEFMServer.java.macros

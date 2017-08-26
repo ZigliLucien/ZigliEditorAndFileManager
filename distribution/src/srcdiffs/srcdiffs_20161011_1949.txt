@@ -1,0 +1,7 @@
+Only in ZEdit: DOps.java.macros
+Only in ZEdit: DOps.java.tmp
+Only in distribution/src/srcdiffs/ZEdit: index.html
+Only in ZEdit: MailFiles.tags
+Only in distribution/src/srcdiffs/ZEdit: META-INF
+Only in ZEdit: tags
+Only in ZEdit: TPEditorX.java.macros
