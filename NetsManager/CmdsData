@@ -1,0 +1,666 @@
+package NetsManager;
+
+import ServPak.jv.ReadClass;
+
+import J2html.*;
+
+import com.ice.tar.*;
+
+import java.io.*;
+
+import java.lang.reflect.*;
+
+import java.util.*;
+import java.util.zip.*;
+
+
+public class Commands {
+
+    static String directory;
+    static ByteArrayOutputStream suzi;
+    static final String[] programs = {
+        "Search", "Perl", "Java", "EPerl", "XML", "TeX", "SVG", "Clsv", "Tar",
+        "Mime", "Mail", "Properties", "JavaX", "Class", "PHP", "RTL"
+    };
+
+    String cmd;
+    public String result;
+    String filename;
+    String texfilename;
+    String runfile;
+    String value;
+    int which = 100;
+    Properties fileinfo = ZConnection.fileinfo;
+
+    public Commands(String _cmd) {
+        // Constructor
+        this.cmd = _cmd;
+        this.result = null;
+        parseCmd();
+    }
+
+    // local methods
+    void parseCmd() {
+        // parse the request
+        String apprun = null;
+        boolean searching = false;
+
+        value = null;
+
+        if (cmd.indexOf("?") > 0) {
+            // IF ENV QUERY
+            value = cmd.substring(cmd.lastIndexOf("?") + 1);
+
+            for (Enumeration enume = fileinfo.propertyNames();
+                    enume.hasMoreElements();) {
+                String key = (String) enume.nextElement();
+
+                String subcmd = cmd.substring(0, cmd.lastIndexOf("?"));
+
+                if (subcmd.substring(subcmd.lastIndexOf(".") + 1).equals(key)) {
+                    filename = subcmd.substring(subcmd.lastIndexOf("/") + 1);
+                    texfilename = subcmd;
+                    apprun = fileinfo.getProperty(key);
+                }
+            }
+        } else {
+            // File Extension Apps
+            for (Enumeration enume = fileinfo.propertyNames();
+                    enume.hasMoreElements();) {
+                String key = (String) enume.nextElement();
+
+                if (cmd.endsWith("." + key)) {
+                    apprun = fileinfo.getProperty(key);
+                    value = apprun.toLowerCase();
+                    filename = cmd.substring(cmd.lastIndexOf("/") + 1);
+                    texfilename = cmd;
+                }
+            }
+        }
+
+        // Get which case
+        for (int q = 0; q < programs.length; q++) {
+            if (programs[q].equals(apprun)) {
+                this.which = q;
+
+                break;
+            }
+        }
+    }
+
+    void go(int whch) {
+        try {
+            switch (whch) {
+            case (0):
+                searchem(texfilename, value);
+
+                break;
+
+            case (1):
+                goPerl(filename, value);
+
+                break;
+
+            case (2):
+                goJava(filename, value);
+
+                break;
+
+            case (3):
+                goEPerl(filename, value);
+
+                break;
+
+            case (4):
+                goXML(filename, value);
+
+                break;
+
+            case (5):
+                goTeX(texfilename, value);
+
+                break;
+
+            case (6):
+                goSVG(filename, value);
+
+                break;
+
+            case (7):
+                goClsv(texfilename, value);
+
+                break;
+
+            case (8):
+                goTar(texfilename, value);
+
+                break;
+
+            case (9):
+                goMime(texfilename, value);
+
+                break;
+
+            case (10):
+                goMail(texfilename, value);
+
+                break;
+
+            case (11):
+                goProperties(texfilename, value);
+
+                break;
+
+            case (12):
+                goJavaX(texfilename, value);
+
+                break;
+
+            case (13):
+                goClass(texfilename, value);
+
+                break;
+
+            case (14):
+                goPHP(filename, value);
+
+                break;
+
+            case (15):
+                goRTL(texfilename, value);
+
+                break;
+
+            default:
+                goJJ();
+            }
+        } catch (Exception eee) {
+        } finally {
+            return;
+        }
+    }
+
+
+   		 ///////////////   Application runs  //////////////////////
+
+
+    //////////////////////////////////// SEARCH //////////////////////////////////////////////////
+
+    void searchem(String fname, String val) throws Exception {
+        //Search it
+        if (!val.equals("search")) {
+            Searcher sally = new Searcher(fname, val);
+
+            if (sally.searchResults != null) {
+                result = new String(sally.searchResults);
+            } else {
+                this.result = "No matches found.";
+            }
+        } else {
+            goJJ();
+        }
+    }
+
+    ////////////////////////////////// PERL ///////////////////////////////////////////
+    void goPerl(String rfile, String val) {
+        if (!val.equals("perl")) {
+            runfile = "perl ServPak/pl/" + rfile + " " + val;
+
+            runIt(runfile);
+        } else {
+            runfile = "perl ServPak/pl/" + rfile;
+            runIt(runfile);
+        }
+    }
+
+    //////////////////////////////////////// JAVA //////////////////////////////////////////////
+    void goJava(String rfile, String val) throws Exception {
+        String clas = rfile.substring(0, rfile.indexOf("."));
+
+        String classname = "ServPak.jv." + clas;
+
+        if (!val.equals("java")) {
+            Class cappi = Class.forName(classname);
+
+           Object obie = cappi.getConstructor(new Class[] { String.class })
+                                         .newInstance(new String[] { val });
+
+            this.result = (String) cappi.getField("printout").get(obie);
+        } else {
+            this.result = "Error";
+        }
+    }
+
+    ///////////////////////////////////////// EPerl /////////////////////////////////////////////
+    void goEPerl(String rfile, String val) {
+        if (!val.equals("eperl")) {
+            runfile = "ServPak/nph-eperl -D QUERYSTRING=" + val + " " +
+                "ServPak/pl/" + rfile;
+        } else {
+            runfile = "ServPak/nph-eperl ServPak/pl/" + rfile;
+        }
+
+        runIt(runfile);
+    }
+
+    ///////////////////////////////////////// XML /////////////////////////////////////////////
+    void goXML(String rfile, String val) throws Exception {
+        String stfile = null;
+
+        ProcessXML web;
+
+        if (!val.equals("xml")) {
+            stfile = val.substring(val.indexOf("=") + 1);
+
+            web = new ProcessXML(rfile, stfile);
+        } else {
+            web = new ProcessXML(rfile);
+        }
+
+        result = web.zipout;
+
+    }
+
+    //////////////////////////////////////////// TEX //////////////////////////////////////////
+    void goTeX(String rfile, String val) {
+        try {
+            ProcessTeX web;
+
+            if (!val.equals("tex")) {
+                this.result = "Processing Error";
+
+                return;
+            } else {
+                web = new ProcessTeX(rfile);
+
+                suzi = new ByteArrayOutputStream();
+
+                for (int data = 0; (data = web.out.read()) != -1;) {
+                    suzi.write(data);
+                }
+                	ZConnection.out.write(suzi.toByteArray());
+                	ZConnection.out.flush();
+            }
+        } catch (Exception etx) {
+        } finally {
+            return;
+        }
+    }
+
+    /////////////////////////////////////////// SVG ///////////////////////////////////////////
+    void goSVG(String rfile, String val) throws Exception {
+        ProcessSVG web;
+
+        if (!val.equals("svg")) {
+            this.result = "Processing Error";
+
+            return;
+        } else {
+            web = new ProcessSVG(rfile);
+
+            suzi = new ByteArrayOutputStream();
+
+            for (int data = 0; (data = web.out.read()) != -1;) {
+                suzi.write(data);
+            }
+            	result = suzi.toString();
+        }
+    }
+
+    //////////////////////////////////////// CLSV //////////////////////////////////////////////
+    void goClsv(String rfile, String val) throws Exception {
+        if (!val.equals("clsv")) {
+            this.result = "Processing Error";
+
+            return;
+        } else {
+            ZEdit.Clsv claudia = new ZEdit.Clsv(rfile);
+
+            new Query(claudia.xmltext, "ServPak/xql/generic.xql", null, true);
+            result = Query.qtabby.toString();
+        }
+    }
+
+    /////////////////////////////////////// Tar/Zip  ///////////////////////////////////////////////
+    void goTar(String rfile, String val) throws Exception {
+        StringBuilder names = new StringBuilder(16385);
+        names.append("<html><body bgcolor=\"#ffffff\">");
+
+        if (!val.equals("tar")) {
+            this.result = "Processing Error";
+
+            return;
+        }
+
+        String filext = cmd.substring(cmd.lastIndexOf(".") + 1);
+
+        int cc = 0;
+
+        if (filext.equals("gz") && !cmd.endsWith("tar.gz")) {
+	FileInputStream fins = new FileInputStream(rfile);
+            InputStream zipin = new GZIPInputStream(fins, fins.available());
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+
+            for (int qq = 0; (qq = zipin.read()) != -1;) {
+                bout.write(qq);
+            }
+
+            names.append("\n<pre>\n");
+            names.append(bout.toString() + "\n</pre>");
+        }
+
+        if (filext.equals("tgz") ||
+                (filext.equals("gz") && cmd.endsWith("tar.gz"))) {
+	FileInputStream fins = new FileInputStream(rfile);
+            InputStream zipin = new GZIPInputStream(fins, fins.available());
+            TarInputStream tin = new TarInputStream(zipin);
+
+            for (TarEntry te = null; (te = tin.getNextEntry()) != null;) {
+                cc++;
+
+                if ((cc % 10) == 0) {
+                    names.append("<p>");
+                }
+
+                String entry = te.getName();
+                StringBuilder out = new StringBuilder(8193);
+                out.append("<a href=TTT?GZ-" + rfile + "!" + entry +
+                    "> View </a> &nbsp;&nbsp;");
+                out.append("<a href=TTT?XGZ-" + rfile + "!" + entry +
+                    "> Extract </a>&nbsp;&nbsp;&nbsp;&nbsp;");
+
+                if (entry.indexOf("/") > 0) {
+                    StringTokenizer stin = new StringTokenizer(entry, "/");
+                    int N = stin.countTokens();
+                    out.append(stin.nextToken());
+
+                    if (N > 2) {
+                        for (int q = 0; q < (N - 2); q++)
+                            out.append("/" + stin.nextToken());
+                    }
+
+                    if (N == 1) {
+                        out.append("<p>" + out + "/");
+                    }
+
+                    if (N >= 2) {
+                        out.append("<tt>/" + stin.nextToken());
+                        out.append("</tt>");
+                    }
+                } else {
+                    out.append("<tt>" + entry + "</tt>");
+                }
+
+                names.append("\n<br>" + out.toString());
+            }
+        }
+
+        if (filext.equals("jar") || filext.equals("zip")) {
+            ZipFile zf = new ZipFile(rfile);
+
+            for (Enumeration enu = zf.entries(); enu.hasMoreElements();) {
+                cc++;
+
+                if ((cc % 10) == 0) {
+                    names.append("<p>");
+                }
+
+                String entry = ((ZipEntry) enu.nextElement()).getName();
+                StringBuilder out = new StringBuilder(8193);
+
+                if (entry.endsWith(".class")) {
+                    out.append("<a href=ReadClass.jav?" + rfile + "!" + entry +
+                        "> View </a>&nbsp;&nbsp;");
+                } else {
+                    out.append("<a href=TTT?ZI-" + rfile + "!" + entry +
+                        "> View </a>&nbsp;&nbsp;");
+                }
+
+                out.append("<a href=TTT?XZI-" + rfile + "!" + entry +
+                    "> Extract </a>&nbsp;&nbsp;&nbsp;&nbsp;");
+
+                if (entry.indexOf("/") > 0) {
+                    StringTokenizer stin = new StringTokenizer(entry, "/");
+                    int N = stin.countTokens();
+                    out.append(stin.nextToken());
+
+                    if (N > 2) {
+                        for (int q = 0; q < (N - 2); q++)
+                            out.append("/" + stin.nextToken());
+                    }
+
+                    if (N == 1) {
+                        out.append("<p>" + out + "/");
+                    }
+
+                    if (N >= 2) {
+                        out.append("<tt>/" + stin.nextToken());
+                        out.append("</tt>");
+                    }
+                } else {
+                    out.append("<tt>" + entry + "</tt>");
+                }
+
+                names.append("\n<br>" + out.toString());
+            }
+        }
+
+        names.append("</body></html>");
+
+	String where = System.getProperty("user.dir");
+
+	PrintWriter pout = new PrintWriter(new FileWriter(where+"/TarList.html"),true);
+	pout.print(names.toString());
+	pout.close();
+
+	String out = 
+"<html><head><script> window.location=\""+where+"/TarList.html\"</script></head>\n"
++"<body><p/>&nbsp;<p/><p/>&nbsp;<p/><center><h2>--&gt;&gt; <a href=\""
++where+"/TarList.html\"> See List </a>&lt;&lt;--</h2></center></body></html>" ;
+
+        result = out;
+    }
+
+    ///////////////////////////////////////// MIME /////////////////////////////////////////////
+    void goMime(String rfile, String val) throws Exception {
+        if (!val.equals("mime")) {
+            this.result = "Processing Error";
+
+            return;
+        } else {
+            String outfile = rfile.substring(0, rfile.indexOf(".mime"));
+
+            new ZEdit.UnPackEm(rfile, outfile);
+
+	if(new File(outfile).exists() && new File(outfile).length()>0) {
+		if(new File(rfile).delete())System.out.println(rfile+" deleted");
+	}
+
+            String ext = outfile.substring(outfile.lastIndexOf(".") + 1)
+                                .toLowerCase();
+
+	String locdir = outfile.substring(0,outfile.lastIndexOf("/"));
+
+            String msgout = "<html><body>\n<p>&nbsp;<p>&nbsp;<p>&nbsp;"+
+			  "<a  href=\"http://"+ZEFMServer.localhost+":"+
+			   ZEFMServer.port+locdir+"?update\">DONE</a></body></html>";
+
+            if (ext.equals("jpg") || ext.equals("jpeg") || ext.equals("png") || ext.equals("gif")) {
+               msgout = "<html><body>\n<p>&nbsp;<p>&nbsp;<p>&nbsp;<a  href=\"http://" 
+	+ZEFMServer.localhost+":"+ZEFMServer.port+outfile + "\">See Picture</a>\n</body></html>";
+            }
+	            result = msgout;
+        }
+    }
+
+    ///////////////////////////////////////// MAIL /////////////////////////////////////////////
+    void goMail(String rfile, String val) throws Exception {
+        if (!val.equals("mail")) {
+            this.result = "Processing Error";
+
+            return;
+        } else {
+            int cut = rfile.lastIndexOf("/");
+            String direc = rfile.substring(0, cut);
+
+            String user = direc.substring(direc.lastIndexOf("/") + 1);
+
+            XmlMail readmail = new XmlMail(rfile, user);
+
+            result = readmail.viewmail;
+        }
+    }
+
+    /////////////////////////////////////// PROPERTIES //////////////////////////////////////////
+    void goProperties(String rfile, String val) throws Exception {
+        ReadProperties rprops;
+
+        if (!val.equals("properties")) {
+            this.result = "Processing Error";
+
+            return;
+        } else {
+            rprops = new ReadProperties(rfile);
+
+            new Traxit(rprops.out, "ServPak/xsl/readProps.xsl", null);
+
+            result = new String(Traxit.tabby);
+        }
+    }
+
+    ////////////////////////////////////// JavaXML ///////////////////////////////////////
+    void goJavaX(String rfile, String val) {
+        if (!val.equals("javax")) {
+            this.result = "Processing Error for JavaX";
+
+            return;
+        } else {
+            try {
+
+	String header = 
+		"<html><head><title>"+rfile+"</title></head>\n\n<body>\n<h2>"+rfile+"</h2>\n";
+	String footer = "\n\n</body>\n</html>";
+
+		 result = header + new Java2Html(rfile).result + footer;
+//                }
+            } catch (Exception e) {
+	                this.result = e.getMessage();
+            }
+        }
+    }
+
+    //////////////////////////////////////// Class File //////////////////////////////////////////////
+    void goClass(String rfile, String val) throws Exception {
+        ReadClass rclass;
+
+        if (!val.equals("class")) {
+            this.result = "Processing Error";
+
+            return;
+        } else {
+            rclass = new ReadClass(rfile);
+
+            result = rclass.printout;
+        }
+    }
+
+     ///////////////////////////////////// PHP /////////////////////////////////////////////////
+    void goPHP(String rfile, String val) {
+        if (!val.equals("php")) {
+
+         runfile = "php ServPak/php/" + rfile + " " + val;
+         runIt(runfile);
+
+        } else {
+
+            runfile = "php ServPak/php/" + rfile;
+            runIt(runfile);
+        }
+    }
+
+     ///////////////////////////////////// RTL /////////////////////////////////////////////////
+    void goRTL(String rfile, String val) {
+        if (!val.equals("rtl")) {
+
+	           this.result = "Processing Error";
+	            return;
+
+        } else {
+try{
+            FileInputStream fins = new FileInputStream(rfile);
+	byte[] data = new byte[fins.available()];
+	fins.read(data);
+
+	StringBuilder resultb = new StringBuilder(
+"<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">"+
+"\n<style> body{font-size: 150%} </style></head>\n"+
+"<body dir=\"rtl\">\n\n");
+
+	BufferedReader bufr = new BufferedReader(new StringReader(new String(data, "UTF-8")));
+	for (String v; (v = bufr.readLine()) != null;) {
+		resultb.append(v+"<br/>\n");
+	}
+	resultb.append("\n\n</body></html>");
+
+	result = resultb.toString();
+
+}catch(Exception ioee){}
+        }
+    }
+
+
+    //////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////// DEFAULT METHOD //////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////
+    void goJJ() {
+        try {
+            if ((ZEFMServer.DocRoot != null) && (cmd.indexOf("?") > 0)) {
+                ServPak.jv.Test tooti = new ServPak.jv.Test("");
+
+                this.result = tooti.printout;
+            }
+
+            return;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+
+            return;
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////// RUNIT ////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////
+    public void runIt(String shellcommand) {
+        try {
+
+	Runtime local = Runtime.getRuntime();
+	Process out = local.exec(shellcommand);
+
+            InputStream infoout = out.getInputStream();
+            InputStream errout  = out.getErrorStream();
+
+            ByteArrayOutputStream stdout = new ByteArrayOutputStream();
+
+            ByteArrayOutputStream errorout = new ByteArrayOutputStream();
+
+            for (int qq = 0; (qq = infoout.read()) != -1;) {
+                stdout.write(qq);
+            }
+
+            for (int qq = 0; (qq = errout.read()) != -1;) {
+                errorout.write(qq);
+            }
+
+            stdout.flush();
+
+            errorout.flush();
+
+            result = stdout.toString();
+
+            System.out.println(errorout.toString());
+        } catch (Exception e) {
+            this.result = e.getMessage();
+        }
+    }
+}

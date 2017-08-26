@@ -1,0 +1,839 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.7	//
+AddBookmark	TPEditorX.java	/^    void AddBookmark() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ AddBookmark \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+AddBookmarks	WebCP.java	/^    void AddBookmarks() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ AddBookmarks \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:WebCP
+AddBookmarks	Webby.java	/^    void AddBookmarks() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ AddBookmarks \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:Webby
+AddIt	TPEditorX.java	/^    void AddIt() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ AddIt \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+AddPicture	TPEditorX.java	/^    void AddPicture() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ AddPicture \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+Addnewemailaddress	TPEditorX.java	/^    void Addnewemailaddress() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/ Addnewemailaddress \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+Addnewquickwords	TPEditorX.java	/^    void Addnewquickwords() { \/\/\/\/\/\/\/\/\/\/\/\/\/ Addnewquickwords \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+Alphabet	Alphabet.java	/^    public Alphabet(String _languageName) {$/;"	m	class:Alphabet
+Alphabet	Alphabet.java	/^public class Alphabet {$/;"	c
+Annotate	Annotate.java	/^    public Annotate(String word, String _fileName) throws EmptyStackException {$/;"	m	class:Annotate
+Annotate	Annotate.java	/^public class Annotate {$/;"	c
+Block	QuickEditor.java	/^    void Block(String rangeplus, String name, String range) { \/\/\/\/\/\/\/\/\/\/\/\/\/ Block \/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:QuickEditor
+Block	TPEditorX.java	/^    void Block(String name, String range) { \/\/\/\/\/\/\/\/\/\/\/\/\/ Block \/\/\/\/\/\/\/\/\/\/\/\/\/                                            \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+Buffer	Buffer.java	/^    public Buffer() throws Exception {$/;"	m	class:Buffer
+Buffer	Buffer.java	/^public class Buffer extends TPEditorX {$/;"	c
+CHOLocal	CHOLocal.java	/^      public CHOLocal(JTextField _jtf, WebCP _wcp) {$/;"	m	class:CHOLocal
+CHOLocal	CHOLocal.java	/^public class CHOLocal extends calpa.html.DefaultCalHTMLObserver{$/;"	c
+Cancel	TPEditorX.java	/^    void Cancel() {$/;"	m	class:TPEditorX
+Clear	TPEditorX.java	/^    void Clear() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ Clear \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+Close	TPEditorX.java	/^    void Close() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ Close \/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+CloseShellWindow	TPEditorX.java	/^    void CloseShellWindow() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/ CloseShellWindow \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+Clsv	Clsv.java	/^    public Clsv(String input) throws Exception {$/;"	m	class:Clsv
+Clsv	Clsv.java	/^    public Clsv(String input, String outfile) throws Exception {$/;"	m	class:Clsv
+Clsv	Clsv.java	/^public class Clsv {$/;"	c
+Commands	Commands.java	/^	public    Commands(String _cmd) {$/;"	m	class:Commands
+Commands	Commands.java	/^ 	public   Commands(String _cmd, String _buffr, String _currentfile, String _direc) {$/;"	m	class:Commands
+Commands	Commands.java	/^public class Commands extends TPEditorX {$/;"	c
+Compile	TPEditorX.java	/^    void Compile() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ Compile \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+CompleteWord	TPEditorX.java	/^    void CompleteWord() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ CompleteWord \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+Confirm	TPEditorX.java	/^    void Confirm() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ Confirm \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+ContinueFindorReplace	TPEditorX.java	/^    void ContinueFindorReplace() { \/\/\/\/\/\/\/\/\/\/\/ ContinueFindorReplace \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+Copy	ZEditor.java	/^    public static void Copy(InputStream fromStream, String toFile) {$/;"	m	class:ZEditor
+DBChecked	DBStart.java	/^            public static boolean DBChecked;$/;"	f	class:DBStart
+DBClear	TPEditorX.java	/^   void DBClear(){$/;"	m	class:TPEditorX
+DBDelete	TPEditorX.java	/^    void DBDelete(){ $/;"	m	class:TPEditorX
+DBStart	DBStart.java	/^  	public DBStart(){ $/;"	m	class:DBStart
+DBStart	DBStart.java	/^public class DBStart {$/;"	c
+DOps	DOps.java	/^public DOps(){$/;"	m	class:DOps
+DOps	DOps.java	/^public class DOps {$/;"	c
+DeleteBookmark	TPEditorX.java	/^    void DeleteBookmark() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ DeleteBookmark \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+DeleteBookmarks	WebCP.java	/^    void DeleteBookmarks() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ DeleteBookmarks \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:WebCP
+DeleteBookmarks	Webby.java	/^    void DeleteBookmarks() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ DeleteBookmarks \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:Webby
+DeleteNote	TPEditorX.java	/^public void DeleteNote(){$/;"	m	class:TPEditorX
+Deletequickwords	TPEditorX.java	/^    void Deletequickwords() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ Deletequickwords \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+DiffFiles	TPEditorX.java	/^    void DiffFiles() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ Diff FILES \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+Download	WebCP.java	/^    public int Download(URL url) {$/;"	m	class:WebCP
+Download	Webby.java	/^    public int Download(URL url) {$/;"	m	class:Webby
+DropParen	Splitz.java	/^    void DropParen() {$/;"	m	class:Splitz
+EditBookmarks	TPEditorX.java	/^	public void EditBookmarks(){$/;"	m	class:TPEditorX
+EditQuickwords	TPEditorX.java	/^	public void EditQuickwords(){$/;"	m	class:TPEditorX
+FTPGetFile	TPEditorX.java	/^    void FTPGetFile() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ FTPGetFile \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+FileIt	WebCP.java	/^    static OutputStream FileIt;$/;"	f	class:WebCP
+FileIt	Webby.java	/^     OutputStream FileIt;$/;"	f	class:Webby
+Find	TPEditorX.java	/^    void Find() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ Find \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+FindString	TPEditorX.java	/^    void FindString() {$/;"	m	class:TPEditorX
+FontColor	TPEditorX.java	/^    void FontColor() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ FontColor \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+FtpClient	FtpClient.java	/^    public FtpClient(String[] argv) {$/;"	m	class:FtpClient
+FtpClient	FtpClient.java	/^class FtpClient {$/;"	c
+GetDiff	TPEditorX.java	/^    void GetDiff() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ GetDiff \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+GetFile	TPEditorX.java	/^    void GetFile() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ GetFile \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+GetInfo	SGetFtp.java	/^    public static void GetInfo(String _filename, InputStream pread)$/;"	m	class:SGetFtp
+GetIt	WebCP.java	/^    static InputStream GetIt;$/;"	f	class:WebCP
+GetIt	Webby.java	/^     InputStream GetIt;$/;"	f	class:Webby
+GetMail	TPEditorX.java	/^    void GetMail() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ GETMAIL \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+GetRemote	TPEditorX.java	/^    void GetRemote() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ GetRemote \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+GetResponse	FtpClient.java	/^    static Splitz GetResponse(BufferedReader bn) throws IOException {$/;"	m	class:FtpClient
+GetResponse	SGetFtp.java	/^    Splitz GetResponse(BufferedReader bn) throws IOException {$/;"	m	class:SGetFtp
+Go	TPEditorX.java	/^    void Go() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ Go \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+GoBookmarks	TPEditorX.java	/^    void GoBookmarks() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ GoBookmarks \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+GoBookmarks	WebCP.java	/^    void GoBookmarks() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ GoBookmarks \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:WebCP
+GoBookmarks	Webby.java	/^    void GoBookmarks() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ GoBookmarks \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:Webby
+GoPrint	TPEditorX.java	/^    void GoPrint() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ GoPrint \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+Helper	Helper.java	/^	public class Helper extends JFrame {$/;"	c
+Helper	Helper.java	/^    public Helper(String commandName, String _helpFileName)$/;"	m	class:Helper
+Id	Splitz.java	/^    String[] Id;$/;"	f	class:Splitz
+JMailClient	JMailClient.java	/^    public JMailClient(String from, String host, String to, String msgtext,$/;"	m	class:JMailClient
+JMailClient	JMailClient.java	/^public class JMailClient {$/;"	c
+Jvmaker	Jvmaker.java	/^public class Jvmaker {$/;"	c
+LineNumbers	TPEditorX.java	/^    void LineNumbers() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ LineNumbers \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+Loginfo	FtpClient.java	/^    private static Splitz Loginfo;$/;"	f	class:FtpClient	file:
+Loginfo	SGetFtp.java	/^    Splitz Loginfo;$/;"	f	class:SGetFtp
+MClient	MClient.java	/^    public MClient(String[] args) throws IOException, ClassNotFoundException {$/;"	m	class:MClient
+MClient	MClient.java	/^public class MClient {$/;"	c
+MailFiles	MailFiles.java	/^    public MailFiles(String filename, String user) throws Exception {$/;"	m	class:MailFiles
+MailFiles	MailFiles.java	/^public class MailFiles {$/;"	c
+MailRun	MailRun.java	/^    public MailRun(String incmd) throws Exception {$/;"	m	class:MailRun
+MailRun	MailRun.java	/^    public MailRun(String incmd, boolean _isWeb) throws Exception {$/;"	m	class:MailRun
+MailRun	MailRun.java	/^public class MailRun extends TPEditorX implements ActionListener {$/;"	c
+MailTo	TPEditorX.java	/^    void MailTo() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ MailTo \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+Mailer	TPEditorX.java	/^    void Mailer(String _cmd) {$/;"	m	class:TPEditorX
+Modes	Modes.java	/^    public Modes(String mode, Properties info) {$/;"	m	class:Modes
+Modes	Modes.java	/^public class Modes {$/;"	c
+Open	TPEditorX.java	/^    void Open() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ OPEN \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+Pack64	TPEditorX.java	/^    void Pack64() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ Pack64 \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+PackEm	PackEm.java	/^	public PackEm(String filein, String fileout) {$/;"	m	class:PackEm
+PackEm	PackEm.java	/^     public class PackEm{$/;"	c
+PackIt	TPEditorX.java	/^    void PackIt() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ PackIt \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+PortInfo	FtpClient.java	/^    private static Splitz PortInfo;$/;"	f	class:FtpClient	file:
+PortInfo	SGetFtp.java	/^    Splitz PortInfo;$/;"	f	class:SGetFtp
+Print	TPEditorX.java	/^    void Print() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ Print \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+PrintView	PrintView.java	/^    public PrintView(Element elem, View root, int w, int h) {$/;"	m	class:PrintView
+PrintView	PrintView.java	/^class PrintView extends BoxView {$/;"	c
+PutInfo	FtpClient.java	/^    public static void PutInfo(String filename, DataOutputStream pwrite)$/;"	m	class:FtpClient
+QuickDialog	QuickDialog.java	/^    public QuickDialog(TPEditorX _parent, String _title, JPanel _centerpanel) {$/;"	m	class:QuickDialog
+QuickDialog	QuickDialog.java	/^    public QuickDialog(TPEditorX _parent, String _title, JPanel _centerpanel,$/;"	m	class:QuickDialog
+QuickDialog	QuickDialog.java	/^public class QuickDialog extends JDialog {$/;"	c
+QuickEditor	QuickEditor.java	/^    public QuickEditor(String _basename, String ttl, boolean _ifold, String _key, String _link) {$/;"	m	class:QuickEditor
+QuickEditor	QuickEditor.java	/^class QuickEditor extends JFrame implements ActionListener {$/;"	c
+QuickMail	TPEditorX.java	/^    void QuickMail() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ QuickMail \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+Quit	TPEditorX.java	/^    void Quit() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ Quit \/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+RTL	TPEditorX.java	/^    void RTL() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ RTL \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+Redo	TPEditorX.java	/^    void Redo() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ Redo \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+RefreshBuffer	TPEditorX.java	/^    void RefreshBuffer() { \/\/\/\/\/\/\/\/\/\/ RefreshBuffer \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+Reloadquickwords	TPEditorX.java	/^    void Reloadquickwords() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ Reloadquickwords \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+RemoteClient	RemoteClient.java	/^	public    RemoteClient(String[] argv) throws Exception {$/;"	m	class:RemoteClient
+RemoteClient	RemoteClient.java	/^	public class RemoteClient {$/;"	c
+RemoteEdit	TPEditorX.java	/^    void RemoteEdit() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ RemoteEdit \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+RemoteSave	TPEditorX.java	/^    void RemoteSave() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ REMOTESAVE \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+Removeaddress	TPEditorX.java	/^    void Removeaddress() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ Removeaddress \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+Replace	TPEditorX.java	/^    void Replace() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ Replace \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+ReplaceString	TPEditorX.java	/^    void ReplaceString() {$/;"	m	class:TPEditorX
+RevertFile	TPEditorX.java	/^    void RevertFile() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ RevertFile \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+Run	TPEditorX.java	/^    void Run(String _cmd) { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ Run \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+SFileClient	SFileClient.java	/^	public class SFileClient {$/;"	c
+SFileClient	SFileClient.java	/^    public SFileClient(String prehost, String _filename) throws Exception {$/;"	m	class:SFileClient
+SGetFtp	SGetFtp.java	/^	public class SGetFtp {$/;"	c
+SGetFtp	SGetFtp.java	/^    public SGetFtp(String[] argv) throws Exception {$/;"	m	class:SGetFtp
+SMailClient	SMailClient.java	/^    public SMailClient(String _from, String _host, String _to, String _message,$/;"	m	class:SMailClient
+SMailClient	SMailClient.java	/^public class SMailClient {$/;"	c
+START	TPEditorX.java	/^    void START() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ START \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+Save	TPEditorX.java	/^    void Save() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ Save \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+SaveAs	TPEditorX.java	/^    void SaveAs() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ SAVEAS \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+SaveRemote	TPEditorX.java	/^    void SaveRemote() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ SAVE REMOTE \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+SendRemote	TPEditorX.java	/^    void SendRemote() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ SendRemote \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+Shell	TPEditorX.java	/^    void Shell() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ Shell \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+Splitz	Splitz.java	/^    Splitz(String Text, String Toke) {$/;"	m	class:Splitz
+Splitz	Splitz.java	/^    public Splitz(String Text) {$/;"	m	class:Splitz
+Splitz	Splitz.java	/^class Splitz {$/;"	c
+TPEditorX	TPEditorX.java	/^    public TPEditorX() {$/;"	m	class:TPEditorX
+TPEditorX	TPEditorX.java	/^    public TPEditorX(String title) throws Exception {$/;"	m	class:TPEditorX
+TPEditorX	TPEditorX.java	/^    public TPEditorX(String title, String filename) throws Exception {$/;"	m	class:TPEditorX
+TPEditorX	TPEditorX.java	/^    public TPEditorX(String title, int rows, int columns)$/;"	m	class:TPEditorX
+TPEditorX	TPEditorX.java	/^    public class TPEditorX extends JInternalFrame $/;"	c
+TPMLCheck	Commands.java	/^	boolean TPMLCheck(String filename) throws Exception{$/;"	m	class:Commands
+ToHTML	TPEditorX.java	/^    void ToHTML() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ ToHTML \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+ToJava	TPEditorX.java	/^    void ToJava() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ ToJava \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+ToggleCharacterParagraphAttributes	TPEditorX.java	/^    void ToggleCharacterParagraphAttributes() { \/\/\/\/\/\/\/\/ ToggleCharacterParagraphAttributes \/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+ToggleClickPad	TPEditorX.java	/^    void ToggleClickPad() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ ToggleClickPad \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+Trace	TPEditorX.java	/^    void Trace() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ Trace \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+Traxit	Traxit.java	/^    public Traxit(String xml, String out) throws Exception {$/;"	m	class:Traxit
+Traxit	Traxit.java	/^    public Traxit(String xml, String xsl, String out) throws Exception {$/;"	m	class:Traxit
+Traxit	Traxit.java	/^public class Traxit {$/;"	c
+UnPack64	TPEditorX.java	/^    void UnPack64() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ UnPack64 \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+UnPackEm	UnPackEm.java	/^	public UnPackEm(String filein, String fileout) {$/;"	m	class:UnPackEm
+UnPackEm	UnPackEm.java	/^     public class UnPackEm{$/;"	c
+Undo	TPEditorX.java	/^    void Undo() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ Undo \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+UnpackIt	TPEditorX.java	/^    void UnpackIt() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ UnpackIt \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+Upload	TPEditorX.java	/^    void Upload() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ UPLOAD \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+User	FtpClient.java	/^    private static Splitz User;$/;"	f	class:FtpClient	file:
+Verify	TPEditorX.java	/^    void Verify() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ Verify \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+VerifySend	TPEditorX.java	/^    void VerifySend() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ VerifySend \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+WebCP	WebCP.java	/^    public WebCP() throws Exception {$/;"	m	class:WebCP
+WebCP	WebCP.java	/^public class WebCP extends TPEditorX implements ActionListener {$/;"	c
+Webby	Webby.java	/^    public Webby() throws Exception {$/;"	m	class:Webby
+Webby	Webby.java	/^public class Webby extends TPEditorX implements ActionListener {$/;"	c
+ZEdit	Alphabet.java	/^package ZEdit;$/;"	p
+ZEdit	Annotate.java	/^package ZEdit;$/;"	p
+ZEdit	Buffer.java	/^package ZEdit;$/;"	p
+ZEdit	CHOLocal.java	/^package ZEdit;$/;"	p
+ZEdit	Clsv.java	/^package ZEdit;$/;"	p
+ZEdit	Commands.java	/^package ZEdit;$/;"	p
+ZEdit	DBStart.java	/^package ZEdit;$/;"	p
+ZEdit	DOps.java	/^package ZEdit;$/;"	p
+ZEdit	FtpClient.java	/^package ZEdit;$/;"	p
+ZEdit	Helper.java	/^package ZEdit;$/;"	p
+ZEdit	JMailClient.java	/^package ZEdit;$/;"	p
+ZEdit	Jvmaker.java	/^package ZEdit;$/;"	p
+ZEdit	MClient.java	/^package ZEdit;$/;"	p
+ZEdit	MailFiles.java	/^package ZEdit;$/;"	p
+ZEdit	MailRun.java	/^package ZEdit;$/;"	p
+ZEdit	Modes.java	/^package ZEdit;$/;"	p
+ZEdit	PackEm.java	/^package ZEdit;$/;"	p
+ZEdit	PrintView.java	/^package ZEdit;$/;"	p
+ZEdit	QuickDialog.java	/^package ZEdit;$/;"	p
+ZEdit	QuickEditor.java	/^package ZEdit;$/;"	p
+ZEdit	RemoteClient.java	/^package ZEdit;$/;"	p
+ZEdit	SFileClient.java	/^package ZEdit;$/;"	p
+ZEdit	SGetFtp.java	/^package ZEdit;$/;"	p
+ZEdit	SMailClient.java	/^package ZEdit;$/;"	p
+ZEdit	Splitz.java	/^package ZEdit;$/;"	p
+ZEdit	TPEditorX.java	/^package ZEdit;$/;"	p
+ZEdit	Traxit.java	/^package ZEdit;$/;"	p
+ZEdit	UnPackEm.java	/^package ZEdit;$/;"	p
+ZEdit	WebCP.java	/^package ZEdit;$/;"	p
+ZEdit	Webby.java	/^package ZEdit;$/;"	p
+ZEdit	ZEditor.java	/^package ZEdit;$/;"	p
+ZEdit	ZFileFilter.java	/^package ZEdit;$/;"	p
+ZEdit	ZPrint.java	/^package ZEdit;$/;"	p
+ZEditor	ZEditor.java	/^    public ZEditor(String args) throws Exception {$/;"	m	class:ZEditor
+ZEditor	ZEditor.java	/^    public ZEditor(String[] argv) throws Exception {$/;"	m	class:ZEditor
+ZEditor	ZEditor.java	/^public class ZEditor extends JFrame implements ActionListener {$/;"	c
+ZFileFilter	ZFileFilter.java	/^    public ZFileFilter(String[] _acceptables, String _filterDescription) {$/;"	m	class:ZFileFilter
+ZFileFilter	ZFileFilter.java	/^public class ZFileFilter extends javax.swing.filechooser.FileFilter {$/;"	c
+ZPrint	ZPrint.java	/^    public ZPrint(JTextPane _buffer) {$/;"	m	class:ZPrint
+ZPrint	ZPrint.java	/^public class ZPrint implements Printable {$/;"	c
+_firstOnPage	PrintView.java	/^    int _firstOnPage = 0;$/;"	f	class:PrintView
+_lastOnPage	PrintView.java	/^    int _lastOnPage = 0;$/;"	f	class:PrintView
+_pageIndex	PrintView.java	/^    int _pageIndex = 0;$/;"	f	class:PrintView
+_printView	ZPrint.java	/^    PrintView _printView;$/;"	f	class:ZPrint
+accept	ZFileFilter.java	/^    public boolean accept(File f) {$/;"	m	class:ZFileFilter
+acceptables	ZFileFilter.java	/^    String[] acceptables;$/;"	f	class:ZFileFilter
+actcmds	TPEditorX.java	/^    static String[] actcmds;$/;"	f	class:TPEditorX
+actionPerformed	MailRun.java	/^    public void actionPerformed(ActionEvent e) {$/;"	m	class:MailRun
+actionPerformed	QuickEditor.java	/^    public void actionPerformed(ActionEvent ae) {$/;"	m	class:QuickEditor
+actionPerformed	TPEditorX.java	/^    public void actionPerformed(ActionEvent ae) {$/;"	m	class:TPEditorX
+actionPerformed	WebCP.java	/^    public void actionPerformed(ActionEvent e) {$/;"	m	class:WebCP
+actionPerformed	Webby.java	/^    public void actionPerformed(ActionEvent e) {$/;"	m	class:Webby
+actionPerformed	ZEditor.java	/^    public void actionPerformed(ActionEvent ae) {$/;"	m	class:ZEditor
+adad	TPEditorX.java	/^    JMenu adad = new JMenu("Utils");$/;"	f	class:TPEditorX
+addHelp	TPEditorX.java	/^    public void addHelp(JMenu mimi, String title) {$/;"	m	class:TPEditorX
+addem	TPEditorX.java	/^    static final String[] addem = {$/;"	f	class:TPEditorX
+addingaddr	TPEditorX.java	/^    static boolean addingaddr;$/;"	f	class:TPEditorX
+addingaddr	WebCP.java	/^    boolean addingaddr;$/;"	f	class:WebCP
+addingaddr	Webby.java	/^    boolean addingaddr;$/;"	f	class:Webby
+address	TPEditorX.java	/^    static JTextField address;$/;"	f	class:TPEditorX
+address	WebCP.java	/^    static JTextField address;$/;"	f	class:WebCP
+address	Webby.java	/^    static JTextField address;$/;"	f	class:Webby
+alal	TPEditorX.java	/^    JMenu alal = new JMenu("English");$/;"	f	class:TPEditorX
+alapop	TPEditorX.java	/^    JMenu alapop = new JMenu("English");$/;"	f	class:TPEditorX
+alph	TPEditorX.java	/^    String alph;$/;"	f	class:TPEditorX
+alphmap	Alphabet.java	/^    public static HashMap alphmap;$/;"	f	class:Alphabet
+alt	TPEditorX.java	/^    static final int alt = Event.ALT_MASK;$/;"	f	class:TPEditorX
+ampcheck	MailFiles.java	/^    public static String ampcheck(String chekit) {$/;"	m	class:MailFiles
+annotating	TPEditorX.java	/^    static boolean annotating;$/;"	f	class:TPEditorX
+args	Commands.java	/^    static String args;$/;"	f	class:Commands
+attgaps	Modes.java	/^    public Stack <Integer> attgaps = new Stack<Integer>();$/;"	f	class:Modes
+attrs	QuickEditor.java	/^    static SimpleAttributeSet attrs = new SimpleAttributeSet();$/;"	f	class:QuickEditor
+attrs	TPEditorX.java	/^    SimpleAttributeSet attrs = new SimpleAttributeSet();$/;"	f	class:TPEditorX
+backshift	Modes.java	/^	public    int backshift;$/;"	f	class:Modes
+basename	QuickEditor.java	/^    String basename;$/;"	f	class:QuickEditor
+bborder	TPEditorX.java	/^    static BevelBorder bborder = new BevelBorder(BevelBorder.LOWERED,$/;"	f	class:TPEditorX
+bcolor	TPEditorX.java	/^    static int bcolor;$/;"	f	class:TPEditorX
+bin	TPEditorX.java	/^     BufferedReader bin;$/;"	f	class:TPEditorX
+bkbk	WebCP.java	/^    JMenu bkbk = new JMenu("Back");$/;"	f	class:WebCP
+bkbk	Webby.java	/^    JMenu bkbk = new JMenu("Back");$/;"	f	class:Webby
+bkmks	ZEditor.java	/^    static JMenu bkmks = new JMenu("Bookmarks");$/;"	f	class:ZEditor
+bkmrx	TPEditorX.java	/^    static String[] bkmrx;$/;"	f	class:TPEditorX
+bobo	WebCP.java	/^    JMenu bobo = new JMenu("BookMarks");$/;"	f	class:WebCP
+bobo	Webby.java	/^    JMenu bobo = new JMenu("BookMarks");$/;"	f	class:Webby
+bold	TPEditorX.java	/^    boolean bold = true;$/;"	f	class:TPEditorX
+bookmarks	TPEditorX.java	/^    JMenu bookmarks = new JMenu("Bookmarks");$/;"	f	class:TPEditorX
+bracecolor	TPEditorX.java	/^    int bracecolor;$/;"	f	class:TPEditorX
+bracecount	TPEditorX.java	/^    int bracecount = 0;$/;"	f	class:TPEditorX
+bubu	ZEditor.java	/^    static JMenu bubu = new JMenu("Buffers");$/;"	f	class:ZEditor
+buf	QuickEditor.java	/^    	 BufferedReader buf;$/;"	f	class:QuickEditor
+buffer	ZPrint.java	/^    JTextPane buffer;$/;"	f	class:ZPrint
+buffnum	ZEditor.java	/^    static int buffnum;$/;"	f	class:ZEditor
+buffr	Commands.java	/^    String buffr;$/;"	f	class:Commands
+buffy	Clsv.java	/^    StringBuilder buffy = new StringBuilder($/;"	f	class:Clsv
+callPage	TPEditorX.java	/^  public void callPage(String filename) {$/;"	m	class:TPEditorX
+cancel	TPEditorX.java	/^    static JButton cancel;$/;"	f	class:TPEditorX
+cc	MailFiles.java	/^    int cc = 0;$/;"	f	class:MailFiles
+centerpanel	QuickDialog.java	/^    JPanel centerpanel;$/;"	f	class:QuickDialog
+chance	TPEditorX.java	/^    public static final JColorChooser chance = ZEditor.chauncy;$/;"	f	class:TPEditorX
+charset	TPEditorX.java	/^    boolean charset = true;$/;"	f	class:TPEditorX
+chary	TPEditorX.java	/^             StringBuilder chary;$/;"	f	class:TPEditorX
+chauncy	ZEditor.java	/^    public static final JColorChooser chauncy = new JColorChooser();$/;"	f	class:ZEditor
+chekstyle	TPEditorX.java	/^    boolean chekstyle(byte[] beti) {$/;"	m	class:TPEditorX
+choc	WebCP.java	/^     CHOLocal choc;$/;"	f	class:WebCP
+chooseFile	TPEditorX.java	/^	 public  void chooseFile(String _dir, boolean _open) {$/;"	m	class:TPEditorX
+cleanup	MailRun.java	/^    public static String cleanup() throws Exception {$/;"	m	class:MailRun
+clearModeMenus	TPEditorX.java	/^	void clearModeMenus(){$/;"	m	class:TPEditorX
+clength	WebCP.java	/^    static int clength;$/;"	f	class:WebCP
+clength	Webby.java	/^    static int clength;$/;"	f	class:Webby
+close	QuickDialog.java	/^    JButton close;$/;"	f	class:QuickDialog
+cmd	Commands.java	/^    String cmd;$/;"	f	class:Commands
+cmd	TPEditorX.java	/^    String cmd;$/;"	f	class:TPEditorX
+color	Modes.java	/^	public    Color color;$/;"	f	class:Modes
+colorstack	TPEditorX.java	/^    Stack <Color> colorstack = new Stack<Color>();$/;"	f	class:TPEditorX
+columns	Modes.java	/^	public    int columns;$/;"	f	class:Modes
+completing	TPEditorX.java	/^    boolean completing;$/;"	f	class:TPEditorX
+completions	TPEditorX.java	/^    static String[] completions;$/;"	f	class:TPEditorX
+con	DBStart.java	/^            Connection con;$/;"	f	class:DBStart
+confirmString	Commands.java	/^	public    String confirmString;$/;"	f	class:Commands
+confirmString	QuickDialog.java	/^    String confirmString;$/;"	f	class:QuickDialog
+conn	Annotate.java	/^     Connection conn;$/;"	f	class:Annotate
+conn	JMailClient.java	/^     Connection conn;$/;"	f	class:JMailClient
+conn	MailFiles.java	/^   Connection conn;$/;"	f	class:MailFiles
+conn	QuickEditor.java	/^    Connection conn;$/;"	f	class:QuickEditor
+conn	SMailClient.java	/^	Connection conn;$/;"	f	class:SMailClient
+controlChecker	MailFiles.java	/^    public static String controlChecker(String y) {$/;"	m	class:MailFiles
+controlsq	TPEditorX.java	/^    boolean controlsq;$/;"	f	class:TPEditorX
+converter	MailFiles.java	/^    public static String converter(String y, String cutter) {$/;"	m	class:MailFiles
+copy	Commands.java	/^    public static void copy(File infile, String tofile, boolean move) {$/;"	m	class:Commands
+copy	Commands.java	/^    public static void copy(String infile, String tofile, boolean move) {$/;"	m	class:Commands
+counter	WebCP.java	/^    static int counter = 0;$/;"	f	class:WebCP
+counter	Webby.java	/^    static int counter = 0;$/;"	f	class:Webby
+cpref	WebCP.java	/^    CalHTMLPreferences cpref;$/;"	f	class:WebCP
+crunch	ZEditor.java	/^    public static String crunch(String in) {$/;"	m	class:ZEditor
+ctrl	TPEditorX.java	/^    static final int ctrl = Event.CTRL_MASK;$/;"	f	class:TPEditorX
+currentDir	WebCP.java	/^    static String currentDir;$/;"	f	class:WebCP
+currentDir	Webby.java	/^    static String currentDir;$/;"	f	class:Webby
+currentFont	TPEditorX.java	/^    Font currentFont;$/;"	f	class:TPEditorX
+currentURL	WebCP.java	/^    static URL currentURL;$/;"	f	class:WebCP
+currentURL	Webby.java	/^    static URL currentURL;$/;"	f	class:Webby
+currentfile	Commands.java	/^    String currentfile;$/;"	f	class:Commands
+currentfile	TPEditorX.java	/^    String currentfile;$/;"	f	class:TPEditorX
+currentinfo	TPEditorX.java	/^    JTextField currentinfo = new JTextField("Welcome to Zigli's Editor");$/;"	f	class:TPEditorX
+dada	TPEditorX.java	/^    JMenu dada = new JMenu("Data");$/;"	f	class:TPEditorX
+daki	ZEditor.java	/^    public final static JDesktopPane daki = new JDesktopPane();$/;"	f	class:ZEditor
+dapop	TPEditorX.java	/^    JMenu dapop = new JMenu("Data");$/;"	f	class:TPEditorX
+data	Clsv.java	/^    String[] data;$/;"	f	class:Clsv
+datafile	Modes.java	/^	public    String datafile;$/;"	f	class:Modes
+dataport	DBStart.java	/^	public static int dataport;$/;"	f	class:DBStart
+days	MailFiles.java	/^    static final String[] days = {$/;"	f	class:MailFiles
+del	QuickEditor.java	/^    static final String[] del = { "Verify Delete" };$/;"	f	class:QuickEditor
+deleteWord	TPEditorX.java	/^    void deleteWord() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ deleteWord \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+dialog	TPEditorX.java	/^    static QuickDialog dialog;$/;"	f	class:TPEditorX
+dialog	WebCP.java	/^    static QuickDialog dialog;$/;"	f	class:WebCP
+dialog	Webby.java	/^    static QuickDialog dialog;$/;"	f	class:Webby
+dictionary	TPEditorX.java	/^    boolean dictionary;$/;"	f	class:TPEditorX
+dictionaryin	Alphabet.java	/^    public static void dictionaryin(String langName, String _inword, Connection _conn) {$/;"	m	class:Alphabet
+dictionaryout	Alphabet.java	/^    public String[] dictionaryout(String langName, String searchword, Connection _conn) {$/;"	m	class:Alphabet
+diff1	TPEditorX.java	/^              String diff1="";$/;"	f	class:TPEditorX
+diff2	TPEditorX.java	/^              String diff2="";$/;"	f	class:TPEditorX
+din	TPEditorX.java	/^   static DataInputStream din;$/;"	f	class:TPEditorX
+dir	TPEditorX.java	/^             String dir = System.getProperty("user.dir");$/;"	f	class:TPEditorX
+direc	Commands.java	/^    String direc;$/;"	f	class:Commands
+direct	TPEditorX.java	/^    static int direct;$/;"	f	class:TPEditorX
+directories	ZEditor.java	/^    static final String[] directories = {$/;"	f	class:ZEditor
+directory	MClient.java	/^    String directory;$/;"	f	class:MClient
+directory	Traxit.java	/^    static String directory;$/;"	f	class:Traxit
+displayURL	WebCP.java	/^    public void displayURL(URL _url) throws Exception {$/;"	m	class:WebCP
+displayURL	Webby.java	/^    public void displayURL(URL _url) throws Exception {$/;"	m	class:Webby
+dldl	WebCP.java	/^    JMenu dldl = new JMenu("Edit");$/;"	f	class:WebCP
+doEdit	WebCP.java	/^    public  void doEdit(String _hostt, URL _url) {$/;"	m	class:WebCP
+doEdit	Webby.java	/^    public  void doEdit(String _hostt, URL _url)$/;"	m	class:Webby
+doFrames	ZEditor.java	/^	static void doFrames() {$/;"	m	class:ZEditor
+doNotes	MailFiles.java	/^    public  void doNotes(String _prereq) throws Exception {$/;"	m	class:MailFiles
+doPage	WebCP.java	/^     void doPage(URLConnection _urla) {$/;"	m	class:WebCP
+doPage	Webby.java	/^    void doPage(URLConnection _urla) {$/;"	m	class:Webby
+doQuickEdit	Webby.java	/^    public  void doQuickEdit(String _hostt, URL _url)$/;"	m	class:Webby
+doSave	DOps.java	/^	public static void doSave(Connection cnct, String filename, byte[] bits, String db) {$/;"	m	class:DOps
+document	Clsv.java	/^    String document;$/;"	f	class:Clsv
+doedit	Webby.java	/^    boolean doedit;$/;"	f	class:Webby
+downCase	TPEditorX.java	/^    void downCase() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ downCase \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+dte	MClient.java	/^    static final Date dte = new Date();$/;"	f	class:MClient
+dte	MailFiles.java	/^    static final java.util.Date dte = new java.util.Date();$/;"	f	class:MailFiles
+duti	MailFiles.java	/^    static HashMap <String,String> duti = new HashMap<String,String>();$/;"	f	class:MailFiles
+eded	QuickEditor.java	/^    final JMenu eded = new JMenu("Edit");$/;"	f	class:QuickEditor
+eded	TPEditorX.java	/^    JMenu eded = new JMenu("Edit");$/;"	f	class:TPEditorX
+edinfo	TPEditorX.java	/^    public static final Properties edinfo = new Properties();$/;"	f	class:TPEditorX
+editMenu	TPEditorX.java	/^	public void editMenu(String label, String title, String whichfile){$/;"	m	class:TPEditorX
+editNotes	TPEditorX.java	/^	public void editNotes(){       $/;"	m	class:TPEditorX
+edits	QuickEditor.java	/^    static final String[] edits = { "Clear", "Save", "Quit" };$/;"	f	class:QuickEditor
+edits	TPEditorX.java	/^    static final String[] edits = {$/;"	f	class:TPEditorX
+elts	Clsv.java	/^    String[] elts;$/;"	f	class:Clsv
+emborder	TPEditorX.java	/^    static SoftBevelBorder emborder = new SoftBevelBorder(BevelBorder.LOWERED);$/;"	f	class:TPEditorX
+emem	TPEditorX.java	/^    JMenu emem = new JMenu("SendEMail");$/;"	f	class:TPEditorX
+empty	Buffer.java	/^    public static boolean empty;$/;"	f	class:Buffer
+entryname	Clsv.java	/^    String entryname;$/;"	f	class:Clsv
+erase	QuickEditor.java	/^    JMenu erase = new JMenu("DeleteThisNote");$/;"	f	class:QuickEditor
+extension	TPEditorX.java	/^    static String extension;$/;"	f	class:TPEditorX
+extinfo	TPEditorX.java	/^    static Properties extinfo = new Properties();$/;"	f	class:TPEditorX
+fStyle	TPEditorX.java	/^    int fStyle;$/;"	f	class:TPEditorX
+fcolor	TPEditorX.java	/^    static int fcolor;$/;"	f	class:TPEditorX
+fifi	TPEditorX.java	/^    JMenu fifi = new JMenu("File");$/;"	f	class:TPEditorX
+fileName	Annotate.java	/^    String fileName;$/;"	f	class:Annotate
+fileattachment	TPEditorX.java	/^    static String fileattachment = "";$/;"	f	class:TPEditorX
+filechoices	TPEditorX.java	/^    static final String[] filechoices = {$/;"	f	class:TPEditorX
+filechosen	TPEditorX.java	/^    String filechosen;$/;"	f	class:TPEditorX
+filefield	TPEditorX.java	/^    static JTextField filefield;$/;"	f	class:TPEditorX
+fileinput	Clsv.java	/^    boolean fileinput = false;$/;"	f	class:Clsv
+filename	Alphabet.java	/^    static String filename;$/;"	f	class:Alphabet
+filename	Buffer.java	/^    String filename;$/;"	f	class:Buffer
+filename	SFileClient.java	/^    String filename;$/;"	f	class:SFileClient
+filename	SGetFtp.java	/^    String filename;$/;"	f	class:SGetFtp
+filename	SMailClient.java	/^    public String filename;$/;"	f	class:SMailClient
+filenum	WebCP.java	/^    static int filenum = 0;$/;"	f	class:WebCP
+filenum	Webby.java	/^    static int filenum = 0;$/;"	f	class:Webby
+fileout	MClient.java	/^    static String fileout;$/;"	f	class:MClient
+fileout	SFileClient.java	/^	public    String fileout;$/;"	f	class:SFileClient
+fileout	SGetFtp.java	/^	public    String fileout;$/;"	f	class:SGetFtp
+filetext	TPEditorX.java	/^    static String filetext = "";$/;"	f	class:TPEditorX
+filii	TPEditorX.java	/^    public static JFileChooser filii = new JFileChooser();$/;"	f	class:TPEditorX
+fillin	TPEditorX.java	/^    JTextField fillin = new JTextField(40);$/;"	f	class:TPEditorX
+filterDescription	ZFileFilter.java	/^    String filterDescription;$/;"	f	class:ZFileFilter
+findList	TPEditorX.java	/^    JComboBox findList;$/;"	f	class:TPEditorX
+findString	TPEditorX.java	/^    void findString() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ findString \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+fntSize	TPEditorX.java	/^    static int fntSize;$/;"	f	class:TPEditorX
+fntfamily	WebCP.java	/^    String fntfamily;$/;"	f	class:WebCP
+fntfamily	Webby.java	/^    String fntfamily;$/;"	f	class:Webby
+fntsize	WebCP.java	/^    String fntsize;$/;"	f	class:WebCP
+fntsize	Webby.java	/^    String fntsize;$/;"	f	class:Webby
+fntstyle	TPEditorX.java	/^    String fntstyle;$/;"	f	class:TPEditorX
+fntstyle	WebCP.java	/^    String fntstyle;$/;"	f	class:WebCP
+fntstyle	Webby.java	/^    String fntstyle;$/;"	f	class:Webby
+fntweight	WebCP.java	/^    String fntweight;$/;"	f	class:WebCP
+fntweight	Webby.java	/^    String fntweight;$/;"	f	class:Webby
+fofam	TPEditorX.java	/^    JMenu fofam = new JMenu("FontFamily");$/;"	f	class:TPEditorX
+fofamcmds	ZEditor.java	/^	public    static String[] fofamcmds;$/;"	f	class:ZEditor
+fontFamily	Alphabet.java	/^	public    static String fontFamily;$/;"	f	class:Alphabet
+fontFamily	TPEditorX.java	/^    String fontFamily;$/;"	f	class:TPEditorX
+fontInfo	TPEditorX.java	/^    JLabel fontInfo = new JLabel();$/;"	f	class:TPEditorX
+fontSize	Alphabet.java	/^	public    static int fontSize;$/;"	f	class:Alphabet
+fontSize	TPEditorX.java	/^    int fontSize;$/;"	f	class:TPEditorX
+fontStyle	TPEditorX.java	/^    String fontStyle;$/;"	f	class:TPEditorX
+fontfamilies	ZEditor.java	/^	public    static final String[] fontfamilies = $/;"	f	class:ZEditor
+fontms	TPEditorX.java	/^    JMenu fontms = new JMenu("Fonts");$/;"	f	class:TPEditorX
+fontsizes	ZEditor.java	/^	public    static final String[] fontsizes = {$/;"	f	class:ZEditor
+fontstyles	ZEditor.java	/^	public    	static final String[] fontstyles = { "Bold", "Italic", "Bold-Italic", "Plain" };$/;"	f	class:ZEditor
+formSubmitUpdate	CHOLocal.java	/^     public void formSubmitUpdate(CalHTMLPane p, URL url, int methd, String act, String dat){$/;"	m	class:CHOLocal
+fosize	TPEditorX.java	/^    JMenu fosize = new JMenu("FontSize");$/;"	f	class:TPEditorX
+fosizecmds	ZEditor.java	/^   public static String[] fosizecmds;$/;"	f	class:ZEditor
+fostyle	TPEditorX.java	/^    JMenu fostyle = new JMenu("FontStyle");$/;"	f	class:TPEditorX
+fostylecmds	ZEditor.java	/^	public    static String[] fostylecmds;$/;"	f	class:ZEditor
+fout	Jvmaker.java	/^    static FileOutputStream fout;$/;"	f	class:Jvmaker
+from	SMailClient.java	/^    String from;$/;"	f	class:SMailClient
+ftw	Helper.java	/^    static FileOutputStream ftw;$/;"	f	class:Helper
+getAlphSymbol	TPEditorX.java	/^    public static String getAlphSymbol(HashMap mapper, int code, int mods) {$/;"	m	class:TPEditorX
+getAlphabet	TPEditorX.java	/^    public void getAlphabet(String _alphabet) {$/;"	m	class:TPEditorX
+getConn	TPEditorX.java	/^       Connection getConn(){$/;"	m	class:TPEditorX
+getDescription	ZFileFilter.java	/^    public String getDescription() {$/;"	m	class:ZFileFilter
+getFile	DOps.java	/^public static byte[] getFile(Connection cnct, String filename, String db) throws Exception {$/;"	m	class:DOps
+getFile	QuickEditor.java	/^	 byte[] getFile(String filename, String _word) throws Exception{$/;"	m	class:QuickEditor
+getJMenu	TPEditorX.java	/^    public static String[] getJMenu(String filein) {$/;"	m	class:TPEditorX
+getJMenu	TPEditorX.java	/^    public static String[] getJMenu(String filein, boolean wrap) {$/;"	m	class:TPEditorX
+getMail	MailRun.java	/^    void getMail(String usertxt, String mailsrvr, String passwd) {$/;"	m	class:MailRun
+getText	TPEditorX.java	/^	ByteArrayOutputStream getText() {$/;"	m	class:TPEditorX
+getTime	MClient.java	/^     public static String getTime() {$/;"	m	class:MClient
+getTime	MailFiles.java	/^    public static String getTime() {$/;"	m	class:MailFiles
+getXSL	Traxit.java	/^    String getXSL(String input) throws IOException {$/;"	m	class:Traxit
+geteml	TPEditorX.java	/^    JMenu geteml = new JMenu("GetEMail");$/;"	f	class:TPEditorX
+getmailinfo	TPEditorX.java	/^    static Properties getmailinfo = new Properties();$/;"	f	class:TPEditorX
+go	Commands.java	/^	public    void go(int whch) {$/;"	m	class:Commands
+goApp	TPEditorX.java	/^    boolean goApp;$/;"	f	class:TPEditorX
+goBuffer	TPEditorX.java	/^	void goBuffer(String filename){$/;"	m	class:TPEditorX
+goClsv	Commands.java	/^    void goClsv() {$/;"	m	class:Commands
+goHTML	Commands.java	/^    void goHTML() {$/;"	m	class:Commands
+goJava	Commands.java	/^    void goJava() {$/;"	m	class:Commands
+goJavaDoc	Commands.java	/^    void goJavaDoc() {$/;"	m	class:Commands
+goJxml	Commands.java	/^    void goJxml() {$/;"	m	class:Commands
+goMysql	DOps.java	/^public static Connection goMysql;$/;"	f	class:DOps
+goPDFLaTeX	Commands.java	/^    void goPDFLaTeX() {$/;"	m	class:Commands
+goPDFTeX	Commands.java	/^    void goPDFTeX() {$/;"	m	class:Commands
+goPS	Commands.java	/^    void goPS() {$/;"	m	class:Commands
+goPerl	Commands.java	/^    void goPerl() {$/;"	m	class:Commands
+goSave	DOps.java	/^	public static void goSave(Connection cnct, String name, byte[] jj, String db) {$/;"	m	class:DOps
+goSaveText	DOps.java	/^	public static void goSaveText(Connection cnct, String name, String jj, String db) {$/;"	m	class:DOps
+goXML	Commands.java	/^    void goXML() {$/;"	m	class:Commands
+gocounter	WebCP.java	/^    static int gocounter = 0;$/;"	f	class:WebCP
+gocounter	Webby.java	/^    static int gocounter = 0;$/;"	f	class:Webby
+gogo	TPEditorX.java	/^    JMenu gogo = new JMenu("Go");$/;"	f	class:TPEditorX
+gogo	WebCP.java	/^    JMenu gogo = new JMenu("Go");$/;"	f	class:WebCP
+gogo	Webby.java	/^    JMenu gogo = new JMenu("Go");$/;"	f	class:Webby
+harry	TPEditorX.java	/^    HashMap harry = new HashMap();$/;"	f	class:TPEditorX
+harry	ZEditor.java	/^    static HashMap harry = new HashMap();$/;"	f	class:ZEditor
+header	TPEditorX.java	/^    static final int[] header = new int[]{-84,-19,0,5,115,114,0,38,106,97,118,97};$/;"	f	class:TPEditorX
+help	ZEditor.java	/^    static JMenu help = new JMenu("Help");$/;"	f	class:ZEditor
+helpFileName	Helper.java	/^    String helpFileName;$/;"	f	class:Helper
+helping	TPEditorX.java	/^    boolean helping;$/;"	f	class:TPEditorX
+hght	ZEditor.java	/^	public    static int hght;$/;"	f	class:ZEditor
+highLight	TPEditorX.java	/^    void highLight(int locus) { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ highLight \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+history	WebCP.java	/^    URL[] history = new URL[12];$/;"	f	class:WebCP
+history	Webby.java	/^    URL[] history = new URL[12];$/;"	f	class:Webby
+hoho	WebCP.java	/^    JMenu hoho = new JMenu("Home");$/;"	f	class:WebCP
+hoho	Webby.java	/^    JMenu hoho = new JMenu("Home");$/;"	f	class:Webby
+holding	TPEditorX.java	/^    boolean holding;$/;"	f	class:TPEditorX
+homeURL	WebCP.java	/^    static URL homeURL;$/;"	f	class:WebCP
+homeURL	Webby.java	/^    static URL homeURL;$/;"	f	class:Webby
+host	MClient.java	/^    static String host;$/;"	f	class:MClient
+host	SFileClient.java	/^    String host;$/;"	f	class:SFileClient
+host	SGetFtp.java	/^    String host;$/;"	f	class:SGetFtp
+host	SMailClient.java	/^    String host;$/;"	f	class:SMailClient
+hostfield	TPEditorX.java	/^    static JTextField hostfield;$/;"	f	class:TPEditorX
+hosttext	TPEditorX.java	/^    static String hosttext = "";$/;"	f	class:TPEditorX
+howmuchusyms	TPEditorX.java	/^    static int howmuchusyms;$/;"	f	class:TPEditorX
+ifold	Annotate.java	/^    boolean ifold;$/;"	f	class:Annotate
+ifold	QuickEditor.java	/^    boolean ifold;$/;"	f	class:QuickEditor
+index	TPEditorX.java	/^    int index;$/;"	f	class:TPEditorX
+info	TPEditorX.java	/^    static JPanel info;$/;"	f	class:TPEditorX
+info	WebCP.java	/^    static JPanel info;$/;"	f	class:WebCP
+info	Webby.java	/^    static JPanel info;$/;"	f	class:Webby
+initializing	ZEditor.java	/^    public static boolean initializing = true;$/;"	f	class:ZEditor
+initzing	TPEditorX.java	/^    boolean initzing;$/;"	f	class:TPEditorX
+instring	TPEditorX.java	/^    static JTextField instring;$/;"	f	class:TPEditorX
+inword	Alphabet.java	/^    static String inword;$/;"	f	class:Alphabet
+isWeb	MailRun.java	/^    boolean isWeb;$/;"	f	class:MailRun
+italic	TPEditorX.java	/^    boolean italic;$/;"	f	class:TPEditorX
+item	TPEditorX.java	/^    static JMenuItem item;$/;"	f	class:TPEditorX
+item	WebCP.java	/^    static JMenuItem item;$/;"	f	class:WebCP
+item	Webby.java	/^    static JMenuItem item;$/;"	f	class:Webby
+item	ZEditor.java	/^    static JMenuItem item;$/;"	f	class:ZEditor
+jat	Helper.java	/^    JEditorPane jat;$/;"	f	class:Helper
+jat	MailRun.java	/^    JTextArea jat;$/;"	f	class:MailRun
+jazz	TPEditorX.java	/^              JScrollPane jazz;$/;"	f	class:TPEditorX
+jff	MailRun.java	/^    JFrame jff;$/;"	f	class:MailRun
+jiji	Helper.java	/^    JMenuBar jiji = new JMenuBar();$/;"	f	class:Helper
+jiji	QuickEditor.java	/^    final JMenuBar jiji = new JMenuBar();$/;"	f	class:QuickEditor
+jiji	TPEditorX.java	/^    JMenuBar jiji = new JMenuBar();$/;"	f	class:TPEditorX
+jiji	WebCP.java	/^    JMenuBar jiji = new JMenuBar();$/;"	f	class:WebCP
+jiji	Webby.java	/^    JMenuBar jiji = new JMenuBar();$/;"	f	class:Webby
+jiji	ZEditor.java	/^    static JMenuBar jiji = new JMenuBar();$/;"	f	class:ZEditor
+jimi	Alphabet.java	/^    static JMenuItem jimi;$/;"	f	class:Alphabet
+jodi	TPEditorX.java	/^    JDialog jodi;$/;"	f	class:TPEditorX
+jot	Alphabet.java	/^    static JTextField jot;$/;"	f	class:Alphabet
+jtf	CHOLocal.java	/^	JTextField jtf;$/;"	f	class:CHOLocal
+jxml	TPEditorX.java	/^    static boolean jxml;$/;"	f	class:TPEditorX
+kbSize	TPEditorX.java	/^    static int kbSize;$/;"	f	class:TPEditorX
+kev	TPEditorX.java	/^	 HashMap <Integer,KeyEvent[]>kev = new HashMap(7);$/;"	f	class:TPEditorX
+key	QuickEditor.java	/^    String key;$/;"	f	class:QuickEditor
+keywordfile	Modes.java	/^	public    String keywordfile;$/;"	f	class:Modes
+keywords	TPEditorX.java	/^    String[] keywords = {  };$/;"	f	class:TPEditorX
+kit	ZEditor.java	/^    static HTMLEditorKit kit = new HTMLEditorKit();$/;"	f	class:ZEditor
+ktv	Modes.java	/^    public String ktv(String cmd) {$/;"	m	class:Modes
+langname	Alphabet.java	/^    static String langname;$/;"	f	class:Alphabet
+language	TPEditorX.java	/^    boolean language;$/;"	f	class:TPEditorX
+ldsym	QuickEditor.java	/^    JMenu ldsym = new JMenu("UniBlox");$/;"	f	class:QuickEditor
+ldsym	TPEditorX.java	/^    JMenu ldsym = new JMenu("UniBlox");$/;"	f	class:TPEditorX
+lettermap	TPEditorX.java	/^    HashMap lettermap = new HashMap();$/;"	f	class:TPEditorX
+letters	TPEditorX.java	/^    static JButton[] letters;$/;"	f	class:TPEditorX
+lineco	TPEditorX.java	/^    int lineco = 0;$/;"	f	class:TPEditorX
+lines	MailFiles.java	/^    int lines = 0;$/;"	f	class:MailFiles
+lingling	TPEditorX.java	/^    JMenu lingling = new JMenu("Alphabet");$/;"	f	class:TPEditorX
+link	Annotate.java	/^    String link;$/;"	f	class:Annotate
+link	QuickEditor.java	/^    String link;$/;"	f	class:QuickEditor
+linkActivatedUpdate	CHOLocal.java	/^ public   void  linkActivatedUpdate(CalHTMLPane p, URL url, String tf, String jn) { $/;"	m	class:CHOLocal
+linkFocusedUpdate	CHOLocal.java	/^      public void linkFocusedUpdate(CalHTMLPane p, URL url) {$/;"	m	class:CHOLocal
+links	QuickEditor.java	/^    JMenu links = new JMenu("DoLink");$/;"	f	class:QuickEditor
+loadmlsyms	TPEditorX.java	/^    boolean loadmlsyms;$/;"	f	class:TPEditorX
+localWord	TPEditorX.java	/^    String localWord(int locus) {$/;"	m	class:TPEditorX
+localaddr	WebCP.java	/^    static String localaddr;$/;"	f	class:WebCP
+localaddr	Webby.java	/^    static String localaddr;$/;"	f	class:Webby
+localword	TPEditorX.java	/^    String localword;$/;"	f	class:TPEditorX
+locationSet	TPEditorX.java	/^    public static int[] locationSet(int r1, int r2) {$/;"	m	class:TPEditorX
+locx	Alphabet.java	/^    static int locx;$/;"	f	class:Alphabet
+locx	Helper.java	/^    int locx;$/;"	f	class:Helper
+locx	MailRun.java	/^    int locx;$/;"	f	class:MailRun
+locx	QuickEditor.java	/^    int locx;$/;"	f	class:QuickEditor
+locy	Alphabet.java	/^    static int locy;$/;"	f	class:Alphabet
+locy	Helper.java	/^    int locy;$/;"	f	class:Helper
+locy	MailRun.java	/^    int locy;$/;"	f	class:MailRun
+locy	QuickEditor.java	/^    int locy;$/;"	f	class:QuickEditor
+logfile	MClient.java	/^    static String logfile;$/;"	f	class:MClient
+longdays	MailFiles.java	/^    static final String[] longdays = {$/;"	f	class:MailFiles
+lookfor	TPEditorX.java	/^    static String lookfor;$/;"	f	class:TPEditorX
+mailFrom	TPEditorX.java	/^    static String mailFrom;$/;"	f	class:TPEditorX
+mailer	TPEditorX.java	/^    static String mailer;$/;"	f	class:TPEditorX
+mailinfo	MailRun.java	/^    static Properties mailinfo;$/;"	f	class:MailRun
+mailinfo	TPEditorX.java	/^    static Properties mailinfo = new Properties();$/;"	f	class:TPEditorX
+mailmail	TPEditorX.java	/^    JMenu mailmail = new JMenu("EMail");$/;"	f	class:TPEditorX
+mailserver	MailRun.java	/^    static String mailserver;$/;"	f	class:MailRun
+mailserverfield	MailRun.java	/^    JTextField mailserverfield;$/;"	f	class:MailRun
+mailto	TPEditorX.java	/^    static String mailto;$/;"	f	class:TPEditorX
+main	DBStart.java	/^public static void main(String[] qubits) { $/;"	m	class:DBStart
+main	SGetFtp.java	/^    public static void main(String[] args) throws Exception {$/;"	m	class:SGetFtp
+main	ZEditor.java	/^    public static void main(String[] args) throws Exception {$/;"	m	class:ZEditor
+makStak	TPEditorX.java	/^	 Stack <KeyEvent> makStak;$/;"	f	class:TPEditorX
+makemak	TPEditorX.java	/^    boolean makemak;$/;"	f	class:TPEditorX
+mathflip	TPEditorX.java	/^    int mathflip = 1;$/;"	f	class:TPEditorX
+mathmode	TPEditorX.java	/^    int mathmode = 0;$/;"	f	class:TPEditorX
+menuItem	QuickEditor.java	/^    JMenuItem menuItem;$/;"	f	class:QuickEditor
+menuItem	TPEditorX.java	/^    static JMenuItem menuItem;$/;"	f	class:TPEditorX
+menuItem	WebCP.java	/^    static JMenuItem menuItem;$/;"	f	class:WebCP
+menuItem	Webby.java	/^    static JMenuItem menuItem;$/;"	f	class:Webby
+menuItem	ZEditor.java	/^    static JMenuItem menuItem;$/;"	f	class:ZEditor
+menuSetter	QuickEditor.java	/^    JMenuItem menuSetter(String tempword) {$/;"	m	class:QuickEditor
+menuSetter	TPEditorX.java	/^    JMenuItem menuSetter(String tempword) {$/;"	m	class:TPEditorX
+menufile	Modes.java	/^ 	public   String menufile;$/;"	f	class:Modes
+mime64_0	MailFiles.java	/^    boolean mime64_0;$/;"	f	class:MailFiles
+mime64_1	MailFiles.java	/^    boolean mime64_1;$/;"	f	class:MailFiles
+mimeIt	JMailClient.java	/^    static Multipart mimeIt(String _filename, BodyPart bpt)$/;"	m	class:JMailClient
+mimi	WebCP.java	/^    JMenu mimi = new JMenu("Pauli");$/;"	f	class:WebCP
+mimi	Webby.java	/^    JMenu mimi = new JMenu("Pauli");$/;"	f	class:Webby
+mm	WebCP.java	/^    static int mm;$/;"	f	class:WebCP
+mm	Webby.java	/^    static int mm;$/;"	f	class:Webby
+mod	QuickEditor.java	/^    final static Modes mod = new Modes("Xml", TPEditorX.modesinfo);$/;"	f	class:QuickEditor
+mod	TPEditorX.java	/^    Modes mod;$/;"	f	class:TPEditorX
+mode	TPEditorX.java	/^    static String mode;$/;"	f	class:TPEditorX
+modename	Modes.java	/^	public    String modename;$/;"	f	class:Modes
+modes	TPEditorX.java	/^    static String[] modes;$/;"	f	class:TPEditorX
+modesinfo	TPEditorX.java	/^    static Properties modesinfo = new Properties();$/;"	f	class:TPEditorX
+modestring	Modes.java	/^	public    String modestring;$/;"	f	class:Modes
+modifiers	Alphabet.java	/^	public   int[] modifiers;$/;"	f	class:Alphabet
+modifiers	TPEditorX.java	/^    static int[] modifiers;$/;"	f	class:TPEditorX
+modifiers	ZEditor.java	/^    int[] modifiers;$/;"	f	class:ZEditor
+modifs	TPEditorX.java	/^    boolean modifs(InputEvent ie, String xyz) {$/;"	m	class:TPEditorX
+momo	TPEditorX.java	/^    JMenu momo = new JMenu("Modes");$/;"	f	class:TPEditorX
+momopop	TPEditorX.java	/^    JMenu momopop = new JMenu("Modes");$/;"	f	class:TPEditorX
+msR	DBStart.java	/^            public static MysqldResource msR;$/;"	f	class:DBStart
+msg	JMailClient.java	/^    SMTPMessage msg;$/;"	f	class:JMailClient
+msg	SMailClient.java	/^    String msg;$/;"	f	class:SMailClient
+names	WebCP.java	/^    static final String[] names = new String[] {$/;"	f	class:WebCP
+names	Webby.java	/^    static final String[] names = new String[] {$/;"	f	class:Webby
+nickname	TPEditorX.java	/^    static JTextField nickname;$/;"	f	class:TPEditorX
+nn	WebCP.java	/^    static int nn;$/;"	f	class:WebCP
+nn	Webby.java	/^    static int nn;$/;"	f	class:Webby
+northLabelText	QuickDialog.java	/^    String northLabelText;$/;"	f	class:QuickDialog
+note	TPEditorX.java	/^    boolean note;$/;"	f	class:TPEditorX
+notmp	TPEditorX.java	/^    boolean notmp;$/;"	f	class:TPEditorX
+noto	TPEditorX.java	/^    JMenu noto = new JMenu("Notes");$/;"	f	class:TPEditorX
+numapps	Commands.java	/^ 	public   static final int numapps = programs.length - 1;$/;"	f	class:Commands
+nummessages	MClient.java	/^    static int nummessages;$/;"	f	class:MClient
+numsWarning	TPEditorX.java	/^    void numsWarning() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ numsWarning \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+numson	TPEditorX.java	/^    boolean numson;$/;"	f	class:TPEditorX
+numtokens	Clsv.java	/^    int numtokens;$/;"	f	class:Clsv
+open	TPEditorX.java	/^    static boolean open;$/;"	f	class:TPEditorX
+options	WebCP.java	/^    static final Object[] options = {$/;"	f	class:WebCP
+options	Webby.java	/^    static final Object[] options = {$/;"	f	class:Webby
+outfile	JMailClient.java	/^    public static String outfile;$/;"	f	class:JMailClient
+outfile	TPEditorX.java	/^    static String outfile;$/;"	f	class:TPEditorX
+outname	TPEditorX.java	/^    String outname;$/;"	f	class:TPEditorX
+outstring	TPEditorX.java	/^    static JTextField outstring;$/;"	f	class:TPEditorX
+outstrokes	Alphabet.java	/^	public   String[] outstrokes;$/;"	f	class:Alphabet
+packed	TPEditorX.java	/^    static String packed = "";$/;"	f	class:TPEditorX
+padpop	TPEditorX.java	/^    JMenu padpop = new JMenu("Pad");$/;"	f	class:TPEditorX
+paintPage	PrintView.java	/^    public boolean paintPage(Graphics g, int hPage, int pageIndex) {$/;"	m	class:PrintView
+pane	CHOLocal.java	/^	CalHTMLPane pane;$/;"	f	class:CHOLocal
+parencolor	TPEditorX.java	/^    int parencolor;$/;"	f	class:TPEditorX
+parencount	TPEditorX.java	/^    int parencount = 0;$/;"	f	class:TPEditorX
+parent	QuickDialog.java	/^    TPEditorX parent;$/;"	f	class:QuickDialog
+pass	MClient.java	/^    static String pass;$/;"	f	class:MClient
+password	MailRun.java	/^    static String password;$/;"	f	class:MailRun
+passwordfield	MailRun.java	/^    JTextField passwordfield;$/;"	f	class:MailRun
+picturetext	TPEditorX.java	/^    static String picturetext = "";$/;"	f	class:TPEditorX
+popup	WebCP.java	/^    JPopupMenu popup = new JPopupMenu();$/;"	f	class:WebCP
+popup	Webby.java	/^    JPopupMenu popup = new JPopupMenu();$/;"	f	class:Webby
+port	SFileClient.java	/^    int port;$/;"	f	class:SFileClient
+port	SGetFtp.java	/^    int port;$/;"	f	class:SGetFtp
+portfield	TPEditorX.java	/^    static JTextField portfield;$/;"	f	class:TPEditorX
+porttext	TPEditorX.java	/^    static String porttext = "";$/;"	f	class:TPEditorX
+position	TPEditorX.java	/^    int position = 0;$/;"	f	class:TPEditorX
+pout	MailFiles.java	/^    PrintWriter pout;$/;"	f	class:MailFiles
+prefix	MailFiles.java	/^    String prefix;$/;"	f	class:MailFiles
+prefixed	TPEditorX.java	/^	public static String[] prefixed(String[] in, String prefix){	$/;"	m	class:TPEditorX
+prereq	MailFiles.java	/^    String prereq;$/;"	f	class:MailFiles
+print	ZPrint.java	/^    public int print(Graphics pg, PageFormat pageFormat, int pageIndex)$/;"	m	class:ZPrint
+printit	ZPrint.java	/^    public void printit() {$/;"	m	class:ZPrint
+printout	ZEditor.java	/^    static String printout;$/;"	f	class:ZEditor
+programs	Commands.java	/^    static final String[] programs = {$/;"	f	class:Commands
+propsdata	TPEditorX.java	/^    boolean propsdata;$/;"	f	class:TPEditorX
+prt	MailFiles.java	/^    PrintWriter prt;$/;"	f	class:MailFiles
+pt	TPEditorX.java	/^    static Point pt;$/;"	f	class:TPEditorX
+putFile	ZEditor.java	/^    public static void putFile(String resource, String localfile) {$/;"	m	class:ZEditor
+pwfield	TPEditorX.java	/^    static JPasswordField pwfield;$/;"	f	class:TPEditorX
+pwordsfield	TPEditorX.java	/^    static JTextField pwordsfield;$/;"	f	class:TPEditorX
+pwordstext	TPEditorX.java	/^    static String pwordstext = "";$/;"	f	class:TPEditorX
+pwtext	TPEditorX.java	/^    static String pwtext = "";$/;"	f	class:TPEditorX
+quickwords	TPEditorX.java	/^    static String[] quickwords;$/;"	f	class:TPEditorX
+qwpop	TPEditorX.java	/^    JMenu qwpop = new JMenu("Quickwords");$/;"	f	class:TPEditorX
+qwqw	TPEditorX.java	/^    JMenu qwqw = new JMenu("Quickwords");$/;"	f	class:TPEditorX
+rcrc	ZEditor.java	/^    static JMenu rcrc = new JMenu("Recent Files");$/;"	f	class:ZEditor
+readCmd	Commands.java	/^    void readCmd() {$/;"	m	class:Commands
+recentfiles	ZEditor.java	/^    static String[] recentfiles;$/;"	f	class:ZEditor
+recentlist	ZEditor.java	/^    static Vector<String> recentlist = new Vector<String>();$/;"	f	class:ZEditor
+refresh	QuickEditor.java	/^    void refresh() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ refresh \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:QuickEditor
+refresh	TPEditorX.java	/^    void refresh() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ refresh \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+refs	QuickEditor.java	/^    static final String[] refs = { "reference|S" };$/;"	f	class:QuickEditor
+removeKey	QuickEditor.java	/^	 boolean removeKey(String name, String _word){$/;"	m	class:QuickEditor
+replaceString	TPEditorX.java	/^    static boolean replaceString;$/;"	f	class:TPEditorX
+replaceString	TPEditorX.java	/^    void replaceString() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ replaceString \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+replaced	TPEditorX.java	/^    static String replaced;$/;"	f	class:TPEditorX
+reply	RemoteClient.java	/^ 	public   static String reply;$/;"	f	class:RemoteClient
+res	DOps.java	/^static ResultSet res;$/;"	f	class:DOps
+result	PackEm.java	/^	byte[] result;$/;"	f	class:PackEm
+result	UnPackEm.java	/^	byte[] result;$/;"	f	class:UnPackEm
+results	MailRun.java	/^    public String results;$/;"	f	class:MailRun
+rgb	TPEditorX.java	/^    public static int rgb(String colorin) {$/;"	m	class:TPEditorX
+rows	Modes.java	/^	public    int rows;$/;"	f	class:Modes
+rs	Alphabet.java	/^	static ResultSet rs;$/;"	f	class:Alphabet
+rs	QuickEditor.java	/^    ResultSet rs;$/;"	f	class:QuickEditor
+runIt	TPEditorX.java	/^    public void runIt(String _runcommand, String _currentfile) {$/;"	m	class:TPEditorX
+runIt	TPEditorX.java	/^    public void runIt(String _shellcommand) {$/;"	m	class:TPEditorX
+runIt	WebCP.java	/^    public  void runIt(String _runcommand, String _currentfile) {$/;"	m	class:WebCP
+runIt	WebCP.java	/^    public  void runIt(String _shellcommand) {$/;"	m	class:WebCP
+runIt	Webby.java	/^    public void runIt(String _runcommand, String _currentfile) {$/;"	m	class:Webby
+runIt	Webby.java	/^    public void runIt(String _shellcommand) {$/;"	m	class:Webby
+runapp	TPEditorX.java	/^    static Commands runapp;$/;"	f	class:TPEditorX
+runcommand	Modes.java	/^	public    String runcommand;$/;"	f	class:Modes
+running	WebCP.java	/^    boolean running;$/;"	f	class:WebCP
+running	Webby.java	/^    boolean running;$/;"	f	class:Webby
+runs	TPEditorX.java	/^    static final String[] runs = {$/;"	f	class:TPEditorX
+ruru	TPEditorX.java	/^    JMenu ruru = new JMenu("Run");$/;"	f	class:TPEditorX
+saveIt	QuickEditor.java	/^	 void saveIt(String name, String _word, String _link, byte[] _data) {$/;"	m	class:QuickEditor
+saveMacros	TPEditorX.java	/^	void saveMacros(){$/;"	m	class:TPEditorX
+savePage	Commands.java	/^    public void savePage(String filename) {$/;"	m	class:Commands
+savePage	TPEditorX.java	/^  public void savePage(String filename) {$/;"	m	class:TPEditorX
+scratch	TPEditorX.java	/^    String scratch;$/;"	f	class:TPEditorX
+sdf	MClient.java	/^    static final SimpleDateFormat sdf = new SimpleDateFormat("MM_dd_yy");$/;"	f	class:MClient
+searchlist	TPEditorX.java	/^    static Vector searchlist = new Vector();$/;"	f	class:TPEditorX
+server	RemoteClient.java	/^    static Socket server;$/;"	f	class:RemoteClient
+server	SFileClient.java	/^    Socket server;$/;"	f	class:SFileClient
+server	SGetFtp.java	/^    Socket server;$/;"	f	class:SGetFtp
+server	SMailClient.java	/^    Socket server;$/;"	f	class:SMailClient
+setAttrs	TPEditorX.java	/^    public void setAttrs() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ setAttrs \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+setAttrs	TPEditorX.java	/^    public void setAttrs(Color color) {$/;"	m	class:TPEditorX
+setBkmrx	WebCP.java	/^    void setBkmrx(JMenu _bobo, String[] bkmrks) {$/;"	m	class:WebCP
+setBkmrx	Webby.java	/^    void setBkmrx(JMenu _bobo, String[] bkmrks) {$/;"	m	class:Webby
+setBookmarks	TPEditorX.java	/^	void setBookmarks(){$/;"	m	class:TPEditorX
+setBufferMenu	ZEditor.java	/^    public void setBufferMenu() {$/;"	m	class:ZEditor
+setGoJMenu	TPEditorX.java	/^    public void setGoJMenu(String filename) {$/;"	m	class:TPEditorX
+setGoJMenu	WebCP.java	/^    public void setGoJMenu(URL _currentURL) {$/;"	m	class:WebCP
+setGoJMenu	Webby.java	/^    public void setGoJMenu(URL _currentURL) {$/;"	m	class:Webby
+setJMenu	QuickEditor.java	/^    public void setJMenu(JMenu mimi, String[] words, String[] actioncmds) {$/;"	m	class:QuickEditor
+setJMenu	QuickEditor.java	/^    public void setJMenu(JMenu mimi, String[] words, int[] strokes,$/;"	m	class:QuickEditor
+setJMenu	TPEditorX.java	/^    public void setJMenu(JMenu mimi, String[] words) {$/;"	m	class:TPEditorX
+setJMenu	TPEditorX.java	/^    public void setJMenu(JMenu mimi, String[] words, JMenuBar bibi) {$/;"	m	class:TPEditorX
+setJMenu	TPEditorX.java	/^    public void setJMenu(JMenu mimi, String[] words, String[] actioncmds) {$/;"	m	class:TPEditorX
+setJMenu	TPEditorX.java	/^    public void setJMenu(JMenu mimi, String[] words, int[] pstrokes, int[] pmodifiers) {$/;"	m	class:TPEditorX
+setJMenu	TPEditorX.java	/^    public void setJMenu(JMenu mimi, String[] words, int[] pstrokes, int[] pmodifiers, String[] actioncmds) {$/;"	m	class:TPEditorX
+setJMenu	TPEditorX.java	/^    public void setJMenu(JPopupMenu mimi, String[] words) {$/;"	m	class:TPEditorX
+setMenu	QuickEditor.java	/^    public void setMenu(JMenu mimi, String[] words, int[] strokes,$/;"	m	class:QuickEditor
+setMenu	ZEditor.java	/^    public void setMenu(JMenu mimi, String[] words, int[] _strokes, int[] _modifiers) {$/;"	m	class:ZEditor
+setMenuItem	TPEditorX.java	/^            void setMenuItem(String term, String acmd, JMenu jmenu){$/;"	m	class:TPEditorX
+setMode	TPEditorX.java	/^    public void setMode() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ setMode \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+setModeMenu	TPEditorX.java	/^    public void setModeMenu() {$/;"	m	class:TPEditorX
+setModeMenu	TPEditorX.java	/^    public void setModeMenu(String menuname, String patternstring) {$/;"	m	class:TPEditorX
+setNotes	TPEditorX.java	/^    public void setNotes() {$/;"	m	class:TPEditorX
+setPad	TPEditorX.java	/^    public void setPad(String datafile, int rows, int columns) {$/;"	m	class:TPEditorX
+setPad	TPEditorX.java	/^    public void setPad(String indata, int rows, int columns, boolean isfileinput) {$/;"	m	class:TPEditorX
+setProps	TPEditorX.java	/^    public String[] setProps(Properties propinfo, boolean sort) {$/;"	m	class:TPEditorX
+setProps	TPEditorX.java	/^    public void setProps(Properties propinfo, JMenu mimi, boolean sort) {$/;"	m	class:TPEditorX
+setQuickwords	TPEditorX.java	/^    public void setQuickwords() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ setQuickwords \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+shell	TPEditorX.java	/^    static boolean shell;$/;"	f	class:TPEditorX
+shellcommand	TPEditorX.java	/^    static String shellcommand;$/;"	f	class:TPEditorX
+shft	TPEditorX.java	/^    static final int shft = Event.SHIFT_MASK;$/;"	f	class:TPEditorX
+showSplash	ZEditor.java	/^    public void showSplash(int _locx, int _locy, int _localhght) {$/;"	m	class:ZEditor
+showoutput	TPEditorX.java	/^    static JFrame showoutput;$/;"	f	class:TPEditorX
+showpads	TPEditorX.java	/^    boolean showpads = true;$/;"	f	class:TPEditorX
+simpleTrans	Traxit.java	/^    public void simpleTrans(String input, String xslID, String fileout)$/;"	m	class:Traxit
+size	ZEditor.java	/^    static Dimension size;$/;"	f	class:ZEditor
+smc	TPEditorX.java	/^    SMailClient smc;$/;"	f	class:TPEditorX
+sml	TPEditorX.java	/^    static JPanel sml;$/;"	f	class:TPEditorX
+smlx	TPEditorX.java	/^    static JDialog smlx;$/;"	f	class:TPEditorX
+southpanel	QuickDialog.java	/^    JPanel southpanel;$/;"	f	class:QuickDialog
+southpanel	TPEditorX.java	/^    JPanel southpanel = new JPanel();$/;"	f	class:TPEditorX
+srchwd	TPEditorX.java	/^    String srchwd;$/;"	f	class:TPEditorX
+start	Jvmaker.java	/^    public static boolean start(RootDoc root) throws Exception {$/;"	m	class:Jvmaker
+startup	Modes.java	/^	public    String startup;$/;"	f	class:Modes
+startup	TPEditorX.java	/^    static String startup;$/;"	f	class:TPEditorX
+stf	MClient.java	/^    static final SimpleDateFormat stf = new SimpleDateFormat("kk_mm");$/;"	f	class:MClient
+stf	MailFiles.java	/^    static final SimpleDateFormat stf = new SimpleDateFormat("kk_mm");$/;"	f	class:MailFiles
+stmt	DBStart.java	/^            Statement stmt;$/;"	f	class:DBStart
+stopMySQL	DOps.java	/^   public static void stopMySQL() {$/;"	m	class:DOps
+stro	TPEditorX.java	/^    static StreamTokenizer stro;$/;"	f	class:TPEditorX
+strokes	Alphabet.java	/^ 	public   int[] strokes;$/;"	f	class:Alphabet
+strokes	TPEditorX.java	/^    static int[] strokes;$/;"	f	class:TPEditorX
+strokes	ZEditor.java	/^    int[] strokes;$/;"	f	class:ZEditor
+styled	TPEditorX.java	/^    boolean styled;$/;"	f	class:TPEditorX
+stylefile	TPEditorX.java	/^    static String stylefile;$/;"	f	class:TPEditorX
+subject	TPEditorX.java	/^    static String subject;$/;"	f	class:TPEditorX
+subusym1	QuickEditor.java	/^    static JMenu subusym1;$/;"	f	class:QuickEditor
+subusym1	TPEditorX.java	/^    JMenu subusym1;$/;"	f	class:TPEditorX
+subusym2	QuickEditor.java	/^    static JMenu subusym2;$/;"	f	class:QuickEditor
+subusym2	TPEditorX.java	/^    JMenu subusym2;$/;"	f	class:TPEditorX
+syml	TPEditorX.java	/^    static String[] syml;$/;"	f	class:TPEditorX
+sympop	TPEditorX.java	/^    JMenu sympop = new JMenu("MLSyms");$/;"	f	class:TPEditorX
+symsym	TPEditorX.java	/^    JMenu symsym = new JMenu("MLSyms");$/;"	f	class:TPEditorX
+sysout	SFileClient.java	/^	public    StringBuilder sysout;$/;"	f	class:SFileClient
+sysout	SGetFtp.java	/^	public    StringBuilder sysout;$/;"	f	class:SGetFtp
+t	MailFiles.java	/^    String t;$/;"	f	class:MailFiles
+tempURL	WebCP.java	/^    static URL tempURL;$/;"	f	class:WebCP
+tempURL	Webby.java	/^    static URL tempURL;$/;"	f	class:Webby
+testKey	Annotate.java	/^	boolean testKey(String _name, String _word){$/;"	m	class:Annotate
+testKey	DOps.java	/^	static boolean testKey(Connection cnct, String name, String db){$/;"	m	class:DOps
+texChecker	TPEditorX.java	/^  boolean texChecker() {$/;"	m	class:TPEditorX
+texChecker	TPEditorX.java	/^  boolean texChecker(String filename) {$/;"	m	class:TPEditorX
+texpop	TPEditorX.java	/^    JMenu texpop = new JMenu("TeXSyms");$/;"	f	class:TPEditorX
+texsyml	TPEditorX.java	/^    static String[] texsyml;$/;"	f	class:TPEditorX
+text	Splitz.java	/^    String text;$/;"	f	class:Splitz
+textex	TPEditorX.java	/^    JMenu textex = new JMenu("TeXSyms");$/;"	f	class:TPEditorX
+textfill	TPEditorX.java	/^    static JTextField textfill;$/;"	f	class:TPEditorX
+textfill2	TPEditorX.java	/^    static JTextField textfill2;$/;"	f	class:TPEditorX
+textin	Helper.java	/^    JTextField textin = new JTextField($/;"	f	class:Helper
+textin	TPEditorX.java	/^    JPanel textin = new JPanel();$/;"	f	class:TPEditorX
+textin	WebCP.java	/^    static JTextField textin = new JTextField("Welcome to the Web!");$/;"	f	class:WebCP
+textin	Webby.java	/^    JTextField textin = new JTextField("Welcome to the Web!");$/;"	f	class:Webby
+textlabel	Commands.java	/^    String textlabel;$/;"	f	class:Commands
+tiling	ZEditor.java	/^    public void tiling() {$/;"	m	class:ZEditor
+title	Commands.java	/^    String title;$/;"	f	class:Commands
+title	QuickEditor.java	/^    String title;$/;"	f	class:QuickEditor
+titles	MailFiles.java	/^    static final String[] titles = { "Subject:", "Date:", "From:" };$/;"	f	class:MailFiles
+to	SMailClient.java	/^    String to;$/;"	f	class:SMailClient
+traceon	TPEditorX.java	/^    boolean traceon;$/;"	f	class:TPEditorX
+tries	TPEditorX.java	/^    static Stack<String> tries;$/;"	f	class:TPEditorX
+txtx	TPEditorX.java	/^    JMenu txtx = new JMenu("Text");$/;"	f	class:TPEditorX
+txtxpop	TPEditorX.java	/^    JMenu txtxpop = new JMenu("Text");$/;"	f	class:TPEditorX
+undo	TPEditorX.java	/^    UndoManager undo = new UndoManager();$/;"	f	class:TPEditorX
+undoableEditHappened	TPEditorX.java	/^    public void undoableEditHappened(UndoableEditEvent e) {$/;"	m	class:TPEditorX
+unimenus	QuickEditor.java	/^    static HashMap unimenus = new HashMap();$/;"	f	class:QuickEditor
+unimenus	TPEditorX.java	/^    HashMap unimenus = new HashMap();$/;"	f	class:TPEditorX
+unipop	QuickEditor.java	/^    static JPopupMenu unipop = new JPopupMenu();$/;"	f	class:QuickEditor
+unipop	TPEditorX.java	/^    JPopupMenu unipop = new JPopupMenu();$/;"	f	class:TPEditorX
+unpacked	TPEditorX.java	/^    static String unpacked = "";$/;"	f	class:TPEditorX
+upCase	TPEditorX.java	/^    void upCase() { \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ upCase \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/$/;"	m	class:TPEditorX
+upfield	TPEditorX.java	/^    static JTextField upfield;$/;"	f	class:TPEditorX
+upfiletext	TPEditorX.java	/^    static String upfiletext = "";$/;"	f	class:TPEditorX
+uphosttext	TPEditorX.java	/^    static String uphosttext = "";$/;"	f	class:TPEditorX
+uptext	TPEditorX.java	/^    static String uptext = "";$/;"	f	class:TPEditorX
+urla	WebCP.java	/^	 URLConnection urla;$/;"	f	class:WebCP
+urla	Webby.java	/^    static URLConnection urla;$/;"	f	class:Webby
+user	MClient.java	/^    static String user;$/;"	f	class:MClient
+user	MailRun.java	/^    static String user;$/;"	f	class:MailRun
+user	SGetFtp.java	/^    String user;$/;"	f	class:SGetFtp
+userdir	WebCP.java	/^    public static String userdir = System.getProperty("user.dir");$/;"	f	class:WebCP
+userdir	Webby.java	/^    public static String userdir = System.getProperty("user.dir");$/;"	f	class:Webby
+userfield	MailRun.java	/^    JTextField userfield;$/;"	f	class:MailRun
+userfield	TPEditorX.java	/^    static JTextField userfield;$/;"	f	class:TPEditorX
+usertext	MailRun.java	/^    static String usertext;$/;"	f	class:MailRun
+usertext	TPEditorX.java	/^    static String usertext = "";$/;"	f	class:TPEditorX
+usym	QuickEditor.java	/^    static JMenu usym = new JMenu("UniSyms");$/;"	f	class:QuickEditor
+usym	TPEditorX.java	/^    JMenu usym = new JMenu("UniSyms");$/;"	f	class:TPEditorX
+utils	ZEditor.java	/^    static final String[] utils = {$/;"	f	class:ZEditor
+utut	ZEditor.java	/^    final JMenu utut = new JMenu("Utils");$/;"	f	class:ZEditor
+verify	QuickDialog.java	/^    JButton verify;$/;"	f	class:QuickDialog
+verify	TPEditorX.java	/^    static JButton verify;$/;"	f	class:TPEditorX
+viewer	WebCP.java	/^    CalHTMLPane viewer;$/;"	f	class:WebCP
+viewer	Webby.java	/^    JEditorPane viewer = new JEditorPane();$/;"	f	class:Webby
+views	ZEditor.java	/^    static final String[] views = { "Go Viewer", "Go Help" };$/;"	f	class:ZEditor
+vwvw	ZEditor.java	/^    static JMenu vwvw = new JMenu("WebView");$/;"	f	class:ZEditor
+wcp	CHOLocal.java	/^	WebCP wcp;$/;"	f	class:CHOLocal
+wdth	ZEditor.java	/^	public    static int wdth;$/;"	f	class:ZEditor
+webinfo	WebCP.java	/^    static Properties webinfo = new Properties();$/;"	f	class:WebCP
+webinfo	Webby.java	/^    static Properties webinfo = new Properties();$/;"	f	class:Webby
+webstyle	TPEditorX.java	/^    public static String webstyle(String name) {$/;"	m	class:TPEditorX
+which	Commands.java	/^ 	public   int which = -1;$/;"	f	class:Commands
+wordkey	Alphabet.java	/^	public   String wordkey;$/;"	f	class:Alphabet
+wordout	Alphabet.java	/^    static String wordout;$/;"	f	class:Alphabet
+wrapper	ZEditor.java	/^    public static InputStream wrapper(String local) {$/;"	m	class:ZEditor
+writer	QuickEditor.java	/^    static JTextPane writer = new JTextPane();$/;"	f	class:QuickEditor
+writer	TPEditorX.java	/^    public JTextPane writer = new JTextPane();$/;"	f	class:TPEditorX
+xmldoc	Commands.java	/^    public static String xmldoc;$/;"	f	class:Commands
+xmltext	Clsv.java	/^    public String xmltext;$/;"	f	class:Clsv

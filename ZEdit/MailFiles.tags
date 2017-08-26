@@ -1,0 +1,24 @@
+MailFiles	MailFiles.java	/^    public MailFiles(String filename, String user) throws Exception {$/;"	m	class:MailFiles
+MailFiles	MailFiles.java	/^public class MailFiles {$/;"	c
+ZEdit	MailFiles.java	/^package ZEdit;$/;"	p
+ampcheck	MailFiles.java	/^    public static String ampcheck(String chekit) {$/;"	m	class:MailFiles
+cc	MailFiles.java	/^    int cc = 0;$/;"	f	class:MailFiles
+conn	MailFiles.java	/^   Connection conn;$/;"	f	class:MailFiles
+controlChecker	MailFiles.java	/^    public static String controlChecker(String y) {$/;"	m	class:MailFiles
+converter	MailFiles.java	/^    public static String converter(String y, String cutter) {$/;"	m	class:MailFiles
+days	MailFiles.java	/^    static final String[] days = {$/;"	f	class:MailFiles
+doNotes	MailFiles.java	/^    public  void doNotes(String _prereq) throws Exception {$/;"	m	class:MailFiles
+dte	MailFiles.java	/^    static final java.util.Date dte = new java.util.Date();$/;"	f	class:MailFiles
+duti	MailFiles.java	/^    static HashMap <String,String> duti = new HashMap<String,String>();$/;"	f	class:MailFiles
+getTime	MailFiles.java	/^    public static String getTime() {$/;"	m	class:MailFiles
+lines	MailFiles.java	/^    int lines = 0;$/;"	f	class:MailFiles
+longdays	MailFiles.java	/^    static final String[] longdays = {$/;"	f	class:MailFiles
+mime64_0	MailFiles.java	/^    boolean mime64_0;$/;"	f	class:MailFiles
+mime64_1	MailFiles.java	/^    boolean mime64_1;$/;"	f	class:MailFiles
+pout	MailFiles.java	/^    PrintWriter pout;$/;"	f	class:MailFiles
+prefix	MailFiles.java	/^    String prefix;$/;"	f	class:MailFiles
+prereq	MailFiles.java	/^    String prereq;$/;"	f	class:MailFiles
+prt	MailFiles.java	/^    PrintWriter prt;$/;"	f	class:MailFiles
+stf	MailFiles.java	/^    static final SimpleDateFormat stf = new SimpleDateFormat("kk_mm");$/;"	f	class:MailFiles
+t	MailFiles.java	/^    String t;$/;"	f	class:MailFiles
+titles	MailFiles.java	/^    static final String[] titles = { "Subject:", "Date:", "From:" };$/;"	f	class:MailFiles

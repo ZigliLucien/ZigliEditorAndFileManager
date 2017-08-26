@@ -1,0 +1,132 @@
+package ZEdit;
+
+import java.sql.*;
+import java.io.*;
+import java.util.zip.*;
+import java.util.*;
+
+import com.mysql.management.*;
+
+public class DOps {
+
+static ResultSet res;
+public static Connection goMysql;
+
+public DOps(){
+
+try{
+
+        String hostColonPort = "localhost:3336";
+        
+        String driver = com.mysql.jdbc.Driver.class.getName();
+        String url = "jdbc:mysql://" + hostColonPort + "/" + "?"
+                + "socketFactory="
+                + ServerLauncherSocketFactory.class.getName();
+
+        Class.forName(driver);
+
+        goMysql = DriverManager.getConnection(url,"root", "");
+
+}catch(Exception en){
+		System.out.println(en.getMessage());
+	}
+
+	}
+ 
+/////////////////// DOSAVE ///////////////////
+	public static void doSave(Connection cnct, String filename, byte[] bits, String db) {
+   try{
+
+	ByteArrayOutputStream bout = new ByteArrayOutputStream();
+	GZIPOutputStream gzout = new GZIPOutputStream(bout);
+
+	gzout.write(bits);
+	gzout.flush();
+	gzout.close();
+
+	byte[] jj = bout.toByteArray();
+
+	goSave(cnct, filename, jj, db);
+
+	}catch(Exception esave){System.out.println(esave.getMessage());}
+
+     }
+
+////////////// GETFILE /////////////////
+public static byte[] getFile(Connection cnct, String filename, String db) throws Exception {
+
+	ResultSet rs = null;
+
+   try{
+            rs = cnct.createStatement().executeQuery(
+		"SELECT filename, data " + "FROM "+db+" WHERE filename='"+filename+"'");
+
+	rs.next();	
+
+           System.out.println("Retrieved "+rs.getString("filename")+" from db "+db);
+
+    }catch( Exception e ) {      System.out.println(e.getMessage()); }
+
+	return rs.getBytes("data");
+  }
+
+////////////// GOSAVE ///////////////
+	public static void goSave(Connection cnct, String name, byte[] jj, String db) {
+
+   try{
+
+	 String sql =     "INSERT INTO "+db+"(filename,data) " +
+			"VALUES('"+name+"',?)"+
+			" ON DUPLICATE KEY UPDATE data=VALUES(data)";
+
+ 		PreparedStatement stmt = cnct.prepareStatement(sql); 
+	            stmt.setBytes(1,jj);
+
+		System.out.println("SAVING BYTES "+name+" to db "+db);
+
+	            stmt.executeUpdate();
+	            stmt.close();
+
+	}catch(Exception esave){System.out.println(esave.getMessage());}
+
+     }
+
+////////////// GOSAVETEXT ///////////////
+	public static void goSaveText(Connection cnct, String name, String jj, String db) {
+
+   try{
+
+	 String sql =     "INSERT INTO "+db+"(filename,data) " +
+			"VALUES('"+name+"',?)"+
+			" ON DUPLICATE KEY UPDATE data=VALUES(data)";
+
+          	            PreparedStatement stmt = cnct.prepareStatement(sql); 
+	            stmt.setString(1,jj);
+
+		System.out.println("SAVING "+name+" to db "+db);
+
+	            stmt.executeUpdate();
+	            stmt.close();
+
+	}catch(Exception esave){System.out.println(esave.getMessage());}
+
+     }
+
+ /////////////// TEST IF KEY EXISTS /////////////////////
+
+	static boolean testKey(Connection conn, String name, String db){
+
+   try{ 
+               res = conn.createStatement().executeQuery(
+		"SELECT data FROM "+db+" WHERE filename='"+name+"'");
+
+	return res.next();
+
+    }catch( Exception e ) {
+		System.out.println(e.getMessage());
+	}
+	
+	return false;
+
+	}
+}
