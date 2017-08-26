@@ -5,7 +5,7 @@
 <project name="AntMaker" default="dodiffs" basedir=".">
 
   <!-- set global properties for this build -->
-  <!-- on the command line use -Dsrc=xxx -DstubFile=yyy to set the properties src and stubFile -->
+  <!-- on the command line use -Dsrc=xxx -Dsrc1=yyy to set the properties src and src1 here one is ZEdit other is NetsManager-->
    <property name="build" value="build"/>
   <property name="dist"  value="distribution"/>
 
