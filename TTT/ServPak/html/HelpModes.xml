@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ServPak/xsl/tpw.xsl"?>
+<!DOCTYPE tpwm [<!ENTITY % tpwsymbols SYSTEM "file:ServPak/xsl/TPW"> %tpwsymbols;]>
+<tpwm>
+<style>
+body{font-family: SansSerif, Monospaced, Arial ;font-size:18pt}
+</style>
+<title> Modes </title>
+<body>
+
+<section id="">
+Here we present the basic built-in Modes.
+In the Utils Menu or by Ctrl-Shift-right click on a buffer window, you will see
+a list of the modes:<br/> <span style="color:darkblue; font-weight:bold">
+Jxml, TeX, Perl, Clsv, Xml, LaTeX, Jv, Html, Text,  Java, Ant, and Lang.
+</span>
+<p/>
+
+These are prescribed in the Modes.properties file. First are the compile commands
+(on F4) for compiling or running the file.<p/>
+Each mode has five associated auxiliary files. Here [Mode] denotes the name of the mode.
+<description>
+<ditem>Strings.data.[Mode]</ditem>
+<ditem>Quickwords.data.[Mode]</ditem>
+<ditem>[Mode].data</ditem>
+<ditem>[Mode].help</ditem>
+<ditem>[Mode].keywords</ditem>
+</description>
+
+
+</section>
+
+<a href="HelpContents.html"> Back: Help Contents </a>
+</body>
+</tpwm>

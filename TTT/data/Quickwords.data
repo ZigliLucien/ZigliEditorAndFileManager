@@ -1,0 +1,14 @@
+&String;|java*
+&int;|java*
+double|java*
+chanoir.math.siu.edu|e-mail*
+<br/>|jxml, html*
+<p/>|jxml, html*
+System.out.println();|java,jxml*
+public static void|java,jxml*
+&String;[] args|jxml
+<form action=" " method="get">|form*
+
+
+<input name=" "/>
+<input name="name"/>|*

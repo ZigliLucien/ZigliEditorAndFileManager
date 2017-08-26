@@ -1,0 +1,4 @@
+To edit the main help file, HelpFile.xml, you can use hxml mode. Link the file .xml to a file with
+extension .hxml and make changes using Zigli's Editor.
+For the other files, use tpmlmarkup (DOCTYPE tpwm) 
+which is the default for files with .xml extension.

@@ -1,0 +1,79 @@
+
+            	         span.v{font-variant: small-caps; 
+ 		                    font-weight: lighter}
+             	         span.c{font-variant: small-caps; color: red;
+	                                font-weight: lighter}
+		         span.m{font-variant: small-caps; color: darkred;
+	             	        font-weight: lighter}
+		         span.d{font-variant: small-caps; color: orange;
+	             	        font-weight: lighter}
+		         span.e{font-variant: small-caps; color: blue;
+	             	        font-weight: lighter}
+		         span.q{font-variant: small-caps; color: green;
+	             	        font-weight: lighter}
+		         span.a{font-variant: small-caps; color: magenta;
+	             	        font-weight: lighter}
+			
+                  input.x{background: #ffffff; color: #5555ff; font-size: 80%; border: 0 }
+                  input.x:hover{color: #ee9909; text-decoration: underline}
+
+	    tr.a   input{background: #ffffee; color: #5555ff;  border: 0}
+	    tr.b  input{background: #eeffff; color: #5555ff; border: 0}
+                  tr     input:hover{color: #cc9908; text-decoration: underline}
+
+	                td.x>a:link{color: #888888; font-size: 90%}
+		 td.x>a:visited{color: #888888}
+		 td.x>a:hover{ color: #cc9908; text-decoration: underline}
+
+		 td.y>a:link{color: #44bbbb; font-size: 90%}
+		 td.y>a:visited{color: #44bbbb}
+		 td.y>a:hover{ color: #cc9908; text-decoration: underline}
+
+		a.w:link{color: #4444ee}
+		a.w:visited{color: #4444ee}
+		a.w:hover{ color: #cc9908;}
+		a.z:hover{ color: #cc9908; text-decoration: underline;}
+
+		#local>a:hover{ color: #bb88ff;}
+
+		a.u:hover{ color: #bb88ff;}
+		
+		table.ww a:link{color: #4444ee}
+		table.ww a:visited{color: #4444ee}
+		table.ww a:hover{ color: #cc9908;}
+
+		  #top a:link{color: #4444ee}
+		  #top a:hover{ color: #cc9908;}
+
+	           tr.a{background: #ffffee;}     
+	           tr.b{background: #eeffff;}
+
+	        th{  font-family: helvetica, sans-serif, arial;
+	              font-variant: small-caps;
+	              font-weight: lighter}
+
+		#local>f{ background-color: #e0ffff;}
+
+		tr.a td:last-child{ width: 35%; text-align: center}
+		tr.a td:first-child{ width: 30%; text-align: center}
+
+		tr.b td:last-child{ width: 35%; text-align: center}
+		tr.b td:first-child{ width: 30%; text-align: center}
+
+		td.w{ color: #888888; width: 25%; text-align: center}
+
+		td.x{text-align: center; background-color: #f2f2f2}
+		td.y{text-align: center; background-color: #ffffff}
+
+		table.ww{align: center}
+		table.ww td{ width: 8%; text-align: center}
+		
+                                 #top {width: 72%; float:left}
+		    #local{width: 15%; float:right;position: relative}
+			
+		    #global{margin-bottom: 22%}
+		    #options{float:left;margin-left:18%}
+		    #table{float:left; margin: auto;margin-bottom: 5%}
+
+		a.pgref{font-size: 50%}
+	

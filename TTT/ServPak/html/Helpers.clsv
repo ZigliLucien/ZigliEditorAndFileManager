@@ -1,0 +1,43 @@
+title:Helpers
+####  ####   ####  ####
+command:shortkey:menu:description:entry
+#
+Open:F9:File Menu:-
+#
+Save:F1:File Menu:Saves current file.
+#
+Save As:F3:File Menu:Saves current file to name chosen. Use for new files as well. First hit F8 to clear the buffer. Then use Save As to start a new file.
+#
+Quit:Ctrl-Q:File Menu: Closes Editor Window
+#
+Clear:F8:Edit Menu:Clears the buffer
+#
+Redo:F6:Edit Menu:Redo previous operation
+#
+Undo:F5:Edit Menu: Undo previous operation
+#
+Line Numbers:F2:Edit Menu:Toggles line numbers. Globally sets font family/size/style as well as font color.
+#
+Find:Ctrl-R:Edit Menu:Look for a given string. Continue with Ctrl-S.
+#
+Replace:Ctrl-Shift-R:Edit Menu:Search and replace one string for another. Continue with Ctrl-S. To undo a change hit  F5 twice.
+#
+Continue Find/or/Replace:Ctrl-S:Edit Menu:Continue Search or Search and Replace. Undo with F5.
+#
+Toggle ClickPad:Ctrl-F:Edit Menu:Toggles clickpad for convenience.
+####
+Shell:Ctrl-Z:Run Menu:Runs a shell command.
+Compile:F4:Run Menu:Runs the command according to the Mode as set in Mode.properties
+Close Shell Window:Ctrl-W:Run Menu:Closes the window that pops up when running a shell command.
+QuickMail:Ctrl-M:Run Menu:Pops up dialogs to enter address and subject to e-mail the contents of the current buffer.
+Get Mail:Ctrl-Shift-M:Run Menu:Pops up a dialog to enter user, mailserver, and password to get mail from a POP3 server. Once entered, the user is sufficient for subsequent retrievals. The servername and password are saved in the GetMail.properties file.
+####
+Quickwords:Use Mouse:MenuBar:To add a quickword, use Ctrl-B. Type in or copy any symbols or phrase that you wish to access quickly. If you want to make a tooltip to remind yourself of what the entry means, put a | followed by the tooltip text. If you are in an XML mode, XML or JXML, it will make an element of the entry, e.g. &lt;xy&gt;&lt;/xy&gt; to avoid this, put a * at the end of the entry (after the tooltip, if any).
+####
+SendEMail:Use Mouse:MenuBar:To send e-mail, you must first fix up the Mail.properties file. Edit the file according to the indications found there - put in your outgoing mail server and your username and address, like- user@host. Then make aliasing entries like- nickname=abc@wherever.mailgoes.com . If you are able to access your correspondent's mailserver directly, you can use it in the address and append ,1 (see the example entries). If you don't put a ,1 your mail will be relayed as usual. Use Ctrl-M to send e-mail to those correspondents whom you have not entered into your Mail.properties file. So it can be used for sending e-mail to anyone.
+####
+Go:Use Mouse:MenuBar:This is a list of the past recent files that you have accessed. Use it to reload a file that may have been modified elsewhere or to check tmp files. Two levels of tmp files are created when certain saves are performed on a working file. They can be checked and accessed through the directory listing or Go Menu.
+####
+MLSyms:Use Mouse:MenuBar:This has most of the XML entities in descriptive form corresponding to TeX symbols. These are for quick access in XML files. If you want the symbols directly, use the UniSyms/UniBlox menus.
+####
+FntSty:Use Mouse:MenuBar:If you highlight some letters, you can set them as bold, italic, bold-italic, or plain style. For shortcut, use ctrl-I to toggle italic, ctrl-J to toggle bold (ctrl-B is taken as the shortcut for adding Quickwords).

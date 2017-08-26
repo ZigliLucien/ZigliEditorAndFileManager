@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ServPak/html/helper.xsl"?>
+<!DOCTYPE tpwm [<!ENTITY % tpwsymbols SYSTEM "file:ServPak/xsl/TPW"> %tpwsymbols;]>
+<tpwm>
+<title>Greek Keymap</title>
+
+<body>
+<display>
+<bordermatrix width="40%">
+<ams/><bf>Key</bf><amcx/><bf>Symbol</bf><cr/>
+<ams/>Alt-A<amcx/>α<cr/>
+<ams/>Alt-Shift-A<amcx/>Α<cr/>
+<ams/>Alt-Meta-A<amcx/>ά<cr/>
+<ams/>Alt-B<amcx/>β<cr/>
+<ams/>Alt-Shift-B<amcx/>Β<cr/>
+<ams/>Alt-C<amcx/>ξ<cr/>
+<ams/>Alt-Shift-C<amcx/>Ξ<cr/>
+<ams/>Alt-D<amcx/>δ<cr/>
+<ams/>Alt-Shift-D<amcx/>Δ<cr/>
+<ams/>Alt-E<amcx/>ε<cr/>
+<ams/>Alt-Shift-E<amcx/>Ε<cr/>
+<ams/>Alt-Meta-E<amcx/>έ<cr/>
+<ams/>Alt-F<amcx/>φ<cr/>
+<ams/>Alt-Shift-F<amcx/>Φ<cr/>
+<ams/>Alt-G<amcx/>γ<cr/>
+<ams/>Alt-Shift-G<amcx/>Γ<cr/>
+<ams/>Alt-H<amcx/>η<cr/>
+<ams/>Alt-Shift-H<amcx/>Η<cr/>
+<ams/>Alt-Meta-H<amcx/>ή<cr/>
+<ams/>Alt-I<amcx/>ι<cr/>
+<ams/>Alt-Shift-I<amcx/>Ι<cr/>
+<ams/>Alt-Meta-I<amcx/>ί<cr/>
+<ams/>Alt-J<amcx/>ϊ<cr/>
+<ams/>Alt-Shift-J<amcx/>ϋ<cr/>
+<ams/>Alt-K<amcx/>κ<cr/>
+<ams/>Alt-Shift-K<amcx/>Κ<cr/>
+<ams/>Alt-L<amcx/>λ<cr/>
+<ams/>Alt-Shift-L<amcx/>Λ<cr/>
+<ams/>Alt-M<amcx/>μ<cr/>
+<ams/>Alt-Shift-M<amcx/>Μ<cr/>
+<ams/>Alt-N<amcx/>ν<cr/>
+<ams/>Alt-Shift-N<amcx/>Ν<cr/>
+<ams/>Alt-O<amcx/>ο<cr/>
+<ams/>Alt-Shift-O<amcx/>Ο<cr/>
+<ams/>Alt-Meta-O<amcx/>ό<cr/>
+<ams/>Alt-P<amcx/>π<cr/>
+<ams/>Alt-Shift-P<amcx/>Π<cr/>
+<ams/>Alt-Q<amcx/>θ<cr/>
+<ams/>Alt-Shift-Q<amcx/>Θ<cr/>
+<ams/>Alt-R<amcx/>ρ<cr/>
+<ams/>Alt-Shift-R<amcx/>Ρ<cr/>
+<ams/>Alt-S<amcx/>σ<cr/>
+<ams/>Alt-Shift-S<amcx/>Σ<cr/>
+<ams/>Alt-T<amcx/>τ<cr/>
+<ams/>Alt-Shift-T<amcx/>Τ<cr/>
+<ams/>Alt-U<amcx/>υ<cr/>
+<ams/>Alt-Shift-U<amcx/>Υ<cr/>
+<ams/>Alt-Meta-U<amcx/>ύ<cr/>
+<ams/>Alt-V<amcx/>ψ<cr/>
+<ams/>Alt-Shift-V<amcx/>Ψ<cr/>
+<ams/>Alt-W<amcx/>ω<cr/>
+<ams/>Alt-Shift-W<amcx/>Ω<cr/>
+<ams/>Alt-Meta-W<amcx/>ώ<cr/>
+<ams/>Alt-X<amcx/>χ<cr/>
+<ams/>Alt-Shift-X<amcx/>Χ<cr/>
+<ams/>Alt-Y<amcx/>ς<cr/>
+<ams/>Alt-Z<amcx/>ζ<cr/>
+<ams/>Alt-Shift-Z<amcx/>Ζ<cr/>
+
+</bordermatrix>
+</display>
+<skip/>
+<a href="HelpContents.html"> Back: Help Contents </a>
+</body>
+</tpwm>

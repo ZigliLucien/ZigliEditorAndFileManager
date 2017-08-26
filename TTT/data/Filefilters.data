@@ -1,0 +1,14 @@
+txt|Get Text( txt )
+html,xhtml|Get HTML( html xhtml )
+xml,xsl,mxml,axml,txml|Get XML( xml xsl mxml axml txml )
+tex,dvi,pdf|Get TeX( tex dvi pdf )
+java,jv,jxml|Get Java( java jv jxml )
+clsv,csv|Get Db Format( clsv csv )
+help,data,properties|Get Auxiliaries( help data properties )
+ps,pdf|Get Formatted( ps pdf )
+png,gif,jpg,jpeg,svg|Get Graphics( png gif jpg jpeg svg )
+pl,prl|Get Perl( pl prl )
+styl|Get Styled( styl )
+yid|Get Yiddish( yid )
+
+

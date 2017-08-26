@@ -1,0 +1,471 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE  ClickPad_Help[<!ENTITY % tpwsymbols SYSTEM "file:ServPak/xsl/TPW"> %tpwsymbols;]>
+<ClickPad_Help>
+
+<entry>
+<command key="START">START</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+Sets up the TPML file, the root element is &lt;tpwm>. <p/>Start by filling in the title of the page.<br/>
+Optionally you can include, before the &lt;body> tag, a &lt;style> element with css style markup.<p/>
+Here are some available tags  that do not appear on the ClickPad:<p/>
+thm (or theorem)<br/>
+example<br/>
+ remark<br/>
+ corollary<br/>
+ proof<br/>
+ lemma<br/>
+ definition<br/>
+ proposition<br/>
+ notation<br/>
+ comment<br/>
+abstract
+<p/>
+You can also use &lt;aref id="">[content]&lt;/aref>as an equivalent to &lt;a href="">[content]&lt;/a>.<br/>
+You have &lt;appendix> and for bibliographic references, use &lt;thebibliography> environment. Included is
+&lt;footnote>, but it is not implemented  in this system. Finally, there is &lt;idx> that provides an anchor
+linking to a generic "index.html" page.<p/>
+HTML markup should sail right through.
+</description>
+</entry>
+
+<entry>
+<command key="label">label</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+Use for making a &quot;name&quot; reference internal to a page. 
+</description>
+</entry>
+ 
+<entry>
+<command key="ref">ref</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+For referring to an internal reference marked by a &lt;label> element.
+</description>
+</entry>
+
+<entry>
+<command key="cite">cite</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+Has effectively the same meaning as "ref". Use for references to bibliography items .
+</description>
+</entry>
+
+<entry>
+<command key="display">display</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+This sets up a centered table. Useful for presenting formulas.<br/>
+Follow it by a &lt;row> element.
+</description>
+</entry>
+
+<entry>
+<command key="xmth">xmth</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+This is a one-rowed floating table. Use one &lt;xmth> element to enclose text and inline formulas.<br/>
+This automatically creates a &lt;row> element. 
+</description>
+</entry>
+
+<entry>
+<command key="bordermatrix">bordermatrix</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+This is like &lt;display> where the table has borders. So the cells are marked off with lines.
+</description>
+</entry>
+
+<entry>
+<command key="blockquote">blockquote</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+The standard HTML markup. 
+</description>
+</entry>
+
+<entry>
+<command key="bibitem">bibitem</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+For bibliography items within a &lt;thebibliography> element. Refer to the "id" attribute with 
+a &lt;cite> element.
+</description>
+</entry>
+
+<entry>
+<command key="choose">choose</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+Binomial coefficient construction. E.g.,
+&lt;choose>&lt;uu>5&lt;/uu>&lt;ll>3&lt;/ll>&lt;/choose> yields 5 choose 3.<br/>
+"uu" stands for upper limit, "ll" for lower limit as in a summation.<p/>
+"Fractype" - it automatically puts in cell element &lt;td> and corresponding &lt;/td>
+ in an xmth or display environment.
+</description>
+</entry>
+
+<entry>
+<command key="int">int</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+Integration. E.g., <br/>&lt;int>&lt;ll>a&lt;/ll>&lt;uu>b&lt;/uu>f(x) dx &lt;/int>.  <br/>
+"uu" stands for upper limit, "ll" for lower limit.<p/>
+"Fractype" - it automatically puts in cell element &lt;td> and corresponding &lt;/td>
+ in an xmth or display environment.
+</description>
+</entry>
+
+<entry>
+<command key="prod">prod</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+Product. E.g., &lt;prod>&lt;ll>j=1&lt;/ll>&lt;uu>50&lt;/uu>(f(j)+g(j))&lt;/prod>.<br/>
+"uu" stands for upper limit, "ll" for lower limit.<p/>
+"Fractype" - it automatically puts in cell element &lt;td> and corresponding &lt;/td>
+ in an xmth or display environment.
+</description>
+</entry>
+
+<entry>
+<command key="sum">sum</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+Sum. E.g., &lt;sum>&lt;ll>j&amp;geq;0&lt;/ll>&lt;uu>&lt;/uu>(f(j)+g(j))&lt;/sum>.<br/>
+"uu" stands for upper limit, "ll" for lower limit.<p/>
+"Fractype" - it automatically puts in cell element &lt;td> and corresponding &lt;/td>
+ in an xmth or display environment.
+</description>
+</entry>
+
+<entry>
+<command key="li">li</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+As in HTML. Use in itemize (ul) or enumerate (ol) environments. Same as &lt;item>.
+</description>
+</entry>
+
+<entry>
+<command key="frac">frac</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+Fraction. &lt;numer> and &lt;denom> elements contain the numerator and denominator respectively. 
+Set the width attribute to be roughly 10 times the number of symbols in the longer of
+the numerator or denominator. Adjust accordingly to an appropriate integer value.<p/>
+"Fractype" - it automatically puts in cell element &lt;td> and corresponding &lt;/td>
+ in an xmth or display environment.
+</description>
+</entry>
+
+<entry>
+<command key="sumtype">sumtype</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+For setting up a symbol with lower and upper limit(s), e.g. a union or limit.
+Set the sizes of the limits with the "limsize" attribute, the size of the symbol by the "symsize" attribute.
+E.g.,<br/>
+&lt;sumtype limsize="+0">&lt;ll>n &gt; 0&lt;ll>&lt;uu>&lt;/uu>&lt;symbol symsize="3"> &cup;&lt;/symbol> 
+ &alpha;&lt;sub>n&lt;/sub> &lt;/sumtype><p/>
+"Fractype" - it automatically puts in cell element &lt;td> and corresponding &lt;/td>
+ in an xmth or display environment.
+</description>
+</entry>
+
+<entry>
+<command key="symbol">symbol</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+For controlling the size of symbols. Set the "symsize" attribute accordingly.
+</description>
+</entry>
+
+<entry>
+<command key="p">p</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+As in HTML. Use for a full line skip. Similar to TeX's \bigskip.
+</description>
+</entry>
+
+<entry>
+<command key="nbsp">nbsp</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+As in HTML. Use for a horizontal skip.
+</description>
+</entry>
+
+<entry>
+<command key="_">_</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+In xmth or display environments, effectively the same as a  center-aligned table cell. Use within an xmth or
+row element to make table cells for alignments.
+</description>
+</entry>
+
+<entry>
+<command key="_r">_r</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+In xmth or display environments, a table cell with right alignment similar to using an \hfill in TeX. It fills the
+left side of the cell with two nbsp's.
+</description>
+</entry>
+
+<entry>
+<command key="_l">_l</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+In xmth or display environments, a table cell with left alignment similar to an \hfill in TeX. It fills the
+right side of the cell with two nbsp's.
+</description>
+</entry>
+
+<entry>
+<command key="row">row</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+Same as &lt;tr> in HTML. Use for rows in a display environment.
+</description>
+</entry>
+
+<entry>
+<command key="cr">cr</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+Effectively &lt;br/>. 
+</description>
+</entry>
+
+<entry>
+<command key="quad">quad</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+Effectively three nbsp's. Also, available is &lt;qquad/> for the equivalent of five nbsp's.
+</description>
+</entry>
+
+<entry>
+<command key="skip">skip</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+Use for a large vertical break. Effectively &lt;p/>&amp;nbsp;&lt;br/>.
+</description>
+</entry>
+
+<entry>
+<command key="sup">sup</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+For superscripts. 
+</description>
+</entry>
+
+<entry>
+<command key="sub">sub</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+For subscripts.
+</description>
+</entry>
+
+<entry>
+<command key="hisup">hisup</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+For a "high" superscript, e.g. after an expression enclosed with large parens. 
+</description>
+</entry>
+
+<entry>
+<command key="section">section</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+Main section. Use the id attribute for the title. <br/>Yields an &lt;h2> heading.
+</description>
+</entry>
+
+<entry>
+<command key="subsection">subsection</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+Next smaller paragraph component than section. <br/>The id attribute yields an &lt;h3> heading.
+</description>
+</entry>
+
+<entry>
+<command key="subsubsection">subsubsection</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+Next smaller paragraph component than subsection. <br/>The id attribute yields an &lt;h4> heading.
+</description>
+</entry>
+
+<entry>
+<command key="paragraph">paragraph</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+Next smaller paragraph component than subsubsection. <br/>The id attribute yields an &lt;h5> heading.
+</description>
+</entry>
+
+<entry>
+<command key="subparagraph">subparagraph</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+Next smaller paragraph component than paragraph. <br/>The id attribute yields an &lt;h6> heading.
+</description>
+</entry>
+
+<entry>
+<command key="item">item</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+Same as HTML's &lt;li>. Use in  itemize (ul) or enumerate (ol) environments as in TeX/LaTeX.
+</description>
+</entry>
+
+<entry>
+<command key="bf">bf</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+As in (La)TeX. Same as HTML's &lt;b>. 
+</description>
+</entry>
+
+<entry>
+<command key="em">em</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+As in (La)TeX. Same as HTML. Use &lt;sl> as an equivalent here. 
+</description>
+</entry>
+
+<entry>
+<command key="it">it</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+As in (La)TeX. Same as HTML's &lt;i>. 
+</description>
+</entry>
+
+<entry>
+<command key="tt">tt</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+As in (La)TeX. Same as HTML.  Use &lt;sf> as an equivalent here. 
+</description>
+</entry>
+
+<entry>
+<command key="itemitem">itemitem</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+An indented item. Effectively a linebreak followed by three nbsp's.
+</description>
+</entry>
+
+<entry>
+<command key="itemize">itemize</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+As in LaTeX. HTML's &lt;ul>.
+</description>
+</entry>
+
+<entry>
+<command key="enumerate">enumerate</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+As in LaTeX. HTML's &lt;ol>.
+</description>
+</entry>
+
+<entry>
+<command key="dlist">dlist</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+Description list as in LaTeX. Or HTML's &lt;dl>. 
+</description>
+</entry>
+
+<entry>
+<command key="ditem">ditem</command>
+<shortkey>Button</shortkey>
+<menu>XML ClickPad</menu>
+<description>
+Item in a dlist environment. HTML's &lt;dt>. You can nest &lt;dterm>'s (HTML's &lt;dd>'s) inside ditems.
+</description>
+</entry>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</ClickPad_Help>

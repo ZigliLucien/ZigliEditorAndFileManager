@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ServPak/html/helper.xsl"?>
+<!DOCTYPE tpwm [<!ENTITY % tpwsymbols SYSTEM "file:ServPak/xsl/TPW"> %tpwsymbols;]>
+<tpwm>
+<title>Mouse Bindings for Zigli's Editor</title>
+<style> td.a{ font-family: helvetica,arial}</style>
+<body bgcolor="white">
+
+<bf> Double Click</bf>
+of either left or right button will refresh the buffer. Useful if the keyboard locks up.<cr/>
+All the rest are single click.
+<skip/>
+
+<h3><it>Left Mouse</it></h3><skip/>
+<display>
+<bordermatrix>
+<ams/><bf>Modifier or Context</bf><amc/><bf>Command</bf><cr/>
+<ams/>In background window<amc/>Expands a single window. Tiles multiple windows.<cr/>
+<ams/> In buffer<amc/> Sets current file name in status line<cr/>
+<ams/>Shift<amc/>Highlight from current cursor position<cr/>
+<ams/>Ctrl<amc/>Cycle buffers<cr/>
+<ams/>Alt<amc/>Paste<cr/>
+</bordermatrix>
+</display>
+
+<skip/>
+
+<h3><it>Right Mouse</it></h3><skip/>
+<display>
+<bordermatrix>
+<ams/><bf>Modifier or Context</bf><amc/><bf>Command</bf><cr/>
+<ams/>In background window<amc/>New Buffer (click on `Cancel' to start with a default file)<cr/>
+<ams/>On a menu item or clickpad item<amc/>Brings up Help for that item.<cr/>
+<ams/>Buffer background<amc/>Brings  up UniPop Menu: first line shows font information,
+any Unicode menus chosen from the UniBlox master menu will appear here along with
+alphabet, clickpad, and quickwords menus. Includes Modes Menu for setting the mode.<cr/>
+<ams/>Shift, on a word or highlighted text<amc/>Highlights. Brings up the Dictionary/Thesaurus menu for that selection. <cr/>
+<ams/>Ctrl<amc/>Cut highlighted text<cr/>
+<ams/>Alt-Shift<amc/>Brings up Dictionary-In dialog box for entering Dictionary/Thesaurus
+information for word or selection.<cr/>
+</bordermatrix>
+</display>
+
+<skip/>
+
+<h3><it>Middle Mouse</it></h3><skip/>
+<display>
+<bordermatrix>
+<ams/><bf>Modifier or Context</bf><amc/><bf>Command</bf><cr/>
+<ams/> Buffer <amc/>Paste<cr/>
+</bordermatrix>
+</display>
+<skip/>
+<a href="HelpContents.html"> Back: Help Contents </a>
+</body>
+</tpwm>

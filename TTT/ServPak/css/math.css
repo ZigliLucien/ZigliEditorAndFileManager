@@ -1,0 +1,59 @@
+		body{margin-left:12%;margin-right:12%}
+
+		.x, td, th {text-align:center}	
+		 a:link,a:visited{color:#4444ee}
+		a:hover{color: #ee9909; text-decoration: underline}
+		a.ttl{color:#dd4444;font-weight: normal}
+
+	 	   input.x{font-size: 90%; border: 0 }
+	                 input.x:hover{color: #ee9909; text-decoration: underline}
+
+		     #links{float:left;margin-top:8%}
+		     #text{text-align:center;margin-bottom:-8%}		
+		     #symbols{float:right;font-size:60%}
+
+		      textarea{overflow: auto}
+
+		#tabs {
+		position: absolute;right:10%;top:15%; 
+		background-color: #f5f5f5;
+		border-left: 1px #ddd outset;
+		  }
+
+		#tabz {
+		font-size: 80%;
+		font-style: italic;
+		position: absolute;right:10px;top:8px; 
+		border-left: 1px #ddd outset;
+		margin-left: auto;
+		margin-bottom: auto;
+		  }
+
+		 #tabs,#tabz a { 
+		 border: 1px solid #fff;
+		 display: block;
+		 margin: 0;
+		 padding: .25em;
+		 color: #000;
+		 }
+		 #tabs,#tabz a:hover {
+		 color: #ee9909; 
+		 text-decoration:none;
+		  } 
+	
+	h2,h3,h4,h5,h6{ font-weight: lighter;color:#aa4400}
+	h1{ font-weight: lighter;color:darkred;}
+	h3,h4{font-style: italic}
+
+	def,.def{color:darkblue}
+	eq,equation,.eq,.equation{display:block;color:#444444;text-align:center}
+	.eqno{position:absolute;right:23%}
+
+	section,.section{display:block;margin-left:3%;margin-bottom:.6em}
+	subsection,.subsection{display:block;margin-left:5%;margin-bottom:.6em}
+	subsubsection,.subsubsection{display:block;margin-left:6%;margin-bottom:.6em}
+	paragraph,.paragraph{display:block;margin-left:7%;margin-bottom:.6em}
+	subparagraph,.subparagraph{display:block;margin-left:8%;margin-bottom:.6em}
+
+	proposition,corollary,lemma,.proposition,.corollary,.lemma{font-style:italic}
+	theorem,.theorem{color:darkblue;font-style:italic}

@@ -1,0 +1,7 @@
+title:ClickPad Help
+####  ####   ####  ####
+command:shortkey:menu:description:entry
+#
+xmth:Button:XML ClickPad:Use to set up a floating table environment especially for math constructions.
+//r import,li mod="",li:Button:JV ClickPad:This is used to format a sequence of declarations all of the same type, such as the import statements at the beginning of a .java file. The format //r A,B,C means to replace A by &lt;B> and end the line with &lt;/C>. For li mod="", you can put the list-style types such as disc, square, or circle as the value of the <em>mod</em> attribute or leave it empty. To close out the sequence use //x on a line by itself.    
+//lr final,x,li,li:Button:JV ClickPad:This is used to format a sequence of declarations all of the same type, such as the import statements at the beginning of a .java file. The format //lr A,B,C,D means to start each declaration with A, replace B by &lt;C> and end the line with &lt;/D>. The li,li without the mod is used for doubly nested elements. To close out the sequence use //x on a line by itself. To get a third label, such as `static final String', you can use an enclosing //t static ...(x String declarations)... //u. The //t...//u pair provides an additional level enclosing element.

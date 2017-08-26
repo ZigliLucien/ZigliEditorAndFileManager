@@ -1,0 +1,47 @@
+<html>
+<head>
+<title>Calculator</title>
+</head>
+
+<h1> Calculator: </h1>
+
+<hr>
+
+<:
+
+@A=split(/&/,$ENV{QUERYSTRING});
+
+for(@A) {
+
+print "<p>";
+
+@x=split(/=/);
+
+next unless $x[1];
+
+$y=eval( pop @x);
+
+print $y;
+
+}
+
+$doc=$ENV{SCRIPT_SRC_URL_FILE} ;
+
+unless (@A) {
+
+print <<QQ;
+
+Enter expression or numbers to add up.<p>
+<form action="$doc" method=get>
+<input name="compute"> Compute<p>
+<input name="addup" size=50> Add \'Em Up<p>
+<input type=submit value="Submit"><input type=reset>
+</form>
+    <hr>
+QQ
+}
+
+:>
+
+</body>
+</html>

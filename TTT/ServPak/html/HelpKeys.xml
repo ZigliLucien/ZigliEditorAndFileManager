@@ -1,0 +1,113 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ServPak/html/helper.xsl"?>
+<!DOCTYPE tpwm [<!ENTITY % tpwsymbols SYSTEM "file:ServPak/xsl/TPW"> %tpwsymbols;]>
+
+<tpwm>
+<title>Key Bindings for Zigli's Editor</title>
+<style> td.a{ font-family: helvetica,arial}</style>
+<body bgcolor="white">
+
+<h3><it>Function Keys</it></h3><skip/>
+<display>
+<ams/>
+<bordermatrix>
+<ams/><bf>Key</bf><amcf/><bf>Command</bf><cr/>
+<ams/>F1<amcf/>Save<cr/>
+<ams/>F2<amcf/>Complete Word<cr/>
+<ams/>F3<amcf/>Save File As<cr/>
+<ams/>F4<amcf/>Compile<cr/>
+<ams/>F5<amcf/>Undo<cr/>
+<ams/>F6<amcf/>Redo<cr/>
+<ams/>F7<amcf/>Refresh Buffer<cr/>
+<ams/>F8<amcf/>Clear Buffer<cr/>
+<ams/>F9<amcf/>Open File<cr/>
+<ams/>F10<amcf/>Menu Bar (ESC to return to buffer)<cr/>
+<ams/>F11<amcf/>Remote Save (FTP upload of a Remote Edit downloaded file)<cr/>
+<ams/>F12<amcf/>Remote Edit (download from a ZServer)<cr/>
+</bordermatrix>
+<amc/>
+<bordermatrix>
+<ams/><bf>Key</bf><amcf/><bf>Command</bf><cr/>
+<ams/>Ctrl-F2<amcf/>Toggle Line Numbers<cr/>
+<ams/>Ctrl-F8  <amcf/>Add Picture<cr/>
+<ams/>Ctrl-F10<amcf/>UnPack64<cr/>
+<ams/>Ctrl-Shift-F10<amcf/>Pack64<cr/>
+<ams/>Ctrl-F11<amcf/>Upload File (FTP)<cr/>
+<ams/>Ctrl-F12<amcf/>FTP Get File<cr/>
+</bordermatrix>
+<amc/>
+<bordermatrix>
+<ams/><bf>Key</bf><amcf/><bf>Command</bf><cr/>
+<ams/>Shift-F1<amcf/>Save as a Styled File<cr/>
+<ams/>Shift-F5<amcf/>Record KeyStroke Macro<cr/>
+<ams/>Shift-F6<amcf/>End Recording Macro<cr/>
+<ams/>Shift-F7<amcf/>Execute Macro<cr/>
+</bordermatrix>
+<ams/>
+</display>
+<skip/>
+<h3><it>Letter Keys</it></h3><skip/>
+<bf>NOTE:</bf> The <em>alt</em> key is used with the Alphabet modes to implement
+the corresponding Keymaps. See the <bf>Alphabet</bf> Menu for the available alphabets.
+Alt combines with Shift and Ctrl for various related symbols as well depending on the Keymap.
+Here, a Keymap is any mapping of keys to Unicode characters associated to a named Alphabet mode,
+registered in the Alphabets.data file.
+<p/>
+<bf> SPACEBAR:</bf> Alt-SPACEBAR is like a Shift-right_mouse click on a word or
+ highlighted text, bringing up the Dictionary/Thesaurus menu for that word or phrase. 
+Alt-Shift-SPACEBAR is like Alt-Shift-right_mouse on a word or highlighted text,
+bringing up a Dictionary dialog box for entering dictionary entries for that word or phrase.
+<skip/>
+
+<bf> BACKSPACE:</bf> Alt-BACKSPACE deletes previous word.
+<skip/>
+
+<display>
+<bordermatrix>
+<ams/><bf>Key</bf><amc/><bf>Command</bf><cr/>
+<ams/>Ctrl-A<amc/>Select All<cr/>
+<ams/>Ctrl-Shift-A<amc/>Add New e-mail address<cr/>
+<ams/>Ctrl-B<amc/>Add New Quickwords<cr/>
+<ams/>Ctrl-C<amc/>Copy<cr/>
+<ams/>Ctrl-Shift-C<amc/>Delete Quickwords<cr/>
+<ams/>Ctrl-Alt-C<amc/>Set Font Color<cr/>
+<ams/>Ctrl-D<amc/>Remove e-mail address<cr/>
+<ams/>Ctrl-E<amc/>Reload Quickwords (after editing)<cr/>
+<ams/>Ctrl-F<amc/>Toggle Clickpad<cr/>
+<ams/>Ctrl-G<amc/>START (sets up new file in a given editing mode)<cr/>
+<ams/>Ctrl-H<amc/>Backspace<cr/>
+<ams/>Ctrl-I<amc/>Toggle italic font style (of highlighted text or buffer) <cr/>
+<ams/>Ctrl-Alt-I<amc/>Minimize all windows <cr/>
+<ams/>Ctrl-J<amc/>Toggle bold font style (of highlighted text or buffer)<cr/>
+<ams/>Ctrl-K<amc/> Toggle TeX colors <cr/>
+<ams/>Ctrl-L<amc/>Move current line to the middle of the buffer window<cr/>
+<ams/>Ctrl-Shift-L<amc/> Lower Case (word) <cr/>
+<ams/>Ctrl-M<amc/>QuickMail (for sending e-mail)<cr/>
+<ams/>Ctrl-Shift-M<amc/>Get Mail<cr/>
+<ams/>Ctrl-Alt-M<amc/>Maximize all windows<cr/>
+<ams/>Ctrl-N<amc/>New Buffer Window<cr/>
+<ams/>Crtl-Alt-N<amc/>Next Buffer<cr/>
+<ams/>Ctrl-O<amc/> Toggles Trace on/off<cr/>
+<ams/>Ctrl-P<amc/> Print Buffer <cr/>
+<ams/>Ctrl-Shift-P<amc/>Toggles character/paragraph assignment of text style attributes<cr/>
+<ams/>Ctrl-Q<amc/> Quit (closes window)<cr/>
+<ams/>Ctrl-R<amc/>Continue Search or Search-and-Replace<cr/>
+<ams/>Ctrl-Shift-R<amc/>Start Search-and-Replace<cr/>
+<ams/>Ctrl-S<amc/>Start Search<cr/>
+<ams/>Ctrl-T<amc/>Annotate text<cr/>
+<ams/>Ctrl-Alt-T<amc/>Tile windows (leaves minimized as they are)<cr/>
+<ams/>Ctrl-U<amc/>Get generic web browser<cr/>
+<ams/>Ctrl-Shift-U<amc/> Upper Case (word) <cr/>
+<ams/>Ctrl-V<amc/>Paste<cr/>
+<ams/>Ctrl-W<amc/>Close Shell Window<cr/>
+<ams/>Ctrl-X<amc/>Cut<cr/>
+<ams/>Ctrl-Y<amc/>Annotate text as a hyperlink<cr/>
+<ams/>Ctrl-Z<amc/>Move current line to top of buffer window<cr/>
+<ams/>Ctrl-Shift-Z<amc/>Shell Command Line<cr/>
+<ams/>Ctrl-Alt-Z<amc/>One Window (maximize current window, minimize the others) <cr/>
+</bordermatrix>
+</display>
+<skip/>
+<a href="HelpContents.html"> Back: Help Contents </a>
+</body>
+</tpwm>

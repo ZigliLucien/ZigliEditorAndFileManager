@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ServPak/html/helper.xsl"?>
+<!DOCTYPE tpwm [<!ENTITY % tpwsymbols SYSTEM "file:ServPak/xsl/TPW"> %tpwsymbols;]>
+<tpwm>
+<title>Polish Keymap</title>
+
+<body>
+<display>
+<bordermatrix width="40%">
+<ams/><bf>Key</bf><amcx/><bf>Symbol</bf><cr/>
+<ams/>Alt-Shift-A<amcx/>Ą<cr/>
+<ams/>Alt-A<amcx/>ą<cr/>
+<ams/>Alt-Shift-C<amcx/>Ć<cr/>
+<ams/>Alt-C<amcx/>ć<cr/>
+<ams/>Alt-Shift-E<amcx/>Ę<cr/>
+<ams/>Alt-E<amcx/>ę<cr/>
+<ams/>Alt-Shift-L<amcx/>Ł<cr/>
+<ams/>Alt-L<amcx/>ł<cr/>
+<ams/>Alt-Shift-N<amcx/>Ń<cr/>
+<ams/>Alt-N<amcx/>ń<cr/>
+<ams/>Alt-Shift-O<amcx/>Ó<cr/>
+<ams/>Alt-O<amcx/>ó<cr/>
+<ams/>Alt-Shift-S<amcx/>Ś<cr/>
+<ams/>Alt-S<amcx/>ś<cr/>
+<ams/>Alt-Shift-X<amcx/>Ż<cr/>
+<ams/>Alt-X<amcx/>ż<cr/>
+<ams/>Alt-Shift-Z<amcx/>Ź<cr/>
+<ams/>Alt-Z<amcx/>ź<cr/>
+
+</bordermatrix>
+</display>
+<skip/>
+<a href="HelpContents.html"> Back: Help Contents </a>
+</body>
+</tpwm>

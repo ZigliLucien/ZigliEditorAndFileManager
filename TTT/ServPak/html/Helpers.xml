@@ -1,0 +1,168 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/plain" href="ServPak/xsl/generic.xsl"?>
+
+<Helpers>
+
+<entry>
+<command>Open</command>
+<shortkey>F9</shortkey>
+<menu>File Menu</menu>
+<description>-</description>
+</entry>
+
+<entry>
+<command>Save</command>
+<shortkey>F1</shortkey>
+<menu>File Menu</menu>
+<description>Saves current file.</description>
+</entry>
+
+<entry>
+<command>Save As</command>
+<shortkey>F3</shortkey>
+<menu>File Menu</menu>
+<description>Saves current file to name chosen. Use for new files as well. First hit F8 to clear the buffer. Then use Save As to start a new file.</description>
+</entry>
+
+<entry>
+<command>Quit</command>
+<shortkey>Ctrl-Q</shortkey>
+<menu>File Menu</menu>
+<description> Closes Editor Window</description>
+</entry>
+
+<entry>
+<command>Clear</command>
+<shortkey>F8</shortkey>
+<menu>Edit Menu</menu>
+<description>Clears the buffer</description>
+</entry>
+
+<entry>
+<command>Redo</command>
+<shortkey>F6</shortkey>
+<menu>Edit Menu</menu>
+<description>Redo previous operation</description>
+</entry>
+
+<entry>
+<command>Undo</command>
+<shortkey>F5</shortkey>
+<menu>Edit Menu</menu>
+<description> Undo previous operation</description>
+</entry>
+
+<entry>
+<command>Line Numbers</command>
+<shortkey>F2</shortkey>
+<menu>Edit Menu</menu>
+<description>Toggles line numbers. Globally sets font family/size/style as well as font color.</description>
+</entry>
+
+<entry>
+<command>Find</command>
+<shortkey>Ctrl-R</shortkey>
+<menu>Edit Menu</menu>
+<description>Look for a given string. Continue with Ctrl-S.</description>
+</entry>
+
+<entry>
+<command>Replace</command>
+<shortkey>Ctrl-Shift-R</shortkey>
+<menu>Edit Menu</menu>
+<description>Search and replace one string for another. Continue with Ctrl-S. To undo a change hit  F5 twice.</description>
+</entry>
+
+<entry>
+<command>Continue Find/or/Replace</command>
+<shortkey>Ctrl-S</shortkey>
+<menu>Edit Menu</menu>
+<description>Continue Search or Search and Replace. Undo with F5.</description>
+</entry>
+
+<entry>
+<command>Toggle ClickPad</command>
+<shortkey>Ctrl-F</shortkey>
+<menu>Edit Menu</menu>
+<description>Toggles clickpad for convenience.</description>
+</entry>
+
+<entry>
+<command>Shell</command>
+<shortkey>Ctrl-Z</shortkey>
+<menu>Run Menu</menu>
+<description>Runs a shell command.</description>
+</entry>
+
+<entry>
+<command>Compile</command>
+<shortkey>F4</shortkey>
+<menu>Run Menu</menu>
+<description>Runs the command according to the Mode as set in Mode.properties</description>
+</entry>
+
+<entry>
+<command>Close Shell Window</command>
+<shortkey>Ctrl-W</shortkey>
+<menu>Run Menu</menu>
+<description>Closes the window that pops up when running a shell command.</description>
+</entry>
+
+<entry>
+<command>QuickMail</command>
+<shortkey>Ctrl-M</shortkey>
+<menu>Run Menu</menu>
+<description>Pops up dialogs to enter address and subject to e-mail the contents of the current buffer.</description>
+</entry>
+
+<entry>
+<command>Get Mail</command>
+<shortkey>Ctrl-Shift-M</shortkey>
+<menu>Run Menu</menu>
+<description>Pops up a dialog to enter user, mailserver, and password to get mail from a POP3 server. Once entered, the user is sufficient for subsequent retrievals. The servername and password are saved in the GetMail.properties file.</description>
+</entry>
+
+<entry>
+<command>Quickwords</command>
+<shortkey>Use Mouse</shortkey>
+<menu>MenuBar</menu>
+<description>To add a quickword, use Ctrl-B. Type in or copy any symbols or phrase that you wish to access quickly. If you want to make a tooltip to remind yourself of what the entry means, put a | followed by the tooltip text. If you are in an XML mode, XML or JXML, it will make an element of the entry, e.g. &lt;xy&gt;&lt;/xy&gt; to avoid this, put a * at the end of the entry (after the tooltip, if any).</description>
+</entry>
+
+<entry>
+<command>SendEMail</command>
+<shortkey>Use Mouse</shortkey>
+<menu>MenuBar</menu>
+<description>To send e-mail, you must first fix up the Mail.properties file. Edit the file according to the indications found there - put in your outgoing mail server and your username and address, like- user@host. Then make aliasing entries like- nickname=abc@wherever.mailgoes.com . If you are able to access your correspondent's mailserver directly, you can use it in the address and append ,1 (see the example entries). If you don't put a ,1 your mail will be relayed as usual. Use Ctrl-M to send e-mail to those correspondents whom you have not entered into your Mail.properties file. So it can be used for sending e-mail to anyone.</description>
+</entry>
+
+<entry>
+<command>Go</command>
+<shortkey>Use Mouse</shortkey>
+<menu>MenuBar</menu>
+<description>This is a list of the past recent files that you have accessed. Use it to reload a file that may have been modified elsewhere or to check tmp files. Two levels of tmp files are created when certain saves are performed on a working file. They can be checked and accessed through the directory listing or Go Menu.</description>
+</entry>
+
+<entry>
+<command>MLSyms</command>
+<shortkey>Use Mouse</shortkey>
+<menu>MenuBar</menu>
+<description>This has most of the XML entities in descriptive form corresponding to TeX symbols. These are for quick access in XML files. If you want the symbols directly, use the UniSyms/UniBlox menus.</description>
+</entry>
+
+<entry>
+<command>FntSty</command>
+<shortkey>Use Mouse</shortkey>
+<menu>MenuBar</menu>
+<description>If you highlight some letters, you can set them as bold, italic, bold-italic, or plain style. For shortcut, use ctrl-I to toggle italic, ctrl-J to toggle bold (ctrl-B is taken as the shortcut for adding Quickwords). The combination Shift-right_mouse pops up the UniSyms menu with the current font information at the top.</description>
+</entry>
+
+<entry>
+<command>UniSyms</command>
+<shortkey>Use Mouse</shortkey>
+<menu>MenuBar</menu>
+<description>First choose subset(s) of  Unicode symbols from the UniBlox menu. Then you will
+find them here. Click on a symbol to have it appear in the text at the cursor. To delete a symbol subset (block) from this menu, click on it in the UniBlox menu. I.e., clicking on a Unicode block in the UniBlox menu toggles its availability here. You can also access symbols from the chosen blocks by the combination Shift-right_mouse.</description>
+</entry>
+
+</Helpers>

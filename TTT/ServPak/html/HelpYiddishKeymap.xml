@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ServPak/html/helper.xsl"?>
+<!DOCTYPE tpwm [<!ENTITY % tpwsymbols SYSTEM "file:ServPak/xsl/TPW"> %tpwsymbols;]>
+<tpwm>
+<title>Yiddish Keymap</title>
+
+<body>
+<display>
+<bordermatrix width="40%">
+<ams/><bf>Key</bf><amcx/><bf>Symbol</bf><cr/>
+<ams/>Alt-A<amcx/>אָ<cr/>
+<ams/>Alt-Shift-A<amcx/>אַ<cr/>
+<ams/>Alt-B<amcx/>ב<cr/>
+<ams/>Alt-Shift-B<amcx/>בֿ<cr/>
+<ams/>Alt-C<amcx/>ח<cr/>
+<ams/>Alt-D<amcx/>ד<cr/>
+<ams/>Alt-E<amcx/>ע<cr/>
+<ams/>Alt-F<amcx/>פֿ<cr/>
+<ams/>Alt-G<amcx/>ג<cr/>
+<ams/>Alt-Shift-G<amcx/>תּ<cr/>
+<ams/>Alt-H<amcx/>ה<cr/>
+<ams/>Alt-I<amcx/>אי<cr/>
+<ams/>Alt-Shift-I<amcx/>ײַ<cr/>
+<ams/>Alt-J<amcx/>י<cr/>
+<ams/>Alt-Shift-J<amcx/>ײ<cr/>
+<ams/>Alt-K<amcx/>כ<cr/>
+<ams/>Alt-Shift-K<amcx/>ך<cr/>
+<ams/>Alt-Meta-K<amcx/>כּ<cr/>
+<ams/>Alt-L<amcx/>ל<cr/>
+<ams/>Alt-Shift-L<amcx/>כּ<cr/>
+<ams/>Alt-M<amcx/>מ<cr/>
+<ams/>Alt-Shift-M<amcx/>ם<cr/>
+<ams/>Alt-N<amcx/>נ<cr/>
+<ams/>Alt-Shift-N<amcx/>ן<cr/>
+<ams/>Alt-O<amcx/>ױ<cr/>
+<ams/>Alt-P<amcx/>פ<cr/>
+<ams/>Alt-Shift-P<amcx/>ף<cr/>
+<ams/>Alt-Meta-P<amcx/>פּ<cr/>
+<ams/>Alt-Q<amcx/>ק<cr/>
+<ams/>Alt-Shift-Q<amcx/>א<cr/>
+<ams/>Alt-R<amcx/>ר<cr/>
+<ams/>Alt-S<amcx/>ס<cr/>
+<ams/>Alt-Shift-S<amcx/>ז<cr/>
+<ams/>Alt-T<amcx/>ט<cr/>
+<ams/>Alt-Shift-T<amcx/>ת<cr/>
+<ams/>Alt-U<amcx/>או<cr/>
+<ams/>Alt-Shift-U<amcx/>וּ<cr/>
+<ams/>Alt-V<amcx/>ו<cr/>
+<ams/>Alt-Shift-V<amcx/>בֿ<cr/>
+<ams/>Alt-W<amcx/>װ<cr/>
+<ams/>Alt-X<amcx/>צ<cr/>
+<ams/>Alt-Shift-X<amcx/>ץ<cr/>
+<ams/>Alt-Y<amcx/>יִ<cr/>
+<ams/>Alt-Z<amcx/>ש<cr/>
+<ams/>Alt-Shift-Z<amcx/>שׂ<cr/>
+<ams/>Alt-[<amcx/>־<cr/>
+<ams/>Alt-Shift-[<amcx/>פּ<cr/>
+<ams/>Alt-]<amcx/>׳<cr/>
+<ams/>Alt-Shift-]<amcx/>״<cr/>
+
+</bordermatrix>
+</display>
+<skip/>
+<a href="HelpContents.html"> Back: Help Contents </a>
+</body>
+</tpwm>

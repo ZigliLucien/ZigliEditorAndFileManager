@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ServPak/xsl/tpw.xsl"?>
+<!DOCTYPE tpwm [<!ENTITY % tpwsymbols SYSTEM "file:ServPak/xsl/TPW"> %tpwsymbols;]>
+<tpwm>
+
+<style>
+body{font-family: SansSerif, Monospaced, Arial ;font-size:18pt}
+</style>
+
+<title>Integration with the File Manager</title>
+<body>
+
+
+
+
+<a href="HelpContents.html"> Back: Help Contents </a>
+</body>
+</tpwm> 

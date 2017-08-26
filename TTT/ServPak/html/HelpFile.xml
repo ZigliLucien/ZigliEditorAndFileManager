@@ -1,0 +1,524 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/plain" href="ServPak/xsl/generic.xsl"?>
+<Helpers>
+
+<entry>
+<command key="Open">Open</command>
+<shortkey>F9 </shortkey> 
+<menu>File Menu</menu>
+<description>
+If you open a file in an already-opened frame, it opens with  the directory of the current file. If you
+open a new frame (Ctrl-N) it defaults to the home directory specified in Editor.properties .
+</description>
+</entry>
+
+<entry>
+<command key="Save">Save</command>
+<shortkey>F1</shortkey> 
+<menu>File Menu</menu>
+<description>
+Saves current file.
+</description>
+</entry>
+
+<entry>
+<command key="Save As">Save As</command>
+<shortkey>F3</shortkey> 
+<menu>File Menu</menu>
+<description>
+Saves current file to name chosen. <br/>
+Use for new files as well. First hit F8 to clear the buffer. Then use Save As to start a new file.
+</description>
+</entry>
+
+<entry>
+<command key="Revert File">Revert File</command>
+<shortkey>Ctrl-F9</shortkey>
+<menu>File Menu</menu>
+<description>
+When a file is opened, it is saved in the TmpZefm directory.<br/>
+This command recovers the file originally loaded and saves the current buffer as a tmp file. <br/>
+Both files will be available through the Go Menu.
+</description>
+</entry>
+
+<entry>
+<command key="Print"> Print </command>
+<shortkey>Ctrl-P</shortkey>
+<menu> File Menu</menu>
+<description>
+Calls up the system printer. <br/> Current buffer is converted to postscript for printing.
+</description>
+</entry>
+
+<entry>
+<command key="Quit">Quit</command>
+<shortkey>Ctrl-Q</shortkey> 
+<menu>File Menu</menu>
+<description> 
+Closes Editor Window
+</description>
+</entry>
+
+<entry>
+<command key="Refresh Buffer">Refresh Buffer</command>
+<shortkey>F2</shortkey>
+<menu>Edit Menu</menu>
+<description>
+Refreshes the buffer. <br/>
+Useful  to update the Notes menu when making annotations.<br/>
+To eradicate changes to a buffer that has not yet been saved, reload the file from the Go Menu.
+</description>
+</entry>
+
+<entry>
+<command key="Clear">Clear</command>
+<shortkey>F8</shortkey> 
+<menu>Edit Menu</menu>
+<description>
+Clears the buffer
+</description>
+</entry>
+
+<entry>
+<command key="Redo">Redo</command>
+<shortkey>F6</shortkey> 
+<menu>Edit Menu</menu>
+<description>
+Redo previous operation
+</description>
+</entry>
+
+<entry>
+<command key="Undo">Undo</command>
+<shortkey>F5</shortkey> 
+<menu>Edit Menu</menu>
+<description>
+ Undo previous operation
+</description>
+</entry>
+
+<entry>
+<command key="Line Numbers">Line Numbers</command>
+<shortkey>F2</shortkey> 
+<menu>Edit Menu</menu>
+<description>
+Toggles line numbers. Globally sets font family/size/style as well as font color.
+</description>
+</entry>
+
+<entry>
+<command key="Find">Find</command>
+<shortkey>Ctrl-S</shortkey> 
+<menu>Edit Menu</menu>
+<description>
+Look for a given string. Continue with Ctrl-R.
+</description>
+</entry>
+
+<entry>
+<command key="Replace">Replace</command>
+<shortkey>Ctrl-Shift-R</shortkey> 
+<menu>Edit Menu</menu>
+<description>
+Search and replace one string for another. Continue with Ctrl-R. To undo a change hit  F5 twice.
+</description>
+</entry>
+
+<entry>
+<command key="Continue Find/or/Replace">Continue Find/or/Replace</command>
+<shortkey>Ctrl-R</shortkey> 
+<menu>Edit Menu</menu>
+<description>
+Continue Search or Search and Replace. Undo with F5.
+</description>
+</entry>
+
+<entry>
+<command key="Toggle ClickPad">Toggle ClickPad</command>
+<shortkey>Ctrl-F</shortkey> 
+<menu>Edit Menu</menu>
+<description>
+Toggles clickpad. 
+</description>
+</entry>
+
+<entry>
+<command key="Shell">Shell</command>
+<shortkey>Ctrl-Z</shortkey> 
+<menu>Run Menu</menu>
+<description>
+Pops up a dialog for running a shell command.
+</description>
+</entry>
+
+<entry>
+<command key="Compile">Compile</command>
+<shortkey>F4</shortkey> 
+<menu>Run Menu</menu>
+<description>
+Runs the command according to the Mode as set in Mode.properties .
+</description>
+</entry>
+
+<entry>
+<command key="Close Shell Window">Close Shell Window</command>
+<shortkey>Ctrl-W</shortkey> 
+<menu>Run Menu</menu>
+<description>
+Closes the window that pops up when running a shell command.<br/>
+If the mouse is in the window, it will close when the mouse leaves it.
+</description>
+</entry>
+
+<entry>
+<command key="QuickMail">QuickMail</command>
+<shortkey>Ctrl-M</shortkey> 
+<menu>Run Menu</menu>
+<description>
+Pops up dialogs to enter address and subject to e-mail the contents of the current buffer.<br/>
+A dialog will pop up asking for an optional attachment.
+</description>
+</entry>
+
+<entry>
+<command key="Get Mail">Get Mail</command>
+<shortkey>Ctrl-Shift-M</shortkey> 
+<menu>Run Menu</menu>
+<description>
+Pops up a dialog to enter user, mailserver, and password to get mail from a POP3 server.<br/>
+ Once entered, the user is sufficient for subsequent retrievals. <br/>
+The servername and password are saved in the GetMail.properties file.
+</description>
+</entry>
+
+<entry>
+<command key="Trace">Trace</command>
+<shortkey>Ctrl-O</shortkey>
+<menu>Run Menu</menu>
+<description>
+In the default Quickwords menu for java files (Java Mode), there are the strings <br/>
+"// StartTrace" and "// StopTrace". Put these surrounding the part of the code that you want traced. <br/>
+Hitting Ctrl-O will fill in print statements to print out all line numbers in between. <br/>
+It is possible that some print statements are unreachable; remove these by hand.<br/>
+If the code has already been set up for Trace, then Ctrl-O will remove the print line number statements, thus
+stopping the Trace.
+</description>
+</entry>
+
+
+<entry>
+<command key="Quickwords">Quickwords</command>
+<shortkey>Use Mouse</shortkey> 
+<menu>MenuBar</menu>
+<description>
+To add a quickword, use Ctrl-B. <p/>
+To add a symbol or Unicode character, highlight it, copy with Ctrl-C and paste it in the dialog box with Ctrl-V.<br/>
+Type in or copy any symbols or phrases that you wish to access quickly. <br/>
+Clicking on a menu entry will insert it into the current buffer at the cursor.<br/>
+If you want to make a tooltip to remind yourself of what the entry means, put a | followed by the tooltip text. 
+<p/>
+If you are in an XML mode (XML, HXML, JXML) it will make an element of the entry, e.g. &lt;xy&gt;&lt;/xy&gt;. <br/>
+To avoid this, put a * at the end of the entry (after the tooltip, if any).
+</description>
+</entry>
+
+<entry>
+<command key="GetEMail">GetEMail</command>
+<shortkey>Use Mouse</shortkey>
+<menu>EMail Menu</menu>
+<description>
+This menu is automatically generated from the list of users in the GetMail.properties file.<p/>
+Mail has a web interface as well. <br/>
+The users list appears on the get mail page accessed from the home page.<br/>
+The received mail directories are subdirectories of the INBOXES directory under the main ZigliFM directory.
+</description>
+</entry>
+
+<entry>
+<command key="SendEMail">SendEMail</command>
+<shortkey>Use Mouse</shortkey> 
+<menu>EMail Menu</menu>
+<description>
+To send e-mail, you must first fix up the Mail.properties file. <br/>
+Edit the file according to the indications found there - put in your outgoing mail server and your username and address, like- user@host. <br/>
+Then go back to the Editor and make aliasing entries like nickname=abc@wherever.mailgoes.com using Ctrl-Shift-A, 
+"add new email address" on the Utils Menu.
+<p/>
+If you are able to access your correspondent's mailserver directly, you can use it in the address and append ,1 (see the example entries in the Mail.properties file). <br/>
+If you don't put a ,1 your mail will be relayed as usual. <p/>
+Use Ctrl-M to send e-mail to those correspondents whom you have not entered into your Mail.properties file. <br/>
+</description>
+</entry>
+
+<entry>
+<command key="Go">Go</command>
+<shortkey>Use Mouse</shortkey> 
+<menu>MenuBar</menu>
+<description>
+This is a list of the past recent files that you have accessed. 
+Use it to circulate among files in a single window frame or for recovery of a file that may have been modified.
+<p/>
+When a file is opened, it is saved in the TmpZefm directory (subidirectory of the main ZigliFM directory).
+To recover the original, use Ctrl-F9, Revert-File, on the File menu. This will switch the current version with
+the original version. 
+<p/>
+You can enter a filename in the Status Bar (just below the buffer frame, atop the clickpad if visible),
+to load an existing file. 
+</description>
+</entry>
+
+<entry>
+<command key="MLSyms">XML Symbols</command>
+<shortkey>Use Mouse</shortkey> 
+<menu>MenuBar</menu>
+<description>
+This has most of the XML entities in descriptive form corresponding to TeX symbols. These are for quick access in XML files. If you want the symbols directly, use the UniSyms/UniBlox menus.
+</description>
+</entry>
+
+<entry>
+<command key="Fonts">Fonts</command>
+<shortkey>Use Mouse</shortkey> 
+<menu>MenuBar</menu>
+<description>
+Contains three submenus: FontFamily, FontSize, FontStyle.<p/>
+Use highlighting then choose properties via the menus. Ctrl-A selects all the current text. Ctrl-Shift-left_mouse
+selects text from current cursor position to the current mouse (clicked) position. Use Ctrl-I to toggle italic,
+Ctrl-J to toggle bold.
+</description>
+</entry>
+
+<entry>
+<command key="FontStyle">Font Style</command>
+<shortkey>Use Mouse</shortkey> 
+<menu>Fonts Menu</menu>
+<description>
+If you highlight some letters, you can set them as bold, italic, bold-italic, or plain style. For shortcut, use ctrl-I to toggle italic, ctrl-J to toggle bold (ctrl-B is taken as the shortcut for adding Quickwords). On the buffer window right_mouse pops up the UniSyms menu with the current font information at the top.
+</description>
+</entry>
+
+<entry>
+<command key="FontSize">Font Size</command>
+<shortkey>Use Mouse</shortkey> 
+<menu>Fonts Menu</menu>
+<description>
+For working in the Editor you probably use a font size say 16 or larger. Don't forget that if you print the buffer,
+it will come out with the text attributes assigned. Before printing, choose the desired output size, say 12pt,
+and check the style (plain/bold/italic). At sizes less than 10 pt the text may be hard to see in the Editor,
+but will print out OK. Use Ctrl-P for printing (see the File menu or Utils menu).
+</description>
+</entry>
+
+<entry>
+<command key="UniSyms"> Unicode Symbols </command>
+<shortkey>Use Mouse</shortkey> 
+<menu>MenuBar</menu>
+<description>
+First choose subset(s) of  Unicode symbols from the UniBlox menu. Then you will
+find them here. Click on a symbol to have it appear in the text at the cursor. <p/>
+To delete a symbol subset (block) from this menu, click on it in the UniBlox menu. I.e., clicking on a Unicode block in the UniBlox menu toggles its availability here. You can also access symbols from the chosen blocks by clicking right_mouse on a buffer window. 
+Note that the decimal value of the code for each symbol appears as a tool-tip.
+</description>
+</entry>
+
+<entry>
+<command key="UniBlox"> Unicode Blocks </command>
+<shortkey>Use Mouse</shortkey> 
+<menu>MenuBar</menu>
+<description>
+This has the Unicode symbol blocks in groups of nine. The decimal values of the corresponding codes for each block appear as tool-tips.
+</description>
+</entry>
+
+<entry>
+<command key="Alphabet">Alphabet</command>
+<shortkey>Use Mouse</shortkey> 
+<menu>MenuBar</menu>
+<description>
+To change alphabets, in  the Alphabet menu, click on the alphabet desired. The clickpad for that alphabet will load.
+Ctrl-F toggles its visibility, as usual for clickpads. To get back the clickpad, say
+for XML, use the Utils/Modes menu or right_mouse to pop up a Modes menu.
+<p/>
+For Greek, Russian, or Yiddish, Scroll-Lock will toggle automatic text entry in the corresponding alphabet
+eliminating the need to use the alt key.
+<p/>
+In any alphabet mode the menu near the upper right corner has the available symbols and corresponding keys.
+</description>
+</entry>
+
+<entry>
+<command key="English"> English</command>
+<shortkey>Use Mouse</shortkey> 
+<menu>Alphabet Menu</menu>
+<description>
+This actually is the same as Greek alphabet mode for convenience in mathematical/scientific texts.
+</description>
+</entry>
+
+<entry>
+<command key="Greek"> Greek</command>
+<shortkey>Use Mouse</shortkey> 
+<menu> Alphabet Menu</menu>
+<description>
+<a href="ServPak/html/HelpGreekKeymap.html">Here is the keymap.</a>
+</description>
+</entry>
+
+<entry>
+<command key="Yiddish,RTL"> Yiddish</command>
+<shortkey>Use Mouse</shortkey> 
+<menu>Alphabet Menu</menu>
+<description>
+You can use Ctrl-L to toggle character/paragraph text attributes. If you use scroll-lock you can enter text
+directly in the Yiddish alphabet. The key correspondences are mainly phonetic.<p/>
+To switch back, hit "English" in the Alphabet menu, then  F2 to refresh the buffer.<p/>
+<a href="ServPak/html/HelpYiddishKeymap.html"> Here is the keymap.</a>
+</description>
+</entry>
+
+<entry>
+<command key="Russian"> Russian</command>
+<shortkey>Use Mouse</shortkey> 
+<menu> Alphabet Menu</menu>
+<description>
+<a href="ServPak/html/HelpRussianKeymap.html">Here is the keymap.</a>
+</description>
+</entry>
+
+<entry>
+<command key="Polish"> Polish</command>
+<shortkey>Use Mouse</shortkey> 
+<menu> Alphabet Menu</menu>
+<description>
+<a href="ServPak/html/HelpPolishKeymap.html">Here is the keymap.</a>
+</description>
+</entry>
+
+<entry>
+<command key="French"> French</command>
+<shortkey>Use Mouse</shortkey> 
+<menu> Alphabet Menu</menu>
+<description>
+<a href="ServPak/html/HelpFrenchKeymap.html">Here is the keymap.</a>
+</description>
+</entry>
+
+<entry>
+<command key="Html">Html</command>
+<shortkey>Use Mouse</shortkey> 
+<menu>MenuBar</menu>
+<description>
+In XML modes, this menu will pick up tag names. A click will jump you to the first occurrence of that
+element tag. Continue with Ctrl-S to pop up the search dialog. Find further instances with Ctrl-R.
+</description>
+</entry>
+
+<entry>
+<command key="Xml">Xml</command>
+<shortkey>Use Mouse</shortkey> 
+<menu>MenuBar</menu>
+<description>
+In XML modes, this menu will pick up tag names. A click will jump you to the first occurrence of that
+element tag. Continue with Ctrl-S to pop up the search dialog. Find further instances with Ctrl-R.
+</description>
+</entry>
+
+<entry>
+<command key="Hxml">Hxml</command>
+<shortkey>Use Mouse</shortkey> 
+<menu>MenuBar</menu>
+<description>
+In XML modes, this menu will pick up tag names. A click will jump you to the first occurrence of that
+element tag. Continue with Ctrl-S to pop up the search dialog. Find further instances with Ctrl-R.
+</description>
+</entry>
+
+<entry>
+<command key="Jxml">Jxml</command>
+<shortkey>Use Mouse</shortkey> 
+<menu>MenuBar</menu>
+<description>
+In XML modes, this menu will pick up tag names. A click will jump you to the first occurrence of that
+element tag. Continue with Ctrl-S to pop up the search dialog. Find further instances with Ctrl-R.
+</description>
+</entry>
+
+<entry>
+<command key="Perl">Perl</command>
+<shortkey>Use Mouse</shortkey> 
+<menu>MenuBar</menu>
+<description>
+In Perl mode, this menu will pick up comments from lines beginning with ### followed by a space.
+You can use two formats: <p/>
+	### here is my comment<p/>
+or <p/>
+	######### here is my comment ##########<p/>
+as long as there are 3 or more #'s in a row. <br/>
+The comment string may be customized, see the Modes.properties file.
+</description>
+</entry>
+
+<entry>
+<command key="Java">Java</command>
+<shortkey>Use Mouse</shortkey> 
+<menu>MenuBar</menu>
+<description>
+In Perl mode, this menu will pick up comments from lines beginning with /// followed by a space.
+You can use two formats: <p/>
+	/// here is my comment<p/>
+or <p/>
+	///////// here is my comment //////////<p/>
+as long as there are 3 or more /'s in a row. <br/>
+The comment string may be customized, see the Modes.properties file.
+</description>
+</entry>
+
+<entry>
+<command key="Tex">TeX</command>
+<shortkey>Use Mouse</shortkey> 
+<menu>MenuBar</menu>
+<description>
+In Tex mode, this menu will pick up comments from lines beginning with %%% followed by a space.
+You can use two formats: <p/>
+	%%% here is my comment<p/>
+or <p/>
+	%%%%%%%%% here is my comment %%%%%%%%%%<p/>
+as long as there are 3 or more %'s in a row. <br/>
+The comment string may be customized, see the Modes.properties file.
+</description>
+</entry>
+
+<entry>
+<command key="LaTex">LaTeX</command>
+<shortkey>Use Mouse</shortkey> 
+<menu>MenuBar</menu>
+<description>
+In LaTex mode, this menu will pick up comments from lines beginning with %%% followed by a space.
+You can use two formats: <p/>
+	%%% here is my comment<p/>
+or <p/>
+	%%%%%%%%% here is my comment %%%%%%%%%%<p/>
+as long as there are 3 or more %'s in a row. <br/>
+The comment string may be customized, see the Modes.properties file.
+</description>
+</entry>
+
+<entry>
+<command key="Notes">Notes</command>
+<shortkey>Ctrl-T, Ctrl-Y</shortkey>
+<menu>MenuBar</menu>
+<description>
+To annotate a word or phrase, in any file, highlight it and hit Ctrl-T. This pops up an editor window
+for your notes. After annotating, hit F1 and brush the popup with the mouse to save.
+The annotated word(s) will appear in the Notes menu for that file.<p/>
+Use Ctrl-Y in a tpml file to make a link. You can directly access the notes file without
+special markup. To link to a page, click "DoLink" in the popup editor. To make an
+external link, start with "http://" and end with ".htm" or ".html". For a local file, don't
+put the http://. Local xml files will automatically be converted to html for presentation in the
+browser. <br/> Use Ctrl-T for further editing of the notes file.
+
+</description>
+</entry>
+
+</Helpers>

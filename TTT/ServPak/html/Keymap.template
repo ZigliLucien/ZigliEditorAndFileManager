@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="/usr/local/ZigliFM/ServPak/xsl/tpw.xsl"?>
+<!DOCTYPE tpwm [<!ENTITY % tpwsymbols SYSTEM "file:/usr/local/ZigliFM/TPW"> %tpwsymbols;]>
+<tpwm>
+<title>Greek Keymap</title>
+<body>
+<display>
+<bordermatrix>
+<ams/><bf>Key</bf><amc/><bf>Symbol</bf><cr/>
+<ams/>Alt-A<amc/>α<cr/>
+<ams/>Alt-Ctrl-A<amc/>ά<cr/>
+<ams/>Alt-Shift-A<amc/>Α<cr/>
+<ams/>Alt-B<amc/>β<cr/>
+<ams/>Alt-Shift-B<amc/>Β<cr/>
+<ams/>Alt-C<amc/>ξ<cr/>
+<ams/>Alt-Shift-C<amc/>Ξ<cr/>
+<ams/>Alt-D<amc/>  <cr/>
+<ams/>Alt-Shift-D<amc/>  <cr/>
+<ams/>Alt-E<amc/><cr/>
+<ams/>Alt-Ctrl-E<amc/><cr/>
+<ams/>Alt-Shift-E<amc/><cr/>
+<ams/>Alt-F<amc/><cr/>
+<ams/>Alt-Shift-F<amc/><cr/>
+<ams/>Alt-G<amc/><cr/>
+<ams/>Alt-Shift-G<amc/><cr/>
+<ams/>Alt-H<amc/><cr/>
+<ams/>Alt-Ctrl-H<amc/><cr/>
+<ams/>Alt-Shift-H<amc/><cr/>
+<ams/>Alt-I<amc/> <cr/>
+<ams/>Alt-Ctrl-I<amc/> <cr/>
+<ams/>Alt-Shift-I<amc/><cr/>
+<ams/>Alt-J<amc/><cr/>
+<ams/>Alt-Shift-J<amc/><cr/>
+<ams/>Alt-K<amc/> <cr/>
+<ams/>Alt-Shift-K<amc/>  <cr/>
+<ams/>Alt-L<amc/><cr/>
+<ams/>Alt-Shift-L<amc/><cr/>
+<ams/>Alt-M<amc/><cr/>
+<ams/>Alt-Shift-M<amc/><cr/>
+<ams/>Alt-Alt-M<amc/><cr/>
+<ams/>Alt-N<amc/><cr/>
+<ams/>Alt-Shift-N<amc/><cr/>
+<ams/>Crtl-Alt-N<amc/><cr/>
+<ams/>Alt-O<amc/>  <cr/>
+<ams/>Alt-Ctrl-O<amc/>  <cr/>
+<ams/>Alt-Shift-O<amc/>  <cr/>
+<ams/>Alt-P<amc/>  <cr/>
+<ams/>Alt-Shift-P<amc/>  <cr/>
+<ams/>Alt-Q<amc/> <cr/>
+<ams/>Alt-Shift-Q<amc/> <cr/>
+<ams/>Alt-R<amc/><cr/>
+<ams/>Alt-Shift-R<amc/><cr/>
+<ams/>Alt-S<amc/><cr/>
+<ams/>Alt-Shift-S<amc/><cr/>
+<ams/>Alt-T<amc/><cr/>
+<ams/>Alt-Shift-T<amc/><cr/>
+<ams/>Alt-Alt-T<amc/><cr/>
+<ams/>Alt-U<amc/><cr/>
+<ams/>Alt-Ctrl-U<amc/><cr/>
+<ams/>Alt-Shift-U<amc/><cr/>
+<ams/>Alt-V<amc/><cr/>
+<ams/>Alt-Shift-V<amc/><cr/>
+<ams/>Alt-Ctrl-Shift-V<amc/><cr/>
+<ams/>Alt-W<amc/><cr/>
+<ams/>Alt-Shift-W<amc/><cr/>
+<ams/>Alt-X<amc/><cr/>
+<ams/>Alt-Shift-X<amc/><cr/>
+<ams/>Alt-Y<amc/><cr/>
+<ams/>Alt-Shift-Y<amc/><cr/>
+<ams/>Alt-Z<amc/><cr/>
+<ams/>Alt-Shift-Z<amc/><cr/>
+</bordermatrix>
+</display>
+<skip/>
+<a href="HelpContents.html"> Back: Help Contents </a>
+
+
+
+
+</body>
+</tpwm>

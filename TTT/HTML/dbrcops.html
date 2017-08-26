@@ -1,0 +1,100 @@
+<html>
+  <head>
+<style type="text/css">
+input { color: green; background-color: white}
+input.res { color: darkblue; background-color: white}
+option { color: white; background-color: blue}
+</style>
+
+    <title>RC Ops</title>
+  </head>
+
+  <body>
+    <h2>Row &amp; Column Operations</h2>
+
+<a href="DBrcops.jav?show"> Show current table </a>
+<p>
+
+<a href="DBrcops.jav?skeleton"> Show skeleton ( numbered row and column headers)</a>
+<p>
+
+<table>
+<tr><td>
+<form action="DBrcops.jav" method="get"></td><td>
+<input type="submit" value="Insert a row" name="insertrow"/> </td><td>
+Which row ? <input name="row" size="2"/></td><td>
+ Name ? <input name="name" size="10"/> </td><td>
+&#160;<input type="reset" class="res"></td>
+</form>
+</tr>
+<tr><td><br></td><td><br></td><td><br></td><td><br></td><td><br></td></tr>
+
+<tr><td>
+<form action="DBrcops.jav" method="get"></td><td>
+<input type="submit" value="Delete row(s)" name="rowdel"/>  
+ <br> List row number(s)<br> in increasing order <br>separated by commas
+</td><td>
+Which row(s) ? <br><input name="row" size="12"/> </td><td>
+<br></td><td>
+&#160;<input type="reset" class="res"></td>
+</form>
+</tr>
+<tr><td><br></td><td><br></td><td><br></td><td><br></td><td><br></td></tr>
+
+<tr><td>
+<form action="DBrcops.jav" method="get"></td><td>
+<input type="submit" value="Exchange rows" name="xrows"/>  </td><td>
+Which rows ? <input name="row1" size="2"/> &lt;-&gt;
+<input name="row2" size="2"/></td><td><br></td></td><td>
+&#160;<input type="reset" class="res"></td>
+</form>
+</tr>
+<tr><td><br></td><td><br></td><td><br></td><td><br></td><td><br></td></tr>
+
+<tr><td>
+<form action="DBrcops.jav" method="get"></td><td>
+<input type="submit" value="Insert a column" name="insertcol"/></td><td>
+Which column ? <input name="col" size="2"/></td><td>
+Name ? <input name="name" size="10"/> </td><td>
+&#160;<input type="reset" class="res"></td>
+</form>
+</tr>
+<tr><td><br></td><td><br></td><td><br></td><td><br></td><td><br></td></tr>
+
+<tr><td>
+<form action="DBrcops.jav" method="get"></td><td>
+<input type="submit" value="Delete column(s) " name="coldel"/> <br>
+List column number(s)<br> in increasing order  <br>separated by commas
+</td>
+<td>
+Which column(s) ? <br><input name="col" size="12"/></td><td>
+<br></td><td>
+&#160;<input type="reset" class="res"></td>
+</form>
+</tr>
+<tr><td><br></td><td><br></td><td><br></td><td><br></td><td><br></td></tr>
+
+<tr><td>
+<form action="DBrcops.jav" method="get"></td><td>
+<input type="submit" value="Exchange columns" name="xcols"/>  </td><td>
+Which columns ? <input name="col1" size="2"/> &lt;-&gt;
+&#160;<input name="col2" size="2"/></td><td><br></td></td><td>
+&#160;<input type="reset" class="res"></td>
+</form>
+</tr>
+<tr><td><br></td><td><br></td><td><br></td><td><br></td><td><br></td></tr>
+
+<tr><td>
+<form action="DBrcops.jav" method="get"></td><td>
+<input type="submit" value="Import column(s)" name="colimport"/> 
+ <br> List column number(s)<br> in increasing order <br>separated by commas
+</td><td>
+Which column(s)? <input name="importcol" size="12"/> </td><td>
+From which dbase? <input name="db" size="12"/> </td><td>
+&#160;<input type="reset" class="res"></td>
+</form>
+</tr>
+</table>
+
+  </body>
+</html>

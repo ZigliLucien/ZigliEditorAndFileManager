@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="ServPak/html/helper.xsl"?>
+<!DOCTYPE tpwm [<!ENTITY % tpwsymbols SYSTEM "file:ServPak/xsl/TPW"> %tpwsymbols;]>
+<tpwm>
+<title>French Keymap</title>
+
+<body>
+<display>
+<bordermatrix width="40%">
+<ams/><bf>Key</bf><amcx/><bf>Symbol</bf><cr/>
+<ams/>Alt-A<amcx/>à<cr/>
+<ams/>Alt-Shift-A<amcx/>â<cr/>
+<ams/>Alt-Q<amcx/>ë<cr/>
+<ams/>Alt-C<amcx/>ç<cr/>
+<ams/>Alt-Shift-C<amcx/>Ç<cr/>
+<ams/>Alt-E<amcx/>é<cr/>
+<ams/>Alt-Shift-E<amcx/>è<cr/>
+<ams/>Alt-R<amcx/>ê<cr/>
+<ams/>Alt-I<amcx/>î<cr/>
+<ams/>Alt-Shift-I<amcx/>ï<cr/>
+<ams/>Alt-O<amcx/>ô<cr/>
+<ams/>Alt-U<amcx/>ù<cr/>
+<ams/>Alt-Shift-U<amcx/>û<cr/>
+<ams/>Alt-W<amcx/>è<cr/>
+<ams/>Alt-Y<amcx/>ü<cr/>
+
+</bordermatrix>
+</display>
+<skip/>
+<a href="HelpContents.html"> Back: Help Contents </a>
+</body>
+</tpwm>

@@ -1,0 +1,19 @@
+#!/usr/bin/perl
+$^I="";
+
+while(<>){
+
+if(/stylesheet/ && /href/){
+
+	s/\/usr\/local\/ZigliFM\///;
+
+}
+
+if(/DOCTYPE/){
+
+	s/\/usr\/local\/ZigliFM\//ServPak\/xsl\//;
+
+}
+
+print;
+}

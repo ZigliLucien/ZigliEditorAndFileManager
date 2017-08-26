@@ -1,0 +1,7 @@
+#!/bin/sh
+# Usage: ./sethelpers inputfile outputfile
+
+# cd /usr/local/ZigliFM/ServPak/html
+
+/usr/local/bin/saxsl addkey.xsl $1 $2
+

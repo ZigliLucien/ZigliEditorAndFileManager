@@ -1,0 +1,35 @@
+<html>
+  <head>
+    <title>DB Ops</title>
+  </head>
+
+  <body>
+    <h2>DB Operations</h2>
+
+<!-- a href="DBanalyze.jav?transpose">  Transpose </a><p -->
+<form action="DBanalyze.jav" method="get">
+<input name="Maximum" size="4"/> Maximum<br>
+<input name="Mean" size="4"/> Mean<br>
+<input type="submit" value="Compute grades via z-scores" name="scores"/>  
+</form>
+<p>
+<a href="DBanalyze.jav?grddist"> Show distribution of grades </a>
+<p>
+<a href="DBanalyze.jav?prtgrds"> View grades 
+(makes the file *_list.xml for sorting/printing) </a>
+<p>
+<a href="DBanalyze.jav?totals_statistics"> Compute row totals and statistics </a>
+<p>
+
+<a href="DBanalyze.jav?totals"> Compute row totals </a>
+<p>&nbsp;<br>
+After doing row totals you can compute interpolated scores: <p>
+<form action="DBanalyze.jav?interpolation" method="get">
+<input name="ins"/> Enter increasing list of values in separated by spaces<br>
+<input name="outs"/> Enter increasing list of corresponding values out separated by spaces <br>
+<input type="submit" value="Compute scores via interpolation" name="scores"/>  
+</form><p>
+&nbsp;<p>
+<a href="DBgo.jav?"> Back to Table </a>
+  </body>
+</html>

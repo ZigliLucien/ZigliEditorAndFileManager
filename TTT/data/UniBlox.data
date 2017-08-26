@@ -1,0 +1,125 @@
+Basic Latin|0:127
+Latin-1 Supplement|128:255
+Latin Extended-A|256:383
+Latin Extended-B|384:591
+IPA Extensions|592:687
+Spacing Modifier Letters|688:767
+Combining Diacritical Marks|768:879
+Greek and Coptic|880:1023
+Cyrillic|1024:1279
+Cyrillic Supplementary|1280:1327
+Armenian|1328:1423
+Hebrew|1424:1535
+Arabic|1536:1791
+Syriac|1792:1871
+Thaana|1920:1983
+Devanagari|2304:2431
+Bengali|2432:2559
+Gurmukhi|2560:2687
+Gujarati|2688:2815
+Oriya|2816:2943
+Tamil|2944:3071
+Telugu|3072:3199
+Kannada|3200:3327
+Malayalam|3328:3455
+Sinhala|3456:3583
+Thai|3584:3711
+Lao|3712:3839
+Tibetan|3840:4095
+Myanmar|4096:4255
+Georgian|4256:4351
+Hangul Jamo|4352:4607
+Ethiopic|4608:4991
+Cherokee|5024:5119
+Unified Canadian Aboriginal Syllabics|5120:5759
+Ogham|5760:5791
+Runic|5792:5887
+Tagalog|5888:5919
+Hanunoo|5920:5951
+Buhid|5952:5983
+Tagbanwa|5984:6015
+Khmer|6016:6143
+Mongolian|6144:6319
+Limbu|6400:6479
+Tai Le|6480:6527
+Khmer Symbols|6624:6655
+Phonetic Extensions|7424:7551
+Latin Extended Additional|7680:7935
+Greek Extended|7936:8191
+General Punctuation|8192:8303
+Superscripts and Subscripts|8304:8351
+Currency Symbols|8352:8399
+Combining Diacritical Marks for Symbols|8400:8447
+Letterlike Symbols|8448:8527
+Number Forms|8528:8591
+Arrows|8592:8703
+Mathematical Operators|8704:8959
+Miscellaneous Technical|8960:9215
+Control Pictures|9216:9279
+Optical Character Recognition|9280:9311
+Enclosed Alphanumerics|9312:9471
+Box Drawing|9472:9599
+Block Elements|9600:9631
+Geometric Shapes|9632:9727
+Miscellaneous Symbols|9728:9983
+Dingbats|9984:10175
+Miscellaneous Mathematical Symbols-A|10176:10223
+Supplemental Arrows-A|10224:10239
+Braille Patterns|10240:10495
+Supplemental Arrows-B|10496:10623
+Miscellaneous Mathematical Symbols-B|10624:10751
+Supplemental Mathematical Operators|10752:11007
+Miscellaneous Symbols and Arrows|11008:11263
+CJK Radicals Supplement|11904:12031
+Kangxi Radicals|12032:12255
+Ideographic Description Characters|12272:12287
+CJK Symbols and Punctuation|12288:12351
+Hiragana|12352:12447
+Katakana|12448:12543
+Bopomofo|12544:12591
+Hangul Compatibility Jamo|12592:12687
+Kanbun|12688:12703
+Bopomofo Extended|12704:12735
+Katakana Phonetic Extensions|12784:12799
+Enclosed CJK Letters and Months|12800:13055
+CJK Compatibility|13056:13311
+CJK Unified Ideographs Extension A|13312:19903
+Yijing Hexagram Symbols|19904:19967
+CJK Unified Ideographs|19968:40959
+Yi Syllables|40960:42127
+Yi Radicals|42128:42191
+Hangul Syllables|44032:55215
+High Surrogates|55296:56191
+High Private Use Surrogates|56192:56319
+Low Surrogates|56320:57343
+Private Use Area|57344:63743
+CJK Compatibility Ideographs|63744:64255
+Alphabetic Presentation Forms|64256:64335
+Arabic Presentation Forms-A|64336:65023
+Variation Selectors|65024:65039
+Combining Half Marks|65056:65071
+CJK Compatibility Forms|65072:65103
+Small Form Variants|65104:65135
+Arabic Presentation Forms-B|65136:65279
+Halfwidth and Fullwidth Forms|65280:65519
+Specials|65520:65535
+Linear B Syllabary|65536:65663
+Linear B Ideograms|65664:65791
+Aegean Numbers|65792:65855
+Old Italic|66304:66351
+Gothic|66352:66383
+Ugaritic|66432:66463
+Deseret|66560:66639
+Shavian|66640:66687
+Osmanya|66688:66735
+Cypriot Syllabary|67584:67647
+Byzantine Musical Symbols|118784:119039
+Musical Symbols|119040:119295
+Tai Xuan Jing Symbols|119552:119647
+Mathematical Alphanumeric Symbols|119808:120831
+CJK Unified Ideographs Extension B|131072:173791
+CJK Compatibility Ideographs Supplement|194560:195103
+Tags|917504:917631
+Variation Selectors Supplement|917760:917999
+Supplementary Private Use Area-A|983040:1048575
+Supplementary Private Use Area-B|1048576:1114111
