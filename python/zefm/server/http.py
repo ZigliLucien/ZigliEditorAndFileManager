@@ -41,7 +41,7 @@ def note_version(record) -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
-def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None):
+def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, open_in_editor=None):
     note_lock=threading.RLock()
     class BrowserHandler(BaseHTTPRequestHandler):
         server_version = "ZEFM-local/1"
@@ -96,6 +96,11 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None):
                     links += (f' &nbsp; <a href="{escape(link("/edit", rel), quote=True)}">Quick edit</a>'
                               f' &nbsp; <a href="{escape(link("/raw", rel), quote=True)}">Download</a>'
                               f' &nbsp; <a href="{escape(link("/notes", rel), quote=True)}">Notes</a>')
+                if not is_dir and open_in_editor is not None:
+                    links += (' &nbsp; <form action="/open-editor" method="post" style="display:inline">'
+                              f'<input type="hidden" name="csrf" value="{escape(token,quote=True)}">'
+                              f'<input type="hidden" name="path" value="{escape(rel,quote=True)}">'
+                              '<button type="submit">Open in ZEFM</button></form>')
                 rows.append(f"<tr><td>{links}</td></tr>")
             return page("File manager", header + "<table>" + "".join(rows) + "</table>"
                         + f"<p><small>{len(entries)} entries. Local files only; browser editing limited to 1 MiB UTF-8 files.</small></p>")
@@ -209,7 +214,21 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None):
                 if not secrets.compare_digest(args.get("csrf", ""), token):
                     raise BrowserError("Invalid form token", 403)
                 route = urlsplit(self.path).path
-                if route=="/note-edit":
+                if route=="/open-editor":
+                    if open_in_editor is None:
+                        raise BrowserError("Desktop editor integration unavailable", 404)
+                    if set(args) != {"csrf", "path"}:
+                        raise BrowserError("Unexpected editor-open parameters")
+                    p=files.resolve(args["path"])
+                    if not p.is_file():
+                        raise BrowserError("File not found",404)
+                    # Never touch Tk widgets from a background HTTP thread.
+                    open_in_editor(str(p))
+                    self._send(200,page("Open in ZEFM",
+                        f'<h2>Sent to ZEFM: {escape(args["path"])}</h2>'
+                        '<p>Return to the editor window. An already open buffer is reused.</p>'
+                        f'<p><a href="{escape(link("/browse", files.relative(p.parent)),quote=True)}">Back to files</a></p>'))
+                elif route=="/note-edit":
                     for key in ("path", "word", "digest", "content"):
                         if key not in args:
                             raise BrowserError("Missing form parameter")
@@ -250,11 +269,11 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None):
 
 
 class BrowserServer:
-    def __init__(self, root: str, port: int = 0, notes_path=None):
+    def __init__(self, root: str, port: int = 0, notes_path=None, open_in_editor=None):
         self.files = LocalFiles(root)
         self.token = secrets.token_urlsafe(32)
         server = ThreadingHTTPServer(("127.0.0.1", port), make_handler(self.files, self.token,
-                                                  lambda: server.server_address[1], notes_path))
+                                                  lambda: server.server_address[1], notes_path, open_in_editor))
         server.daemon_threads = True
         self.server = server
         self.thread = None
