@@ -7,6 +7,7 @@ handles typed input; controller handles the three explicit clipboard commands.
 import sys
 import re
 import webbrowser
+from queue import Queue, Empty
 from pathlib import Path
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox, simpledialog, font as tkfont
@@ -56,6 +57,8 @@ class Window:
         self.dictionary_dir=Path(__file__).resolve().parents[3] / "dictionaries"
         self.word_notes = None  # Initialized when first used; storage errors are displayed.
         self.local_browser = None  # Start only on explicit File menu request.
+        self.browser_open_requests = Queue()
+        self.browser_poll_id = None
         self.recent_files = RecentFiles()
         self.recent_menu = None
         self.search_term = ""
@@ -1291,6 +1294,19 @@ class Window:
             self._status(widget)
         except (OSError,UnicodeError) as exc:messagebox.showerror("Save failed",str(exc),parent=self.root)
 
+    def _drain_browser_requests(self):
+        """Process HTTP-originated requests exclusively on the Tk main thread."""
+        self.browser_poll_id = None
+        try:
+            while True:
+                path = self.browser_open_requests.get_nowait()
+                self._open_path(path)
+                self.root.lift()
+        except Empty:
+            pass
+        if self.local_browser is not None:
+            self.browser_poll_id = self.root.after(150, self._drain_browser_requests)
+
     def open_local_file_manager(self):
         """Serve only the currently selected local directory, using loopback HTTP."""
         from ...server.http import BrowserServer
@@ -1300,8 +1316,10 @@ class Window:
                 self.local_browser.close()
                 self.local_browser=None
             if self.local_browser is None:
-                self.local_browser=BrowserServer(root)
+                self.local_browser=BrowserServer(root, open_in_editor=self.browser_open_requests.put)
             url=self.local_browser.start()
+            if self.browser_poll_id is None:
+                self.browser_poll_id = self.root.after(150, self._drain_browser_requests)
             webbrowser.open(url)
             self.status.set(f"Local file manager: {url} (root: {root})")
         except (OSError,ValueError) as exc:
@@ -1314,6 +1332,9 @@ class Window:
         if any(e.state.buffer.modified for _,e in self.views.values()):
             if not messagebox.askyesno("Unsaved changes","Quit with unsaved buffers?",parent=self.root):
                 return
+        if self.browser_poll_id is not None:
+            self.root.after_cancel(self.browser_poll_id)
+            self.browser_poll_id = None
         if self.local_browser is not None:
             self.local_browser.close()
             self.local_browser=None
