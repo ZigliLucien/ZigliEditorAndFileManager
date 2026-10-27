@@ -97,3 +97,20 @@ Standalone `python3 -m zefm.server.http` does not show this button.
 **Known limitation:** Browser Quick Edit and other external changes still require
 manual **File → Revert** in already-open desktop buffers. V41 does not overwrite
 an unsaved editor buffer in response to a browser request.
+
+## v42 — external file change safety
+
+When the desktop editor opens a file, it records a SHA-256 signature of the
+bytes on disk. Saves refresh the signature. If another application or browser
+Quick Edit changes that file, **File → Save** warns before overwriting the
+newer version. Choosing No preserves both the editor buffer and disk data.
+
+**Open in ZEFM** for a file already in an editor tab checks the disk signature.
+For an unmodified tab, it offers to reload; for an unsaved tab, it warns without
+destroying the unsaved edits. **File → Revert** remains an explicit way to
+reload a buffer.
+
+This is a snapshot check rather than continuous filesystem watching.
+There is a possible time-of-check/time-of-use race if another writer modifies
+the file between confirmation and writing; fully atomic conflict-safe saves
+will require a later revision.
