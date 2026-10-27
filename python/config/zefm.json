@@ -1,0 +1,7 @@
+{
+  "encoding": "utf-8",
+  "dictionary_dir": "dictionaries",
+  "command_timeout": 30,
+  "home_directory": "~",
+  "remember_last_directory": true
+}

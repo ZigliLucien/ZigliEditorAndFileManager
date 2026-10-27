@@ -1,0 +1,61 @@
+{
+  "source": "ZEFMEXPORT.zip",
+  "archives": [
+    {
+      "name": "ZCLIENT.jar",
+      "size_bytes": 34931
+    },
+    {
+      "name": "saxon9-sql.jar",
+      "size_bytes": 44743
+    },
+    {
+      "name": "ZEFM.jar",
+      "size_bytes": 1789485
+    },
+    {
+      "name": "saxon9-jdom.jar",
+      "size_bytes": 36793
+    },
+    {
+      "name": "saxon9-xpath.jar",
+      "size_bytes": 44925
+    },
+    {
+      "name": "saxon9-s9api.jar",
+      "size_bytes": 127765
+    },
+    {
+      "name": "saxon9-dom.jar",
+      "size_bytes": 126167
+    },
+    {
+      "name": "ZEdit_ZEFM_src.jar",
+      "size_bytes": 82707
+    },
+    {
+      "name": "NetsManager_ZEFM_src.jar",
+      "size_bytes": 61871
+    },
+    {
+      "name": "saxon9-xqj.jar",
+      "size_bytes": 192550
+    },
+    {
+      "name": "saxon9-dom4j.jar",
+      "size_bytes": 34064
+    },
+    {
+      "name": "ServPakDir.jar",
+      "size_bytes": 26512890
+    },
+    {
+      "name": "saxon9-xom.jar",
+      "size_bytes": 56342
+    },
+    {
+      "name": "mxj.jar",
+      "size_bytes": 3413800
+    }
+  ]
+}

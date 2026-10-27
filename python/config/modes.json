@@ -1,0 +1,68 @@
+{
+  "default_mode": "text",
+  "extensions": {
+    ".py": "python",
+    ".java": "java",
+    ".tex": "latex",
+    ".md": "markdown",
+    ".markdown": "markdown",
+    ".html": "html",
+    ".htm": "html",
+    ".xml": "xml",
+    ".xsl": "xml",
+    ".xslt": "xml",
+    ".json": "json",
+    ".csv": "csv",
+    ".txt": "text",
+    ".properties": "properties"
+  },
+  "filenames": {
+    "Makefile": "makefile"
+  },
+  "modes": {
+    "text": {
+      "indent_width": 4,
+      "use_tabs": false
+    },
+    "python": {
+      "indent_width": 4,
+      "use_tabs": false
+    },
+    "java": {
+      "indent_width": 4,
+      "use_tabs": false
+    },
+    "latex": {
+      "indent_width": 2,
+      "use_tabs": false
+    },
+    "markdown": {
+      "indent_width": 2,
+      "use_tabs": false
+    },
+    "html": {
+      "indent_width": 2,
+      "use_tabs": false
+    },
+    "xml": {
+      "indent_width": 2,
+      "use_tabs": false
+    },
+    "json": {
+      "indent_width": 2,
+      "use_tabs": false
+    },
+    "csv": {
+      "indent_width": 4,
+      "use_tabs": false
+    },
+    "properties": {
+      "indent_width": 4,
+      "use_tabs": false
+    },
+    "makefile": {
+      "indent_width": 4,
+      "use_tabs": true
+    }
+  }
+}

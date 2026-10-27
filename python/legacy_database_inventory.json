@@ -1,0 +1,141 @@
+{
+  "source": "ZEFMdb.zip",
+  "format": "MyISAM",
+  "files": [
+    {
+      "name": "tmpZefm.MYI",
+      "size_bytes": 123904,
+      "crc32": "31f090f5"
+    },
+    {
+      "name": "annotations.frm",
+      "size_bytes": 8598,
+      "crc32": "d3bcd406"
+    },
+    {
+      "name": "tmpZefm.MYD",
+      "size_bytes": 21167800,
+      "crc32": "7e4342e3"
+    },
+    {
+      "name": "notes.MYI",
+      "size_bytes": 7168,
+      "crc32": "a74f99e8"
+    },
+    {
+      "name": "xml.MYD",
+      "size_bytes": 6930484,
+      "crc32": "85cc8d51"
+    },
+    {
+      "name": "listings.MYI",
+      "size_bytes": 209920,
+      "crc32": "54e3b3b5"
+    },
+    {
+      "name": "tmpZefm.frm",
+      "size_bytes": 8598,
+      "crc32": "d7d49321"
+    },
+    {
+      "name": "notes.MYD",
+      "size_bytes": 2968,
+      "crc32": "7a9a42f1"
+    },
+    {
+      "name": "xml.MYI",
+      "size_bytes": 152576,
+      "crc32": "10fd5713"
+    },
+    {
+      "name": "dictionaries.frm",
+      "size_bytes": 8620,
+      "crc32": "8340ed03"
+    },
+    {
+      "name": "main.MYD",
+      "size_bytes": 23075488,
+      "crc32": "cae5cf9e"
+    },
+    {
+      "name": "texts.MYD",
+      "size_bytes": 14991044,
+      "crc32": "d305b087"
+    },
+    {
+      "name": "main.frm",
+      "size_bytes": 8628,
+      "crc32": "622b741b"
+    },
+    {
+      "name": "texts.frm",
+      "size_bytes": 8598,
+      "crc32": "75551867"
+    },
+    {
+      "name": "dictionaries.MYI",
+      "size_bytes": 13024256,
+      "crc32": "2b1ec6e1"
+    },
+    {
+      "name": "main.MYI",
+      "size_bytes": 119808,
+      "crc32": "74005f59"
+    },
+    {
+      "name": "sentMail.MYI",
+      "size_bytes": 37888,
+      "crc32": "89e12def"
+    },
+    {
+      "name": "annotations.MYI",
+      "size_bytes": 29696,
+      "crc32": "69b5ce29"
+    },
+    {
+      "name": "dictionaries.MYD",
+      "size_bytes": 18555424,
+      "crc32": "f7628d49"
+    },
+    {
+      "name": "sentMail.frm",
+      "size_bytes": 8728,
+      "crc32": "a54330b0"
+    },
+    {
+      "name": "annotations.MYD",
+      "size_bytes": 67472,
+      "crc32": "f8ca077a"
+    },
+    {
+      "name": "notes.frm",
+      "size_bytes": 8658,
+      "crc32": "6d604bcc"
+    },
+    {
+      "name": "texts.MYI",
+      "size_bytes": 4995072,
+      "crc32": "39f0777a"
+    },
+    {
+      "name": "listings.frm",
+      "size_bytes": 8598,
+      "crc32": "d3bcd406"
+    },
+    {
+      "name": "sentMail.MYD",
+      "size_bytes": 38260,
+      "crc32": "6cfde370"
+    },
+    {
+      "name": "listings.MYD",
+      "size_bytes": 12915936,
+      "crc32": "4f05a83a"
+    },
+    {
+      "name": "xml.frm",
+      "size_bytes": 8628,
+      "crc32": "4acefe08"
+    }
+  ]
+}
