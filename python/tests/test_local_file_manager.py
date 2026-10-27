@@ -253,3 +253,38 @@ class BrowserEditableNotesTests(unittest.TestCase):
         self.assertEqual(status,400)
         status,_=self.request('/note-edit',{**fields,'path':'missing.txt','word':'x'})
         self.assertEqual(status,404)
+
+
+class BrowserEditorBridgeTests(unittest.TestCase):
+    def test_opt_in_editor_open_and_safety(self):
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d); file=root/'cœur ייִדיש.txt';file.write_text('שלום',encoding='utf-8')
+            seen=[]
+            srv=BrowserServer(str(root),open_in_editor=seen.append)
+            srv.start()
+            try:
+                with urlopen(srv.url, timeout=4) as resp:
+                    self.assertIn('Open in ZEFM',resp.read().decode('utf-8'))
+                def send(path,token,route='/open-editor'):
+                    request=Request(srv.url.rstrip('/')+route,
+                        data=urlencode({'csrf':token,'path':path}).encode('utf-8'),
+                        method='POST',headers={'Content-Type':'application/x-www-form-urlencoded'})
+                    try:
+                        with urlopen(request,timeout=4) as response:return response.status
+                    except HTTPError as err:return err.code
+                self.assertEqual(send(file.name,'wrong'),403)
+                self.assertEqual(send('../outside.txt',srv.token),403)
+                self.assertEqual(seen,[])
+                self.assertEqual(send(file.name,srv.token),200)
+                self.assertEqual(seen,[str(file.resolve())])
+            finally:
+                srv.close()
+
+    def test_standalone_does_not_offer_bridge(self):
+        with tempfile.TemporaryDirectory() as d:
+            file=Path(d)/'test.txt';file.write_text('test')
+            srv=BrowserServer(d);srv.start()
+            try:
+                with urlopen(srv.url,timeout=4) as response:
+                    self.assertNotIn('Open in ZEFM',response.read().decode())
+            finally:srv.close()
