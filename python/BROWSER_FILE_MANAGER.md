@@ -82,3 +82,18 @@ CRLF line endings, UTF-8 Notes rendering, and other earlier editor features.
 
 A Tk/Xvfb smoke test verifies that the File menu creates a working browser
 server; native Slackware/macOS interactive behavior still needs confirmation.
+
+
+## v41 — Open directly in desktop ZEFM
+
+Start the file manager from **File → Open Local File Manager in Browser...** in the Tk editor.
+The browser listing displays **Open in ZEFM** for each file. Clicking it submits a
+same-origin POST request with a per-session form token. The local server validates
+the file path within the selected root, then queues the absolute path for the
+Tk main thread. It does not manipulate widgets from the HTTP worker thread.
+If the file is already open, ZEFM selects that tab instead of opening another.
+Standalone `python3 -m zefm.server.http` does not show this button.
+
+**Known limitation:** Browser Quick Edit and other external changes still require
+manual **File → Revert** in already-open desktop buffers. V41 does not overwrite
+an unsaved editor buffer in response to a browser request.
