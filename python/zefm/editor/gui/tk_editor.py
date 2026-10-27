@@ -14,6 +14,7 @@ from tkinter import ttk, filedialog, messagebox, simpledialog, font as tkfont
 from ..model import Buffer
 from ...config import load as load_config
 from ..working_directory import WorkingDirectory
+from ..external_changes import disk_signature, changed_on_disk
 from ..recent_files import RecentFiles
 from ..font_settings import read_font, write_font
 from ..language_tools import LANGUAGES, language_dictionary, expand_suffix
@@ -44,6 +45,7 @@ class Window:
         self.editor_font=tkfont.Font(root=self.root,**font_options)
         self.views = {}
         self.saved_messages = {}
+        self.disk_signatures = {}
         settings=load_config(Path(__file__).resolve().parents[3] / "config/zefm.json")
         self.working_directory=WorkingDirectory(settings["home_directory"],settings["remember_last_directory"],
             state_path=Path.home()/".config"/"zefm"/"session.json")
@@ -95,6 +97,7 @@ class Window:
         editor=TPEditor(self.clipboard,Buffer(text,path))
         self.views[str(frame)] = (widget,editor)
         self.saved_messages[str(frame)] = None
+        self.disk_signatures[str(frame)] = disk_signature(path) if path else None
         self.buffer_modes[str(frame)] = self.mode_registry.detect(path,text)
         self.buffer_languages[str(frame)] = "system"
         self.buffer_keymaps[str(frame)] = None
@@ -938,6 +941,7 @@ class Window:
         self.tabs.forget(tab)
         del self.views[tab]
         self.saved_messages.pop(tab,None)
+        self.disk_signatures.pop(tab,None)
         self.buffer_modes.pop(tab,None)
         self.buffer_languages.pop(tab,None)
         self.buffer_keymaps.pop(tab,None)
@@ -1210,6 +1214,8 @@ class Window:
             widget.delete("1.0","end");widget.insert("1.0",b.text)
             widget.edit_reset();widget.edit_modified(False)
             editor.state.buffer=b
+            self.disk_signatures[self.tabs.select()]=disk_signature(b.path)
+            self.saved_messages[self.tabs.select()]=None
             self.buffer_modes[self.tabs.select()]=self.mode_registry.detect(b.path,b.text)
             self.tabs.tab(self.tabs.select(),text=Path(b.path).name)
         except (OSError,UnicodeError) as exc:
@@ -1257,6 +1263,16 @@ class Window:
             if old is not None and Path(old).expanduser().resolve()==resolved:
                 self.tabs.select(tab)
                 widget.focus_set()
+                if changed_on_disk(resolved,self.disk_signatures.get(tab)):
+                    if editor.state.buffer.modified:
+                        messagebox.showwarning("File changed on disk",
+                            "The file changed outside ZEFM, but this buffer has unsaved edits. "
+                            "Your edits are preserved. Use File → Revert to reload, or Save to confirm an overwrite.",
+                            parent=self.root)
+                    elif messagebox.askyesno("File changed on disk",
+                            f"{resolved.name} changed outside ZEFM. Reload it from disk?",
+                            parent=self.root):
+                        self.revert_file()
                 self._status(widget)
                 self.recent_files.record(resolved)
                 return
@@ -1280,10 +1296,23 @@ class Window:
         if as_new or not path:
             path=filedialog.asksaveasfilename(parent=self.root,initialdir=self.working_directory.initial_directory())
             if not path:return
+        # A file may have changed in the browser or another program.
+        # Check BEFORE writing and leave the editor text untouched on refusal.
+        current_tab=self.tabs.select()
+        old_path=editor.state.buffer.path
+        same_path=(old_path is not None and Path(old_path).expanduser().resolve()==Path(path).expanduser().resolve())
+        if same_path and changed_on_disk(path,self.disk_signatures.get(current_tab)):
+            if not messagebox.askyesno("External file changes",
+                f"{Path(path).name} has changed on disk since ZEFM opened or last saved it.\\n\\n"
+                "Overwrite the newer disk version with the editor buffer?",
+                parent=self.root):
+                self.status.set("Save cancelled: file changed outside ZEFM")
+                return
         editor.state.buffer.text=widget.get("1.0","end-1c")
         try:
             from ..files import save_buffer
             save_buffer(editor.state.buffer,path)
+            self.disk_signatures[current_tab]=disk_signature(path)
             self.working_directory.used_file(path)
             self.recent_files.record(path)
             self.tabs.tab(self.tabs.select(),text=path.rsplit("/",1)[-1])
