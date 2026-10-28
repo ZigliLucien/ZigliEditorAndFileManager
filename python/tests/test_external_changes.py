@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from zefm.editor.external_changes import disk_signature, changed_on_disk
+from zefm.editor.external_changes import disk_signature, changed_on_disk, ExternalChangeDismissals
 
 
 class ExternalChangesTests(unittest.TestCase):
@@ -32,6 +32,33 @@ class ExternalChangesTests(unittest.TestCase):
             self.assertIsNone(disk_signature(p))
             self.assertFalse(changed_on_disk(p, None))
 
+
+
+
+class ExternalDismissalTests(unittest.TestCase):
+    def test_dismissal_is_per_tab_and_revision(self):
+        d = ExternalChangeDismissals()
+        self.assertTrue(d.pending("a", "before", "after"))
+        self.assertTrue(d.pending("b", "before", "after"))
+        d.dismiss("a", "after")
+        self.assertFalse(d.pending("a", "before", "after"))
+        self.assertTrue(d.pending("a", "before", "new-change"))
+        self.assertTrue(d.pending("b", "before", "after"))
+        d.reset("a")
+        self.assertTrue(d.pending("a", "before", "after"))
+
+    def test_missing_file_and_restore(self):
+        d = ExternalChangeDismissals()
+        self.assertTrue(d.pending("tab", "original", None))
+        d.dismiss("tab", None)
+        self.assertFalse(d.pending("tab", "original", None))
+        self.assertTrue(d.pending("tab", "original", "restored"))
+        self.assertFalse(d.pending("tab", "original", "original"))
+
+    def test_clean_buffer_or_untracked_file(self):
+        d = ExternalChangeDismissals()
+        self.assertFalse(d.pending("a", "equal", "equal"))
+        self.assertFalse(d.pending("b", None, None))
 
 if __name__ == "__main__":
     unittest.main()
