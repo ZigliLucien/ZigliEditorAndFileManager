@@ -14,7 +14,7 @@ from tkinter import ttk, filedialog, messagebox, simpledialog, font as tkfont
 from ..model import Buffer
 from ...config import load as load_config
 from ..working_directory import WorkingDirectory
-from ..external_changes import disk_signature, changed_on_disk
+from ..external_changes import disk_signature, changed_on_disk, ExternalChangeDismissals
 from ..recent_files import RecentFiles
 from ..font_settings import read_font, write_font
 from ..language_tools import LANGUAGES, language_dictionary, expand_suffix
@@ -46,6 +46,7 @@ class Window:
         self.views = {}
         self.saved_messages = {}
         self.disk_signatures = {}
+        self.external_dismissals = ExternalChangeDismissals()
         settings=load_config(Path(__file__).resolve().parents[3] / "config/zefm.json")
         self.working_directory=WorkingDirectory(settings["home_directory"],settings["remember_last_directory"],
             state_path=Path.home()/".config"/"zefm"/"session.json")
@@ -68,6 +69,18 @@ class Window:
         self.vim_direction = 1
         self.status = tk.StringVar(value="Ready")
         ttk.Label(self.root, textvariable=self.status, anchor="w").pack(side="bottom", fill="x")
+        # A nonmodal warning above the status line; it never replaces user edits.
+        self.external_notice_text = tk.StringVar()
+        self.external_notice = ttk.Frame(self.root, padding=(6, 4))
+        ttk.Label(self.external_notice, textvariable=self.external_notice_text).pack(
+            side="left", fill="x", expand=True)
+        self.external_reload = ttk.Button(
+            self.external_notice, text="Reload from disk...", command=self._reload_external)
+        self.external_reload.pack(side="right", padx=4)
+        ttk.Button(self.external_notice, text="Dismiss this change",
+                   command=self._dismiss_external).pack(side="right", padx=4)
+        self.noticed_signature = None
+        self.disk_poll_id = None
         self.command_bar = ttk.Frame(self.root)
         self.command_label = ttk.Label(self.command_bar, text="/")
         self.command_label.pack(side="left")
@@ -83,6 +96,8 @@ class Window:
                               for item in items] for group,items in self.menus.items()}
         self._make_menus()
         self.new_buffer()
+        self.tabs.bind("<<NotebookTabChanged>>", self._tab_changed)
+        self.disk_poll_id = self.root.after(3000, self._disk_monitor_tick)
         self.root.geometry("920x680")
 
     def new_buffer(self, path=None, text=""):
@@ -98,6 +113,7 @@ class Window:
         self.views[str(frame)] = (widget,editor)
         self.saved_messages[str(frame)] = None
         self.disk_signatures[str(frame)] = disk_signature(path) if path else None
+        self.external_dismissals.reset(str(frame))
         self.buffer_modes[str(frame)] = self.mode_registry.detect(path,text)
         self.buffer_languages[str(frame)] = "system"
         self.buffer_keymaps[str(frame)] = None
@@ -131,6 +147,65 @@ class Window:
             if saved and not self.current()[1].state.buffer.modified:
                 label += f"  |  {saved}"
             self.status.set(label)
+
+    def _hide_external_notice(self):
+        if self.external_notice.winfo_manager():
+            self.external_notice.pack_forget()
+
+    def _check_external_changes(self):
+        """Check the active buffer periodically, without changing its text."""
+        tab = self.tabs.select()
+        if not tab or tab not in self.views:
+            self._hide_external_notice()
+            return
+        _widget, editor = self.views[tab]
+        path = editor.state.buffer.path
+        if not path:
+            self._hide_external_notice()
+            return
+        try:
+            current = disk_signature(path)
+        except OSError as exc:
+            self.external_notice_text.set(f"Cannot check {Path(path).name}: {exc}")
+            self.external_reload.configure(state="disabled")
+            if not self.external_notice.winfo_manager():
+                self.external_notice.pack(side="bottom", fill="x")
+            return
+        baseline = self.disk_signatures.get(tab)
+        if not self.external_dismissals.pending(tab, baseline, current):
+            self._hide_external_notice()
+            return
+        self.noticed_signature = current
+        if current is None:
+            message = f"{Path(path).name} was removed from disk. Your editor buffer is unchanged."
+        else:
+            message = f"{Path(path).name} changed on disk. Reload or keep your current buffer."
+        self.external_notice_text.set(message)
+        self.external_reload.configure(state="normal" if current is not None else "disabled")
+        if not self.external_notice.winfo_manager():
+            self.external_notice.pack(side="bottom", fill="x")
+
+    def _tab_changed(self, event=None):
+        widget, _editor = self.current()
+        if widget is not None:
+            self._status(widget)
+        self._check_external_changes()
+
+    def _disk_monitor_tick(self):
+        self.disk_poll_id = None
+        self._check_external_changes()
+        self.disk_poll_id = self.root.after(3000, self._disk_monitor_tick)
+
+    def _dismiss_external(self):
+        tab = self.tabs.select()
+        if tab:
+            self.external_dismissals.dismiss(tab, self.noticed_signature)
+        self._check_external_changes()
+
+    def _reload_external(self):
+        """Revert with the existing unsaved-edits confirmation."""
+        self.revert_file()
+        self._check_external_changes()
 
     def _changed(self, widget, editor):
         if widget.edit_modified():
@@ -942,6 +1017,7 @@ class Window:
         del self.views[tab]
         self.saved_messages.pop(tab,None)
         self.disk_signatures.pop(tab,None)
+        self.external_dismissals.reset(tab)
         self.buffer_modes.pop(tab,None)
         self.buffer_languages.pop(tab,None)
         self.buffer_keymaps.pop(tab,None)
@@ -1215,6 +1291,8 @@ class Window:
             widget.edit_reset();widget.edit_modified(False)
             editor.state.buffer=b
             self.disk_signatures[self.tabs.select()]=disk_signature(b.path)
+            self.external_dismissals.reset(self.tabs.select())
+            self._check_external_changes()
             self.saved_messages[self.tabs.select()]=None
             self.buffer_modes[self.tabs.select()]=self.mode_registry.detect(b.path,b.text)
             self.tabs.tab(self.tabs.select(),text=Path(b.path).name)
@@ -1313,6 +1391,8 @@ class Window:
             from ..files import save_buffer
             save_buffer(editor.state.buffer,path)
             self.disk_signatures[current_tab]=disk_signature(path)
+            self.external_dismissals.reset(current_tab)
+            self._check_external_changes()
             self.working_directory.used_file(path)
             self.recent_files.record(path)
             self.tabs.tab(self.tabs.select(),text=path.rsplit("/",1)[-1])
@@ -1361,6 +1441,9 @@ class Window:
         if any(e.state.buffer.modified for _,e in self.views.values()):
             if not messagebox.askyesno("Unsaved changes","Quit with unsaved buffers?",parent=self.root):
                 return
+        if self.disk_poll_id is not None:
+            self.root.after_cancel(self.disk_poll_id)
+            self.disk_poll_id = None
         if self.browser_poll_id is not None:
             self.root.after_cancel(self.browser_poll_id)
             self.browser_poll_id = None
