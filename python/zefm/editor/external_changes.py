@@ -18,3 +18,24 @@ def disk_signature(path):
 
 def changed_on_disk(path, original_signature):
     return disk_signature(path) != original_signature
+
+
+class ExternalChangeDismissals:
+    """Dismiss only a particular disk revision, not all future changes.
+
+    Tab IDs can be any hashable values. A missing disk file is represented by
+    a None signature; membership checks avoid confusing it with no dismissal.
+    """
+
+    def __init__(self):
+        self._ignored = {}
+
+    def pending(self, tab, baseline, current):
+        return (current != baseline and
+                (tab not in self._ignored or self._ignored[tab] != current))
+
+    def dismiss(self, tab, signature):
+        self._ignored[tab] = signature
+
+    def reset(self, tab):
+        self._ignored.pop(tab, None)
