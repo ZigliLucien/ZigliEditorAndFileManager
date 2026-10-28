@@ -79,3 +79,13 @@ keyboard testing required. Word/file Notes source relationship documented in
   revision checks. Both UIs share the original Notes `(filename, word)` key.
 - Historical MyISAM conversion and desktop-file browser synchronization
   remain pending. The user's Slackware browser test of v39 was successful.
+
+
+### v43 external file notifications
+- Active file monitored approximately every 3 seconds and on tab changes.
+- Nonmodal notification with explicit Reload (preserving unsaved work unless confirmed)
+  and per-revision Dismiss.
+- Missing disk file leaves in-memory edits intact; reload is unavailable.
+- Existing v42 save conflict confirmation remains active after dismissing notices.
+- SHA-256 monitor hashes the active file on the GUI thread; optimize for large files later.
+- Tests added for per-tab dismissal/reappearance and optional Tk GUI interactions.
