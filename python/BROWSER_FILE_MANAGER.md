@@ -114,3 +114,28 @@ This is a snapshot check rather than continuous filesystem watching.
 There is a possible time-of-check/time-of-use race if another writer modifies
 the file between confirmation and writing; fully atomic conflict-safe saves
 will require a later revision.
+
+
+## v43 — nonmodal external-change notifications
+
+When the Tk editor has a file open, it checks the *active buffer* against
+the saved disk SHA-256 approximately every **3 seconds**, and again when
+switching tabs. If the file has changed outside ZEFM, a nonmodal strip appears
+above the status line:
+
+- **Reload from disk...** explicitly reloads the disk version. For an
+  unsaved buffer it asks before discarding those edits.
+- **Dismiss this change** suppresses the warning for that particular disk
+  revision. A further external change produces a new warning.
+- A deleted disk file is reported without deleting the editor buffer;
+  reload is disabled until the file becomes available again.
+
+Nothing is reloaded automatically, and merely dismissing the notice does
+**not** disable the separate v42 warning shown before overwriting a newer
+disk version with File → Save. Save and Revert reset the notice state.
+
+These checks are performed on the Tk main thread and hash the entire active
+file; there is no kernel file watcher and no instantaneous notification. For
+very large files, a later version should use a metadata precheck and/or a
+background worker. The existing check-before-write safeguard still has the
+documented time-of-check/time-of-use race.
