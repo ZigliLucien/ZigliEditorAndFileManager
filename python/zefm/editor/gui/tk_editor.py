@@ -72,7 +72,7 @@ class Window:
         # A nonmodal warning above the status line; it never replaces user edits.
         self.external_notice_text = tk.StringVar()
         self.external_notice = ttk.Frame(self.root, padding=(6, 4))
-        ttk.Label(self.external_notice, textvariable=self.external_notice_text).pack(
+        ttk.Label(self.external_notice, textvariable=self.external_notice_text, wraplength=500).pack(
             side="left", fill="x", expand=True)
         self.external_reload = ttk.Button(
             self.external_notice, text="Reload from disk...", command=self._reload_external)
@@ -1379,7 +1379,17 @@ class Window:
         current_tab=self.tabs.select()
         old_path=editor.state.buffer.path
         same_path=(old_path is not None and Path(old_path).expanduser().resolve()==Path(path).expanduser().resolve())
-        if same_path and changed_on_disk(path,self.disk_signatures.get(current_tab)):
+        if same_path:
+            try:
+                external_change = changed_on_disk(path, self.disk_signatures.get(current_tab))
+            except OSError as exc:
+                messagebox.showerror("Save blocked",
+                    f"Unable to verify the disk version of {Path(path).name}: {exc}",
+                    parent=self.root)
+                return
+        else:
+            external_change = False
+        if external_change:
             if not messagebox.askyesno("External file changes",
                 f"{Path(path).name} has changed on disk since ZEFM opened or last saved it.\\n\\n"
                 "Overwrite the newer disk version with the editor buffer?",
