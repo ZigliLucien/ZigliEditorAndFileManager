@@ -1391,7 +1391,7 @@ class Window:
             external_change = False
         if external_change:
             if not messagebox.askyesno("External file changes",
-                f"{Path(path).name} has changed on disk since ZEFM opened or last saved it.\\n\\n"
+                f"{Path(path).name} has changed on disk since ZEFM opened or last saved it.\n\n"
                 "Overwrite the newer disk version with the editor buffer?",
                 parent=self.root):
                 self.status.set("Save cancelled: file changed outside ZEFM")
