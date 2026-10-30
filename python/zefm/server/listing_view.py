@@ -108,7 +108,7 @@ def listing_shell(hostname: str, token: str, desktop_editor: bool) -> bytes:
             '<div id="time" aria-label="Local date and time"></div>'
             '<p class="filter-label"><label for="filter">Find filename</label>'
             '<input id="filter" type="search" placeholder="Filter filenames"></p>'
-            '<a class="basic-link" href="/">Basic listing</a>'
+            '<a class="basic-link" id="basic-listing" href="/">Basic listing</a>'
             '</aside><section id="directories" aria-label="Subdirectories">'
             '<div class="directories-heading">Directories</div>'
             '<table id="directory-grid"><tbody></tbody></table>'
