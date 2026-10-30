@@ -17,6 +17,7 @@ from urllib.parse import parse_qs, quote, urlencode, urlsplit
 from .file_manager import BrowserError, LocalFiles, MAX_EDIT_BYTES
 from .routes import permitted
 from ..storage.word_notes import WordNotes
+from .rtl_keymap import RTL_KEYMAP_JS, yiddish_keymap_json
 
 
 _STYLE = """<style>body{max-width:1000px;margin:2rem auto;padding:0 1rem;font:16px system-ui,sans-serif}
@@ -50,14 +51,17 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
             pass  # No accidental logging of private filenames into stdout.
 
         def _send(self, status: int, data: bytes, content_type: str = "text/html; charset=utf-8",
-                  extra: dict[str, str] | None = None):
+                  extra: dict[str, str] | None = None, allow_local_script: bool = False):
             self.send_response(status)
             self.send_header("Content-Type", content_type)
             self.send_header("Content-Length", str(len(data)))
             self.send_header("Cache-Control", "no-store")
             self.send_header("X-Content-Type-Options", "nosniff")
             self.send_header("Referrer-Policy", "no-referrer")
-            self.send_header("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'")
+            csp = "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'"
+            if allow_local_script:
+                csp += "; script-src 'self'"
+            self.send_header("Content-Security-Policy", csp)
             for key, value in (extra or {}).items():
                 self.send_header(key, value)
             self.end_headers()
@@ -117,6 +121,11 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                 rel = args.get("path", ".")
                 if parsed.path in ("/", "/browse"):
                     self._send(200, self._render_listing(rel))
+                elif parsed.path == "/rtl-keymap.js":
+                    if args:
+                        raise BrowserError("Unexpected script parameters")
+                    self._send(200, RTL_KEYMAP_JS.encode("utf-8"),
+                               "text/javascript; charset=utf-8")
                 elif parsed.path == "/view":
                     text, _ = files.read_text(rel)
                     content = (f'<p><a href="{escape(link("/browse", files.relative(files.resolve(rel).parent)), quote=True)}">← Back</a> '
@@ -130,16 +139,28 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                     if direction not in ("ltr", "rtl"):
                         raise BrowserError("Invalid text direction", 400)
                     text, digest = files.read_text(rel)
-                    textarea_direction = (' dir="rtl" style="text-align:right"'
+                    textarea_direction = (' dir="rtl" style="text-align:right" id="zefm-rtl-content"'
+                                          f' data-zefm-keymap="{escape(yiddish_keymap_json(), quote=True)}"'
                                           if direction == "rtl" else '')
+                    rtl_controls = (
+                        '<p><label><input type="checkbox" id="zefm-yiddish-keymap" checked>'
+                        ' Enable original Yiddish Alt keymap</label></p>'
+                        '<p><small>Alt+B = ב; Alt+Shift+I = אי. '
+                        'Characters advance leftward; text is stored in logical Unicode order. '
+                        'Uncheck to use the system keyboard.</small></p>'
+                        if direction == "rtl" else '')
+                    rtl_script = ('<script src="/rtl-keymap.js" defer></script>'
+                                  if direction == "rtl" else '')
                     content = (f'<p><a href="{escape(link("/browse", files.relative(files.resolve(rel).parent)), quote=True)}">← Back</a></p>'
                                f'<h2>Quick edit{" (RTL)" if direction == "rtl" else ""}: {escape(rel)}</h2>'
                                '<form action="/edit" method="post" accept-charset="utf-8">'
                                f'<input type="hidden" name="csrf" value="{escape(token, quote=True)}">'
                                f'<input type="hidden" name="path" value="{escape(rel, quote=True)}">'
                                f'<input type="hidden" name="digest" value="{digest}">'
-                               f'<textarea name="content"{textarea_direction}>{escape(text)}</textarea><p><button type="submit">Save</button></p></form>')
-                    self._send(200, page(rel, content))
+                               f'{rtl_controls}'
+                               f'<textarea name="content"{textarea_direction}>{escape(text)}</textarea><p><button type="submit">Save</button></p></form>'
+                               f'{rtl_script}')
+                    self._send(200, page(rel, content), allow_local_script=(direction == "rtl"))
                 elif parsed.path == "/notes":
                     p = files.resolve(rel)
                     if not p.is_file():
