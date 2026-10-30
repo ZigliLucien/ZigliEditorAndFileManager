@@ -18,7 +18,7 @@ MAX_COPY_BYTES = 64 * 1024 * 1024
 def _child_name(name: str) -> str:
     """A single UTF-8 filename, not a path or an absolute destination."""
     if (not isinstance(name, str) or not name or name in (".", "..")
-            or "/" in name or "\\\\" in name
+            or "/" in name or "\\" in name
             or any(ord(char) < 32 or ord(char) == 127 for char in name)
             or len(name.encode("utf-8")) > 255):
         raise BrowserError("Enter one valid filename (no path separators or controls)")
