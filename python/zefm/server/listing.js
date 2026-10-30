@@ -139,6 +139,7 @@
   }
 
   function renderFiles() {
+    if (!state.data) return;
     const body = $("file-list").querySelector("tbody");
     body.replaceChildren();
     const rows = orderedFiles();
