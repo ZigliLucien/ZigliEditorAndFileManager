@@ -224,6 +224,7 @@
         throw new Error("Could not load directory (HTTP " + result.status + ")");
       }
       state.data = await result.json();
+      $("listing-info").classList.remove("error");
       state.page = 0;
       renderBreadcrumbs(state.data);
       renderDirectories(state.data);
