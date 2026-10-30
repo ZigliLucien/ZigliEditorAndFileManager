@@ -1,5 +1,5 @@
 """Explicit, deliberately small local file-manager route registry."""
-GET_ROUTES = frozenset({"/", "/browse", "/view", "/edit", "/raw", "/notes", "/note-edit", "/note-edit"})
+GET_ROUTES = frozenset({"/", "/browse", "/view", "/edit", "/raw", "/notes", "/note-edit", "/rtl-keymap.js"})
 POST_ROUTES = frozenset({"/edit", "/note-edit", "/open-editor"})
 
 
