@@ -118,8 +118,8 @@ class OriginalListingTests(unittest.TestCase):
     def test_gofm_navigation_and_extension_based_groups(self):
         status, script, _ = self.get("/listing.js")
         self.assertEqual(status, 200)
-        for feature in (b'pageGroups(rows)', b'state.sort === "filetype"',
-                        b'groups[groups.length - 1][0].type', b'pageSize: 25',
+        for feature in (b'/api/listing-page', b'state.data.page_count',
+                        b'state.data.references', b'pageSize: 25',
                         b'"Top"', b'"Bottom"', b'"Previous"', b'"Next"',
                         b'"Listing " + (state.page + 1)',
                         b'"gofm-references"', b'history.pushState',
