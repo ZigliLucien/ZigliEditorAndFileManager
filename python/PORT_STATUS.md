@@ -124,3 +124,14 @@ keyboard testing required. Word/file Notes source relationship documented in
 - Desktop Tk 8.6 still lacks true bidi editing/caret positioning; its
   right alignment must not be confused with proper RTL input.
 - Tests cover mapped characters, serving the JS, form isolation and UTF-8.
+
+### v47 — ServPakDir file-manager operations
+- Added Create folder and Copy file (same directory) through the loopback
+  browser, completing another concrete piece of Java FileOps migration.
+- New files are published only when the destination does not exist; copying
+  is bounded to 64 MiB, copies binary content and preserves POSIX mode.
+- Rejects traversal, symlink escapes and unsafe names; POST actions require
+  Host checks and the existing per-session CSRF token.
+- Added focused tests for Unicode, conflicts, symlinks, invalid names,
+  oversized files and HTML escaping.
+- Rename, move, delete and Note migration are still unimplemented.
