@@ -94,6 +94,7 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                 links = f'<a href="{url}">{escape(label)}</a>'
                 if not is_dir:
                     links += (f' &nbsp; <a href="{escape(link("/edit", rel), quote=True)}">Quick edit</a>'
+                              f' &nbsp; <a href="{escape(link("/edit", rel) + "&dir=rtl", quote=True)}">RTL edit</a>'
                               f' &nbsp; <a href="{escape(link("/raw", rel), quote=True)}">Download</a>'
                               f' &nbsp; <a href="{escape(link("/notes", rel), quote=True)}">Notes</a>')
                 if not is_dir and open_in_editor is not None:
@@ -123,14 +124,21 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                                f"<h2>{escape(rel)}</h2><pre>{escape(text)}</pre>")
                     self._send(200, page(rel, content))
                 elif parsed.path == "/edit":
+                    if set(args) - {"path", "dir"}:
+                        raise BrowserError("Unexpected edit parameters", 400)
+                    direction = args.get("dir", "ltr")
+                    if direction not in ("ltr", "rtl"):
+                        raise BrowserError("Invalid text direction", 400)
                     text, digest = files.read_text(rel)
+                    textarea_direction = (' dir="rtl" style="text-align:right"'
+                                          if direction == "rtl" else '')
                     content = (f'<p><a href="{escape(link("/browse", files.relative(files.resolve(rel).parent)), quote=True)}">← Back</a></p>'
-                               f'<h2>Quick edit: {escape(rel)}</h2>'
+                               f'<h2>Quick edit{" (RTL)" if direction == "rtl" else ""}: {escape(rel)}</h2>'
                                '<form action="/edit" method="post" accept-charset="utf-8">'
                                f'<input type="hidden" name="csrf" value="{escape(token, quote=True)}">'
                                f'<input type="hidden" name="path" value="{escape(rel, quote=True)}">'
                                f'<input type="hidden" name="digest" value="{digest}">'
-                               f'<textarea name="content">{escape(text)}</textarea><p><button type="submit">Save</button></p></form>')
+                               f'<textarea name="content"{textarea_direction}>{escape(text)}</textarea><p><button type="submit">Save</button></p></form>')
                     self._send(200, page(rel, content))
                 elif parsed.path == "/notes":
                     p = files.resolve(rel)
