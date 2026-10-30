@@ -101,6 +101,11 @@ class OriginalListingTests(unittest.TestCase):
         self.assertIn(b"pageSize: 25", script)
 
     def test_gofm_page_deep_links_and_invalid_page_parameters(self):
+        status, body, _ = self.get("/listing?" + urlencode({
+            "path": ".", "page": 2, "sort": "filetype", "filter": "math"}))
+        self.assertEqual(status, 200, body.decode("utf-8"))
+        self.assertEqual(self.get("/listing?sort=invalid")[0], 400)
+        self.assertEqual(self.get("/listing?filter=" + "x" * 201)[0], 400)
         for page in (1, 2, 25, 100):
             status, body, _ = self.get("/listing?" + urlencode({"path": ".", "page": page}))
             self.assertEqual(status, 200, body.decode("utf-8"))
