@@ -8,6 +8,7 @@ import sys
 import re
 import webbrowser
 from queue import Queue, Empty
+from urllib.parse import urlencode
 from pathlib import Path
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox, simpledialog, font as tkfont
@@ -210,6 +211,12 @@ class Window:
 
     def _changed(self, widget, editor):
         if widget.edit_modified():
+            for tab, (w, _e) in self.views.items():
+                if w is widget and (
+                        self.buffer_languages.get(tab) == "yi" or
+                        self.buffer_keymaps.get(tab) == "Yiddish"):
+                    self._apply_rtl_alignment(tab)
+                    break
             editor.state.buffer.text=widget.get("1.0","end-1c")
             editor.state.buffer.modified=True
             for tab,(w,e) in self.views.items():
@@ -612,11 +619,28 @@ class Window:
             initialvalue=abs(self.editor_font.actual("size")),minvalue=6,maxvalue=72)
         if size is not None:self._set_font_style(size=size)
 
+    def _apply_rtl_alignment(self, tab):
+        """Align Yiddish paragraphs on the right without altering stored text.
+
+        Tk 8.6/X11 does NOT implement full Unicode BiDi editing. For correct
+        mixed-script ordering and cursor movement use the RTL browser editor.
+        """
+        if tab not in self.views:
+            return
+        widget, _editor = self.views[tab]
+        tag = "zefm-rtl-alignment"
+        widget.tag_configure(tag, justify="right")
+        if self.buffer_languages.get(tab) == "yi" or self.buffer_keymaps.get(tab) == "Yiddish":
+            widget.tag_add(tag, "1.0", "end")
+        else:
+            widget.tag_remove(tag, "1.0", "end")
+
     def choose_language(self, language):
         if language not in LANGUAGES:return
         tab=self.tabs.select()
         if not tab:return
         self.buffer_languages[tab]=language
+        self._apply_rtl_alignment(tab)
         widget,_=self.current()
         if widget:self._status(widget)
 
@@ -625,6 +649,7 @@ class Window:
         if not tab:return
         if name is not None and name not in self.available_keymaps:return
         self.buffer_keymaps[tab]=name
+        self._apply_rtl_alignment(tab)
         widget,_=self.current()
         if widget:widget.focus_set();self._status(widget)
 
@@ -918,6 +943,7 @@ class Window:
                 menu.add_command(label="Close Buffer",command=self.close_buffer,accelerator="Ctrl+Shift+W")
                 menu.add_command(label="Set Working Directory...",command=self.set_working_directory)
                 menu.add_command(label="Open Local File Manager in Browser...",command=self.open_local_file_manager)
+                menu.add_command(label="Edit Current File RTL in Browser...",command=self.edit_current_file_rtl)
                 menu.add_command(label="Open Local Email Archive in Browser...",command=self.open_local_email_archive)
                 self.recent_menu=tk.Menu(menu,tearoff=False,postcommand=self._populate_recent_files)
                 menu.add_cascade(label="Recent Files",menu=self.recent_menu)
@@ -1427,6 +1453,46 @@ class Window:
             pass
         if self.local_browser is not None:
             self.browser_poll_id = self.root.after(150, self._drain_browser_requests)
+
+    def edit_current_file_rtl(self):
+        """Edit the saved file in a browser with real RTL cursor/layout support.
+
+        This is intentionally a disk-based bridge: unsaved Tk edits are never
+        uploaded or discarded, and the browser's digest-protected Save applies.
+        """
+        widget, editor = self.current()
+        if not widget:
+            return
+        path = editor.state.buffer.path
+        if not path:
+            messagebox.showinfo("RTL editing", "Save the file before opening its RTL browser editor.",
+                                parent=self.root)
+            return
+        if (editor.state.buffer.modified or
+                widget.get("1.0", "end-1c") != editor.state.buffer.text):
+            messagebox.showwarning("Unsaved changes",
+                "Please save this buffer before editing it in the RTL browser. "
+                "ZEFM will not discard unsaved changes.", parent=self.root)
+            return
+        try:
+            from ...server.http import BrowserServer
+            resolved = Path(path).expanduser().resolve()
+            if not resolved.is_file():
+                raise OSError(f"File does not exist: {resolved}")
+            directory = resolved.parent
+            if self.local_browser is not None and self.local_browser.files.root != directory:
+                self.local_browser.close()
+                self.local_browser = None
+            if self.local_browser is None:
+                self.local_browser = BrowserServer(
+                    str(directory), open_in_editor=self.browser_open_requests.put)
+            url = self.local_browser.start()
+            if self.browser_poll_id is None:
+                self.browser_poll_id = self.root.after(150, self._drain_browser_requests)
+            webbrowser.open(url + "edit?" + urlencode({"path": resolved.name, "dir": "rtl"}))
+            self.status.set("RTL browser editor opened; save there, then reload in ZEFM.")
+        except (OSError, ValueError) as exc:
+            messagebox.showerror("RTL editing", str(exc), parent=self.root)
 
     def open_local_file_manager(self):
         """Serve only the currently selected local directory, using loopback HTTP."""
