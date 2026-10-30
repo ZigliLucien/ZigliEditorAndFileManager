@@ -96,7 +96,7 @@ class OriginalListingTests(unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertIn(b"textContent", script)
         self.assertIn(b"replaceChildren", script)
-        self.assertIn(b"/api/files", script)
+        self.assertIn(b"/api/listing-page", script)
         self.assertNotIn(b".innerHTML", script)
         self.assertIn(b"pageSize: 25", script)
 
