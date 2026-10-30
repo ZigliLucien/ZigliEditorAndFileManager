@@ -103,3 +103,42 @@ directory/item counts may differ, legacy formatted TPW annotations are not
 rendered as HTML, and the old SQL-only operations do not run. We have kept
 the characteristic visual structure and color choices while preserving the
 new Python server's safety boundaries.
+
+## v49 — GoFM.java paging behavior
+
+The original `usr/Project/ServPakDir/ServPak/jv/GoFM.java` has two
+distinct page types: `directory^0` reloads the complete top listing,
+whereas `directory^N` extracts the `HEADERN` section from compressed
+XML using XQuery. The page heading is `directory : Listing N`.
+Its **Top** and **Bottom** links jump to page 0 and the final page.
+`Xlster.reffout` provides a *progressively extended reference strip*
+through the current/next page, in roughly ten columns; filename-sort
+references use a short filename prefix, file-type-sort references show the
+extension, and other sorting modes show numbers. `Xlster` starts a new
+`HEADER` every 25 file rows for ordinary sorting, but **starts a new page
+whenever the file type changes** for file-type sorting.
+
+The v49 JavaScript frontend now reproduces these behaviors without keeping
+XML `HEADERN` fragments or a MySQL `listings` table:
+
+- **Top**, **Previous**, **Listing N of M**, **Next**, and **Bottom**
+  controls; Top selects the first file page and scrolls to the directory
+  overview, rather than fetching a separate HTML page.
+- Page references grow through the next page; ten columns preserve the
+  original visual rhythm. Filename references use the first four characters,
+  and file-type references use the extension.
+- 25-file chunks for filename, date, size and Notes ordering; **one page per
+  file extension** when File Type is selected. Files remain in logical
+  filename order inside each type group.
+- Deep links use `/listing?path=...&page=N` (1-based). Navigating pages
+  participates in browser history, so Back/Forward restores the file page.
+- Sorting or filtering resets to the first page. Refresh keeps the
+  current page where it still exists. Page numbers are safely clamped
+  if contents change.
+- No network access beyond ZEFM localhost; page state and grouping happen
+  in the existing JavaScript/JSON frontend.
+
+Unlike the original cached `HEADER` system, the four-column directory
+grid stays in the page header while files are paged below. We preserve
+the directory overview without an extra server round trip. We also avoid
+the original automatic page reload on missing XML/SQL state.
