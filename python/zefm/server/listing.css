@@ -103,3 +103,14 @@ footer{margin:36px auto 0;padding-top:12px;border-top:1px solid #eee;text-align:
  #file-list .filename-button{font-size:12px}
  #file-list .note{font-size:12px}
 }
+
+/* GoFM.java / Xlster.reffout(): Top, Bottom and progressive reference strip. */
+#pages{display:flex;flex-direction:column;align-items:center;gap:8px}
+.gofm-navigation{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:6px 15px}
+.gofm-current{font-size:12px;color:#777;font-variant:small-caps;margin:0 7px}
+.gofm-references{max-width:850px;display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:3px 8px;align-items:center;justify-items:center}
+#pages .gofm-nav{color:#5555ff;font-variant:small-caps}
+#pages .gofm-nav:disabled{color:#bbb;cursor:default}
+#pages .gofm-reference{min-width:40px;max-width:75px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#777;font-size:13px}
+#pages .gofm-reference[aria-current="page"]{color:#4444ee;background:#ffffee;text-decoration:underline;font-weight:bold}
+@media(max-width:550px){.gofm-references{grid-template-columns:repeat(5,minmax(0,1fr))}}
