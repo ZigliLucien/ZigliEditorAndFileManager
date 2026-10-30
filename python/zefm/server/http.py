@@ -22,6 +22,7 @@ from ..storage.word_notes import WordNotes
 from .rtl_keymap import RTL_KEYMAP_JS, yiddish_keymap_json
 from .listing_view import listing_data, listing_shell
 from .listing_paging import paged_listing
+from .pdf_delivery import select_pdf, byte_range
 
 
 _STYLE = """<style>body{max-width:1000px;margin:2rem auto;padding:0 1rem;font:16px system-ui,sans-serif}
@@ -72,6 +73,49 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
             self.end_headers()
             self.wfile.write(data)
 
+        def _serve_pdf(self, relative):
+            """Stream a native-browser PDF response, including single byte ranges."""
+            p = select_pdf(files, relative)
+            with p.open("rb") as stream:
+                if stream.read(5) != b"%PDF-":
+                    raise BrowserError("File does not have a PDF signature", 415)
+                stream.seek(0, 2)
+                size = stream.tell()
+                from .pdf_delivery import MAX_PDF_BYTES
+                if size > MAX_PDF_BYTES:
+                    raise BrowserError("PDF exceeds browser preview limit", 413)
+                header = self.headers.get("Range")
+                try:
+                    start, end, partial = byte_range(header, size)
+                except BrowserError as exc:
+                    self.send_response(exc.status)
+                    self.send_header("Content-Range", f"bytes */{size}")
+                    self.send_header("Content-Length", "0")
+                    self.send_header("Cache-Control", "no-store")
+                    self.send_header("X-Content-Type-Options", "nosniff")
+                    self.end_headers()
+                    return
+                amount = end - start + 1 if size else 0
+                self.send_response(206 if partial else 200)
+                self.send_header("Content-Type", "application/pdf")
+                self.send_header("Content-Disposition", "inline")
+                self.send_header("Content-Length", str(amount))
+                self.send_header("Accept-Ranges", "bytes")
+                self.send_header("Cache-Control", "no-store")
+                self.send_header("X-Content-Type-Options", "nosniff")
+                self.send_header("Referrer-Policy", "no-referrer")
+                if partial:
+                    self.send_header("Content-Range", f"bytes {start}-{end}/{size}")
+                self.end_headers()
+                stream.seek(start)
+                remaining = amount
+                while remaining:
+                    chunk = stream.read(min(65536, remaining))
+                    if not chunk:
+                        break
+                    self.wfile.write(chunk)
+                    remaining -= len(chunk)
+
         def _host_ok(self):
             host = self.headers.get("Host", "")
             return host in {f"127.0.0.1:{bound_port()}", f"localhost:{bound_port()}"}
@@ -107,16 +151,22 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
             for entry in entries:
                 rel = files.relative(entry)
                 is_dir = entry.is_dir()
-                action = "browse" if is_dir else "view"
+                action = "browse" if is_dir else ("pdf" if entry.suffix.casefold() == ".pdf" else "view")
                 label = entry.name + ("/" if is_dir else "")
                 url = escape(link("/" + action, rel), quote=True)
                 links = f'<a href="{url}">{escape(label)}</a>'
                 if not is_dir:
-                    links += (f' &nbsp; <a href="{escape(link("/edit", rel), quote=True)}">Quick edit</a>'
+                    if entry.suffix.casefold() == ".pdf":
+                        links += f' &nbsp; <a href="{escape(link("/pdf", rel), quote=True)}">Open PDF</a>'
+                    else:
+                        links += (f' &nbsp; <a href="{escape(link("/edit", rel), quote=True)}">Quick edit</a>'
                               f' &nbsp; <a href="{escape(link("/edit", rel) + "&dir=rtl", quote=True)}">RTL edit</a>'
                               f' &nbsp; <a href="{escape(link("/raw", rel), quote=True)}">Download</a>'
                               f' &nbsp; <a href="{escape(link("/copy", rel), quote=True)}">Copy...</a>'
                               f' &nbsp; <a href="{escape(link("/notes", rel), quote=True)}">Notes</a>')
+                    if entry.suffix.casefold() == ".pdf":
+                        links += (f' &nbsp; <a href="{escape(link("/raw", rel), quote=True)}">Download</a>'
+                                  f' &nbsp; <a href="{escape(link("/notes", rel), quote=True)}">Notes</a>')
                 if not is_dir and open_in_editor is not None:
                     links += (' &nbsp; <form action="/open-editor" method="post" style="display:inline">'
                               f'<input type="hidden" name="csrf" value="{escape(token,quote=True)}">'
@@ -205,7 +255,14 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                         '<button type="submit">Create copy</button></form>'
                     )
                     self._send(200, page("Copy file", content))
+                elif parsed.path == "/pdf":
+                    if set(args) - {"path"}:
+                        raise BrowserError("Unexpected PDF parameters")
+                    self._serve_pdf(rel)
                 elif parsed.path == "/view":
+                    if files.resolve(rel).suffix.casefold() == ".pdf":
+                        self._serve_pdf(rel)
+                        return
                     text, _ = files.read_text(rel)
                     content = (f'<p><a href="{escape(link("/browse", files.relative(files.resolve(rel).parent)), quote=True)}">← Back</a> '
                                f'<a href="{escape(link("/edit", rel), quote=True)}">Quick edit</a></p>'
