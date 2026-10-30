@@ -1,7 +1,8 @@
 """Explicit, deliberately small local file-manager route registry."""
 GET_ROUTES = frozenset({
     "/", "/browse", "/view", "/edit", "/raw", "/notes", "/note-edit",
-    "/rtl-keymap.js", "/copy",
+    "/rtl-keymap.js", "/copy", "/listing", "/listing.css", "/listing.js",
+    "/api/files",
 })
 POST_ROUTES = frozenset({
     "/edit", "/note-edit", "/open-editor", "/mkdir", "/copy",
