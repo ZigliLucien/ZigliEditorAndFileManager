@@ -138,12 +138,17 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                 if parsed.path in ("/", "/browse"):
                     self._send(200, self._render_listing(rel))
                 elif parsed.path == "/listing":
-                    if set(args) - {"path", "page"}:
+                    if set(args) - {"path", "page", "sort", "filter"}:
                         raise BrowserError("Unexpected listing parameters")
                     if "page" in args and (not args["page"].isdigit()
                                            or not (1 <= len(args["page"]) <= 9)
                                            or int(args["page"]) < 1):
                         raise BrowserError("Invalid listing page")
+                    if args.get("sort", "filename") not in {
+                            "filename", "filetype", "timekey", "size", "notes"}:
+                        raise BrowserError("Invalid listing sort")
+                    if len(args.get("filter", "")) > 200:
+                        raise BrowserError("Filename filter is too long")
                     # Validate the directory before showing a JavaScript shell.
                     files.list_directory(rel)
                     self._send(200, listing_shell(gethostname(), token, open_in_editor is not None),
