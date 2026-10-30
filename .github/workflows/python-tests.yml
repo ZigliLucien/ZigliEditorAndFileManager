@@ -25,6 +25,9 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y python3-tk xvfb
+      - name: Check browser JavaScript syntax
+        run: |
+          node --check python/zefm/server/listing.js
       - name: Run Python tests, including Tk GUI smoke tests
         working-directory: python
         run: xvfb-run -a python3 -m unittest discover -s tests -v
