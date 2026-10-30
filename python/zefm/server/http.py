@@ -21,6 +21,7 @@ from .routes import permitted
 from ..storage.word_notes import WordNotes
 from .rtl_keymap import RTL_KEYMAP_JS, yiddish_keymap_json
 from .listing_view import listing_data, listing_shell
+from .listing_paging import paged_listing
 
 
 _STYLE = """<style>body{max-width:1000px;margin:2rem auto;padding:0 1rem;font:16px system-ui,sans-serif}
@@ -147,6 +148,18 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                     files.list_directory(rel)
                     self._send(200, listing_shell(gethostname(), token, open_in_editor is not None),
                                allow_local_script=True)
+                elif parsed.path == "/api/listing-page":
+                    if set(args) - {"path", "page", "sort", "filter"}:
+                        raise BrowserError("Unexpected paging parameters")
+                    raw_page = args.get("page", "1")
+                    if not raw_page.isdecimal() or len(raw_page) > 7:
+                        raise BrowserError("Invalid page number")
+                    data = paged_listing(files, rel, page=int(raw_page),
+                                         sort=args.get("sort", "filename"),
+                                         filter_text=args.get("filter", ""),
+                                         notes_path=notes_path)
+                    self._send(200, json.dumps(data, ensure_ascii=False).encode("utf-8"),
+                               "application/json; charset=utf-8")
                 elif parsed.path == "/api/files":
                     if set(args) - {"path"}:
                         raise BrowserError("Unexpected listing parameters")
