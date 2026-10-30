@@ -130,7 +130,7 @@
         }
         return;
       case "view":
-        location.href = pathUrl("/view", path);
+        location.href = pathUrl(row.type === "pdf" ? "/pdf" : "/view", path);
         return;
       default:
         return; // Move and delete are intentionally not ported.
