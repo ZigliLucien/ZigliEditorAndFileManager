@@ -133,7 +133,7 @@ def paged_listing(files, relative=".", *, page=1, sort="filename", filter_text="
     refs = []
     for i, (first, last) in enumerate(spans):
         if sort == "filetype":
-            descriptor = filtered[first]["type"]
+            descriptor = filtered[first]["type"] if last > first else "none"
         elif sort == "filename":
             descriptor = filtered[first]["name"][:4] if last > first else "1"
         else:
