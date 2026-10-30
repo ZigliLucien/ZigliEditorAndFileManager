@@ -250,3 +250,15 @@ and precise source references.
   visible Save Note button and confirmation page. Browser and editor use the
   same Notes store. Stale note edits are rejected rather than overwritten.
 - Test: `python3 -m unittest discover -s tests -v`.
+
+
+## v44: local email archive browser
+
+The File menu now includes **Open Local Email Archive in Browser...**.
+It reads existing Maildir folders via Python's email parser (read-only), and
+shows recent messages as escaped text with no active HTML or attachments.
+Annotations for a message can be added through **Notes for this message**
+and are stored separately from the original email using WordNotes.
+The original getmail/DavMail and Python-generated HTML index are unchanged.
+See [MAIL_ARCHIVE.md](MAIL_ARCHIVE.md) for local account configuration and
+the standalone browser command. Never commit real mail data.
