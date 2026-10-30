@@ -16,3 +16,7 @@ session.json
 font.json
 recent_files.json
 .DS_Store
+# Locally configured mailbox paths and raw messages
+maildirs.json
+*.eml
+*.mbox
