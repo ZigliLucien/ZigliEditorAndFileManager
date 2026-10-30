@@ -60,6 +60,7 @@ class Window:
         self.dictionary_dir=Path(__file__).resolve().parents[3] / "dictionaries"
         self.word_notes = None  # Initialized when first used; storage errors are displayed.
         self.local_browser = None  # Start only on explicit File menu request.
+        self.mail_browser = None  # Separately scoped local Maildir reader.
         self.browser_open_requests = Queue()
         self.browser_poll_id = None
         self.recent_files = RecentFiles()
@@ -917,6 +918,7 @@ class Window:
                 menu.add_command(label="Close Buffer",command=self.close_buffer,accelerator="Ctrl+Shift+W")
                 menu.add_command(label="Set Working Directory...",command=self.set_working_directory)
                 menu.add_command(label="Open Local File Manager in Browser...",command=self.open_local_file_manager)
+                menu.add_command(label="Open Local Email Archive in Browser...",command=self.open_local_email_archive)
                 self.recent_menu=tk.Menu(menu,tearoff=False,postcommand=self._populate_recent_files)
                 menu.add_cascade(label="Recent Files",menu=self.recent_menu)
                 menu.add_separator()
@@ -1444,6 +1446,31 @@ class Window:
         except (OSError,ValueError) as exc:
             messagebox.showerror("Local file manager",str(exc),parent=self.root)
 
+    def open_local_email_archive(self):
+        """Open existing local Maildir accounts without fetching or sending mail."""
+        from ...server.mail_archive import discover_maildirs
+        from ...server.mail_http import MailBrowser
+        try:
+            accounts = discover_maildirs()
+            if not accounts:
+                selected = filedialog.askdirectory(
+                    parent=self.root, initialdir=str(Path.home()),
+                    title="Select a Maildir folder (contains cur/ and new/)")
+                if not selected:
+                    return
+                accounts = {"Local": selected}
+            if self.mail_browser is None or self.mail_browser.archive.accounts != {
+                    label: Path(directory).expanduser().resolve()
+                    for label, directory in accounts.items()}:
+                if self.mail_browser is not None:
+                    self.mail_browser.close()
+                self.mail_browser = MailBrowser(accounts)
+            url = self.mail_browser.start()
+            webbrowser.open(url)
+            self.status.set(f"Local Maildir browser: {url} ({', '.join(accounts)})")
+        except (OSError, ValueError) as exc:
+            messagebox.showerror("Local email archive", str(exc), parent=self.root)
+
     def quit(self):
         for widget,editor in self.views.values():
             if widget.get("1.0","end-1c") != editor.state.buffer.text:
@@ -1460,6 +1487,9 @@ class Window:
         if self.local_browser is not None:
             self.local_browser.close()
             self.local_browser=None
+        if self.mail_browser is not None:
+            self.mail_browser.close()
+            self.mail_browser = None
         self.root.destroy()
 
 def main():
