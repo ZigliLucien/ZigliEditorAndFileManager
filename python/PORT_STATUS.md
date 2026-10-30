@@ -102,3 +102,13 @@ keyboard testing required. Word/file Notes source relationship documented in
 - Bounded listing (100 recent entries, first 10,000 files/account), with a
   5 MiB preview cap; pagination/search and legacy HTML-index linking pending.
 - See MAIL_ARCHIVE.md. Synthetic Maildir regression cases added.
+
+### v45: Yiddish right-to-left editing
+- Tk language Yiddish or Yiddish Alt keymap now right-aligns that buffer;
+  switching to a non-RTL language/keymap removes alignment.
+- The Tk 8.6 text widget still lacks full visual bidirectional/cursor behavior.
+- File menu offers browser-native RTL editing for a saved file, using a
+  `dir="rtl"` text area with protected Quick Edit Save.
+- The browser file manager adds a general-purpose RTL edit link.
+- Unsaved Tk buffers are never silently transferred, discarded or overwritten.
+- Tests cover RTL HTML, logical UTF-8 preservation and optional GUI launching.
