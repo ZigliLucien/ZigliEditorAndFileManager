@@ -142,3 +142,34 @@ Unlike the original cached `HEADER` system, the four-column directory
 grid stays in the page header while files are paged below. We preserve
 the directory overview without an extra server round trip. We also avoid
 the original automatic page reload on missing XML/SQL state.
+
+
+## v49 — GoFM-derived server-side paging
+
+The original `NetsManager/Xlster.java` creates `HEADER1`/`HEADER2`/…
+listing fragments, and `GoFM.java` serves individual referenced pages.
+V48 reproduced those navigation controls entirely in JavaScript, but loaded
+the entire directory's file/Notes data through `/api/files`.
+
+V49 adds `GET /api/listing-page`, which accepts `path`, `page` (1-based),
+`sort`, and `filter`. Its response contains just the requested page of
+file entries plus directory breadcrumbs, folder matrix and GoFM-style page
+references. The browser requests another page only when needed, instead of
+loading every file's full metadata and Notes preview on initial display.
+
+The original conventions remain: normal pages of 25 filenames, type sorting
+grouped by extension, filename page descriptors from the first four letters,
+and numbered page controls with Top/Previous/Next/Bottom. Sorting by size,
+modification time, extension, name and Notes is handled on the server.
+Filtering is server-side, preserving accurate page counts.
+
+This is **bounded transfer and rendering**, not yet a filesystem index:
+the Python server still scans entries to sort them and generate accurate page
+counts. `/api/files` remains for backward compatibility, and the Basic
+listing is unchanged. Notes are indexed once per request, and only the
+selected page is enriched except when sorting by Notes. Extension-grouped
+pages can contain more than 25 files, matching `Xlster`. A directory ceiling
+of 3,000 entries is retained for now.
+
+The response preserves the logical Unicode filenames, existing path guards,
+local-only HTTP restrictions, and read-only nature of listing requests.
