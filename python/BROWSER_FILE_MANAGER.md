@@ -169,3 +169,40 @@ The file-manager listing also exposes **RTL edit** for any file.
 only; the browser uses its normal operating-system/IME keyboard setup (or
 paste) for Yiddish input. A future integration may offer browser-side
 legacy keymap shortcuts without relaxing the browser's restrictive CSP.
+
+
+## v46 — original Yiddish Alt keymap in the real RTL browser editor
+
+**The Tk 8.6 widget still cannot insert Hebrew/Yiddish with correct RTL cursor
+movement. Right alignment is not bidi layout.** This limitation is not fixed
+by choosing Language → Yiddish in the desktop editor.
+
+To type Yiddish with correct direction, save your desktop buffer and choose
+**Language → Edit Yiddish RTL in Browser (Alt keymap)...** or
+**File → Edit Current File RTL in Browser...**.
+
+The RTL browser editor now loads the original
+`legacy_keymaps/Yiddish.keymap` and enables **Use original Yiddish Alt
+keymap** by default. Examples:
+
+- **Alt+B** inserts `ב`.
+- **Alt+Shift+I** inserts `אי`.
+
+The browser handles visual right-to-left layout and cursor placement.
+New letters appear **to the left** of earlier Hebrew letters.
+The underlying UTF-8 text remains in logical order and is never reversed.
+
+The checkbox can be unchecked to use the system's own keyboard input.
+Only Alt/Alt+Shift chords mapped in the legacy file are intercepted;
+Ctrl/Command shortcuts and unmapped Alt shortcuts are left untouched.
+A browser or desktop environment may reserve particular Alt shortcuts
+before the page receives them.
+
+The keymap script is served only by ZEFM's loopback server; the RTL edit page
+permits this same-origin script while all other browser pages retain the
+earlier restrictive content security policy. The file manager's RTL edit
+link offers the same control.
+
+Saving the file in the browser retains digest conflict protection. Return to
+Tk and choose **Reload from disk...** when ZEFM detects the external change.
+No private mail or text data is sent to GitHub.
