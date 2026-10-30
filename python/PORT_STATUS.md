@@ -147,3 +147,14 @@ keyboard testing required. Word/file Notes source relationship documented in
 - Legacy plain HTML listing remains available; move/delete are disabled.
 - Restrictive same-origin CSP and DOM textContent, no SQL/XML/XSLT for listing.
 - See ORIGINAL_LISTING_DESIGN.md for the detailed original-source inventory.
+
+### v49 — GoFM paging migrated
+- Original GoFM.java distinguished page 0 (top) from numbered HEADERn
+  pages; Xlster.java generated 25-file groups or extension-based groups.
+- JavaScript now supports Top/Bottom/Previous/Next, Listing N of M, and
+  progressively exposed page descriptors grouped ten per row.
+- Filename page labels use four-character prefixes; extension groups use
+  extension labels; other sort modes use page numbers.
+- A page query parameter allows deep links and Back/Forward navigation;
+  pages are clamped when directory contents or filters change.
+- Existing JSON listing, file operations and safety checks remain intact.
