@@ -94,7 +94,7 @@ class BrowserPdfTests(unittest.TestCase):
         self.assertEqual(self.get("/pdf?path=hello.txt")[0], 415)
         self.assertEqual(self.get("/pdf?path=missing.pdf")[0], 404)
         self.assertEqual(self.get("/pdf?path=..%2Foutside.pdf")[0], 403)
-        self.assertEqual(self.get("/pdf?path=" + urlencode({"path": self.pdf.name}) + "&junk=1")[0], 400)
+        self.assertEqual(self.get("/pdf?" + urlencode({"path": self.pdf.name}) + "&junk=1")[0], 400)
         fake = self.root / "fake.pdf"
         fake.write_bytes(b"not a pdf")
         self.assertEqual(self.get("/pdf?path=fake.pdf")[0], 415)
