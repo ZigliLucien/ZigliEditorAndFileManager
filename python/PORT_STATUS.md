@@ -158,3 +158,8 @@ keyboard testing required. Word/file Notes source relationship documented in
 - A page query parameter allows deep links and Back/Forward navigation;
   pages are clamped when directory contents or filters change.
 - Existing JSON listing, file operations and safety checks remain intact.
+
+### v49 GoFM paging
+- Added server-side /api/listing-page with 25-file pages, extension grouping, filtered/sorted metadata and Notes previews.
+- Browser now fetches requested pages instead of eagerly transferring the whole directory.
+- V48 full JSON endpoint and basic listing remain compatible. Filesystem scan for exact counts remains O(N).
