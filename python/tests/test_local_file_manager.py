@@ -288,3 +288,51 @@ class BrowserEditorBridgeTests(unittest.TestCase):
                 with urlopen(srv.url,timeout=4) as response:
                     self.assertNotIn('Open in ZEFM',response.read().decode())
             finally:srv.close()
+
+
+
+class BrowserRtlEditingTests(unittest.TestCase):
+    """Browser-native RTL changes display only, never UTF-8 storage order."""
+
+    def test_rtl_form_preserves_logical_unicode_and_conflict_detection(self):
+        with tempfile.TemporaryDirectory() as directory:
+            name = 'ייִדיש français.txt'
+            p = Path(directory) / name
+            original = 'שלום עולם 123 abc\nבוקר טוב'
+            p.write_text(original, encoding='utf-8')
+            server = BrowserServer(directory)
+            server.start()
+            try:
+                def fetch(path):
+                    try:
+                        with urlopen(server.url + path, timeout=4) as response:
+                            return response.status, response.read().decode('utf-8')
+                    except HTTPError as exc:
+                        return exc.code, exc.read().decode('utf-8')
+
+                query = urlencode({'path': name, 'dir': 'rtl'})
+                status, html = fetch('edit?' + query)
+                self.assertEqual(status, 200)
+                self.assertIn('name="content" dir="rtl" style="text-align:right"', html)
+                self.assertIn(original, html)
+                self.assertIn('Quick edit (RTL)', html)
+                status, html = fetch('edit?' + urlencode({'path': name}))
+                self.assertEqual(status, 200)
+                self.assertNotIn('name="content" dir="rtl"', html)
+                status, _ = fetch('edit?' + urlencode({'path': name, 'dir': 'invalid'}))
+                self.assertEqual(status, 400)
+                status, _ = fetch('edit?' + urlencode({'path': '../outside', 'dir': 'rtl'}))
+                self.assertEqual(status, 403)
+
+                from zefm.server.file_manager import LocalFiles
+                _content, digest = LocalFiles(directory).read_text(name)
+                replacement = 'ייִדיש 456 English, שלום'
+                data = urlencode({'csrf': server.token, 'path': name,
+                                  'digest': digest, 'content': replacement}).encode('utf-8')
+                request = Request(server.url + 'edit', data=data, method='POST',
+                                  headers={'Content-Type': 'application/x-www-form-urlencoded'})
+                with urlopen(request, timeout=4) as response:
+                    self.assertEqual(response.status, 200)
+                self.assertEqual(p.read_text(encoding='utf-8'), replacement)
+            finally:
+                server.close()
