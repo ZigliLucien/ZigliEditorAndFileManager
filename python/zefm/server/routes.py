@@ -1,6 +1,11 @@
 """Explicit, deliberately small local file-manager route registry."""
-GET_ROUTES = frozenset({"/", "/browse", "/view", "/edit", "/raw", "/notes", "/note-edit", "/rtl-keymap.js"})
-POST_ROUTES = frozenset({"/edit", "/note-edit", "/open-editor"})
+GET_ROUTES = frozenset({
+    "/", "/browse", "/view", "/edit", "/raw", "/notes", "/note-edit",
+    "/rtl-keymap.js", "/copy",
+})
+POST_ROUTES = frozenset({
+    "/edit", "/note-edit", "/open-editor", "/mkdir", "/copy",
+})
 
 
 def permitted(method: str, path: str) -> bool:
