@@ -12,12 +12,15 @@ from html import escape
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import secrets
 import threading
+from pathlib import Path
+from socket import gethostname
 from urllib.parse import parse_qs, quote, urlencode, urlsplit
 
 from .file_manager import BrowserError, LocalFiles, MAX_EDIT_BYTES, MAX_COPY_BYTES
 from .routes import permitted
 from ..storage.word_notes import WordNotes
 from .rtl_keymap import RTL_KEYMAP_JS, yiddish_keymap_json
+from .listing_view import listing_data, listing_shell
 
 
 _STYLE = """<style>body{max-width:1000px;margin:2rem auto;padding:0 1rem;font:16px system-ui,sans-serif}
@@ -60,7 +63,8 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
             self.send_header("Referrer-Policy", "no-referrer")
             csp = "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'"
             if allow_local_script:
-                csp += "; script-src 'self'"
+                csp = csp.replace("style-src 'unsafe-inline'", "style-src 'self' 'unsafe-inline'")
+                csp += "; script-src 'self'; connect-src 'self'"
             self.send_header("Content-Security-Policy", csp)
             for key, value in (extra or {}).items():
                 self.send_header(key, value)
@@ -84,7 +88,9 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
         def _render_listing(self, relative):
             directory, entries = files.list_directory(relative)
             crumb = files.relative(directory)
-            header = f"<h1>Files: {escape(str(directory))}</h1>"
+            header = (f"<h1>Files: {escape(str(directory))}</h1>"
+                      f'<p><a href="{escape(link("/listing", files.relative(directory)), quote=True)}">'
+                      'Original ZEFM-style listing</a></p>')
             if directory != files.root:
                 parent = files.relative(directory.parent)
                 header += f'<p><a href="{escape(link("/browse", parent), quote=True)}">↑ Parent</a></p>'
@@ -130,6 +136,26 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                 rel = args.get("path", ".")
                 if parsed.path in ("/", "/browse"):
                     self._send(200, self._render_listing(rel))
+                elif parsed.path == "/listing":
+                    if set(args) - {"path"}:
+                        raise BrowserError("Unexpected listing parameters")
+                    # Validate the directory before showing a JavaScript shell.
+                    files.list_directory(rel)
+                    self._send(200, listing_shell(gethostname(), token, open_in_editor is not None),
+                               allow_local_script=True)
+                elif parsed.path == "/api/files":
+                    if set(args) - {"path"}:
+                        raise BrowserError("Unexpected listing parameters")
+                    data = listing_data(files, rel, notes_path)
+                    self._send(200, json.dumps(data, ensure_ascii=False).encode("utf-8"),
+                               "application/json; charset=utf-8")
+                elif parsed.path in ("/listing.css", "/listing.js"):
+                    if args:
+                        raise BrowserError("Unexpected asset parameters")
+                    name = parsed.path[1:]
+                    data = (Path(__file__).resolve().parent / name).read_bytes()
+                    self._send(200, data, ("text/css" if name.endswith(".css")
+                                           else "text/javascript") + "; charset=utf-8")
                 elif parsed.path == "/rtl-keymap.js":
                     if args:
                         raise BrowserError("Unexpected script parameters")
