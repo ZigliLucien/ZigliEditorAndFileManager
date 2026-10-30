@@ -3,7 +3,11 @@
 (() => {
   "use strict";
   const $ = (id) => document.getElementById(id);
-  const state = {data: null, sort: "filename", filter: "", page: 0, pageSize: 25};
+  // GoFM.java used page 0 for the top listing and HEADER1..N for file pages.
+  // In this single-page UI, page 1 starts at index 0; Top scrolls to the
+  // directory overview and Bottom selects the final file page.
+  const state = {data: null, sort: "filename", filter: "", page: 0, pageSize: 25,
+                 directory: ".", requestSerial: 0};
   const collator = new Intl.Collator(undefined, {numeric: true, sensitivity: "base"});
   const hasEditor = document.body.dataset.editor === "true";
 
@@ -19,10 +23,24 @@
     return route + "?" + query.toString();
   }
 
+  function listingUrl(path, page = 1) {
+    return pathUrl("/listing", path, page > 1 ? {page: String(page)} : {});
+  }
+
   function navigate(path, recordHistory = true) {
-    const nextUrl = pathUrl("/listing", path);
-    if (recordHistory) history.pushState({path}, "", nextUrl);
-    refresh(path);
+    if (recordHistory) history.pushState({path, page: 1}, "", listingUrl(path));
+    refresh(path, 1);
+  }
+
+  function selectPage(index, recordHistory = true, scrollToFiles = true) {
+    const count = Math.max(1, Math.ceil(orderedFiles().length / state.pageSize));
+    state.page = Math.max(0, Math.min(index, count - 1));
+    if (recordHistory) {
+      history.pushState({path: state.directory, page: state.page + 1}, "",
+                        listingUrl(state.directory, state.page + 1));
+    }
+    renderFiles();
+    if (scrollToFiles) $("file-list").scrollIntoView({block: "start"});
   }
 
   function renderBreadcrumbs(data) {
@@ -183,21 +201,7 @@
       body.append(tr);
     }
 
-    const pages = $("pages");
-    pages.replaceChildren();
-    if (count > 1) {
-      for (let index = 0; index < count; index++) {
-        const b = make("button", "", String(index + 1));
-        b.type = "button";
-        if (index === state.page) b.setAttribute("aria-current", "page");
-        b.addEventListener("click", () => {
-          state.page = index;
-          renderFiles();
-          $("file-list").scrollIntoView({block: "start"});
-        });
-        pages.append(b);
-      }
-    }
+    renderGoFMPages(rows, count);
     $("listing-info").textContent =
       rows.length + " files · " + state.data.folders.length + " directories" +
       (rows.length > 0 ? " · showing " + (start + 1) + "–" +
@@ -205,6 +209,52 @@
       (state.filter ? " · filtered" : "");
     $("sort-summary").textContent = state.sort +
       (state.sort === "timekey" || state.sort === "size" ? " (descending)" : "");
+  }
+
+  function renderGoFMPages(rows, count) {
+    // Xlster.reffout() progressively exposed GoFM page references through
+    // current+1 and arranged references in rows of about ten.
+    const pages = $("pages");
+    pages.replaceChildren();
+    const nav = make("div", "gofm-navigation");
+    function navButton(label, page, disabled = false, scroll = true) {
+      const b = make("button", "gofm-nav", label);
+      b.type = "button";
+      b.disabled = disabled;
+      b.addEventListener("click", () => selectPage(page, true, scroll));
+      nav.append(b);
+      return b;
+    }
+    navButton("Top", 0, false, false).addEventListener("click", () => {
+      window.scrollTo({top: 0, behavior: "smooth"});
+    });
+    navButton("Previous", state.page - 1, state.page === 0);
+    nav.append(make("span", "gofm-current",
+      "Listing " + (state.page + 1) + " of " + count));
+    navButton("Next", state.page + 1, state.page >= count - 1);
+    navButton("Bottom", count - 1, count === 1 || state.page === count - 1);
+    pages.append(nav);
+    if (count <= 1) return;
+
+    const refs = make("div", "gofm-references");
+    // As in GoFM, reveal page references through the next page; never render
+    // a sprawling list of all 120 possible refs for a huge directory at once.
+    const shown = Math.min(count, state.page + 2);
+    for (let i = 0; i < shown; i++) {
+      const entry = rows[i * state.pageSize];
+      let descriptor;
+      if (state.sort === "filetype") descriptor = entry?.type || "none";
+      else if (state.sort === "filename") descriptor = entry?.name.slice(0, 4) || String(i + 1);
+      else descriptor = String(i + 1);
+      const b = make("button", "gofm-reference", descriptor);
+      b.type = "button";
+      b.title = "Listing " + (i + 1);
+      b.setAttribute("aria-label", "Listing " + (i + 1) + ": " + descriptor);
+      if (i === state.page) b.setAttribute("aria-current", "page");
+      b.addEventListener("click", () => selectPage(i));
+      refs.append(b);
+    }
+    pages.append(refs);
   }
 
   function updateClock() {
@@ -215,7 +265,8 @@
     $("time").textContent = date + " · " + time;
   }
 
-  async function refresh(path) {
+  async function refresh(path, requestedPage = 1) {
+    const serial = ++state.requestSerial;
     $("listing-info").textContent = "Loading directory…";
     try {
       const result = await fetch(pathUrl("/api/files", path),
@@ -223,13 +274,18 @@
       if (!result.ok) {
         throw new Error("Could not load directory (HTTP " + result.status + ")");
       }
-      state.data = await result.json();
+      const data = await result.json();
+      if (serial !== state.requestSerial) return;
+      state.data = data;
+      state.directory = data.relative;
       $("listing-info").classList.remove("error");
-      state.page = 0;
+      state.page = Number.isSafeInteger(requestedPage) && requestedPage > 0 ?
+                   requestedPage - 1 : 0;
       renderBreadcrumbs(state.data);
       renderDirectories(state.data);
       renderFiles();
     } catch (error) {
+      if (serial !== state.requestSerial) return;
       $("listing-info").textContent = String(error.message || error);
       $("listing-info").classList.add("error");
     }
@@ -272,25 +328,29 @@
 
   $("sort-key").addEventListener("change", (event) => {
     state.sort = event.target.value;
-    state.page = 0;
-    renderFiles();
+    selectPage(0);
   });
   $("filter").addEventListener("input", (event) => {
     state.filter = event.target.value;
-    state.page = 0;
-    renderFiles();
+    selectPage(0);
   });
   $("find-file").addEventListener("click", () => $("filter").focus());
   $("refresh").addEventListener("click", () =>
-    refresh(state.data ? state.data.relative : "."));
+    refresh(state.data ? state.data.relative : ".", state.page + 1));
+  function pageFromUrl(query) {
+    const raw = query.get("page") || "1";
+    if (!/^[1-9][0-9]*$/.test(raw)) return 1;
+    const number = Number(raw);
+    return Number.isSafeInteger(number) ? number : 1;
+  }
   window.addEventListener("popstate", () => {
     const query = new URLSearchParams(location.search);
-    refresh(query.get("path") || ".");
+    refresh(query.get("path") || ".", pageFromUrl(query));
   });
 
   setupKeyboard();
   updateClock();
   setInterval(updateClock, 1000);
   const query = new URLSearchParams(location.search);
-  refresh(query.get("path") || ".");
+  refresh(query.get("path") || ".", pageFromUrl(query));
 })();
