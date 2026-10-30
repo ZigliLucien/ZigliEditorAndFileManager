@@ -112,3 +112,15 @@ keyboard testing required. Word/file Notes source relationship documented in
 - The browser file manager adds a general-purpose RTL edit link.
 - Unsaved Tk buffers are never silently transferred, discarded or overwritten.
 - Tests cover RTL HTML, logical UTF-8 preservation and optional GUI launching.
+
+### v46: restore native Yiddish keyboard in actual RTL layout
+- Browser-native RTL textarea now supports the original Yiddish.keymap
+  without reversing or otherwise rewriting Unicode content.
+- Alt and Alt+Shift combinations map via keyboard physical code; the
+  legacy keymap is loaded at request time and no mapping is duplicated.
+- New checkbox can disable mappings; local JavaScript is scoped to the
+  RTL edit page by explicit same-origin CSP permission.
+- New Language menu item opens browser RTL editing directly.
+- Desktop Tk 8.6 still lacks true bidi editing/caret positioning; its
+  right alignment must not be confused with proper RTL input.
+- Tests cover mapped characters, serving the JS, form isolation and UTF-8.
