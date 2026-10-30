@@ -301,3 +301,20 @@ require a session CSRF token, reject path traversal, and never overwrite
 existing files. Copying supports binary files to 64 MiB and preserves their
 permissions. Rename, move and delete are deliberately not exposed yet.
 See [BROWSER_FILE_MANAGER.md](BROWSER_FILE_MANAGER.md) for details.
+
+## v48 — original ZEFM listing design, rebuilt without XML/XSLT
+
+The Java-to-Python browser file manager now offers the original visual
+listing design from `lister.xsl`, `locxsorter.xsl`, `listing.css`,
+`listing.js`, `Xlster.java` and `XCommands.java`, reconstructed as
+plain HTML/CSS/JavaScript with a small read-only `/api/files` JSON endpoint.
+
+Choose **File → Open Local File Manager in Browser...** in the Tk editor to
+open the styled interface. The existing plain Python listing remains at
+`/` or via **Basic listing** in the new page. Styled listing preserves
+the original directory matrix, pastel striped filename/notes table,
+sort/clock controls, colored file-operation radio buttons, and pagination.
+Move/delete and old unported utilities are shown disabled, not executed.
+
+See [ORIGINAL_LISTING_DESIGN.md](ORIGINAL_LISTING_DESIGN.md) for a source
+crosswalk, design details and known differences.
