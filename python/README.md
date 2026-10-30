@@ -278,3 +278,17 @@ system's input method or paste, not ZEFM's Tk-only Alt keymaps.
 
 The normal file-browser listing also offers **RTL edit**. See
 [BROWSER_FILE_MANAGER.md](BROWSER_FILE_MANAGER.md) for details.
+
+## v46 — Yiddish Alt keymap with actual right-to-left browser editing
+
+Tk 8.6 on X11 cannot place successive Yiddish glyphs leftward just by
+right-aligning the text widget. For correct RTL entry, use the saved
+file's **Language → Edit Yiddish RTL in Browser (Alt keymap)...** or
+**File → Edit Current File RTL in Browser...** command.
+
+The local browser RTL editor now loads `legacy_keymaps/Yiddish.keymap`
+and enables its original Alt/Alt+Shift combinations by default, e.g.
+Alt+B → ב and Alt+Shift+I → אי. A checkbox disables the mapping to
+use the operating-system keyboard. The native browser renders text RTL;
+files retain standard logical UTF-8 sequence. Save in the browser and
+use ZEFM's external-file change Reload control to update the desktop tab.
