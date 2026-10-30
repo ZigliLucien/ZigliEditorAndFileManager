@@ -135,3 +135,15 @@ keyboard testing required. Word/file Notes source relationship documented in
 - Added focused tests for Unicode, conflicts, symlinks, invalid names,
   oversized files and HTML escaping.
 - Rename, move, delete and Note migration are still unimplemented.
+
+### v48 — source-faithful reconstruction of ZEFM listing
+- Reproduced layout drawing from the original lister.xsl, locxsorter.xsl,
+  listing.css, listing.js, Xlster.java and XCommands.java.
+- Desktop File menu now opens the styled /listing page, which loads
+  filesystem/notes data from a guarded JSON /api/files endpoint.
+- Preserves directory checkerboard, top path/hostname, sorting/clock,
+  colored radio options, yellow/cyan file rows and Notes previews.
+- Adds filename filter, keyboard shortcuts and 25-file client pagination.
+- Legacy plain HTML listing remains available; move/delete are disabled.
+- Restrictive same-origin CSP and DOM textContent, no SQL/XML/XSLT for listing.
+- See ORIGINAL_LISTING_DESIGN.md for the detailed original-source inventory.
