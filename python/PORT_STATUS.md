@@ -89,3 +89,16 @@ keyboard testing required. Word/file Notes source relationship documented in
 - Existing v42 save conflict confirmation remains active after dismissing notices.
 - SHA-256 monitor hashes the active file on the GUI thread; optimize for large files later.
 - Tests added for per-tab dismissal/reappearance and optional Tk GUI interactions.
+
+
+### v44 Maildir browser (initial)
+- Loopback-only, read-only Maildir browser launched through the Tk File menu.
+- Supports configured SIU/Personal/GMAIL paths, or a selected Maildir folder.
+- MIME parsing prefers text/plain; HTML-only bodies become text; no active
+  content, remote resources or attachments served.
+- Word Notes linked by stable message ID in a local JSON store, not in mail files.
+- Original mail fetching, sending, local HTML index, and MyISAM migration
+  remain separate and unmodified.
+- Bounded listing (100 recent entries, first 10,000 files/account), with a
+  5 MiB preview cap; pagination/search and legacy HTML-index linking pending.
+- See MAIL_ARCHIVE.md. Synthetic Maildir regression cases added.
