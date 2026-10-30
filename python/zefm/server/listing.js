@@ -33,7 +33,7 @@
   }
 
   function selectPage(index, recordHistory = true, scrollToFiles = true) {
-    const count = Math.max(1, Math.ceil(orderedFiles().length / state.pageSize));
+    const count = pageGroups(orderedFiles()).length;
     state.page = Math.max(0, Math.min(index, count - 1));
     if (recordHistory) {
       history.pushState({path: state.directory, page: state.page + 1}, "",
@@ -156,15 +156,36 @@
     return rows;
   }
 
+  function pageGroups(rows) {
+    if (state.sort === "filetype") {
+      // Xlster.java: test3 starts a new HEADER when the file extension changes.
+      const groups = [];
+      for (const row of rows) {
+        if (!groups.length || groups[groups.length - 1][0].type !== row.type) {
+          groups.push([row]);
+        } else {
+          groups[groups.length - 1].push(row);
+        }
+      }
+      return groups.length ? groups : [[]];
+    }
+    const groups = [];
+    for (let i = 0; i < rows.length; i += state.pageSize) {
+      groups.push(rows.slice(i, i + state.pageSize));
+    }
+    return groups.length ? groups : [[]];
+  }
+
   function renderFiles() {
     if (!state.data) return;
     const body = $("file-list").querySelector("tbody");
     body.replaceChildren();
     const rows = orderedFiles();
-    const count = Math.max(1, Math.ceil(rows.length / state.pageSize));
+    const groups = pageGroups(rows);
+    const count = groups.length;
     state.page = Math.max(0, Math.min(state.page, count - 1));
-    const start = state.page * state.pageSize;
-    const current = rows.slice(start, start + state.pageSize);
+    const start = groups.slice(0, state.page).reduce((sum, group) => sum + group.length, 0);
+    const current = groups[state.page];
 
     for (let i = 0; i < current.length; i++) {
       const item = current[i];
@@ -201,7 +222,7 @@
       body.append(tr);
     }
 
-    renderGoFMPages(rows, count);
+    renderGoFMPages(groups, count);
     $("listing-info").textContent =
       rows.length + " files · " + state.data.folders.length + " directories" +
       (rows.length > 0 ? " · showing " + (start + 1) + "–" +
@@ -211,7 +232,7 @@
       (state.sort === "timekey" || state.sort === "size" ? " (descending)" : "");
   }
 
-  function renderGoFMPages(rows, count) {
+  function renderGoFMPages(groups, count) {
     // Xlster.reffout() progressively exposed GoFM page references through
     // current+1 and arranged references in rows of about ten.
     const pages = $("pages");
@@ -241,7 +262,7 @@
     // a sprawling list of all 120 possible refs for a huge directory at once.
     const shown = Math.min(count, state.page + 2);
     for (let i = 0; i < shown; i++) {
-      const entry = rows[i * state.pageSize];
+      const entry = groups[i][0];
       let descriptor;
       if (state.sort === "filetype") descriptor = entry?.type || "none";
       else if (state.sort === "filename") descriptor = entry?.name.slice(0, 4) || String(i + 1);
