@@ -329,3 +329,16 @@ the old Xlster constructed its XML HEADER sections. Page numbers use
 1-based `/listing?path=...&page=N` links that work with browser
 Back/Forward. The directory grid stays visible above the file table.
 See ORIGINAL_LISTING_DESIGN.md for the Java-source comparison.
+
+## v50 — native browser PDF viewing
+
+PDF filenames in the original-style listing now open the browser's built-in
+PDF viewer in **View** mode. The local server sends `application/pdf`
+with `Content-Disposition: inline` and supports single HTTP byte ranges
+for PDF page seeking. The existing **Download** route still offers a
+download, while text files continue to open in the standard HTML view.
+
+PDF previews are limited to 128 MiB and require a PDF header. Requests
+remain confined to the current loopback filesystem root; no external PDF
+software or subprocess is invoked. Viewer availability depends on the
+browser's own PDF settings. See BROWSER_FILE_MANAGER.md for details.
