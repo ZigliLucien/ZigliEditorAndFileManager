@@ -163,3 +163,10 @@ keyboard testing required. Word/file Notes source relationship documented in
 - Added server-side /api/listing-page with 25-file pages, extension grouping, filtered/sorted metadata and Notes previews.
 - Browser now fetches requested pages instead of eagerly transferring the whole directory.
 - V48 full JSON endpoint and basic listing remain compatible. Filesystem scan for exact counts remains O(N).
+
+### v50 native PDF browser support
+- View on PDF files now serves application/pdf inline, rather than UTF-8 text.
+- Range requests (206, Content-Range, 416) support native PDF viewers.
+- Bounded 128 MiB preview, PDF signature check, path restrictions, no-store.
+- Download remains explicit and unchanged; standard text view stays intact.
+- Synthetic PDF response tests cover byte ranges, invalid paths, MIME headers.
