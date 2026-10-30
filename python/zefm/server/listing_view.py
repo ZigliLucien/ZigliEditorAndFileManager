@@ -24,6 +24,9 @@ def listing_data(files, relative=".", notes_path=None):
     store = WordNotes(notes_path)
     folders, documents = [], []
     for entry in entries:
+        # Original XCommands.updateList and Xlster omitted dot-prefixed entries.
+        if entry.name.startswith("."):
+            continue
         try:
             target = entry.resolve()
             # An externally pointing symlink should not disclose metadata,
@@ -68,7 +71,7 @@ def listing_data(files, relative=".", notes_path=None):
         "breadcrumbs": crumb,
         "folders": folders,
         "files": documents,
-        "count": len(entries),
+        "count": len(folders) + len(documents),
     }
 
 
