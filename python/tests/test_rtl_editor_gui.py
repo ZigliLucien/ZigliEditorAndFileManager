@@ -25,7 +25,8 @@ class RtlEditorTests(unittest.TestCase):
 
     def tearDown(self):
         if hasattr(self, "app"):
-            self.app.quit()
+            with mock.patch("zefm.editor.gui.tk_editor.messagebox.askyesno", return_value=True):
+                self.app.quit()
 
     def test_yiddish_alignment_is_per_buffer(self):
         widget, _ = self.app.current()
