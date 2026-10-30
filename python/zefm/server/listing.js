@@ -24,7 +24,10 @@
   }
 
   function listingUrl(path, page = 1) {
-    return pathUrl("/listing", path, page > 1 ? {page: String(page)} : {});
+    const args = {path, page: String(page)};
+    if (state.sort !== "filename") args.sort = state.sort;
+    if (state.filter) args.filter = state.filter;
+    return "/listing?" + new URLSearchParams(args);
   }
 
   function navigate(path, recordHistory = true) {
@@ -33,14 +36,14 @@
   }
 
   function selectPage(index, recordHistory = true, scrollToFiles = true) {
-    const count = pageGroups(orderedFiles()).length;
-    state.page = Math.max(0, Math.min(index, count - 1));
+    if (!state.data) return;
+    const count = state.data.page_count;
+    const page = Math.max(1, Math.min(index + 1, count));
     if (recordHistory) {
-      history.pushState({path: state.directory, page: state.page + 1}, "",
-                        listingUrl(state.directory, state.page + 1));
+      history.pushState({path: state.directory, page}, "",
+                        listingUrl(state.directory, page));
     }
-    renderFiles();
-    if (scrollToFiles) $("file-list").scrollIntoView({block: "start"});
+    refresh(state.directory, page, scrollToFiles);
   }
 
   function renderBreadcrumbs(data) {
@@ -134,58 +137,15 @@
     }
   }
 
-  function orderedFiles() {
-    if (!state.data) return [];
-    const search = state.filter.toLocaleLowerCase();
-    const rows = state.data.files.filter((row) =>
-      row.name.toLocaleLowerCase().includes(search));
-    rows.sort((a, b) => {
-      switch (state.sort) {
-        case "filetype":
-          return collator.compare(a.type, b.type) || collator.compare(a.name, b.name);
-        case "size":
-          return b.size - a.size || collator.compare(a.name, b.name);
-        case "timekey":
-          return b.modified - a.modified || collator.compare(a.name, b.name);
-        case "notes":
-          return collator.compare(a.note, b.note) || collator.compare(a.name, b.name);
-        default:
-          return collator.compare(a.name, b.name);
-      }
-    });
-    return rows;
-  }
-
-  function pageGroups(rows) {
-    if (state.sort === "filetype") {
-      // Xlster.java: test3 starts a new HEADER when the file extension changes.
-      const groups = [];
-      for (const row of rows) {
-        if (!groups.length || groups[groups.length - 1][0].type !== row.type) {
-          groups.push([row]);
-        } else {
-          groups[groups.length - 1].push(row);
-        }
-      }
-      return groups.length ? groups : [[]];
-    }
-    const groups = [];
-    for (let i = 0; i < rows.length; i += state.pageSize) {
-      groups.push(rows.slice(i, i + state.pageSize));
-    }
-    return groups.length ? groups : [[]];
-  }
-
   function renderFiles() {
     if (!state.data) return;
     const body = $("file-list").querySelector("tbody");
     body.replaceChildren();
-    const rows = orderedFiles();
-    const groups = pageGroups(rows);
-    const count = groups.length;
-    state.page = Math.max(0, Math.min(state.page, count - 1));
-    const start = groups.slice(0, state.page).reduce((sum, group) => sum + group.length, 0);
-    const current = groups[state.page];
+    const rows = state.data.files;
+    const count = state.data.page_count;
+    state.page = state.data.page - 1;
+    const start = state.data.page_start - 1;
+    const current = rows;
 
     for (let i = 0; i < current.length; i++) {
       const item = current[i];
@@ -222,17 +182,17 @@
       body.append(tr);
     }
 
-    renderGoFMPages(groups, count);
+    renderGoFMPages(state.data.references, count);
     $("listing-info").textContent =
-      rows.length + " files · " + state.data.folders.length + " directories" +
-      (rows.length > 0 ? " · showing " + (start + 1) + "–" +
-        (start + current.length) : "") +
+      state.data.total_files + " files · " + state.data.folders.length + " directories" +
+      (rows.length > 0 ? " · showing " + state.data.page_start + "–" +
+        state.data.page_end : "") +
       (state.filter ? " · filtered" : "");
     $("sort-summary").textContent = state.sort +
       (state.sort === "timekey" || state.sort === "size" ? " (descending)" : "");
   }
 
-  function renderGoFMPages(groups, count) {
+  function renderGoFMPages(references, count) {
     // Xlster.reffout() progressively exposed GoFM page references through
     // current+1 and arranged references in rows of about ten.
     const pages = $("pages");
@@ -262,11 +222,7 @@
     // a sprawling list of all 120 possible refs for a huge directory at once.
     const shown = Math.min(count, state.page + 2);
     for (let i = 0; i < shown; i++) {
-      const entry = groups[i][0];
-      let descriptor;
-      if (state.sort === "filetype") descriptor = entry?.type || "none";
-      else if (state.sort === "filename") descriptor = entry?.name.slice(0, 4) || String(i + 1);
-      else descriptor = String(i + 1);
+      const descriptor = references[i].label;
       const b = make("button", "gofm-reference", descriptor);
       b.type = "button";
       b.title = "Listing " + (i + 1);
@@ -286,12 +242,13 @@
     $("time").textContent = date + " · " + time;
   }
 
-  async function refresh(path, requestedPage = 1) {
+  async function refresh(path, requestedPage = 1, scrollToFiles = false) {
     const serial = ++state.requestSerial;
     $("listing-info").textContent = "Loading directory…";
     try {
-      const result = await fetch(pathUrl("/api/files", path),
-        {cache: "no-store", credentials: "same-origin"});
+      const result = await fetch(pathUrl("/api/listing-page", path, {
+        page: String(requestedPage), sort: state.sort, filter: state.filter
+      }), {cache: "no-store", credentials: "same-origin"});
       if (!result.ok) {
         throw new Error("Could not load directory (HTTP " + result.status + ")");
       }
@@ -300,11 +257,11 @@
       state.data = data;
       state.directory = data.relative;
       $("listing-info").classList.remove("error");
-      state.page = Number.isSafeInteger(requestedPage) && requestedPage > 0 ?
-                   requestedPage - 1 : 0;
+      state.page = data.page - 1;
       renderBreadcrumbs(state.data);
       renderDirectories(state.data);
       renderFiles();
+      if (scrollToFiles) $("file-list").scrollIntoView({block: "start"});
     } catch (error) {
       if (serial !== state.requestSerial) return;
       $("listing-info").textContent = String(error.message || error);
@@ -366,6 +323,11 @@
   }
   window.addEventListener("popstate", () => {
     const query = new URLSearchParams(location.search);
+    state.sort = ["filename", "filetype", "timekey", "size", "notes"].includes(query.get("sort"))
+      ? query.get("sort") : "filename";
+    state.filter = (query.get("filter") || "").slice(0, 200);
+    $("sort-key").value = state.sort;
+    $("filter").value = state.filter;
     refresh(query.get("path") || ".", pageFromUrl(query));
   });
 
@@ -373,5 +335,10 @@
   updateClock();
   setInterval(updateClock, 1000);
   const query = new URLSearchParams(location.search);
+  state.sort = ["filename", "filetype", "timekey", "size", "notes"].includes(query.get("sort"))
+    ? query.get("sort") : "filename";
+  state.filter = (query.get("filter") || "").slice(0, 200);
+  $("sort-key").value = state.sort;
+  $("filter").value = state.filter;
   refresh(query.get("path") || ".", pageFromUrl(query));
 })();
