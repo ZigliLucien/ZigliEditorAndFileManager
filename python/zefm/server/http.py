@@ -14,7 +14,7 @@ import secrets
 import threading
 from urllib.parse import parse_qs, quote, urlencode, urlsplit
 
-from .file_manager import BrowserError, LocalFiles, MAX_EDIT_BYTES
+from .file_manager import BrowserError, LocalFiles, MAX_EDIT_BYTES, MAX_COPY_BYTES
 from .routes import permitted
 from ..storage.word_notes import WordNotes
 from .rtl_keymap import RTL_KEYMAP_JS, yiddish_keymap_json
@@ -88,6 +88,14 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
             if directory != files.root:
                 parent = files.relative(directory.parent)
                 header += f'<p><a href="{escape(link("/browse", parent), quote=True)}">↑ Parent</a></p>'
+            folder_form = (
+                '<form action="/mkdir" method="post" accept-charset="utf-8">'
+                f'<input type="hidden" name="csrf" value="{escape(token, quote=True)}">'
+                f'<input type="hidden" name="path" value="{escape(crumb, quote=True)}">'
+                '<label>New folder: <input name="name" required maxlength="255"'
+                ' aria-label="New folder name"></label> '
+                '<button type="submit">Create folder</button></form>'
+            )
             rows = []
             for entry in entries:
                 rel = files.relative(entry)
@@ -100,6 +108,7 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                     links += (f' &nbsp; <a href="{escape(link("/edit", rel), quote=True)}">Quick edit</a>'
                               f' &nbsp; <a href="{escape(link("/edit", rel) + "&dir=rtl", quote=True)}">RTL edit</a>'
                               f' &nbsp; <a href="{escape(link("/raw", rel), quote=True)}">Download</a>'
+                              f' &nbsp; <a href="{escape(link("/copy", rel), quote=True)}">Copy...</a>'
                               f' &nbsp; <a href="{escape(link("/notes", rel), quote=True)}">Notes</a>')
                 if not is_dir and open_in_editor is not None:
                     links += (' &nbsp; <form action="/open-editor" method="post" style="display:inline">'
@@ -107,7 +116,7 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                               f'<input type="hidden" name="path" value="{escape(rel,quote=True)}">'
                               '<button type="submit">Open in ZEFM</button></form>')
                 rows.append(f"<tr><td>{links}</td></tr>")
-            return page("File manager", header + "<table>" + "".join(rows) + "</table>"
+            return page("File manager", header + folder_form + "<table>" + "".join(rows) + "</table>"
                         + f"<p><small>{len(entries)} entries. Local files only; browser editing limited to 1 MiB UTF-8 files.</small></p>")
 
         def do_GET(self):
@@ -126,6 +135,28 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                         raise BrowserError("Unexpected script parameters")
                     self._send(200, RTL_KEYMAP_JS.encode("utf-8"),
                                "text/javascript; charset=utf-8")
+                elif parsed.path == "/copy":
+                    if set(args) != {"path"}:
+                        raise BrowserError("Unexpected copy parameters")
+                    source = files.resolve(rel)
+                    if not source.is_file():
+                        raise BrowserError("Source file not found", 404)
+                    if source.stat().st_size > MAX_COPY_BYTES:
+                        raise BrowserError("File too large to copy in browser", 413)
+                    back = escape(link("/browse", files.relative(source.parent)), quote=True)
+                    default_name = "Copy of " + source.name
+                    content = (
+                        f'<p><a href="{back}">← Back to directory</a></p>'
+                        f'<h2>Copy file: {escape(rel)}</h2>'
+                        '<p>Make a copy in the same directory. Existing files are never replaced.</p>'
+                        '<form method="post" action="/copy" accept-charset="utf-8">'
+                        f'<input type="hidden" name="csrf" value="{escape(token, quote=True)}">'
+                        f'<input type="hidden" name="path" value="{escape(rel, quote=True)}">'
+                        f'<label>New filename: <input name="name" maxlength="255" required'
+                        f' value="{escape(default_name, quote=True)}"></label> '
+                        '<button type="submit">Create copy</button></form>'
+                    )
+                    self._send(200, page("Copy file", content))
                 elif parsed.path == "/view":
                     text, _ = files.read_text(rel)
                     content = (f'<p><a href="{escape(link("/browse", files.relative(files.resolve(rel).parent)), quote=True)}">← Back</a> '
@@ -243,7 +274,23 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                 if not secrets.compare_digest(args.get("csrf", ""), token):
                     raise BrowserError("Invalid form token", 403)
                 route = urlsplit(self.path).path
-                if route=="/open-editor":
+                if route=="/mkdir":
+                    if set(args) != {"csrf", "path", "name"}:
+                        raise BrowserError("Unexpected create-directory parameters")
+                    created = files.create_directory(args["path"], args["name"])
+                    back = escape(link("/browse", files.relative(created.parent)), quote=True)
+                    self._send(201, page("Folder created",
+                        f'<h2>Created folder: {escape(created.name)}</h2>'
+                        f'<p><a href="{back}">Back to directory</a></p>'))
+                elif route=="/copy":
+                    if set(args) != {"csrf", "path", "name"}:
+                        raise BrowserError("Unexpected copy parameters")
+                    copied = files.copy_file(args["path"], args["name"])
+                    back = escape(link("/browse", files.relative(copied.parent)), quote=True)
+                    self._send(201, page("File copied",
+                        f'<h2>Copied to: {escape(copied.name)}</h2>'
+                        f'<p><a href="{back}">Back to directory</a></p>'))
+                elif route=="/open-editor":
                     if open_in_editor is None:
                         raise BrowserError("Desktop editor integration unavailable", 404)
                     if set(args) != {"csrf", "path"}:
