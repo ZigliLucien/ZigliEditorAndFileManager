@@ -292,3 +292,12 @@ Alt+B → ב and Alt+Shift+I → אי. A checkbox disables the mapping to
 use the operating-system keyboard. The native browser renders text RTL;
 files retain standard logical UTF-8 sequence. Save in the browser and
 use ZEFM's external-file change Reload control to update the desktop tab.
+
+## v47 — local ServPakDir FileOps increment
+
+The browser file manager can now **Create folder** and **Copy...** a file
+within the current directory. Both operations stay inside the selected root,
+require a session CSRF token, reject path traversal, and never overwrite
+existing files. Copying supports binary files to 64 MiB and preserves their
+permissions. Rename, move and delete are deliberately not exposed yet.
+See [BROWSER_FILE_MANAGER.md](BROWSER_FILE_MANAGER.md) for details.
