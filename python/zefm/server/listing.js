@@ -42,6 +42,7 @@
       area.append(a);
     }
     $("directory-title").textContent = data.directory;
+    $("basic-listing").href = pathUrl("/browse", data.relative);
     document.title = data.directory + " · ZEFM Listing";
   }
 
