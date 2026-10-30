@@ -100,6 +100,32 @@ class OriginalListingTests(unittest.TestCase):
         self.assertNotIn(b".innerHTML", script)
         self.assertIn(b"pageSize: 25", script)
 
+    def test_gofm_page_deep_links_and_invalid_page_parameters(self):
+        for page in (1, 2, 25, 100):
+            status, body, _ = self.get("/listing?" + urlencode({"path": ".", "page": page}))
+            self.assertEqual(status, 200, body.decode("utf-8"))
+        for value in ("0", "-1", "two", "1/../../", "999999999999", ""):
+            status, _, _ = self.get("/listing?" + urlencode({"path": ".", "page": value}))
+            self.assertEqual(status, 400)
+        status, _, _ = self.get("/listing?" + urlencode({"path": "..", "page": 2}))
+        self.assertEqual(status, 403)
+
+    def test_gofm_navigation_and_extension_based_groups(self):
+        status, script, _ = self.get("/listing.js")
+        self.assertEqual(status, 200)
+        for feature in (b'pageGroups(rows)', b'state.sort === "filetype"',
+                        b'groups[groups.length - 1][0].type', b'pageSize: 25',
+                        b'"Top"', b'"Bottom"', b'"Previous"', b'"Next"',
+                        b'"Listing " + (state.page + 1)',
+                        b'"gofm-references"', b'history.pushState',
+                        b'window.addEventListener("popstate"'):
+            with self.subTest(feature=feature):
+                self.assertIn(feature, script)
+        status, css, _ = self.get("/listing.css")
+        self.assertEqual(status, 200)
+        self.assertIn(b"gofm-references", css)
+        self.assertIn(b"repeat(10", css)
+
     def test_legacy_listing_is_still_available(self):
         status, html, _ = self.get("/")
         self.assertEqual(status, 200)
