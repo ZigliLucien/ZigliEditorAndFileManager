@@ -206,3 +206,42 @@ link offers the same control.
 Saving the file in the browser retains digest conflict protection. Return to
 Tk and choose **Reload from disk...** when ZEFM detects the external change.
 No private mail or text data is sent to GitHub.
+
+
+## v47 — local file operations (ServPakDir FileOps increment)
+
+The browser file manager can now **Create folder** in the current directory
+and **Copy...** a regular file into the **same directory**, under a new name.
+
+To use these operations, start **File → Open Local File Manager in Browser...**
+and use the form above the directory listing, or choose **Copy...** next to a
+file. Operations only modify the selected local file-tree root. The existing
+browser-to-Tk Open in ZEFM bridge and text Quick Edit are unchanged.
+
+Safety limits:
+- Every write requires the existing per-session CSRF token and valid Host
+  header. No FTP, LAN server, arbitrary command execution, or MySQL.
+- New file/folder names must be a single name, not an absolute path,
+  parent-traversal path or path containing slash/backslash/control characters.
+  Names are UTF-8 and checked against a 255-byte limit.
+- Copy is bounded to **64 MiB**, supports arbitrary binary files, preserves
+  Unix file permissions, and leaves the source untouched. A private temporary
+  copy is completed and synced before publishing it via a no-clobber link.
+- Existing target files, directories or symlinks are **never replaced**.
+  A name collision returns HTTP 409. This means a copy with the same filename
+  must be given a new name.
+- Direct symlink sources are not copyable; paths escaping the selected root
+  are rejected. File changes while a copy is underway are checked before
+  publishing, with the normal limitations of a trusted local filesystem.
+- Creating a folder uses owner-only default permissions (subject to umask).
+- Word Notes belong to the original file identity and are **not automatically
+  duplicated** when copying a file.
+
+The no-overwrite copy uses a POSIX filesystem hardlink as an atomic publish
+operation; this increment targets the user's Linux/macOS workstation. It does
+not provide atomic source snapshots under concurrent writes.
+
+**Not yet implemented:** rename, move between directories, delete/trash,
+multi-file selection, copy directory trees, and automatic Note migration. The
+absence of destructive operations is intentional while we validate the new
+browser file actions.
