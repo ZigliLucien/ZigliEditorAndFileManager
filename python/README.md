@@ -318,3 +318,14 @@ Move/delete and old unported utilities are shown disabled, not executed.
 
 See [ORIGINAL_LISTING_DESIGN.md](ORIGINAL_LISTING_DESIGN.md) for a source
 crosswalk, design details and known differences.
+
+## v49 — GoFM page navigation port
+
+Pagination now follows the original GoFM.java and Xlster.java approach:
+**Top**, **Bottom**, **Previous**, **Next**, `Listing N of M`, and a
+progressively growing row of short page descriptors. Standard sorting
+uses 25 files per page; **File Type** uses one page per extension, just as
+the old Xlster constructed its XML HEADER sections. Page numbers use
+1-based `/listing?path=...&page=N` links that work with browser
+Back/Forward. The directory grid stays visible above the file table.
+See ORIGINAL_LISTING_DESIGN.md for the Java-source comparison.
