@@ -1009,6 +1009,9 @@ class Window:
             keymaps_menu.add_command(label=name,command=lambda n=name:self.choose_keymap(n))
         language_menu.add_cascade(label="Alt Keymaps (per buffer)",menu=keymaps_menu)
         language_menu.add_command(label="Show Keymap / Keyboard Reference...",command=self.show_keymap)
+        language_menu.add_separator()
+        language_menu.add_command(label="Edit Yiddish RTL in Browser (Alt keymap)...",
+                                  command=self.edit_current_file_rtl)
         bar.add_cascade(label="Language",menu=language_menu)
         notes_menu=tk.Menu(bar,tearoff=False)
         notes_menu.add_command(label="Annotate Selected Word / Word at Cursor...",command=self.annotate_word)
