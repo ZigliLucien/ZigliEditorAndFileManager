@@ -139,3 +139,33 @@ file; there is no kernel file watcher and no instantaneous notification. For
 very large files, a later version should use a metadata precheck and/or a
 background worker. The existing check-before-write safeguard still has the
 documented time-of-check/time-of-use race.
+
+
+## v45 — Yiddish and other right-to-left writing
+
+The desktop Tk `Text` widget on Tk 8.6/X11 does not fully implement Unicode
+bidirectional layout. Selecting **Language → Yiddish**, or **Language →
+Alt Keymaps (per buffer) → Yiddish**, now right-aligns paragraphs *in the
+desktop editor*, and switching back removes that alignment. Right justification
+does **not** reverse glyphs, move the cursor in visual RTL order, or implement
+the Unicode Bidirectional Algorithm. The underlying UTF-8 contents are never
+reversed or otherwise rewritten.
+
+For **correct RTL editing**, save the current file and select
+**File → Edit Current File RTL in Browser...**. ZEFM opens the local Quick Edit
+page with `dir="rtl"` and right alignment. The browser handles bidi layout
+(including Hebrew/Yiddish with numbers and embedded Latin words). Its Save
+button retains the same optimistic digest check and CSRF guard as normal Quick
+Edit, and writes the original logical Unicode character sequence.
+
+If the Tk buffer has unsaved edits, the command refuses to launch until
+you explicitly save it. After saving from the browser, switch back to ZEFM:
+v43 will report the external change, where you can choose **Reload from disk...**
+without losing unsaved changes automatically.
+
+The file-manager listing also exposes **RTL edit** for any file.
+
+**Important:** The desktop's legacy Alt keymap works inside the Tk widget
+only; the browser uses its normal operating-system/IME keyboard setup (or
+paste) for Yiddish input. A future integration may offer browser-side
+legacy keymap shortcuts without relaxing the browser's restrictive CSP.
