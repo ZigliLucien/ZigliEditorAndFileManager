@@ -262,3 +262,19 @@ and are stored separately from the original email using WordNotes.
 The original getmail/DavMail and Python-generated HTML index are unchanged.
 See [MAIL_ARCHIVE.md](MAIL_ARCHIVE.md) for local account configuration and
 the standalone browser command. Never commit real mail data.
+
+## v45: Yiddish / Hebrew RTL editing
+
+Choosing Yiddish in either the Language selector or the per-buffer Alt keymaps
+right-aligns the Tk editor's paragraphs. This is only **alignment**: Tk 8.6/X11
+cannot guarantee correct Unicode bidirectional visual order or RTL cursor motion.
+
+For accurate RTL text entry and mixed Hebrew/Latin/numeric layout, save the file
+and choose **File → Edit Current File RTL in Browser...**. The local browser
+uses its native `dir="rtl"` textarea; Save writes logical-order UTF-8 text
+with the usual digest and CSRF safeguards. External-change notification from
+v43 then lets you Reload from disk in the Tk editor. The browser uses the
+system's input method or paste, not ZEFM's Tk-only Alt keymaps.
+
+The normal file-browser listing also offers **RTL edit**. See
+[BROWSER_FILE_MANAGER.md](BROWSER_FILE_MANAGER.md) for details.
