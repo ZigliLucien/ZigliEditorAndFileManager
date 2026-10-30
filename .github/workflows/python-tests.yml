@@ -1,0 +1,30 @@
+name: ZEFM Python port tests
+
+on:
+  push:
+    branches: [python-port]
+    paths:
+      - "python/**"
+      - ".github/workflows/python-tests.yml"
+  pull_request:
+    paths:
+      - "python/**"
+      - ".github/workflows/python-tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  python-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Tk and virtual X11 display
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-tk xvfb
+      - name: Run Python tests, including Tk GUI smoke tests
+        working-directory: python
+        run: xvfb-run -a python3 -m unittest discover -s tests -v
