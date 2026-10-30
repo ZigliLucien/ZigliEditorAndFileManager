@@ -245,3 +245,23 @@ not provide atomic source snapshots under concurrent writes.
 multi-file selection, copy directory trees, and automatic Note migration. The
 absence of destructive operations is intentional while we validate the new
 browser file actions.
+
+## v50 — view PDFs directly in the browser
+
+With **view** selected in the reconstructed listing, click a `.pdf` file
+to open the **native browser PDF viewer**. The basic HTML listing also links
+PDF files directly to that view. The new `GET /pdf?path=...` endpoint sends
+the original PDF bytes as `application/pdf` with inline disposition, and
+supports a single `Range: bytes=...` request for efficient seeking to pages.
+
+Use the existing **Download** link to save the file instead. Neither action
+changes the original PDF. Only files inside the configured directory root,
+with a `.pdf` extension and a PDF header, are viewable. Preview size is
+limited to 128 MiB. The server is loopback-only; PDF viewing uses the
+browser's built-in PDF capabilities and does not execute an external program.
+
+Firefox: ensure the PDF content-type action is configured to **Open in
+Firefox** if you want the viewer rather than the browser's download prompt.
+PDFs larger than the preview limit must be opened locally outside this
+browser interface. The normal Quick Edit textarea is deliberately not
+offered for PDF files.
