@@ -1510,8 +1510,8 @@ class Window:
             url=self.local_browser.start()
             if self.browser_poll_id is None:
                 self.browser_poll_id = self.root.after(150, self._drain_browser_requests)
-            webbrowser.open(url)
-            self.status.set(f"Local file manager: {url} (root: {root})")
+            webbrowser.open(url + "listing")
+            self.status.set(f"ZEFM original-style file listing: {url}listing (root: {root})")
         except (OSError,ValueError) as exc:
             messagebox.showerror("Local file manager",str(exc),parent=self.root)
 
