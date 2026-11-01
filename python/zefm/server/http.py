@@ -304,10 +304,9 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                         self._serve_pdf(rel)
                         return
                     if suffix in (".html", ".htm"):
-                        data, media_type, html_document = site_resource(
-                            files, site_url(rel))
-                        self._send(200, data, media_type,
-                                   {"Content-Security-Policy": HTML_PREVIEW_CSP})
+                        # Redirect so relative CSS/images resolve beside the
+                        # HTML document instead of under the /view endpoint.
+                        self._send(302, b"", extra={"Location": site_url(rel)})
                         return
                     text, _ = files.read_text(rel)
                     content = (f'<p><a href="{escape(safe_listing_return(files, back_state, files.relative(files.resolve(rel).parent)), quote=True)}">← Back</a> '
