@@ -152,7 +152,8 @@ class BuildBrowserTests(unittest.TestCase):
         self.assertEqual(code, 200)
         self.assertIn(b"Heading", data)
         self.assertIn("sandbox", headers["Content-Security-Policy"])
-        self.assertNotIn("allow-scripts", headers["Content-Security-Policy"])
+        self.assertIn("sandbox allow-scripts", headers["Content-Security-Policy"])
+        self.assertNotIn("allow-same-origin", headers["Content-Security-Policy"])
 
     def test_build_popup_and_post_validation(self):
         status, html, headers = self.request("/build?path=c%C5%93ur.md")
