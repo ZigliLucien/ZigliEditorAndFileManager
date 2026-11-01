@@ -418,21 +418,24 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                 if not secrets.compare_digest(args.get("csrf", ""), token):
                     raise BrowserError("Invalid form token", 403)
                 route = urlsplit(self.path).path
+                return_to = args.get("back")
+                if return_to:
+                    safe_listing_return(files, return_to)
                 if route=="/mkdir":
-                    if set(args) != {"csrf", "path", "name"}:
+                    if set(args) - {"csrf", "path", "name", "back"} or not {"csrf", "path", "name"} <= set(args):
                         raise BrowserError("Unexpected create-directory parameters")
                     created = files.create_directory(args["path"], args["name"])
-                    back = escape(link("/browse", files.relative(created.parent)), quote=True)
+                    back = escape(safe_listing_return(files, return_to, files.relative(created.parent)), quote=True)
                     self._send(201, page("Folder created",
                         f'<h2>Created folder: {escape(created.name)}</h2>'
                         f'<p><a href="{back}">Back to directory</a></p>'))
                 elif route=="/rename":
-                    if set(args) != {"csrf", "path", "name"}:
+                    if set(args) - {"csrf", "path", "name", "back"} or not {"csrf", "path", "name"} <= set(args):
                         raise BrowserError("Unexpected rename parameters")
                     with note_lock:
                         renamed, count = rename_manager.rename(args["path"], args["name"])
                     directory = files.relative(renamed.parent)
-                    back = escape(link("/listing", directory), quote=True)
+                    back = escape(safe_listing_return(files, return_to, directory), quote=True)
                     self._send(200, page("File renamed",
                         f'<h2>Renamed to: {escape(renamed.name)}</h2>'
                         f'<p>{count} attached Notes retained under the new filename.</p>'
@@ -441,14 +444,14 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                     if set(args) != {"csrf", "path", "name"}:
                         raise BrowserError("Unexpected copy parameters")
                     copied = files.copy_file(args["path"], args["name"])
-                    back = escape(link("/browse", files.relative(copied.parent)), quote=True)
+                    back = escape(safe_listing_return(files, return_to, files.relative(copied.parent)), quote=True)
                     self._send(201, page("File copied",
                         f'<h2>Copied to: {escape(copied.name)}</h2>'
                         f'<p><a href="{back}">Back to directory</a></p>'))
                 elif route=="/open-editor":
                     if open_in_editor is None:
                         raise BrowserError("Desktop editor integration unavailable", 404)
-                    if set(args) != {"csrf", "path"}:
+                    if set(args) - {"csrf", "path", "back"} or not {"csrf", "path"} <= set(args):
                         raise BrowserError("Unexpected editor-open parameters")
                     p=files.resolve(args["path"])
                     if not p.is_file():
@@ -458,7 +461,7 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                     self._send(200,page("Open in ZEFM",
                         f'<h2>Sent to ZEFM: {escape(args["path"])}</h2>'
                         '<p>Return to the editor window. An already open buffer is reused.</p>'
-                        f'<p><a href="{escape(link("/browse", files.relative(p.parent)),quote=True)}">Back to files</a></p>'))
+                        f'<p><a href="{escape(safe_listing_return(files, return_to, files.relative(p.parent)),quote=True)}">Back to files</a></p>'))
                 elif route=="/note-edit":
                     for key in ("path", "word", "digest", "content"):
                         if key not in args:
@@ -482,14 +485,14 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                         except (OSError,ValueError) as exc:
                             raise BrowserError(f"Could not save note: {exc}",500) from exc
                     self._send(200,page("Note Saved",f'<h2>Saved note: {escape(word)}</h2>'
-                           f'<p><a href="{escape(link("/notes",args["path"]),quote=True)}">Back to Notes</a></p>'))
+                           f'<p><a href="{escape(link("/notes",args["path"]) + ("&" + urlencode({"back": return_to}) if return_to else ""),quote=True)}">Back to Notes</a></p>'))
                 else:
                     for key in ("path", "digest", "content"):
                         if key not in args:
                             raise BrowserError("Missing form parameter")
                     files.save_text(args["path"], args["content"], args["digest"])
                     self._send(200, page("Saved", f"<h2>Saved: {escape(args['path'])}</h2>"
-                               f'<p><a href="{escape(link("/browse", files.relative(files.resolve(args["path"]).parent)), quote=True)}">Back to directory</a></p>'
+                               f'<p><a href="{escape(safe_listing_return(files, return_to, files.relative(files.resolve(args["path"]).parent)), quote=True)}">Back to directory</a></p>'
                                "<p>If this file is open in the desktop editor, reload it there before editing further.</p>"))
             except (BrowserError, UnicodeDecodeError) as exc:
                 status = exc.status if isinstance(exc, BrowserError) else 400
