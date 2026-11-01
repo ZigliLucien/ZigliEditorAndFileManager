@@ -1,4 +1,4 @@
-"""Bounded Markdown preview and PDF builds for local ZEFM documents.
+"""Discount makepage preview and PDF builds for local ZEFM documents.
 
 Builds execute known programs with argv (never a shell), a timeout,
 controlled per-source output directory, and explicit diagnostics.
@@ -35,53 +35,70 @@ def checked_source(files, relative, *, for_build=False):
     return path, descriptor
 
 
-def markdown_html(files, relative):
-    """Render Markdown into sandboxed HTML without exposing raw scripts.
+def _discount_command():
+    """Prefer Discount's makepage, as in the original ZEFM workflow."""
+    executable = shutil.which("makepage")
+    if executable:
+        return [executable, "-f", "latex,nostyle,nohtml"]
+    executable = shutil.which("markdown")
+    if executable:
+        return [executable, "-f", "latex,nostyle,nohtml"]
+    return None
 
-    Pandoc is optional; when unavailable preserve a readable escaped source.
-    HTML rendering and external resources remain blocked by the CSP.
-    """
+
+def _discount_render(text: str, source: Path) -> str | None:
+    command = _discount_command()
+    if command is None:
+        return None
+    try:
+        proc = subprocess.run(
+            command, input=text, cwd=str(source.parent), capture_output=True,
+            text=True, errors="replace", timeout=10, check=False)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    if proc.returncode != 0 or len(proc.stdout.encode("utf-8")) > 2 * MAX_SOURCE_BYTES:
+        return None
+    result = proc.stdout
+    # makepage creates a complete HTML page, while markdown produces a body
+    # fragment. Keep that native makepage structure for visual fidelity.
+    if Path(command[0]).name == "makepage":
+        return result
+    return ("<!doctype html><html><head><meta charset='utf-8'></head>"
+            "<body>" + result + "</body></html>")
+
+
+def markdown_html(files, relative):
+    """Use Discount makepage to display Markdown, with escaped-source fallback."""
     source, desc = checked_source(files, relative)
     if desc["view"] != "markdown":
         raise BrowserError("Not a Markdown file", 415)
-    raw = source.read_bytes()
     try:
-        text = raw.decode("utf-8")
-    except UnicodeError as exc:
+        text = source.read_bytes().decode("utf-8")
+    except UnicodeDecodeError as exc:
         raise BrowserError("Markdown file is not UTF-8", 415) from exc
-    pandoc = shutil.which("pandoc")
-    if pandoc:
-        try:
-            result = subprocess.run(
-                [pandoc, "--from=markdown-raw_html", "--to=html5",
-                 "--no-highlight"], input=text, capture_output=True, text=True,
-                timeout=10, check=False, cwd=str(source.parent))
-        except (subprocess.TimeoutExpired, OSError):
-            result = None
-        if result is not None and result.returncode == 0 and len(result.stdout) < 2 * MAX_SOURCE_BYTES:
-            body = result.stdout
-        else:
-            body = "<pre>" + escape(text) + "</pre>"
-    else:
-        body = "<pre>" + escape(text) + "</pre>"
+    rendered = _discount_render(text, source)
+    if rendered is not None:
+        return rendered.encode("utf-8")
     return ("<!doctype html><html><head><meta charset='utf-8'>"
             "<meta name='viewport' content='width=device-width,initial-scale=1'>"
             "<title>" + escape(source.name) + "</title>"
             "<style>body{font:16px/1.6 system-ui,sans-serif;max-width:940px;"
             "margin:2rem auto;padding:0 1rem}pre{overflow:auto;background:#f4f4f4;"
-            "padding:1rem}code{font-family:monospace}</style></head><body>"
-            + body + "</body></html>").encode("utf-8")
+            "padding:1rem}</style></head><body>"
+            "<pre>" + escape(text) + "</pre></body></html>").encode("utf-8")
 
 
 def _command(source, output_dir, descriptor):
     if descriptor["build"] == "pandoc":
-        binary = shutil.which("pandoc")
-        if not binary:
-            raise BrowserError("Pandoc is not installed or not on PATH", 503)
-        # Deliberately do not allow raw TeX or raw HTML from Markdown.
-        return [binary, "--from=markdown-raw_tex-raw_html",
-                "--pdf-engine=lualatex", "--output",
-                str(output_dir / "document.pdf"), str(source)]
+        # The Markdown build now follows Discount -> HTML -> PDF, not Pandoc.
+        # The HTML conversion itself is done before this command is returned.
+        engine = shutil.which("weasyprint")
+        if not engine:
+            raise BrowserError(
+                "Markdown PDF requires WeasyPrint (and Discount makepage). "
+                "The Markdown HTML preview already works without it.", 503)
+        return [engine, str(output_dir / "document.html"),
+                str(output_dir / "document.pdf")]
     if descriptor["build"] == "lualatex":
         binary = shutil.which("lualatex")
         if not binary:
@@ -105,6 +122,17 @@ def build_pdf(files, relative):
         raise BrowserError("Unsafe output directory", 403)
     temporary = Path(tempfile.mkdtemp(prefix="job-", dir=output_base))
     try:
+        if descriptor["build"] == "pandoc":
+            if not _discount_command():
+                raise BrowserError("Discount makepage or markdown is required", 503)
+            try:
+                text = source.read_bytes().decode("utf-8")
+            except UnicodeDecodeError as exc:
+                raise BrowserError("Markdown file is not UTF-8", 415) from exc
+            html = _discount_render(text, source)
+            if html is None:
+                raise BrowserError("Discount Markdown conversion failed", 422)
+            (temporary / "document.html").write_text(html, encoding="utf-8")
         command = _command(source, temporary, descriptor)
         started = time.monotonic()
         try:
