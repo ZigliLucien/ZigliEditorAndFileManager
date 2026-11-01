@@ -24,6 +24,7 @@ from .listing_view import listing_data, listing_shell
 from .listing_paging import paged_listing
 from .pdf_delivery import select_pdf, byte_range
 from .rename_ops import RenameManager
+from .navigation import safe_listing_return
 
 
 _STYLE = """<style>body{max-width:1000px;margin:2rem auto;padding:0 1rem;font:16px system-ui,sans-serif}
@@ -188,6 +189,9 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                     raise BrowserError("Unknown route", 404)
                 args = self._params(parsed.query)
                 rel = args.get("path", ".")
+                back_state = args.get("back")
+                if back_state:
+                    safe_listing_return(files, back_state)
                 if parsed.path in ("/", "/browse"):
                     self._send(200, self._render_listing(rel))
                 elif parsed.path == "/listing":
@@ -237,12 +241,12 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                     self._send(200, RTL_KEYMAP_JS.encode("utf-8"),
                                "text/javascript; charset=utf-8")
                 elif parsed.path == "/rename":
-                    if set(args) != {"path"}:
+                    if set(args) - {"path", "back"}:
                         raise BrowserError("Unexpected rename parameters")
                     source = files.resolve(rel)
                     if not source.is_file() or (files.root / rel).is_symlink():
                         raise BrowserError("File not found for rename", 404)
-                    back = escape(link("/browse", files.relative(source.parent)), quote=True)
+                    back = escape(safe_listing_return(files, back_state, files.relative(source.parent)), quote=True)
                     content = (
                         f'<p><a href="{back}">← Back</a></p>'
                         f'<h2>Rename: {escape(rel)}</h2>'
@@ -251,20 +255,21 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                         '<form method="post" action="/rename" accept-charset="utf-8">'
                         f'<input type="hidden" name="csrf" value="{escape(token,quote=True)}">'
                         f'<input type="hidden" name="path" value="{escape(rel,quote=True)}">'
+                        f'<input type="hidden" name="back" value="{escape(back_state or "",quote=True)}">'
                         f'<label>New filename: <input name="name" required maxlength="255"'
                         f' value="{escape(source.name,quote=True)}"></label> '
                         '<button type="submit">Rename file</button></form>'
                     )
                     self._send(200, page("Rename file", content))
                 elif parsed.path == "/copy":
-                    if set(args) != {"path"}:
+                    if set(args) - {"path", "back"}:
                         raise BrowserError("Unexpected copy parameters")
                     source = files.resolve(rel)
                     if not source.is_file():
                         raise BrowserError("Source file not found", 404)
                     if source.stat().st_size > MAX_COPY_BYTES:
                         raise BrowserError("File too large to copy in browser", 413)
-                    back = escape(link("/browse", files.relative(source.parent)), quote=True)
+                    back = escape(safe_listing_return(files, back_state, files.relative(source.parent)), quote=True)
                     default_name = "Copy of " + source.name
                     content = (
                         f'<p><a href="{back}">← Back to directory</a></p>'
@@ -273,26 +278,29 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                         '<form method="post" action="/copy" accept-charset="utf-8">'
                         f'<input type="hidden" name="csrf" value="{escape(token, quote=True)}">'
                         f'<input type="hidden" name="path" value="{escape(rel, quote=True)}">'
+                        f'<input type="hidden" name="back" value="{escape(back_state or "",quote=True)}">'
                         f'<label>New filename: <input name="name" maxlength="255" required'
                         f' value="{escape(default_name, quote=True)}"></label> '
                         '<button type="submit">Create copy</button></form>'
                     )
                     self._send(200, page("Copy file", content))
                 elif parsed.path == "/pdf":
-                    if set(args) - {"path"}:
+                    if set(args) - {"path", "back"}:
                         raise BrowserError("Unexpected PDF parameters")
                     self._serve_pdf(rel)
                 elif parsed.path == "/view":
+                    if set(args) - {"path", "back"}:
+                        raise BrowserError("Unexpected view parameters")
                     if files.resolve(rel).suffix.casefold() == ".pdf":
                         self._serve_pdf(rel)
                         return
                     text, _ = files.read_text(rel)
-                    content = (f'<p><a href="{escape(link("/browse", files.relative(files.resolve(rel).parent)), quote=True)}">← Back</a> '
+                    content = (f'<p><a href="{escape(safe_listing_return(files, back_state, files.relative(files.resolve(rel).parent)), quote=True)}">← Back</a> '
                                f'<a href="{escape(link("/edit", rel), quote=True)}">Quick edit</a></p>'
                                f"<h2>{escape(rel)}</h2><pre>{escape(text)}</pre>")
                     self._send(200, page(rel, content))
                 elif parsed.path == "/edit":
-                    if set(args) - {"path", "dir"}:
+                    if set(args) - {"path", "dir", "back"}:
                         raise BrowserError("Unexpected edit parameters", 400)
                     direction = args.get("dir", "ltr")
                     if direction not in ("ltr", "rtl"):
@@ -310,17 +318,20 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                         if direction == "rtl" else '')
                     rtl_script = ('<script src="/rtl-keymap.js" defer></script>'
                                   if direction == "rtl" else '')
-                    content = (f'<p><a href="{escape(link("/browse", files.relative(files.resolve(rel).parent)), quote=True)}">← Back</a></p>'
+                    content = (f'<p><a href="{escape(safe_listing_return(files, back_state, files.relative(files.resolve(rel).parent)), quote=True)}">← Back</a></p>'
                                f'<h2>Quick edit{" (RTL)" if direction == "rtl" else ""}: {escape(rel)}</h2>'
                                '<form action="/edit" method="post" accept-charset="utf-8">'
                                f'<input type="hidden" name="csrf" value="{escape(token, quote=True)}">'
                                f'<input type="hidden" name="path" value="{escape(rel, quote=True)}">'
+                               f'<input type="hidden" name="back" value="{escape(back_state or "",quote=True)}">'
                                f'<input type="hidden" name="digest" value="{digest}">'
                                f'{rtl_controls}'
                                f'<textarea name="content"{textarea_direction}>{escape(text)}</textarea><p><button type="submit">Save</button></p></form>'
                                f'{rtl_script}')
                     self._send(200, page(rel, content), allow_local_script=(direction == "rtl"))
                 elif parsed.path == "/notes":
+                    if set(args) - {"path", "back"}:
+                        raise BrowserError("Unexpected notes parameters")
                     p = files.resolve(rel)
                     if not p.is_file():
                         raise BrowserError("Not a file", 404)
@@ -331,16 +342,18 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                             raise BrowserError(f"Cannot read local notes: {exc}", 500) from exc
                     results = "".join(
                         f'<section><h3>{escape(note["word"])}</h3>'
-                        f'<p><a href="{escape(link("/note-edit", rel) + "&word=" + quote(note["word"], safe=""), quote=True)}">Edit note</a></p>'
+                        f'<p><a href="{escape(link("/note-edit", rel) + "&word=" + quote(note["word"], safe="") + ("&" + urlencode({"back":back_state}) if back_state else ""), quote=True)}">Edit note</a></p>'
                         f'<pre>{escape(note["data"])}</pre></section>' for note in notes)
                     if not results:
                         results = '<p>No word-attached Notes for this file.</p>'
-                    back = escape(link("/browse", files.relative(p.parent)), quote=True)
-                    create = escape(link("/note-edit", rel), quote=True)
+                    back = escape(safe_listing_return(files, back_state, files.relative(p.parent)), quote=True)
+                    create = escape(link("/note-edit", rel) + ("&" + urlencode({"back":back_state}) if back_state else ""), quote=True)
                     self._send(200, page(f"Notes: {rel}", f'<p><a href="{back}">← Back</a></p>'
                                          f'<h2>Notes: {escape(rel)}</h2>'
                                          f'<p><a href="{create}">Add Note</a></p>{results}'))
                 elif parsed.path == "/note-edit":
+                    if set(args) - {"path", "word", "back"}:
+                        raise BrowserError("Unexpected note-edit parameters")
                     p = files.resolve(rel)
                     if not p.is_file():
                         raise BrowserError("Not a file", 404)
@@ -354,7 +367,7 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                             raise BrowserError(f"Cannot read local notes: {exc}", 500) from exc
                     data=record["data"] if record else ""
                     revision=note_version(record)
-                    back=escape(link("/notes",rel),quote=True)
+                    back=escape(link("/notes",rel) + ("&" + urlencode({"back":back_state}) if back_state else ""),quote=True)
                     word_label=(f'<strong>Word: {escape(word)}</strong>' if word else
                                 '<label>Word or phrase: <input name="word" required maxlength="500"></label>')
                     word_field=(f'<input type="hidden" name="word" value="{escape(word,quote=True)}">' if word else "")
@@ -362,6 +375,7 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                           '<form action="/note-edit" method="post" accept-charset="utf-8">'
                           f'<input type="hidden" name="csrf" value="{escape(token,quote=True)}">'
                           f'<input type="hidden" name="path" value="{escape(rel,quote=True)}">'
+                          f'<input type="hidden" name="back" value="{escape(back_state or "",quote=True)}">'
                           f'<input type="hidden" name="digest" value="{revision}">'
                           f'{word_label}{word_field}'
                           '<p><button type="submit">Save Note</button></p>'
@@ -369,6 +383,8 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                           '<p><button type="submit">Save Note</button></p></form>')
                     self._send(200,page(f"Edit Note: {rel}",body))
                 elif parsed.path == "/raw":
+                    if set(args) - {"path", "back"}:
+                        raise BrowserError("Unexpected raw parameters")
                     p = files.resolve(rel)
                     if not p.is_file():
                         raise BrowserError("Not a file", 404)
