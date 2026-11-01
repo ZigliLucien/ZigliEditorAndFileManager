@@ -300,3 +300,24 @@ listing's directory/page/sort/filter context.
   with fresh outputs, existing timeouts and diagnostics. If WeasyPrint is
   missing, HTML preview still works and PDF build reports a clear error.
 - LuaLaTeX compilation and the `.tex` View behavior are unchanged.
+
+### v57 — restored original ServPak mathematical page styling
+- Inspected `TTT/ServPak/js/mathformat.js`, `TTT/ServPak/css/math.css`,
+  and related `Plugins/GoMD.java`. The requested `web.css` was not found
+  at the expected ServPak location.
+- Added a scoped, locally served `/math.css` stylesheet, preserving the
+  original dark-blue theorem text, green lemmas/propositions, brown lighter
+  section headings, italic theorem blocks, numbered centered equations,
+  and original link palette.
+- Ported the presentation transformations from jQuery into Python's
+  `HTMLParser`, performed before sending generated HTML. This supports
+  theorem/proof labels, section headings, equation numbers, list elements
+  and internal references without running JavaScript in the browser.
+- Discount Markdown preview and intermediate HTML for PDF conversion use
+  this shared presentation. Other locally generated ZEFM HTML pages link
+  the stylesheet, though its mathematical styles are scoped to the
+  `zefm-math-page` class to protect existing file manager layout.
+- Existing CSP restrictions still block scripts and remote MathJax: this
+  revision formats mathematical structure but does not provide a full
+  TeX-to-typeset-math engine in the browser. LuaLaTeX PDF compilation
+  remains the definitive route for typesetting equations.
