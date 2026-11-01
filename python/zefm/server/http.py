@@ -171,6 +171,7 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                               f' &nbsp; <a href="{escape(link("/raw", rel), quote=True)}">Download</a>'
                               f' &nbsp; <a href="{escape(link("/copy", rel), quote=True)}">Copy...</a>'
                               f' &nbsp; <a href="{escape(link("/rename", rel), quote=True)}">Rename...</a>'
+                              f' &nbsp; <a href="{escape(link("/move", rel), quote=True)}">Move...</a>'
                               f' &nbsp; <a href="{escape(link("/notes", rel), quote=True)}">Notes</a>')
                     if entry.suffix.casefold() == ".pdf":
                         links += (f' &nbsp; <a href="{escape(link("/raw", rel), quote=True)}">Download</a>'
@@ -272,6 +273,28 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                         '<button type="submit">Rename file</button></form>'
                     )
                     self._send(200, page("Rename file", content))
+                elif parsed.path == "/move":
+                    if set(args) - {"path", "back"}:
+                        raise BrowserError("Unexpected move parameters")
+                    source = files.resolve(rel)
+                    if not source.is_file() or (files.root / rel).is_symlink():
+                        raise BrowserError("File not found for moving", 404)
+                    back = escape(safe_listing_return(files, back_state, files.relative(source.parent)), quote=True)
+                    content = (
+                        f'<p><a href="{back}">← Back</a></p>'
+                        f'<h2>Move file: {escape(rel)}</h2>'
+                        '<p>Move to another existing directory inside this ZEFM root. '
+                        'No file will be overwritten; Notes move with the file. '
+                        'Close any open desktop editor buffer first.</p>'
+                        '<form method="post" action="/move" accept-charset="utf-8">'
+                        f'<input type="hidden" name="csrf" value="{escape(token,quote=True)}">'
+                        f'<input type="hidden" name="path" value="{escape(rel,quote=True)}">'
+                        f'<input type="hidden" name="back" value="{escape(back_state or "",quote=True)}">'
+                        '<label>Destination directory (relative to browsing root): '
+                        '<input name="destination" required value="."></label> '
+                        '<button type="submit">Move file</button></form>'
+                    )
+                    self._send(200, page("Move file", content))
                 elif parsed.path == "/copy":
                     if set(args) - {"path", "back"}:
                         raise BrowserError("Unexpected copy parameters")
@@ -457,6 +480,20 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                         f'<h2>Renamed to: {escape(renamed.name)}</h2>'
                         f'<p>{count} attached Notes retained under the new filename.</p>'
                         f'<p><a href="{back}">Back to original-style listing</a></p>'))
+                elif route=="/move":
+                    if (set(args) - {"csrf", "path", "destination", "back"}
+                            or not {"csrf", "path", "destination"} <= set(args)):
+                        raise BrowserError("Unexpected move parameters")
+                    with note_lock:
+                        moved, count = rename_manager.move(args["path"], args["destination"])
+                    back = escape(safe_listing_return(
+                        files, return_to, files.relative(moved.parent)), quote=True)
+                    destination_link = escape(link("/listing", files.relative(moved.parent)), quote=True)
+                    self._send(200, page("File moved",
+                        f'<h2>Moved to: {escape(files.relative(moved))}</h2>'
+                        f'<p>{count} attached Notes retained.</p>'
+                        f'<p><a href="{back}">Return to previous listing</a> · '
+                        f'<a href="{destination_link}">Open destination directory</a></p>'))
                 elif route=="/copy":
                     if set(args) - {"csrf", "path", "name", "back"} or not {"csrf", "path", "name"} <= set(args):
                         raise BrowserError("Unexpected copy parameters")
