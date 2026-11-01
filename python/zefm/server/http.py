@@ -71,9 +71,12 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
             if allow_local_script:
                 csp = csp.replace("style-src 'unsafe-inline'", "style-src 'self' 'unsafe-inline'")
                 csp += "; script-src 'self'; connect-src 'self'"
+            if extra and "Content-Security-Policy" in extra:
+                csp = extra["Content-Security-Policy"]
             self.send_header("Content-Security-Policy", csp)
             for key, value in (extra or {}).items():
-                self.send_header(key, value)
+                if key.lower() != "content-security-policy":
+                    self.send_header(key, value)
             self.end_headers()
             self.wfile.write(data)
 
