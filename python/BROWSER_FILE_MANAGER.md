@@ -393,3 +393,23 @@ only after a success response.
 **Not part of v55**: MIME email extraction, attachment directories,
 build cancellation, a configurable engine selection UI, and caching of
 Markdown HTML. These remain on the development roadmap.
+
+## v56 — Markdown via Discount `makepage`, not Pandoc
+
+Markdown View now runs Discount **`makepage`** using the `latex`,
+`nostyle` and `nohtml` flags. This follows the original ZEFM
+`Plugins/GoMD.java` Markdown presentation: that Java code used
+`/usr/local/bin/markdown -f latex -f nostyle`, then assembled the HTML
+page. Using `makepage` produces the complete page directly. When
+`makepage` is unavailable, the Discount `markdown` executable is tried
+instead; if neither is installed or conversion fails, an escaped Markdown
+source preview remains available. HTML stays in the restricted preview
+sandbox. Raw HTML from Markdown is intentionally disabled.
+
+Markdown **Compile PDF** no longer invokes Pandoc. ZEFM now builds HTML
+with Discount first and, **if WeasyPrint is installed**, converts that HTML
+to a newly generated PDF. A missing WeasyPrint executable yields a clear
+build diagnostic without affecting Markdown HTML viewing. The `.tex`
+LuaLaTeX compilation path has not changed. MathJax's historical CDN script
+is not automatically loaded because preview scripts are blocked; any future
+local mathematical typesetting must preserve the sandbox model.
