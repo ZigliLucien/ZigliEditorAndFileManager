@@ -243,7 +243,7 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                     data = listing_data(files, rel, notes_path)
                     self._send(200, json.dumps(data, ensure_ascii=False).encode("utf-8"),
                                "application/json; charset=utf-8")
-                elif parsed.path in ("/listing.css", "/listing.js", "/build.js"):
+                elif parsed.path in ("/listing.css", "/listing.js", "/build.js", "/math.css"):
                     if args:
                         raise BrowserError("Unexpected asset parameters")
                     name = parsed.path[1:]
