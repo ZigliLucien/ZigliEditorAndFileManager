@@ -122,3 +122,9 @@ footer{margin:36px auto 0;padding-top:12px;border-top:1px solid #eee;text-align:
 .zefm-context-action{display:block;width:100%;text-align:left;padding:7px 12px;
   background:transparent;border:none;cursor:pointer;color:#384c73}
 .zefm-context-action:hover,.zefm-context-action:focus{background:#eeffff;color:#3344b1}
+
+/* v54: compact desktop presentation. CSS zoom changes layout dimensions
+   as well as glyphs, unlike transform:scale. Preserve original palette. */
+@media (min-width: 700px) {
+  #zefm-app { zoom: 0.85; }
+}
