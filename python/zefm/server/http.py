@@ -23,6 +23,7 @@ from .rtl_keymap import RTL_KEYMAP_JS, yiddish_keymap_json
 from .listing_view import listing_data, listing_shell
 from .listing_paging import paged_listing
 from .pdf_delivery import select_pdf, byte_range
+from .rename_ops import RenameManager
 
 
 _STYLE = """<style>body{max-width:1000px;margin:2rem auto;padding:0 1rem;font:16px system-ui,sans-serif}
@@ -47,8 +48,9 @@ def note_version(record) -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
-def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, open_in_editor=None):
+def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, open_in_editor=None, file_in_use=None):
     note_lock=threading.RLock()
+    rename_manager = RenameManager(files, notes_path, file_in_use)
     class BrowserHandler(BaseHTTPRequestHandler):
         server_version = "ZEFM-local/1"
 
@@ -163,6 +165,7 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                               f' &nbsp; <a href="{escape(link("/edit", rel) + "&dir=rtl", quote=True)}">RTL edit</a>'
                               f' &nbsp; <a href="{escape(link("/raw", rel), quote=True)}">Download</a>'
                               f' &nbsp; <a href="{escape(link("/copy", rel), quote=True)}">Copy...</a>'
+                              f' &nbsp; <a href="{escape(link("/rename", rel), quote=True)}">Rename...</a>'
                               f' &nbsp; <a href="{escape(link("/notes", rel), quote=True)}">Notes</a>')
                     if entry.suffix.casefold() == ".pdf":
                         links += (f' &nbsp; <a href="{escape(link("/raw", rel), quote=True)}">Download</a>'
@@ -233,6 +236,26 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                         raise BrowserError("Unexpected script parameters")
                     self._send(200, RTL_KEYMAP_JS.encode("utf-8"),
                                "text/javascript; charset=utf-8")
+                elif parsed.path == "/rename":
+                    if set(args) != {"path"}:
+                        raise BrowserError("Unexpected rename parameters")
+                    source = files.resolve(rel)
+                    if not source.is_file() or (files.root / rel).is_symlink():
+                        raise BrowserError("File not found for rename", 404)
+                    back = escape(link("/browse", files.relative(source.parent)), quote=True)
+                    content = (
+                        f'<p><a href="{back}">← Back</a></p>'
+                        f'<h2>Rename: {escape(rel)}</h2>'
+                        '<p>Existing files are never overwritten. Notes follow the renamed file.'
+                        ' Close any open desktop editor buffer before renaming.</p>'
+                        '<form method="post" action="/rename" accept-charset="utf-8">'
+                        f'<input type="hidden" name="csrf" value="{escape(token,quote=True)}">'
+                        f'<input type="hidden" name="path" value="{escape(rel,quote=True)}">'
+                        f'<label>New filename: <input name="name" required maxlength="255"'
+                        f' value="{escape(source.name,quote=True)}"></label> '
+                        '<button type="submit">Rename file</button></form>'
+                    )
+                    self._send(200, page("Rename file", content))
                 elif parsed.path == "/copy":
                     if set(args) != {"path"}:
                         raise BrowserError("Unexpected copy parameters")
@@ -387,6 +410,17 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                     self._send(201, page("Folder created",
                         f'<h2>Created folder: {escape(created.name)}</h2>'
                         f'<p><a href="{back}">Back to directory</a></p>'))
+                elif route=="/rename":
+                    if set(args) != {"csrf", "path", "name"}:
+                        raise BrowserError("Unexpected rename parameters")
+                    with note_lock:
+                        renamed, count = rename_manager.rename(args["path"], args["name"])
+                    directory = files.relative(renamed.parent)
+                    back = escape(link("/listing", directory), quote=True)
+                    self._send(200, page("File renamed",
+                        f'<h2>Renamed to: {escape(renamed.name)}</h2>'
+                        f'<p>{count} attached Notes retained under the new filename.</p>'
+                        f'<p><a href="{back}">Back to original-style listing</a></p>'))
                 elif route=="/copy":
                     if set(args) != {"csrf", "path", "name"}:
                         raise BrowserError("Unexpected copy parameters")
@@ -450,11 +484,11 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
 
 
 class BrowserServer:
-    def __init__(self, root: str, port: int = 0, notes_path=None, open_in_editor=None):
+    def __init__(self, root: str, port: int = 0, notes_path=None, open_in_editor=None, file_in_use=None):
         self.files = LocalFiles(root)
         self.token = secrets.token_urlsafe(32)
         server = ThreadingHTTPServer(("127.0.0.1", port), make_handler(self.files, self.token,
-                                                  lambda: server.server_address[1], notes_path, open_in_editor))
+                                                  lambda: server.server_address[1], notes_path, open_in_editor, file_in_use))
         server.daemon_threads = True
         self.server = server
         self.thread = None
