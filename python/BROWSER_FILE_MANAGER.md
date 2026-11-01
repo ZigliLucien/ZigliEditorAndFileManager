@@ -330,3 +330,26 @@ limits. Other text formats retain ZEFM's source/text viewer.
 The styled listing opens PDF and HTML documents in another tab so the
 GoFM page, sort order and filter remain intact. Browser settings and popup
 blocking may affect opening a new tab.
+
+## v54 — compact listing and guarded directory moves
+
+The original-style desktop listing now uses **85% CSS zoom**, reducing text,
+whitespace and controls together while maintaining the original checkerboard,
+blue filename buttons, GoFM paging and right-click operation palette.
+The compact zoom applies only at desktop widths (700px and above); small
+screens retain responsive sizing.
+
+The previously disabled **Move** operation is now available in the
+right-click menu and operation strip, and the Basic listing has a **Move...**
+link. It opens a form accepting an *existing* destination directory relative
+to the file-manager root (for example `Research/2026`). Files retain their
+original names. Move refuses to overwrite another file, traverse outside
+the selected root, follow directory symlinks or move a file open in the
+ZEFM desktop editor. Existing word Notes follow the file.
+
+Like Rename, Move uses POSIX no-clobber `os.link` followed by `os.unlink`
+with an intervening atomic Notes update and best-effort rollback. A move
+across different filesystems is **not supported** (no unsafe copy/unlink
+fallback). Do not move files being written by external programs, or rely on
+this operation as a crash-safe filesystem transaction. Directory-tree moves
+and trash/delete remain unimplemented.
