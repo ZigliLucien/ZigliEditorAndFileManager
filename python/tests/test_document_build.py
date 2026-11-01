@@ -60,7 +60,7 @@ class BuildModelTests(unittest.TestCase):
                    side_effect=lambda name: "/usr/local/bin/markdown" if name == "markdown" else None), \
              patch("zefm.server.document_build.subprocess.run", return_value=Result()) as run:
             html = markdown_html(self.files, self.md.name).decode()
-        self.assertIn("<body><h1>שלום</h1></body>", html)
+        self.assertIn('<body class="zefm-math-page"><h1>שלום</h1></body>', html)
         self.assertEqual(html.count("<html>"), 1)
 
     def test_markdown_pdf_pipeline_uses_discount_and_weasyprint(self):
