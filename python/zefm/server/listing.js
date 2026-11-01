@@ -31,6 +31,12 @@
   }
 
   function navigate(path, recordHistory = true) {
+    if (filterTimer !== null) {
+      clearTimeout(filterTimer);
+      filterTimer = null;
+    }
+    state.filter = "";
+    $("filter").value = "";
     if (recordHistory) history.pushState({path, page: 1}, "", listingUrl(path));
     refresh(path, 1);
   }
@@ -317,9 +323,18 @@
     state.sort = event.target.value;
     selectPage(0);
   });
+  let filterTimer = null;
   $("filter").addEventListener("input", (event) => {
-    state.filter = event.target.value;
-    selectPage(0);
+    state.filter = event.target.value.slice(0, 200);
+    if (filterTimer !== null) clearTimeout(filterTimer);
+    filterTimer = setTimeout(() => {
+      filterTimer = null;
+      if (!state.data) return;
+      // Typing a search should not create dozens of Back history entries.
+      history.replaceState({path: state.directory, page: 1}, "",
+                           listingUrl(state.directory, 1));
+      refresh(state.directory, 1);
+    }, 160);
   });
   $("find-file").addEventListener("click", () => $("filter").focus());
   $("refresh").addEventListener("click", () =>
