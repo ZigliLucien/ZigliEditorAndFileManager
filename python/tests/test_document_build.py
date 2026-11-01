@@ -44,20 +44,20 @@ class BuildModelTests(unittest.TestCase):
             stdout = "<!doctype html><html><head></head><body><h1>שלום</h1></body></html>"
             stderr = ""
         with patch("zefm.server.document_build.shutil.which",
-                   side_effect=lambda name: "/usr/local/bin/makepage" if name == "makepage" else None), \\
+                   side_effect=lambda name: "/usr/local/bin/makepage" if name == "makepage" else None), \
              patch("zefm.server.document_build.subprocess.run", return_value=Result()) as run:
             html = markdown_html(self.files, self.md.name).decode()
         self.assertIn("<h1>שלום</h1>", html)
         self.assertEqual(html.count("<html>"), 1)
         self.assertIn("latex,nostyle,nohtml", run.call_args.args[0])
-        self.assertEqual(run.call_args.kwargs["input"], "# שלום\\n\\n**bold**")
+        self.assertEqual(run.call_args.kwargs["input"], "# שלום\n\n**bold**")
 
     def test_discount_markdown_cli_fallback(self):
         class Result:
             returncode = 0
             stdout = "<h1>שלום</h1>"
         with patch("zefm.server.document_build.shutil.which",
-                   side_effect=lambda name: "/usr/local/bin/markdown" if name == "markdown" else None), \\
+                   side_effect=lambda name: "/usr/local/bin/markdown" if name == "markdown" else None), \
              patch("zefm.server.document_build.subprocess.run", return_value=Result()) as run:
             html = markdown_html(self.files, self.md.name).decode()
         self.assertIn("<body><h1>שלום</h1></body>", html)
@@ -74,14 +74,14 @@ class BuildModelTests(unittest.TestCase):
             self.assertEqual(Path(command[1]).name, "document.html")
             self.assertEqual(Path(command[2]).name, "document.pdf")
             self.assertIn("<h1>שלום</h1>", Path(command[1]).read_text())
-            Path(command[2]).write_bytes(b"%PDF-1.7\\nvalid")
+            Path(command[2]).write_bytes(b"%PDF-1.7\nvalid")
             class Compiled:
                 returncode = 0
                 stdout = "Rendered with WeasyPrint"
                 stderr = ""
             return Compiled()
         with patch("zefm.server.document_build.shutil.which",
-                   side_effect=lambda name: "/usr/bin/" + name), \\
+                   side_effect=lambda name: "/usr/bin/" + name), \
              patch("zefm.server.document_build.subprocess.run", side_effect=fake_run):
             result = build_pdf(self.files, self.md.name)
         self.assertTrue(result["ok"])
