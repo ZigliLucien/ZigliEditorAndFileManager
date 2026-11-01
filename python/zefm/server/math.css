@@ -1,0 +1,49 @@
+/* ZEFM mathematical-document presentation.
+   Adapted from TTT/ServPak/css/math.css, deliberately scoped so the
+   GoFM listing and form controls retain their established design. */
+.zefm-math-page {
+  max-width: 950px;
+  margin: 1.8em auto;
+  padding: 0 1.5em;
+  line-height: 1.62;
+  color: #303030;
+  overflow-wrap: break-word;
+}
+.zefm-math-page h1 { font-weight: 300; color: darkred; }
+.zefm-math-page :is(h2,h3,h4,h5,h6) { font-weight: 300; color: #aa4400; }
+.zefm-math-page :is(h3,h4) { font-style: italic; }
+.zefm-math-page a:link, .zefm-math-page a:visited { color: #4444ee; }
+.zefm-math-page a:hover { color: #ee9909; text-decoration: underline; }
+.zefm-math-page :is(.definition,.def,def) { color: darkblue; }
+.zefm-math-page :is(.theorem,theorem) { color: darkblue; font-style: italic; }
+.zefm-math-page :is(.proposition,.corollary,.lemma,proposition,corollary,lemma) {
+  color: #006500; font-style: italic;
+}
+.zefm-math-page :is(.remark,.example,remark,example) { font-style: italic; }
+.zefm-math-page :is(.zefm-math-block,.proof,.theorem,.proposition,.lemma,.corollary,.remark,.example) {
+  margin: 1em 0 1em 3%;
+}
+.zefm-math-page .zefm-math-heading { font-weight: 650; font-style: normal; margin-right: .5em; }
+.zefm-math-page .zefm-proof-heading { font-style: italic; margin-right: .5em; }
+.zefm-math-page :is(.eq,.equation,eq,equation) {
+  display: block; color: #444; text-align: center; margin: 1.1em auto;
+  position: relative; padding-right: 4em; overflow-x: auto;
+}
+.zefm-math-page .eqno { position: absolute; right: .5em; color: #555; font-size: .95em; }
+.zefm-math-page :is(.section,section) { display: block; margin: .7em 0 .7em 3%; }
+.zefm-math-page :is(.subsection,subsection) { display: block; margin: .7em 0 .7em 5%; }
+.zefm-math-page :is(.subsubsection,subsubsection) { display: block; margin: .7em 0 .7em 6%; }
+.zefm-math-page :is(.paragraph,paragraph) { display: block; margin-left: 7%; }
+.zefm-math-page :is(.subparagraph,subparagraph) { display: block; margin-left: 8%; }
+.zefm-math-page :is(.x,td,th) { text-align: center; }
+.zefm-math-page pre { overflow-x: auto; padding: .8em; background: #f5f5f5; white-space: pre; }
+.zefm-math-page code { font-family: ui-monospace, Menlo, Consolas, monospace; }
+.zefm-math-page blockquote { border-left: 2px solid #ddd; padding-left: 1em; margin-left: 1em; }
+.zefm-math-page :is(.skip,skip) { display:block; height: 1.8em; }
+.zefm-math-page :is(.quad,quad) { display:inline-block; width: 1em; }
+.zefm-math-page :is(.qquad,qquad) { display:inline-block; width: 2em; }
+.zefm-math-page :is(.cr,cr) { display:block; }
+@media(max-width:700px) {
+  .zefm-math-page { margin: 1em auto; padding: 0 .75em; }
+  .zefm-math-page .eqno { position: static; display:block; text-align:right; }
+}
