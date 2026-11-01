@@ -441,7 +441,7 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                         f'<p>{count} attached Notes retained under the new filename.</p>'
                         f'<p><a href="{back}">Back to original-style listing</a></p>'))
                 elif route=="/copy":
-                    if set(args) != {"csrf", "path", "name"}:
+                    if set(args) - {"csrf", "path", "name", "back"} or not {"csrf", "path", "name"} <= set(args):
                         raise BrowserError("Unexpected copy parameters")
                     copied = files.copy_file(args["path"], args["name"])
                     back = escape(safe_listing_return(files, return_to, files.relative(copied.parent)), quote=True)
