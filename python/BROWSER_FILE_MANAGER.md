@@ -291,3 +291,21 @@ not use renaming for files being edited elsewhere.
 **Still pending:** cross-directory move, directory-tree rename, delete/trash,
 and a more general open-file coordination system. The original PDF viewing,
 GoFM paging and older Basic listing remain available.
+
+## v52 — navigation that preserves your place
+
+The original-style ZEFM file listing now carries its directory, page number,
+sort order and filename filter into its **View, Notes, Edit, Copy, Rename and
+Open in ZEFM** actions. Back links and successful form submissions return to
+that same listing state, rather than dropping to an unfiltered Basic listing.
+Existing direct URLs without return context continue to work.
+
+PDFs opened from the styled listing now open in a **separate browser tab**,
+leaving the directory page, selected operation and GoFM navigation untouched.
+The Basic listing retains its ordinary direct PDF link.
+
+The return address is verified as an internal `/listing` URL with a confined
+directory and valid paging/sort/filter parameters. External URLs, traversal
+and arbitrary HTTP routes are rejected. No JavaScript framework or XML/XSLT
+is required. Typing into the filename filter is debounced and updates the
+current history entry instead of adding one Back entry per keystroke.
