@@ -352,3 +352,11 @@ file's associated word Notes to its new filename. When launched from
 the desktop editor, an open file must be closed before renaming. This
 increment does not expose move or delete operations. See
 [BROWSER_FILE_MANAGER.md](BROWSER_FILE_MANAGER.md) for safety limits.
+
+## v52 — context-preserving GoFM navigation
+
+The original-style listing keeps its directory, page, sort and filter after
+opening files or using Notes, Copy and Rename. Return links from forms
+restore the same view. PDFs opened from the styled listing appear in a
+separate tab so the listing stays where you left it. Search/filter typing no
+longer adds a Back-history entry for every character.
