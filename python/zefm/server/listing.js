@@ -125,6 +125,7 @@
     switch (mode) {
       case "copy": location.href = operationUrl("/copy", path); return;
       case "rename": location.href = operationUrl("/rename", path); return;
+      case "move": location.href = operationUrl("/move", path); return;
       case "notes": location.href = operationUrl("/notes", path); return;
       case "quick": location.href = operationUrl("/edit", path); return;
       case "edit":
