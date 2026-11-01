@@ -342,3 +342,13 @@ PDF previews are limited to 128 MiB and require a PDF header. Requests
 remain confined to the current loopback filesystem root; no external PDF
 software or subprocess is invoked. Viewer availability depends on the
 browser's own PDF settings. See BROWSER_FILE_MANAGER.md for details.
+
+## v51 — renaming in the original ZEFM listing
+
+Select the **rename** operation and click a file in the styled browser
+listing, or use **Rename...** in Basic listing. The operation stays in the
+same directory, refuses to replace an existing file, and migrates the
+file's associated word Notes to its new filename. When launched from
+the desktop editor, an open file must be closed before renaming. This
+increment does not expose move or delete operations. See
+[BROWSER_FILE_MANAGER.md](BROWSER_FILE_MANAGER.md) for safety limits.
