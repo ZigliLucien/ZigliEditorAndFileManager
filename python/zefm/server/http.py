@@ -28,6 +28,7 @@ from .navigation import safe_listing_return
 from .html_preview import site_url, site_resource, HTML_PREVIEW_CSP
 from .file_types import handler_for
 from .document_build import markdown_html, checked_source, build_pdf
+from .mathjax_filter import MATHJAX_PREVIEW_CSP
 
 
 _STYLE = """<style>body{max-width:1000px;margin:2rem auto;padding:0 1rem;font:16px system-ui,sans-serif}
@@ -243,7 +244,7 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                     data = listing_data(files, rel, notes_path)
                     self._send(200, json.dumps(data, ensure_ascii=False).encode("utf-8"),
                                "application/json; charset=utf-8")
-                elif parsed.path in ("/listing.css", "/listing.js", "/build.js", "/math.css"):
+                elif parsed.path in ("/listing.css", "/listing.js", "/build.js", "/math.css", "/mathjax-config.js"):
                     if args:
                         raise BrowserError("Unexpected asset parameters")
                     name = parsed.path[1:]
@@ -358,7 +359,7 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                         return
                     if handler_for(rel)["view"] == "markdown":
                         self._send(200, markdown_html(files, rel),
-                                   extra={"Content-Security-Policy": HTML_PREVIEW_CSP})
+                                   extra={"Content-Security-Policy": MATHJAX_PREVIEW_CSP})
                         return
                     if suffix in (".html", ".htm"):
                         # Redirect so relative CSS/images resolve beside the
