@@ -31,23 +31,61 @@ class BuildModelTests(unittest.TestCase):
         self.assertEqual(handler_for("a.pdf")["view"], "pdf")
         self.assertIsNone(handler_for("a.txt")["build"])
 
-    def test_markdown_fallback_without_pandoc(self):
+    def test_markdown_fallback_without_discount(self):
         with patch("zefm.server.document_build.shutil.which", return_value=None):
             html = markdown_html(self.files, self.md.name).decode()
         self.assertIn("שלום", html)
         self.assertIn("# שלום", html)
         self.assertIn("<pre>", html)
 
-    def test_markdown_pandoc_rendered_html(self):
+    def test_markdown_makepage_full_document(self):
         class Result:
             returncode = 0
-            stdout = "<h1>שלום</h1>"
+            stdout = "<!doctype html><html><head></head><body><h1>שלום</h1></body></html>"
             stderr = ""
-        with patch("zefm.server.document_build.shutil.which", return_value="/usr/bin/pandoc"), \
+        with patch("zefm.server.document_build.shutil.which",
+                   side_effect=lambda name: "/usr/local/bin/makepage" if name == "makepage" else None), \\
              patch("zefm.server.document_build.subprocess.run", return_value=Result()) as run:
             html = markdown_html(self.files, self.md.name).decode()
         self.assertIn("<h1>שלום</h1>", html)
-        self.assertIn("--from=markdown-raw_html", run.call_args.args[0])
+        self.assertEqual(html.count("<html>"), 1)
+        self.assertIn("latex,nostyle,nohtml", run.call_args.args[0])
+        self.assertEqual(run.call_args.kwargs["input"], "# שלום\\n\\n**bold**")
+
+    def test_discount_markdown_cli_fallback(self):
+        class Result:
+            returncode = 0
+            stdout = "<h1>שלום</h1>"
+        with patch("zefm.server.document_build.shutil.which",
+                   side_effect=lambda name: "/usr/local/bin/markdown" if name == "markdown" else None), \\
+             patch("zefm.server.document_build.subprocess.run", return_value=Result()) as run:
+            html = markdown_html(self.files, self.md.name).decode()
+        self.assertIn("<body><h1>שלום</h1></body>", html)
+        self.assertEqual(html.count("<html>"), 1)
+
+    def test_markdown_pdf_pipeline_uses_discount_and_weasyprint(self):
+        def fake_run(command, **kwargs):
+            if command[0].endswith("makepage"):
+                class Rendered:
+                    returncode = 0
+                    stdout = "<html><body><h1>שלום</h1></body></html>"
+                return Rendered()
+            self.assertTrue(command[0].endswith("weasyprint"))
+            self.assertEqual(Path(command[1]).name, "document.html")
+            self.assertEqual(Path(command[2]).name, "document.pdf")
+            self.assertIn("<h1>שלום</h1>", Path(command[1]).read_text())
+            Path(command[2]).write_bytes(b"%PDF-1.7\\nvalid")
+            class Compiled:
+                returncode = 0
+                stdout = "Rendered with WeasyPrint"
+                stderr = ""
+            return Compiled()
+        with patch("zefm.server.document_build.shutil.which",
+                   side_effect=lambda name: "/usr/bin/" + name), \\
+             patch("zefm.server.document_build.subprocess.run", side_effect=fake_run):
+            result = build_pdf(self.files, self.md.name)
+        self.assertTrue(result["ok"])
+        self.assertIn("Rendered", result["log"])
 
     def test_tex_success_verified_new_pdf(self):
         def fake_run(command, **kwargs):
@@ -136,7 +174,7 @@ class BuildBrowserTests(unittest.TestCase):
         self.assertEqual(status, 503)
         result = json.loads(body)
         self.assertFalse(result["ok"])
-        self.assertIn("Pandoc", result["error"])
+        self.assertIn("Discount", result["error"])
         self.assertIn("application/json", headers["Content-Type"])
 
 
