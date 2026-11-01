@@ -192,3 +192,11 @@ keyboard testing required. Word/file Notes source relationship documented in
 - Filename filter debounced and does not fill browser Back history.
 - Tests cover returning to page 3, Unicode filters, post-action links and
   rejection of malicious external return URLs.
+
+### v53 — left-click View, right-click file options and rendered HTML
+- Restored original filename interaction: ordinary left-click views; right-click
+  (or Shift+F10) opens View, Copy, Rename, Edit, Quick Edit, Notes menu.
+- HTML/HTM uses browser rendering at a confined /site URL, preserving
+  relative local CSS and image assets; scripts/forms disabled by CSP sandbox.
+- PDF native viewer and GoFM navigation continue unchanged.
+- Added dedicated preview/path-security regression tests.
