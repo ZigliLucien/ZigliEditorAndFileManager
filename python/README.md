@@ -360,3 +360,12 @@ opening files or using Notes, Copy and Rename. Return links from forms
 restore the same view. PDFs opened from the styled listing appear in a
 separate tab so the listing stays where you left it. Search/filter typing no
 longer adds a Back-history entry for every character.
+
+## v53 — original ZEFM filename click behavior
+
+Left-click a filename to open its natural browser representation (PDF or
+rendered HTML; other text formats in the text viewer). Right-click or use
+Shift+F10 for the original file operations menu: View, Copy, Rename, Edit,
+Quick Edit and Notes. This preserves the styled listing while making
+ordinary browsing natural again. HTML previews use confined static assets
+and sandbox restrictions for untrusted local pages.
