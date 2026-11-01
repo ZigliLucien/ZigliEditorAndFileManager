@@ -114,3 +114,11 @@ footer{margin:36px auto 0;padding-top:12px;border-top:1px solid #eee;text-align:
 #pages .gofm-reference{min-width:40px;max-width:75px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#777;font-size:13px}
 #pages .gofm-reference[aria-current="page"]{color:#4444ee;background:#ffffee;text-decoration:underline;font-weight:bold}
 @media(max-width:550px){.gofm-references{grid-template-columns:repeat(5,minmax(0,1fr))}}
+
+/* Right-click ZEFM operation menu; independent of ordinary left-click View. */
+.zefm-context-menu{position:fixed;z-index:1000;background:#ffffee;border:1px solid #99a5b4;
+  box-shadow:0 4px 14px #0002;min-width:164px;padding:5px;border-radius:3px}
+.zefm-context-menu[hidden]{display:none}
+.zefm-context-action{display:block;width:100%;text-align:left;padding:7px 12px;
+  background:transparent;border:none;cursor:pointer;color:#384c73}
+.zefm-context-action:hover,.zefm-context-action:focus{background:#eeffff;color:#3344b1}
