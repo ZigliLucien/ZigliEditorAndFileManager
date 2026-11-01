@@ -63,6 +63,7 @@ class Window:
         self.local_browser = None  # Start only on explicit File menu request.
         self.mail_browser = None  # Separately scoped local Maildir reader.
         self.browser_open_requests = Queue()
+        self._browser_open_paths = frozenset()
         self.browser_poll_id = None
         self.recent_files = RecentFiles()
         self.recent_menu = None
@@ -127,7 +128,20 @@ class Window:
         widget.bind("<Tab>", self._mode_tab)
         widget.bind("<ButtonRelease-1>", lambda event,w=widget:self._status(w))
         self._status(widget)
+        self._refresh_browser_open_paths()
         return widget
+
+    def _refresh_browser_open_paths(self):
+        # A snapshot published on Tk's main thread. HTTP workers may read it
+        # without accessing Tk widgets themselves.
+        self._browser_open_paths = frozenset(
+            Path(editor.state.buffer.path).expanduser().resolve()
+            for widget, editor in self.views.values()
+            if editor.state.buffer.path
+        )
+
+    def _browser_file_in_use(self, path):
+        return Path(path).resolve() in self._browser_open_paths
 
     def current(self):
         key=self.tabs.select()
@@ -1054,6 +1068,7 @@ class Window:
         self.buffer_keymaps.pop(tab,None)
         widget.master.destroy()
         if not self.views:self.new_buffer()
+        self._refresh_browser_open_paths()
 
     def query_replace(self):
         """Modeless query-replace; y/n/!/q are handled in a focused prompt."""
@@ -1435,6 +1450,7 @@ class Window:
             self.external_dismissals.reset(current_tab)
             self._check_external_changes()
             self.working_directory.used_file(path)
+            self._refresh_browser_open_paths()
             self.recent_files.record(path)
             self.tabs.tab(self.tabs.select(),text=path.rsplit("/",1)[-1])
             widget.edit_modified(False)
@@ -1454,6 +1470,7 @@ class Window:
                 self.root.lift()
         except Empty:
             pass
+        self._refresh_browser_open_paths()
         if self.local_browser is not None:
             self.browser_poll_id = self.root.after(150, self._drain_browser_requests)
 
@@ -1488,7 +1505,8 @@ class Window:
                 self.local_browser = None
             if self.local_browser is None:
                 self.local_browser = BrowserServer(
-                    str(directory), open_in_editor=self.browser_open_requests.put)
+                    str(directory), open_in_editor=self.browser_open_requests.put,
+                    file_in_use=self._browser_file_in_use)
             url = self.local_browser.start()
             if self.browser_poll_id is None:
                 self.browser_poll_id = self.root.after(150, self._drain_browser_requests)
@@ -1506,7 +1524,8 @@ class Window:
                 self.local_browser.close()
                 self.local_browser=None
             if self.local_browser is None:
-                self.local_browser=BrowserServer(root, open_in_editor=self.browser_open_requests.put)
+                self.local_browser=BrowserServer(root, open_in_editor=self.browser_open_requests.put,
+                    file_in_use=self._browser_file_in_use)
             url=self.local_browser.start()
             if self.browser_poll_id is None:
                 self.browser_poll_id = self.root.after(150, self._drain_browser_requests)
