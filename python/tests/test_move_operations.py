@@ -111,7 +111,7 @@ class MoveBrowserTests(unittest.TestCase):
         self.assertIn('action="/move"', html)
         self.assertIn('name="destination"', html)
         self.assertIn("No file will be overwritten", html)
-        status, html = self.request("/")
+        status, html = self.request("/browse?path=Docs")
         self.assertEqual(status, 200)
         self.assertIn("Move...", html)
         status, html = self.request("/listing")
