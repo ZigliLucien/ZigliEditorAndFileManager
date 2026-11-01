@@ -5,7 +5,7 @@ GET_ROUTES = frozenset({
     "/api/files", "/api/listing-page", "/pdf", "/site/",
 })
 POST_ROUTES = frozenset({
-    "/edit", "/note-edit", "/open-editor", "/mkdir", "/copy", "/rename",
+    "/edit", "/note-edit", "/open-editor", "/mkdir", "/copy", "/rename", "/move",
 })
 
 
