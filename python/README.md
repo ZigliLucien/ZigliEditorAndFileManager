@@ -407,3 +407,17 @@ Markdown **Compile PDF** no longer uses Pandoc. It converts Markdown to
 HTML with Discount and, if installed, uses **WeasyPrint** to generate PDF.
 The existing LuaLaTeX pipeline for `.tex` is unchanged. On Slackware,
 check `command -v makepage` and optionally `command -v weasyprint`.
+
+## v58 — MathJax filter without Perl or jQuery
+
+The Markdown browser presentation now incorporates the original
+`makepage | mathjaxfilterr` processing as Python:
+Discount renders Markdown, server-side Python formats theorem/equation
+structures, and a small Python filter injects modern MathJax scripts
+before `</head>`. The MathJax configuration is served locally;
+the renderer itself currently uses the HTTPS jsDelivr CDN.
+
+Mathematical inline delimiters `$…$` and `\\(…\\)`, and display
+delimiters `$$…$$` and `\\[…\\]` are supported. The preview
+runs in an isolated browser sandbox; normal HTML pages still disallow
+scripts. No jQuery or remote legacy MathJax 2 APIs are required.
