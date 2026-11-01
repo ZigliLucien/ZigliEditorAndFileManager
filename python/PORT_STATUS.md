@@ -170,3 +170,14 @@ keyboard testing required. Word/file Notes source relationship documented in
 - Bounded 128 MiB preview, PDF signature check, path restrictions, no-store.
 - Download remains explicit and unchanged; standard text view stays intact.
 - Synthetic PDF response tests cover byte ranges, invalid paths, MIME headers.
+
+### v51 — safe rename with Notes
+- Added same-directory rename form in both browser listings.
+- POSIX no-clobber hardlink+unlink and best-effort rollback preserves file bytes.
+- WordNotes records migrated to the new absolute filename with validation,
+  no target overwrite, and rollback on failure.
+- Desktop-open files are rejected through immutable snapshots produced on
+  Tk's main thread; browser worker does not access Tk objects directly.
+- Separate tests cover Unicode filenames, Notes, conflicts, CSRF, open tabs
+  and failed filesystem/Notes writes.
+- Directory moves/renames and trash remain unimplemented.
