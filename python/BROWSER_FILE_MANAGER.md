@@ -309,3 +309,24 @@ directory and valid paging/sort/filter parameters. External URLs, traversal
 and arbitrary HTTP routes are rejected. No JavaScript framework or XML/XSLT
 is required. Typing into the filename filter is debounced and updates the
 current history entry instead of adding one Back entry per keystroke.
+
+## v53 — original mouse interaction and natural browser presentation
+
+The original ZEFM interaction is restored: **left-click a filename** to view it,
+**right-click** to open the file-operation menu (View, Copy, Rename, Edit,
+Quick Edit, Notes). The keyboard equivalent is **Shift+F10** on a focused
+filename button. The colored operation strip is retained for its original
+visual identity, but normal left-click no longer applies its selected radio
+operation.
+
+PDFs continue to use the Firefox/native PDF viewer. HTML and HTM files
+now open as rendered documents rather than escaped source text. A confined
+`/site/...` URL preserves relative links to local CSS and image assets.
+The HTML preview response is protected with a restrictive CSP sandbox:
+embedded JavaScript, forms, and plugins cannot execute; linked resources
+are limited to allowed static formats within the selected root and size
+limits. Other text formats retain ZEFM's source/text viewer.
+
+The styled listing opens PDF and HTML documents in another tab so the
+GoFM page, sort order and filter remain intact. Browser settings and popup
+blocking may affect opening a new tab.
