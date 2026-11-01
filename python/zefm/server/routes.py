@@ -10,4 +10,4 @@ POST_ROUTES = frozenset({
 
 
 def permitted(method: str, path: str) -> bool:
-    return path in (GET_ROUTES if method == "GET" else POST_ROUTES if method == "POST" else ())
+    return (method == "GET" and path.startswith("/site/")) or path in (GET_ROUTES if method == "GET" else POST_ROUTES if method == "POST" else ())
