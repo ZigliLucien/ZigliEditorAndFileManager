@@ -272,3 +272,20 @@ listing's directory/page/sort/filter context.
 5. Integrate each with the GoFM right-click menu and context-preserving
    navigation. Add unit/integration tests for Unicode paths, escaping,
    subprocess failure, stale outputs, malformed MIME, and attachment names.
+
+### v55 — extension-aware Markdown View and PDF build popup
+- New file-type registry recognizes PDF, HTML, Markdown and TeX, retaining
+  ordinary text fallback and existing left-click/right-click semantics.
+- Markdown View uses Pandoc HTML conversion when available, with sandboxed
+  output and escaped source fallback if Pandoc is missing.
+- Right-click Markdown or TeX → Compile PDF opens a separate build popup
+  with CSRF-protected POST, visible diagnostics, timeouts and results.
+- New PDFs are verified by signature in fresh per-run output folders
+  before being offered through the existing browser PDF viewer.
+- LuaLaTeX direct invocation uses -no-shell-escape, bounded runtime and
+  explicit argument lists, not shell command strings.
+- TeX processing is **not an OS security sandbox**; only trusted local
+  source files should be compiled. Email MIME/attachment parsing remains
+  a separate upcoming workstream.
+- Regression tests cover build paths, error diagnostics, source previews,
+  missing tools, Unicode names and old-PDF avoidance.
