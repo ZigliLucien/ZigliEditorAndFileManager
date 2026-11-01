@@ -413,3 +413,24 @@ build diagnostic without affecting Markdown HTML viewing. The `.tex`
 LuaLaTeX compilation path has not changed. MathJax's historical CDN script
 is not automatically loaded because preview scripts are blocked; any future
 local mathematical typesetting must preserve the sandbox model.
+
+## v57 — original ServPak mathematical presentation
+
+The original `TTT/ServPak/js/mathformat.js` and
+`TTT/ServPak/css/math.css` have been adapted into the Python
+browser renderer. They originally used jQuery to manipulate theorem,
+lemma, corollary, proof, numbered equation, section, list and internal
+reference elements after the page loaded.
+
+Since ZEFM intentionally disables JavaScript inside generated Markdown
+previews, the corresponding transformations now occur **on the Python
+server**, before the document is delivered. The new local `/math.css`
+reconstructs the typography and color palette with styles scoped to
+`zefm-math-page`. It is also linked from other locally generated HTML
+pages without disturbing their controls or the GoFM directory listing.
+
+The transformed HTML preserves Discount's UTF-8 content and existing
+strict sandbox Content Security Policy. The original remote MathJax
+script is **not enabled**; `$...$` and `\\(...\\)` formulas may still
+appear as TeX text until an approved local math renderer is introduced.
+LuaLaTeX-to-PDF remains available for fully typeset mathematics.
