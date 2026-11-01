@@ -171,7 +171,6 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                               f' &nbsp; <a href="{escape(link("/raw", rel), quote=True)}">Download</a>'
                               f' &nbsp; <a href="{escape(link("/copy", rel), quote=True)}">Copy...</a>'
                               f' &nbsp; <a href="{escape(link("/rename", rel), quote=True)}">Rename...</a>'
-                              f' &nbsp; <a href="{escape(link("/move", rel), quote=True)}">Move...</a>'
                               f' &nbsp; <a href="{escape(link("/notes", rel), quote=True)}">Notes</a>')
                     if entry.suffix.casefold() == ".pdf":
                         links += (f' &nbsp; <a href="{escape(link("/raw", rel), quote=True)}">Download</a>'
