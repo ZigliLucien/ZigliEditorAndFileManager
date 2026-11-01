@@ -138,5 +138,6 @@ def listing_shell(hostname: str, token: str, desktop_editor: bool) -> bytes:
             '<footer>Original ZEFM listing layout · Python + JSON + JavaScript · localhost</footer>'
             '<form id="open-desktop-form" action="/open-editor" method="post" hidden>'
             f'<input type="hidden" name="csrf" value="{csrf}">'
-            '<input type="hidden" name="path" id="open-desktop-path"></form>'
+            '<input type="hidden" name="path" id="open-desktop-path">'
+            '<input type="hidden" name="back" id="open-desktop-back"></form>'
             '</main></body></html>').encode("utf-8")
