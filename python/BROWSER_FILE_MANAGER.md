@@ -353,3 +353,43 @@ across different filesystems is **not supported** (no unsafe copy/unlink
 fallback). Do not move files being written by external programs, or rely on
 this operation as a crash-safe filesystem transaction. Directory-tree moves
 and trash/delete remain unimplemented.
+
+## v55 — Markdown viewing and PDF compilation for Markdown/LaTeX
+
+The local browser file manager now has a file-type registry. Left-clicking
+`.md` or `.markdown` produces a **sandboxed HTML preview** with Pandoc if
+it is installed. The preview falls back to escaped source when Pandoc is not
+available or conversion fails. Raw HTML is excluded from Pandoc's Markdown
+input; the preview's CSP blocks scripts and remote resources.
+
+Right-click `.md`, `.markdown` or `.tex` and choose **Compile PDF**.
+This opens a separate local browser tab containing a form, compilation
+status and error log. The form uses a protected POST request. Compilation
+runs in a short-lived worker thread (the HTTP request thread, not Tk's UI
+thread) using a trusted executable name and argv-list subprocess invocation;
+no shell string is evaluated. Successful compilation automatically opens
+the new PDF in the same tab using ZEFM's existing native browser PDF route.
+On failure, the diagnostics stay visible in the build tab. LaTeX source
+continues to open in ZEFM's text/source View when left-clicked.
+
+Builders require local installations of **pandoc** (Markdown) and
+**lualatex** (LaTeX and Pandoc's PDF engine). The build has a 45-second
+timeout, UTF-8 source size limit of 2 MiB, bounded logs, and a newly created
+temporary output folder beneath `.zefm-build` in the source directory.
+The generated PDF is published under that build folder. A failed attempt
+never opens an older PDF. PDF previews continue to have a 128 MiB limit.
+`.zefm-build` directories are hidden from the styled GoFM listing, but
+can be found through the Basic listing.
+
+**Security**: compile only files you trust. Although the direct LuaLaTeX
+command disables shell escape and none of the commands invoke a shell,
+TeX itself is powerful enough to read or write files accessible to the
+running account; it is *not* a sandbox. The HTTP server remains bound to
+loopback and protects build POSTs with the existing CSRF token. Do not
+expose it to untrusted users. Builds do not yet run in an OS sandbox.
+The browser-side status view appears immediately; the actual PDF opens
+only after a success response.
+
+**Not part of v55**: MIME email extraction, attachment directories,
+build cancellation, a configurable engine selection UI, and caching of
+Markdown HTML. These remain on the development roadmap.
