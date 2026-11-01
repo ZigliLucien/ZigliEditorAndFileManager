@@ -115,6 +115,9 @@
       case "copy":
         location.href = pathUrl("/copy", path);
         return;
+      case "rename":
+        location.href = pathUrl("/rename", path);
+        return;
       case "notes":
         location.href = pathUrl("/notes", path);
         return;
