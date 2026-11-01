@@ -25,6 +25,7 @@ from .listing_paging import paged_listing
 from .pdf_delivery import select_pdf, byte_range
 from .rename_ops import RenameManager
 from .navigation import safe_listing_return
+from .html_preview import site_url, site_resource, HTML_PREVIEW_CSP
 
 
 _STYLE = """<style>body{max-width:1000px;margin:2rem auto;padding:0 1rem;font:16px system-ui,sans-serif}
@@ -192,7 +193,14 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                 back_state = args.get("back")
                 if back_state:
                     safe_listing_return(files, back_state)
-                if parsed.path in ("/", "/browse"):
+                if parsed.path.startswith("/site/"):
+                    if args:
+                        raise BrowserError("Unexpected site resource parameters")
+                    data, media_type, html_document = site_resource(files, parsed.path)
+                    self._send(200, data, media_type,
+                               {"Content-Security-Policy": HTML_PREVIEW_CSP}
+                               if html_document else None)
+                elif parsed.path in ("/", "/browse"):
                     self._send(200, self._render_listing(rel))
                 elif parsed.path == "/listing":
                     if set(args) - {"path", "page", "sort", "filter"}:
@@ -291,8 +299,15 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                 elif parsed.path == "/view":
                     if set(args) - {"path", "back"}:
                         raise BrowserError("Unexpected view parameters")
-                    if files.resolve(rel).suffix.casefold() == ".pdf":
+                    suffix = files.resolve(rel).suffix.casefold()
+                    if suffix == ".pdf":
                         self._serve_pdf(rel)
+                        return
+                    if suffix in (".html", ".htm"):
+                        data, media_type, html_document = site_resource(
+                            files, site_url(rel))
+                        self._send(200, data, media_type,
+                                   {"Content-Security-Policy": HTML_PREVIEW_CSP})
                         return
                     text, _ = files.read_text(rel)
                     content = (f'<p><a href="{escape(safe_listing_return(files, back_state, files.relative(files.resolve(rel).parent)), quote=True)}">← Back</a> '
