@@ -369,3 +369,12 @@ Shift+F10 for the original file operations menu: View, Copy, Rename, Edit,
 Quick Edit and Notes. This preserves the styled listing while making
 ordinary browsing natural again. HTML previews use confined static assets
 and sandbox restrictions for untrusted local pages.
+
+## v54 — smaller ZEFM listing and Move file
+
+The original-style web listing is now scaled to 85% on desktop browsers,
+preserving the original colors and layout. Right-click a filename and
+choose **Move** to place it in another existing directory beneath the selected
+root, retaining its associated Notes. No overwrites or cross-filesystem
+moves are allowed. The original Basic listing also provides **Move...**.
+See [BROWSER_FILE_MANAGER.md](BROWSER_FILE_MANAGER.md).
