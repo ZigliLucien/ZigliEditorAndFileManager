@@ -210,3 +210,65 @@ keyboard testing required. Word/file Notes source relationship documented in
 - Source retained on failed Notes write or cross-device link.
 - Tests cover Unicode names, Notes, collisions, POST authorization,
   unsafe destinations, and rollback. Directory moving/deleting remains pending.
+
+
+## Planned: extension-aware browser presentation and document builds
+
+These are **roadmap items**, not yet implemented. Preserve the original
+ZEFM browsing model: left-click is the natural file presentation, right-click
+is the operations menu, and opening a preview does not disturb the GoFM
+listing's directory/page/sort/filter context.
+
+### Markdown (`.md`)
+- Render Markdown as HTML in the browser, using a Python library or Pandoc
+  where available. Sanitize or sandbox generated HTML, including raw HTML.
+- Expose a separate **Compile / Build PDF** operation using a configurable
+  Pandoc command and PDF engine. Keep diagnostics visible even on failure.
+- Open a generated PDF in the existing browser PDF viewer only if the build
+  succeeds and a valid output file exists. A stale PDF should not be
+  mistaken for the current result.
+
+### LaTeX (`.tex`)
+- Left-click defaults to a useful source/preview choice; add a
+  **Compile → View PDF** operation, preferably accessible from right-click.
+- Invoke an available configured engine (LuaLaTeX preferred, with possible
+  latexmk support) using `subprocess` argument arrays, fixed working
+  directory, timeouts, captured stdout/stderr, and explicit exit-code checks.
+  Never concatenate filenames into shell commands.
+- Launch compilation from a short-lived popup/dialog with a visible log and
+  final status. Do not block the Tk event loop or HTTP request thread.
+- Compile into a controlled output/build directory. Open the resulting PDF
+  with the existing native browser viewer only after a verified successful
+  build; avoid automatically showing an outdated PDF on failure.
+- Treat TeX compilation as execution of potentially untrusted input:
+  disable shell escape by default, use explicit command allowlists, and
+  document that non-shell-escape TeX is not a full security sandbox.
+
+### Email (`.eml`, Maildir message data)
+- Use Python's standard `email` package with its modern policy and MIME
+  tree traversal, respecting charset and multipart/alternative semantics.
+- Display the HTML alternative when appropriate; otherwise convert the
+  text/plain part into escaped, readable HTML. Never treat message HTML as
+  trusted code: disable scripts, forms, active/remote content by default.
+- Extract attachments to a dedicated per-message directory with safe,
+  unique, Unicode-preserving filenames. Reject path traversal, reserved
+  names, duplicate overwrites, symlinks, and unreasonable total sizes.
+  Keep the original message intact and record attachment metadata.
+- Show attachment links in the message view, with explicit **Save
+  attachments** to disk (or a configurable extraction policy). Avoid
+  automatically opening or executing attachment types.
+- Reuse the existing local Maildir browser and browser-based HTML message
+  reading workflow; this does not change the existing Emacs-based email
+  composition/sending setup.
+
+### Shared architecture and sequencing
+1. Add a small extension/handler registry mapping suffixes to default View,
+   Build, PDF and attachment actions, with safe fallback to raw/text view.
+2. Implement Markdown rendering and PDF build with captured diagnostics.
+3. Add LaTeX build popup and result verification, preserving compiled PDF
+   links and logs.
+4. Extend `.eml`/Maildir MIME rendering and per-message attachment
+   extraction with explicit user controls.
+5. Integrate each with the GoFM right-click menu and context-preserving
+   navigation. Add unit/integration tests for Unicode paths, escaping,
+   subprocess failure, stale outputs, malformed MIME, and attachment names.
