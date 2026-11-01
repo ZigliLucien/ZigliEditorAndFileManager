@@ -434,3 +434,34 @@ strict sandbox Content Security Policy. The original remote MathJax
 script is **not enabled**; `$...$` and `\\(...\\)` formulas may still
 appear as TeX text until an approved local math renderer is introduced.
 LuaLaTeX-to-PDF remains available for fully typeset mathematics.
+
+## v58 — native Python replacement for `makepage | mathjaxfilterr`
+
+The user's original 33-line Perl `mathjaxfilterr` has been ported to
+`server/mathjax_filter.py`. It inserts scripts just before `</head>`,
+without modifying the Discount HTML body. The old filter used MathJax
+version 2 via HTTP and depended on jQuery to run `mathformat.js`.
+
+The new pipeline is:
+
+```text
+Markdown → Discount makepage → Python mathformat equivalent
+         → Python mathjaxfilterr equivalent → sandboxed browser view
+```
+
+The JavaScript formatting effects of `mathformat.js` remain implemented
+in Python, and the original typography lives in `/math.css`. The page
+also receives local `/mathjax-config.js` and MathJax version 3's SVG
+component from `https://cdn.jsdelivr.net`. The configuration supports
+`$…$`, `\\(…\\)`, `$$…$$`, and `\\[…\\]` delimiters. This
+requires **no jQuery**.
+
+The preview CSP allows script execution only for the local configuration
+and HTTPS MathJax bundle and retains an **opaque sandbox origin**, which
+prevents generated Markdown from acting as a privileged ZEFM page.
+Embedded forms, framing, remote images, and arbitrary external resources
+remain blocked. This means MathJax is no longer an entirely offline
+feature; a connection to jsDelivr is required for this version.
+Ordinary `.html` previews remain strictly script-disabled. Markdown-to-PDF
+still uses Discount/WeasyPrint without browser JavaScript. The direct
+LuaLaTeX compilation path for `.tex` files is unchanged.
