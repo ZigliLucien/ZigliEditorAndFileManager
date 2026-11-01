@@ -145,7 +145,19 @@
         }
         return;
       case "view":
-        location.href = operationUrl(row.type === "pdf" ? "/pdf" : "/view", path);
+        if (row.type === "pdf") {
+          // Leave the GoFM listing (page, filter, operation selection) intact.
+          // Opening from a click is a direct user gesture, not an automatic popup.
+          const target = operationUrl("/pdf", path);
+          const pdfWindow = window.open(target, "_blank", "noopener");
+          if (!pdfWindow) {
+            // Some browsers return null even for successful noopener openings.
+            // A normal anchor-like navigation remains available via modifier-click
+            // on a filename in the Basic listing.
+          }
+        } else {
+          location.href = operationUrl("/view", path);
+        }
         return;
       default:
         return; // Move and delete are intentionally not ported.
