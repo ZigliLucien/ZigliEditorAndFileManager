@@ -181,3 +181,14 @@ keyboard testing required. Word/file Notes source relationship documented in
 - Separate tests cover Unicode filenames, Notes, conflicts, CSRF, open tabs
   and failed filesystem/Notes writes.
 - Directory moves/renames and trash remain unimplemented.
+
+### v52 — preserve listing navigation across operations
+- Original-style listing includes return state in View, Edit, Notes, Copy,
+  Rename and desktop Open actions.
+- Server checks every return URL is confined to /listing and a valid
+  directory/sort/filter/page state; no open redirect.
+- Confirmation pages and Notes subpages maintain prior GoFM listing context.
+- PDF View opens a separate tab, retaining the existing page and filter.
+- Filename filter debounced and does not fill browser Back history.
+- Tests cover returning to page 3, Unicode filters, post-action links and
+  rejection of malicious external return URLs.
