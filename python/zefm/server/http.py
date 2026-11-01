@@ -26,6 +26,8 @@ from .pdf_delivery import select_pdf, byte_range
 from .rename_ops import RenameManager
 from .navigation import safe_listing_return
 from .html_preview import site_url, site_resource, HTML_PREVIEW_CSP
+from .file_types import handler_for
+from .document_build import markdown_html, checked_source, build_pdf
 
 
 _STYLE = """<style>body{max-width:1000px;margin:2rem auto;padding:0 1rem;font:16px system-ui,sans-serif}
@@ -241,7 +243,7 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                     data = listing_data(files, rel, notes_path)
                     self._send(200, json.dumps(data, ensure_ascii=False).encode("utf-8"),
                                "application/json; charset=utf-8")
-                elif parsed.path in ("/listing.css", "/listing.js"):
+                elif parsed.path in ("/listing.css", "/listing.js", "/build.js"):
                     if args:
                         raise BrowserError("Unexpected asset parameters")
                     name = parsed.path[1:]
@@ -253,6 +255,30 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                         raise BrowserError("Unexpected script parameters")
                     self._send(200, RTL_KEYMAP_JS.encode("utf-8"),
                                "text/javascript; charset=utf-8")
+                elif parsed.path == "/build":
+                    if set(args) - {"path", "back"}:
+                        raise BrowserError("Unexpected build parameters")
+                    source, descriptor = checked_source(files, rel, for_build=True)
+                    target = escape(safe_listing_return(files, back_state,
+                                        files.relative(source.parent)), quote=True)
+                    engine = escape(descriptor["build"])
+                    content = (
+                        f'<p><a href="{target}">← Return to listing</a></p>'
+                        f'<h2>Build PDF: {escape(source.name)}</h2>'
+                        f'<p>Engine: {engine}. Build may take several seconds. '
+                        'The browser opens the new PDF only after a successful build.</p>'
+                        '<p><small>Only compile trusted documents. TeX can access '
+                        'local files even when shell escape is disabled.</small></p>'
+                        '<form action="/build" method="post" id="zefm-build-form">'
+                        f'<input type="hidden" name="csrf" value="{escape(token,quote=True)}">'
+                        f'<input type="hidden" name="path" value="{escape(rel,quote=True)}">'
+                        f'<button type="submit" id="zefm-build-button">Compile and view PDF</button>'
+                        '</form>'
+                        '<p id="zefm-build-status" role="status"></p>'
+                        '<pre id="zefm-build-log" style="white-space:pre-wrap"></pre>'
+                        '<script src="/build.js" defer></script>'
+                    )
+                    self._send(200, page("Build PDF", content), allow_local_script=True)
                 elif parsed.path == "/rename":
                     if set(args) - {"path", "back"}:
                         raise BrowserError("Unexpected rename parameters")
@@ -329,6 +355,10 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                     suffix = files.resolve(rel).suffix.casefold()
                     if suffix == ".pdf":
                         self._serve_pdf(rel)
+                        return
+                    if handler_for(rel)["view"] == "markdown":
+                        self._send(200, markdown_html(files, rel),
+                                   extra={"Content-Security-Policy": HTML_PREVIEW_CSP})
                         return
                     if suffix in (".html", ".htm"):
                         # Redirect so relative CSS/images resolve beside the
@@ -462,7 +492,19 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                 return_to = args.get("back")
                 if return_to:
                     safe_listing_return(files, return_to)
-                if route=="/mkdir":
+                if route=="/build":
+                    if set(args) != {"csrf", "path"}:
+                        raise BrowserError("Unexpected build parameters")
+                    try:
+                        result = build_pdf(files, args["path"])
+                    except BrowserError as exc:
+                        self._send(exc.status, json.dumps(
+                            {"ok": False, "error": str(exc)}).encode("utf-8"),
+                            "application/json; charset=utf-8")
+                        return
+                    self._send(200, json.dumps(result, ensure_ascii=False).encode("utf-8"),
+                               "application/json; charset=utf-8")
+                elif route=="/mkdir":
                     if set(args) - {"csrf", "path", "name", "back"} or not {"csrf", "path", "name"} <= set(args):
                         raise BrowserError("Unexpected create-directory parameters")
                     created = files.create_directory(args["path"], args["name"])
