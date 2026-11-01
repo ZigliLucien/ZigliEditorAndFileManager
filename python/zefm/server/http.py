@@ -176,6 +176,8 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                     if entry.suffix.casefold() == ".pdf":
                         links += (f' &nbsp; <a href="{escape(link("/raw", rel), quote=True)}">Download</a>'
                                   f' &nbsp; <a href="{escape(link("/notes", rel), quote=True)}">Notes</a>')
+                if not is_dir:
+                    links += f' &nbsp; <a href="{escape(link("/move", rel), quote=True)}">Move...</a>'
                 if not is_dir and open_in_editor is not None:
                     links += (' &nbsp; <form action="/open-editor" method="post" style="display:inline">'
                               f'<input type="hidden" name="csrf" value="{escape(token,quote=True)}">'
