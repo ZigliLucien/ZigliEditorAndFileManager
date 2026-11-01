@@ -42,7 +42,8 @@ def link(path: str, relative: str = ".") -> str:
 
 def page(title: str, body: str) -> bytes:
     return ("<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><title>"
-            + escape(title) + " — ZEFM</title>" + _STYLE + "</head><body>"
+            + escape(title) + " — ZEFM</title>" + _STYLE
+            + '<link rel="stylesheet" href="/math.css"></head><body class="zefm-local-page">'
             + body + "<hr><small>ZEFM local browser · UTF-8 · loopback only</small></body></html>").encode("utf-8")
 
 
@@ -69,9 +70,8 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
             self.send_header("Cache-Control", "no-store")
             self.send_header("X-Content-Type-Options", "nosniff")
             self.send_header("Referrer-Policy", "no-referrer")
-            csp = "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'"
+            csp = "default-src 'none'; style-src 'self' 'unsafe-inline'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'"
             if allow_local_script:
-                csp = csp.replace("style-src 'unsafe-inline'", "style-src 'self' 'unsafe-inline'")
                 csp += "; script-src 'self'; connect-src 'self'"
             if extra and "Content-Security-Policy" in extra:
                 csp = extra["Content-Security-Policy"]
