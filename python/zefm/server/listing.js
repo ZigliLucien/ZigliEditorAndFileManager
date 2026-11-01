@@ -109,31 +109,37 @@
     return selected ? selected.value : "view";
   }
 
+  function operationUrl(route, path, extra = {}) {
+    return pathUrl(route, path, { ...extra,
+      back: listingUrl(state.directory, state.page + 1) });
+  }
+
   function activateFile(row) {
     const path = row.path;
     switch (chosenMode()) {
       case "copy":
-        location.href = pathUrl("/copy", path);
+        location.href = operationUrl("/copy", path);
         return;
       case "rename":
-        location.href = pathUrl("/rename", path);
+        location.href = operationUrl("/rename", path);
         return;
       case "notes":
-        location.href = pathUrl("/notes", path);
+        location.href = operationUrl("/notes", path);
         return;
       case "quick":
-        location.href = pathUrl("/edit", path);
+        location.href = operationUrl("/edit", path);
         return;
       case "edit":
         if (hasEditor) {
           $("open-desktop-path").value = path;
+          $("open-desktop-back").value = listingUrl(state.directory, state.page + 1);
           $("open-desktop-form").submit();
         } else {
-          location.href = pathUrl("/edit", path);
+          location.href = operationUrl("/edit", path);
         }
         return;
       case "view":
-        location.href = pathUrl(row.type === "pdf" ? "/pdf" : "/view", path);
+        location.href = operationUrl(row.type === "pdf" ? "/pdf" : "/view", path);
         return;
       default:
         return; // Move and delete are intentionally not ported.
@@ -168,7 +174,7 @@
       const notes = make("td", "note");
       if (item.note_count) {
         const a = make("a", "", item.note || "Notes");
-        a.href = pathUrl("/notes", item.path);
+        a.href = operationUrl("/notes", item.path);
         a.title = item.note_count + " annotation(s)";
         notes.append(a);
       } else {
