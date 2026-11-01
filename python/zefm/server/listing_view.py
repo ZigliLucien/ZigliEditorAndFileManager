@@ -122,6 +122,7 @@ def listing_shell(hostname: str, token: str, desktop_editor: bool) -> bytes:
             '<fieldset id="file-operations"><legend>File operations</legend>'
             '<label class="op v"><input type="radio" name="fileops" value="view" checked> view</label>'
             '<label class="op c"><input type="radio" name="fileops" value="copy"> copy</label>'
+            '<label class="op r"><input type="radio" name="fileops" value="rename"> rename</label>'
             '<label class="op m unavailable" title="Move is not yet ported"><input type="radio" name="fileops" value="move" disabled> move</label>'
             '<label class="op d unavailable" title="Delete is not yet ported"><input type="radio" name="fileops" value="delete" disabled> dele</label>'
             '<label class="op e"><input type="radio" name="fileops" value="edit"> edit</label>'
