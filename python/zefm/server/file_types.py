@@ -10,7 +10,7 @@ _VIEW = {
     ".md": "markdown", ".markdown": "markdown",
     ".tex": "text",
 }
-_BUILDABLE = {".md": "pandoc", ".markdown": "pandoc", ".tex": "lualatex"}
+_BUILDABLE = {".md": "discount", ".markdown": "discount", ".tex": "lualatex"}
 
 
 def handler_for(name):
