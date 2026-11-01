@@ -89,7 +89,7 @@ def markdown_html(files, relative):
 
 
 def _command(source, output_dir, descriptor):
-    if descriptor["build"] == "pandoc":
+    if descriptor["build"] == "discount":
         # The Markdown build now follows Discount -> HTML -> PDF, not Pandoc.
         # The HTML conversion itself is done before this command is returned.
         engine = shutil.which("weasyprint")
@@ -122,7 +122,7 @@ def build_pdf(files, relative):
         raise BrowserError("Unsafe output directory", 403)
     temporary = Path(tempfile.mkdtemp(prefix="job-", dir=output_base))
     try:
-        if descriptor["build"] == "pandoc":
+        if descriptor["build"] == "discount":
             if not _discount_command():
                 raise BrowserError("Discount makepage or markdown is required", 503)
             try:
