@@ -393,3 +393,17 @@ PDF on success. PDF output is under the source directory's
 `.zefm-build` folder. Required external programs must be installed
 and on `PATH`; compile only trusted documents. See
 [BROWSER_FILE_MANAGER.md](BROWSER_FILE_MANAGER.md) for safeguards.
+
+## v56 — Discount makepage for Markdown (supersedes v55 Pandoc)
+
+Markdown left-click preview now prefers Discount's `makepage` to produce
+the complete HTML document, retaining the original ZEFM/GoMD convention
+(`latex` and `nostyle` flags). If `makepage` is absent, ZEFM tries
+Discount's `markdown` CLI and wraps its fragment as HTML. Raw embedded
+HTML is disabled by the `nohtml` flag and the browser keeps its restrictive
+HTML sandbox. If neither tool exists, an escaped source view is displayed.
+
+Markdown **Compile PDF** no longer uses Pandoc. It converts Markdown to
+HTML with Discount and, if installed, uses **WeasyPrint** to generate PDF.
+The existing LuaLaTeX pipeline for `.tex` is unchanged. On Slackware,
+check `command -v makepage` and optionally `command -v weasyprint`.
