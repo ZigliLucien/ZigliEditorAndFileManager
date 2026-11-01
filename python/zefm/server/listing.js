@@ -282,7 +282,7 @@
   }
 
   function setupKeyboard() {
-    const modes = {v: "view", c: "copy", e: "edit", q: "quick", n: "notes"};
+    const modes = {v: "view", c: "copy", e: "edit", q: "quick", n: "notes", m: "rename"};
     document.addEventListener("keydown", (event) => {
       if (event.altKey || event.ctrlKey || event.metaKey) return;
       const focused = document.activeElement;
