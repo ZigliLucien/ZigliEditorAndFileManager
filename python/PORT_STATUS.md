@@ -289,3 +289,14 @@ listing's directory/page/sort/filter context.
   a separate upcoming workstream.
 - Regression tests cover build paths, error diagnostics, source previews,
   missing tools, Unicode names and old-PDF avoidance.
+
+### v56 — Discount restored for Markdown
+- Markdown HTML preview prefers Discount `makepage` (complete HTML document),
+  then Discount `markdown` as fallback; no Pandoc invocation.
+- Preserved original GoMD's `latex`/`nostyle` Discount flags and added
+  `nohtml` to prevent arbitrary embedded HTML. Restrictive browser CSP
+  still applies. Missing Discount yields escaped UTF-8 source.
+- Markdown PDF path now uses Discount-generated HTML plus optional WeasyPrint,
+  with fresh outputs, existing timeouts and diagnostics. If WeasyPrint is
+  missing, HTML preview still works and PDF build reports a clear error.
+- LuaLaTeX compilation and the `.tex` View behavior are unchanged.
