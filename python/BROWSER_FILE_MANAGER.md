@@ -265,3 +265,29 @@ Firefox** if you want the viewer rather than the browser's download prompt.
 PDFs larger than the preview limit must be opened locally outside this
 browser interface. The normal Quick Edit textarea is deliberately not
 offered for PDF files.
+
+## v51 — guarded file renaming and Note migration
+
+The reconstructed listing now includes a **rename** operation alongside
+View/Copy/Edit/Notes. In the styled listing, choose **rename** and click a
+filename; in Basic listing, select **Rename...** next to the file. A form
+accepts a new filename in the *same directory*, preserving its contents and
+existing word-attached Notes.
+
+The operation does not overwrite existing destinations and rejects absolute
+paths, path separators, control characters, symlink sources, and renaming a
+directory. It checks that a file is not open in the desktop editor when
+launched through Tk (main-thread snapshots; external editors cannot be
+detected). All write requests have the existing loopback Host and CSRF checks.
+
+The operation uses a no-clobber hardlink plus unlink on the same POSIX
+filesystem, with an atomic JSON Notes store update between those steps.
+On a failure it attempts to roll back the new link and Notes change.
+There is a short-lived duplicate hardlink while Notes are being updated;
+this is a **best-effort local transaction**, not crash-safe across power
+loss, and an external concurrent writer may still race with it. Users should
+not use renaming for files being edited elsewhere.
+
+**Still pending:** cross-directory move, directory-tree rename, delete/trash,
+and a more general open-file coordination system. The original PDF viewing,
+GoFM paging and older Basic listing remain available.
