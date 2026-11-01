@@ -120,21 +120,13 @@
       back: listingUrl(state.directory, state.page + 1) });
   }
 
-  function activateFile(row) {
+  function activateFile(row, mode = "view") {
     const path = row.path;
-    switch (chosenMode()) {
-      case "copy":
-        location.href = operationUrl("/copy", path);
-        return;
-      case "rename":
-        location.href = operationUrl("/rename", path);
-        return;
-      case "notes":
-        location.href = operationUrl("/notes", path);
-        return;
-      case "quick":
-        location.href = operationUrl("/edit", path);
-        return;
+    switch (mode) {
+      case "copy": location.href = operationUrl("/copy", path); return;
+      case "rename": location.href = operationUrl("/rename", path); return;
+      case "notes": location.href = operationUrl("/notes", path); return;
+      case "quick": location.href = operationUrl("/edit", path); return;
       case "edit":
         if (hasEditor) {
           $("open-desktop-path").value = path;
@@ -145,24 +137,65 @@
         }
         return;
       case "view":
-        if (row.type === "pdf") {
-          // Leave the GoFM listing (page, filter, operation selection) intact.
-          // Opening from a click is a direct user gesture, not an automatic popup.
-          const target = operationUrl("/pdf", path);
-          const pdfWindow = window.open(target, "_blank", "noopener");
-          if (!pdfWindow) {
-            // Some browsers return null even for successful noopener openings.
-            // A normal anchor-like navigation remains available via modifier-click
-            // on a filename in the Basic listing.
-          }
+        if (row.type === "pdf" || row.type === "html" || row.type === "htm") {
+          const route = row.type === "pdf" ? "/pdf" : "/view";
+          window.open(operationUrl(route, path), "_blank", "noopener");
         } else {
           location.href = operationUrl("/view", path);
         }
         return;
-      default:
-        return; // Move and delete are intentionally not ported.
     }
   }
+
+  // Right click reintroduces the original ZEFM operation workflow;
+  // left click always opens the file's normal browser representation.
+  const contextMenu = make("div", "zefm-context-menu");
+  contextMenu.id = "zefm-context-menu";
+  contextMenu.setAttribute("role", "menu");
+  contextMenu.hidden = true;
+  document.body.append(contextMenu);
+  let menuReturnFocus = null;
+
+  function dismissMenu(restoreFocus = false) {
+    if (contextMenu.hidden) return;
+    contextMenu.hidden = true;
+    contextMenu.replaceChildren();
+    if (restoreFocus && menuReturnFocus) menuReturnFocus.focus();
+    menuReturnFocus = null;
+  }
+
+  function showFileMenu(event, row, source) {
+    event.preventDefault();
+    dismissMenu();
+    menuReturnFocus = source;
+    const options = [
+      ["View", "view"], ["Copy", "copy"], ["Rename", "rename"],
+      ["Edit", "edit"], ["Quick Edit", "quick"], ["Notes", "notes"]
+    ];
+    for (const [name, mode] of options) {
+      const item = make("button", "zefm-context-action", name);
+      item.type = "button";
+      item.setAttribute("role", "menuitem");
+      item.addEventListener("click", () => {
+        dismissMenu();
+        activateFile(row, mode);
+      });
+      contextMenu.append(item);
+    }
+    contextMenu.hidden = false;
+    const x = event.clientX || source.getBoundingClientRect().left;
+    const y = event.clientY || source.getBoundingClientRect().bottom;
+    contextMenu.style.left = Math.max(0, Math.min(x, window.innerWidth - 190)) + "px";
+    contextMenu.style.top = Math.max(0, Math.min(y, window.innerHeight - 260)) + "px";
+    contextMenu.querySelector("button").focus();
+  }
+  document.addEventListener("click", (event) => {
+    if (!contextMenu.hidden && !contextMenu.contains(event.target)) dismissMenu();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") dismissMenu(true);
+  });
+  window.addEventListener("blur", () => dismissMenu());
 
   function renderFiles() {
     if (!state.data) return;
@@ -180,8 +213,12 @@
       const first = make("td");
       const button = make("button", "filename-button", item.name);
       button.type = "button";
-      button.title = "Apply selected file operation to " + item.name;
-      button.addEventListener("click", () => activateFile(item));
+      button.title = "Left click to view; right click for file operations: " + item.name;
+      button.addEventListener("click", () => activateFile(item, "view"));
+      button.addEventListener("contextmenu", (event) => showFileMenu(event, item, button));
+      button.addEventListener("keydown", (event) => {
+        if (event.key === "F10" && event.shiftKey) showFileMenu(event, item, button);
+      });
       first.append(button);
 
       const metadata = make("td", "filemeta");
