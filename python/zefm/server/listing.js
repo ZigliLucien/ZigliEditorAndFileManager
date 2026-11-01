@@ -170,7 +170,7 @@
     dismissMenu();
     menuReturnFocus = source;
     const options = [
-      ["View", "view"], ["Copy", "copy"], ["Rename", "rename"],
+      ["View", "view"], ["Copy", "copy"], ["Rename", "rename"], ["Move", "move"],
       ["Edit", "edit"], ["Quick Edit", "quick"], ["Notes", "notes"]
     ];
     for (const [name, mode] of options) {
