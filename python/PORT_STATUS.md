@@ -321,3 +321,23 @@ listing's directory/page/sort/filter context.
   revision formats mathematical structure but does not provide a full
   TeX-to-typeset-math engine in the browser. LuaLaTeX PDF compilation
   remains the definitive route for typesetting equations.
+
+### v58 — Python replacement for the original `mathjaxfilterr` Perl pipe
+- Inspected the user's actual `mathjaxfilterr`: it streams HTML output
+  from Discount `makepage` and inserts a MathJax configuration, CDN
+  runtime, `mathformat.js` and `math.css` immediately before `</head>`.
+- Added `server/mathjax_filter.py`, a robust, idempotent Python
+  header filter. Mathematical structure formatting remains server-side
+  Python (`math_presentation.py`), **not jQuery**.
+- Added a local `mathjax-config.js` with the original inline `$…$`
+  and `\\(…\\)` delimiters, plus display `$$…$$` and `\\[…\\]`.
+- Preview uses modern MathJax 3 (TeX/MathML to SVG) loaded by HTTPS from
+  jsDelivr, replacing the obsolete `http://cdn.mathjax.org` URL.
+- MathJax scripts run only in sandboxed Markdown preview pages:
+  CSP enables scripts but denies same-origin privileges, forms, frames,
+  arbitrary network requests and general object embedding. Normal
+  HTML previews continue with scripts disabled.
+- PDF build HTML remains script-free, as WeasyPrint does not run JS;
+  the existing direct LuaLaTeX compilation pipeline is unchanged.
+- No jQuery dependency is introduced. Offline MathJax bundling is a
+  possible subsequent step; the MathJax CDN currently requires internet.
