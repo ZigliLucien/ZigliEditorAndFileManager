@@ -200,3 +200,13 @@ keyboard testing required. Word/file Notes source relationship documented in
   relative local CSS and image assets; scripts/forms disabled by CSP sandbox.
 - PDF native viewer and GoFM navigation continue unchanged.
 - Added dedicated preview/path-security regression tests.
+
+### v54 — compact listing and guarded file moves
+- Desktop original-style listing compressed to 85% while keeping colors,
+  typography proportions, GoFM pagination and right-click options.
+- Implemented same-filesystem Move into an existing subdirectory in root.
+- POSIX no-clobber target, Notes migration, destination confinement,
+  symlink restrictions and desktop-open-file rejection.
+- Source retained on failed Notes write or cross-device link.
+- Tests cover Unicode names, Notes, collisions, POST authorization,
+  unsafe destinations, and rollback. Directory moving/deleting remains pending.
