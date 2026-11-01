@@ -128,6 +128,9 @@
       case "move": location.href = operationUrl("/move", path); return;
       case "notes": location.href = operationUrl("/notes", path); return;
       case "quick": location.href = operationUrl("/edit", path); return;
+      case "build":
+        window.open(operationUrl("/build", path), "_blank", "noopener");
+        return;
       case "edit":
         if (hasEditor) {
           $("open-desktop-path").value = path;
@@ -138,7 +141,7 @@
         }
         return;
       case "view":
-        if (row.type === "pdf" || row.type === "html" || row.type === "htm") {
+        if (["pdf", "html", "htm", "md", "markdown"].includes(row.type)) {
           const route = row.type === "pdf" ? "/pdf" : "/view";
           window.open(operationUrl(route, path), "_blank", "noopener");
         } else {
@@ -173,6 +176,9 @@
       ["View", "view"], ["Copy", "copy"], ["Rename", "rename"], ["Move", "move"],
       ["Edit", "edit"], ["Quick Edit", "quick"], ["Notes", "notes"]
     ];
+    if (["md", "markdown", "tex"].includes(row.type)) {
+      options.push(["Compile PDF", "build"]);
+    }
     for (const [name, mode] of options) {
       const item = make("button", "zefm-context-action", name);
       item.type = "button";
