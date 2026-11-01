@@ -17,6 +17,7 @@ import time
 
 from .file_manager import BrowserError
 from .file_types import handler_for
+from .math_presentation import format_math_html
 
 MAX_SOURCE_BYTES = 2 * 1024 * 1024
 MAX_PDF_BYTES = 128 * 1024 * 1024
@@ -78,14 +79,15 @@ def markdown_html(files, relative):
         raise BrowserError("Markdown file is not UTF-8", 415) from exc
     rendered = _discount_render(text, source)
     if rendered is not None:
-        return rendered.encode("utf-8")
-    return ("<!doctype html><html><head><meta charset='utf-8'>"
+        return format_math_html(rendered).encode("utf-8")
+    fallback = ("<!doctype html><html><head><meta charset='utf-8'>"
             "<meta name='viewport' content='width=device-width,initial-scale=1'>"
             "<title>" + escape(source.name) + "</title>"
             "<style>body{font:16px/1.6 system-ui,sans-serif;max-width:940px;"
             "margin:2rem auto;padding:0 1rem}pre{overflow:auto;background:#f4f4f4;"
             "padding:1rem}</style></head><body>"
-            "<pre>" + escape(text) + "</pre></body></html>").encode("utf-8")
+            "<pre>" + escape(text) + "</pre></body></html>")
+    return format_math_html(fallback).encode("utf-8")
 
 
 def _command(source, output_dir, descriptor):
@@ -132,7 +134,7 @@ def build_pdf(files, relative):
             html = _discount_render(text, source)
             if html is None:
                 raise BrowserError("Discount Markdown conversion failed", 422)
-            (temporary / "document.html").write_text(html, encoding="utf-8")
+            (temporary / "document.html").write_text(format_math_html(html), encoding="utf-8")
         command = _command(source, temporary, descriptor)
         started = time.monotonic()
         try:
