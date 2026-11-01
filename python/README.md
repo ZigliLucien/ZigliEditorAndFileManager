@@ -378,3 +378,18 @@ choose **Move** to place it in another existing directory beneath the selected
 root, retaining its associated Notes. No overwrites or cross-filesystem
 moves are allowed. The original Basic listing also provides **Move...**.
 See [BROWSER_FILE_MANAGER.md](BROWSER_FILE_MANAGER.md).
+
+## v55 — Markdown preview and LaTeX/Markdown PDF building
+
+Left-click Markdown (`.md`/`.markdown`) in the original-style listing
+to see a sandboxed HTML rendering made with **Pandoc** (or escaped source
+when Pandoc is unavailable). Left-click `.tex` to view its text source.
+
+Right-click either Markdown or TeX and choose **Compile PDF**. ZEFM
+opens a separate browser build tab; press **Compile and view PDF**.
+It uses Pandoc with LuaLaTeX for Markdown, or LuaLaTeX for TeX.
+The tab shows compilation status/errors and opens the newly generated
+PDF on success. PDF output is under the source directory's
+`.zefm-build` folder. Required external programs must be installed
+and on `PATH`; compile only trusted documents. See
+[BROWSER_FILE_MANAGER.md](BROWSER_FILE_MANAGER.md) for safeguards.
