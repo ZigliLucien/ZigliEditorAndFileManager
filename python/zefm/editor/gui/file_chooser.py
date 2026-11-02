@@ -140,8 +140,8 @@ class FileChooser(tk.Toplevel):
         if not selected:
             return
         path = self.paths.get(selected[0])
-        if path is not None and path.is_file():
-            self.name.set(path.name)
+        if path is not None:
+            self.name.set(path.name if path.is_file() else "")
 
     def go_up(self):
         if self.folder.parent != self.folder:
