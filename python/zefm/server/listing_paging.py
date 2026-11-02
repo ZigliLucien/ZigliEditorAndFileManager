@@ -30,7 +30,7 @@ def _preview(notes):
     return (content[:155] + "…" if len(content) > 155 else content) or "—"
 
 
-def paged_listing(files, relative=".", *, page=1, sort="filename", filter_text="",
+def paged_listing(files, relative=".", *, page=1, sort="timekey", filter_text="",
                   notes_path=None):
     """Return directory structure and one selected file page as UTF-8 JSON data.
 
