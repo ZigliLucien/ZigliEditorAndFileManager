@@ -341,3 +341,16 @@ listing's directory/page/sort/filter context.
   the existing direct LuaLaTeX compilation pipeline is unchanged.
 - No jQuery dependency is introduced. Offline MathJax bundling is a
   possible subsequent step; the MathJax CDN currently requires internet.
+
+### v59 — unified startup mode selection
+- New `python -m zefm --mode {editor,files,both}` entrypoint.
+- Default remains editor-only; existing editor and file-manager
+  module entrypoints continue to work.
+- File-manager-only starts the localhost HTTP server without Tk.
+- Both mode creates one Tk editor and one browser file manager sharing
+  the existing thread-safe open-file queue and file-in-use callbacks.
+- `--root`, `--port`, `--no-browser` are available in files/both
+  modes; automatic port selection stays the default.
+- Closing Tk shuts down the combined file manager. Ctrl+C stops
+  standalone file-manager mode.
+- Unit tests verify options, dispatch, server cleanup, and no-browser mode.
