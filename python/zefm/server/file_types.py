@@ -10,6 +10,7 @@ _VIEW = {
     ".pdf": "pdf", ".ps": "postscript", ".eps": "postscript", ".epub": "epub", ".djvu": "djvu", ".djv": "djvu",
     ".html": "html", ".htm": "html", ".xhtml": "html",
     ".md": "markdown", ".markdown": "markdown", ".tex": "text",
+    ".json": "structured", ".xml": "structured", ".ipynb": "structured",
 }
 _IMAGES = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".avif"}
 _ARCHIVES = {".zip", ".jar", ".war", ".ear", ".tar", ".tgz",
