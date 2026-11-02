@@ -1515,24 +1515,36 @@ class Window:
         except (OSError, ValueError) as exc:
             messagebox.showerror("RTL editing", str(exc), parent=self.root)
 
-    def open_local_file_manager(self):
-        """Serve only the currently selected local directory, using loopback HTTP."""
+    def open_local_file_manager(self, directory=None, port=0, open_browser=True):
+        """Start or reuse the loopback file manager.
+
+        The File menu calls this with no arguments.  The unified launcher can
+        explicitly select the directory/port and whether to open a browser.
+        Both modes share one server and the same Tk-safe editor callbacks.
+        """
         from ...server.http import BrowserServer
-        root=self.working_directory.initial_directory()
+        directory = directory if directory is not None else self.working_directory.initial_directory()
+        root = str(Path(directory).expanduser().resolve())
         try:
-            if self.local_browser is not None and self.local_browser.files.root != Path(root).resolve():
+            if (self.local_browser is not None
+                    and (self.local_browser.files.root != Path(root)
+                         or (port and self.local_browser.server.server_address[1] != port))):
                 self.local_browser.close()
-                self.local_browser=None
+                self.local_browser = None
             if self.local_browser is None:
-                self.local_browser=BrowserServer(root, open_in_editor=self.browser_open_requests.put,
+                self.local_browser = BrowserServer(
+                    root, port=port, open_in_editor=self.browser_open_requests.put,
                     file_in_use=self._browser_file_in_use)
-            url=self.local_browser.start()
+            url = self.local_browser.start()
             if self.browser_poll_id is None:
                 self.browser_poll_id = self.root.after(150, self._drain_browser_requests)
-            webbrowser.open(url + "listing")
+            if open_browser:
+                webbrowser.open(url + "listing")
             self.status.set(f"ZEFM original-style file listing: {url}listing (root: {root})")
-        except (OSError,ValueError) as exc:
-            messagebox.showerror("Local file manager",str(exc),parent=self.root)
+            return url
+        except (OSError, ValueError) as exc:
+            messagebox.showerror("Local file manager", str(exc), parent=self.root)
+            return None
 
     def open_local_email_archive(self):
         """Open existing local Maildir accounts without fetching or sending mail."""
