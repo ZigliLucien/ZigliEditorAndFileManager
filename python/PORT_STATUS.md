@@ -354,3 +354,16 @@ listing's directory/page/sort/filter context.
 - Closing Tk shuts down the combined file manager. Ctrl+C stops
   standalone file-manager mode.
 - Unit tests verify options, dispatch, server cleanup, and no-browser mode.
+
+### v60 — mouse-wheel file chooser and accessible RTL editor
+- Replaced native Open/Save As filename dialogs with a compact Tk
+  Treeview chooser, keeping the configured initial directory.
+- Mouse wheel advances the selected file (including X11 Button-4/5)
+  and scrolls the chosen item into view; tests cover platform deltas
+  and directory sorting.
+- Added an always-visible **RTL Browser** button, using the existing
+  Yiddish browser-edit path for correct BiDi rendering.
+- Tk Text still cannot natively reorder Yiddish right-to-left glyph
+  runs on Tk 8.6/X11. No visual character reversal was applied to
+  stored buffer contents; this avoids corrupting Unicode text, cursor
+  offsets, search and saves.
