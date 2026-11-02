@@ -86,11 +86,18 @@ class StandaloneFilesNavigationTests(unittest.TestCase):
         self.assertEqual(nested["files"][0]["name"], "cœur ייִדיש.md")
 
     def test_standalone_launcher_without_browser_window(self):
-        with patch("zefm.__main__.threading.Event") as event, \
+        # Mock the browser server rather than threading.Event, because the
+        # latter is shared by HTTP worker initialization.
+        from unittest.mock import Mock
+        fake_server = Mock()
+        fake_server.start.return_value = "http://127.0.0.1:9876/"
+        with patch("zefm.server.http.BrowserServer", return_value=fake_server), \
+             patch("zefm.__main__.threading.Event") as event, \
              patch("zefm.__main__.webbrowser.open") as open_browser:
-            event.return_value.wait.side_effect = KeyboardInterrupt
+            event.return_value.wait.side_effect = KeyboardInterrupt()
             launch_files(root=self.root, open_browser=False)
         open_browser.assert_not_called()
+        fake_server.close.assert_called_once()
 
 
 if __name__ == "__main__":
