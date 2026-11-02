@@ -30,6 +30,7 @@ from .file_types import handler_for
 from .book_preview import epub_page, djvu_page
 from .archive_preview import archive_listing
 from .postscript_preview import postscript_pdf
+from .structured_preview import transformed_document
 from .document_build import markdown_html, checked_source, build_pdf
 from .mathjax_filter import MATHJAX_PREVIEW_CSP
 
@@ -365,6 +366,17 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                         raise BrowserError("Unexpected view parameters")
                     descriptor = handler_for(rel)
                     kind = descriptor["view"]
+                    if kind == "structured":
+                        content = transformed_document(files, rel)
+                        if descriptor["extension"] == ".ipynb":
+                            self._send(200, content.encode("utf-8"),
+                                       extra={"Content-Security-Policy":
+                                              "default-src 'none'; style-src 'unsafe-inline'; "
+                                              "img-src data:; font-src data:; "
+                                              "base-uri 'none'; frame-ancestors 'none'"})
+                        else:
+                            self._send(200, page(rel, content))
+                        return
                     if kind == "postscript":
                         self._send(200, postscript_pdf(files, rel), "application/pdf",
                                    {"Content-Disposition": "inline"})
