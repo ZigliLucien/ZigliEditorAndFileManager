@@ -6,6 +6,7 @@ from pathlib import Path
 
 _VIEW = {
     ".pdf": "pdf",
+    ".epub": "epub", ".djvu": "djvu", ".djv": "djvu",
     ".html": "html", ".htm": "html",
     ".md": "markdown", ".markdown": "markdown",
     ".tex": "text",
