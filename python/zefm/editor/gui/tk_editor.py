@@ -30,6 +30,7 @@ from ..json_path import paths_at, navigate, locate_path, jq_path
 from ..json_tools import parse_simple_path, value_at_path, format_json
 from ..mode_tools import validate_json, indentation
 from .tk_clipboard import TkClipboard
+from .file_chooser import choose_file
 from .keyboard_policy import install_editor_shortcut
 
 class Window:
@@ -71,7 +72,14 @@ class Window:
         self.vim_normal = False
         self.vim_direction = 1
         self.status = tk.StringVar(value="Ready")
-        ttk.Label(self.root, textvariable=self.status, anchor="w").pack(side="bottom", fill="x")
+        self.status_bar = ttk.Frame(self.root)
+        self.status_bar.pack(side="bottom", fill="x")
+        ttk.Label(self.status_bar, textvariable=self.status, anchor="w").pack(
+            side="left", fill="x", expand=True)
+        # Tk 8.6 cannot reorder Unicode RTL glyphs. A direct button opens
+        # the already-working browser editor without altering saved text.
+        ttk.Button(self.status_bar, text="RTL Browser",
+                   command=self.edit_current_file_rtl).pack(side="right", padx=4)
         # A nonmodal warning above the status line; it never replaces user edits.
         self.external_notice_text = tk.StringVar()
         self.external_notice = ttk.Frame(self.root, padding=(6, 4))
@@ -1410,16 +1418,19 @@ class Window:
             messagebox.showerror('Open failed',str(exc),parent=self.root)
 
     def open_file(self):
-        path=filedialog.askopenfilename(parent=self.root,initialdir=self.working_directory.initial_directory())
-        if path:self._open_path(path)
+        path = choose_file(self.root, self.working_directory.initial_directory())
+        if path:
+            self._open_path(path)
 
     def save_file(self,as_new=False):
         widget,editor=self.current()
         if not widget:return
         path=editor.state.buffer.path
         if as_new or not path:
-            path=filedialog.asksaveasfilename(parent=self.root,initialdir=self.working_directory.initial_directory())
-            if not path:return
+            path = choose_file(self.root, self.working_directory.initial_directory(),
+                               save=True, initialfile=Path(path).name if path else "")
+            if not path:
+                return
         # A file may have changed in the browser or another program.
         # Check BEFORE writing and leave the editor text untouched on refusal.
         current_tab=self.tabs.select()
