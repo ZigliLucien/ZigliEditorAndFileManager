@@ -454,3 +454,22 @@ python3 -m zefm.server.http --root ~/Documents
 ```
 
 Type `python3 -m zefm --help` for complete options.
+
+## v60 — wheel file chooser and Yiddish RTL shortcut
+
+File → Open and File → Save As now use a Tk file chooser with a list whose
+mouse wheel **moves the current selection** and scrolls it into view.
+Linux/X11 Button-4/Button-5, Windows MouseWheel and macOS wheel deltas are
+handled. Double-click a directory to enter it, use **Up** to return to
+the parent, or select a filename and press Open/Save. The chooser sorts
+directories first and files by name. No external toolkit dependency.
+
+The Tk editor now has an **RTL Browser** shortcut at the bottom right.
+Yiddish text remains stored in its normal logical Unicode order. Tk 8.6
+on X11 does not properly implement bidirectional glyph layout in a Text
+widget, so merely right-aligning text cannot correct its on-screen
+character order. The shortcut opens the already-working local HTML
+RTL editor for the saved file, with correct browser bidirectional
+typesetting and its existing save/reload protections. Save the current
+Tk buffer before opening the RTL browser editor. This is a supported
+workaround, not an implementation of native Tk BiDi editing.
