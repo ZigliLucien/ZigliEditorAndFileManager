@@ -367,3 +367,15 @@ listing's directory/page/sort/filter context.
   runs on Tk 8.6/X11. No visual character reversal was applied to
   stored buffer contents; this avoids corrupting Unicode text, cursor
   offsets, search and saves.
+
+### v61 — chooser scrolling and files-mode navigation
+- Mouse wheel handling covers Tk chooser list, scrollbar and adjacent
+  panel, with a pure function for bounded selected-row movement and
+  immediate filename update (avoids virtual-event timing races).
+- Styled GoFM file manager has explicit Home/Up directory controls.
+  Both work with standalone `--mode files` as well as combined mode.
+- Top has a single click callback; page URL canonicalizes when a
+  requested page is no longer available. Browser history remains active.
+- Tests check wheel direction/bounds, 62-file three-page navigation,
+  nested Unicode directory breadcrumbs, no-editor standalone shell
+  and standalone launcher operation.
