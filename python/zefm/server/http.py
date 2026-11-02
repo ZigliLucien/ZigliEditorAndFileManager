@@ -379,7 +379,8 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                         src = escape(link("/djvu-page", rel) + "&page=" + str(number), quote=True)
                         body = (f"<h2>{escape(rel)}</h2><nav>{previous}Page {number}{following}</nav>"
                                 f'<p><img src="{src}" alt="DjVu page {number}" style="max-width:100%;height:auto"></p>')
-                        self._send(200, page(rel, body))
+                        self._send(200, page(rel, body), extra={
+                            "Content-Security-Policy": "default-src 'none'; img-src 'self'; style-src 'self' 'unsafe-inline'; base-uri 'none'; frame-ancestors 'none'"})
                         return
                     suffix = files.resolve(rel).suffix.casefold()
                     if suffix == ".pdf":
