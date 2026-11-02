@@ -150,7 +150,7 @@
         }
         return;
       case "view":
-        if (["pdf", "html", "htm", "md", "markdown", "epub", "djvu", "djv", "jpg", "jpeg", "png", "gif", "webp", "bmp", "avif", "zip", "jar", "war", "ear", "tar", "tgz", "tbz", "tbz2", "txz"].includes(row.type)) {
+        if (["pdf", "ps", "eps", "html", "htm", "md", "markdown", "epub", "djvu", "djv", "jpg", "jpeg", "png", "gif", "webp", "bmp", "avif", "zip", "jar", "war", "ear", "tar", "tgz", "tbz", "tbz2", "txz"].includes(row.type)) {
           const route = row.type === "pdf" ? "/pdf" : "/view";
           window.open(operationUrl(route, path), "_blank", "noopener");
         } else {
