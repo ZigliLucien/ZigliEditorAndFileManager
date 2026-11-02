@@ -6,7 +6,7 @@
   // GoFM.java used page 0 for the top listing and HEADER1..N for file pages.
   // In this single-page UI, page 1 starts at index 0; Top scrolls to the
   // directory overview and Bottom selects the final file page.
-  const state = {data: null, sort: "filename", filter: "", page: 0, pageSize: 25,
+  const state = {data: null, sort: "timekey", filter: "", page: 0, pageSize: 25,
                  directory: ".", requestSerial: 0};
   const collator = new Intl.Collator(undefined, {numeric: true, sensitivity: "base"});
   const hasEditor = document.body.dataset.editor === "true";
@@ -25,7 +25,7 @@
 
   function listingUrl(path, page = 1) {
     const args = {path, page: String(page)};
-    if (state.sort !== "filename") args.sort = state.sort;
+    if (state.sort !== "timekey") args.sort = state.sort;
     if (state.filter) args.filter = state.filter;
     return "/listing?" + new URLSearchParams(args);
   }
@@ -423,7 +423,7 @@
   window.addEventListener("popstate", () => {
     const query = new URLSearchParams(location.search);
     state.sort = ["filename", "filetype", "timekey", "size", "notes"].includes(query.get("sort"))
-      ? query.get("sort") : "filename";
+      ? query.get("sort") : "timekey";
     state.filter = (query.get("filter") || "").slice(0, 200);
     $("sort-key").value = state.sort;
     $("filter").value = state.filter;
@@ -435,7 +435,7 @@
   setInterval(updateClock, 1000);
   const query = new URLSearchParams(location.search);
   state.sort = ["filename", "filetype", "timekey", "size", "notes"].includes(query.get("sort"))
-    ? query.get("sort") : "filename";
+    ? query.get("sort") : "timekey";
   state.filter = (query.get("filter") || "").slice(0, 200);
   $("sort-key").value = state.sort;
   $("filter").value = state.filter;
