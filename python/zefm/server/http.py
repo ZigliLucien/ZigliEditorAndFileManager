@@ -29,6 +29,7 @@ from .html_preview import site_url, site_resource, HTML_PREVIEW_CSP
 from .file_types import handler_for
 from .book_preview import epub_page, djvu_page
 from .archive_preview import archive_listing
+from .postscript_preview import postscript_pdf
 from .document_build import markdown_html, checked_source, build_pdf
 from .mathjax_filter import MATHJAX_PREVIEW_CSP
 
@@ -364,6 +365,10 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                         raise BrowserError("Unexpected view parameters")
                     descriptor = handler_for(rel)
                     kind = descriptor["view"]
+                    if kind == "postscript":
+                        self._send(200, postscript_pdf(files, rel), "application/pdf",
+                                   {"Content-Disposition": "inline"})
+                        return
                     if kind == "archive":
                         self._send(200, page(rel, archive_listing(files, rel)))
                         return
