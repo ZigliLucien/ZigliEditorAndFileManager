@@ -473,3 +473,18 @@ RTL editor for the saved file, with correct browser bidirectional
 typesetting and its existing save/reload protections. Save the current
 Tk buffer before opening the RTL browser editor. This is a supported
 workaround, not an implementation of native Tk BiDi editing.
+
+## v61 — mouse-wheel file selection and standalone browser navigation
+
+The editor's Open/Save As chooser now accepts wheel events over the file
+list, scrollbar or its surrounding panel. On Slackware X11, Button-4/5
+events advance the highlighted file by one row; the row is made visible
+and its filename updated immediately. MouseWheel events also work on
+macOS/Windows. Use double-click to enter a folder or Up to return.
+
+The browser file manager (`python3 -m zefm --mode files`) has explicit
+**Home** and **Up** directory controls in addition to its GoFM
+breadcrumbs. The **Top** page control has one click action, and the
+current URL is corrected if a requested page has been clamped because
+the directory contents or filter changed. Previous/Next/Bottom and
+browser Back/Forward remain available, without needing Tk.
