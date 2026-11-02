@@ -465,3 +465,29 @@ feature; a connection to jsDelivr is required for this version.
 Ordinary `.html` previews remain strictly script-disabled. Markdown-to-PDF
 still uses Discount/WeasyPrint without browser JavaScript. The direct
 LuaLaTeX compilation path for `.tex` files is unchanged.
+
+
+## v62 — compact directories and EPUB/DjVu previews
+
+The original-style directory grid retains four columns, names, clickable
+navigation, and alternating palette while reducing cell padding and
+surrounding whitespace. File metadata/notes remain unchanged.
+
+The extension dispatch registry recognizes `.epub`, `.djvu`, and `.djv`.
+EPUB left-click opens an in-browser, escaped-text chapter reader using the
+standard-library ZIP/XML modules. Chapter navigation follows the EPUB
+spine. Book-authored HTML/scripts are not executed, and book images and
+advanced CSS/layout are not yet displayed.
+
+DjVu left-click opens a page viewer. Install DjVuLibre's `ddjvu` executable
+to render each page via a local, bounded subprocess to a PNG response.
+The interface provides previous/next page links; an out-of-range page returns
+an error. This is a raster-only preview and does not expose DjVu OCR text.
+No browser DjVu plugin is necessary. For example on Alpine use
+`apk add djvulibre` if that package is available for your release.
+
+The original document remains available for download through the existing
+download route (subject to its current file-size limit). Neither format
+runs untrusted embedded scripts or external programs from inside archives.
+The EPUB and DjVu readers are initial implementations requiring browser
+testing on Slackware/macOS/Alpine.
