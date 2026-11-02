@@ -27,6 +27,7 @@ from .rename_ops import RenameManager
 from .navigation import safe_listing_return
 from .html_preview import site_url, site_resource, HTML_PREVIEW_CSP
 from .file_types import handler_for
+from .book_preview import epub_page, djvu_page
 from .document_build import markdown_html, checked_source, build_pdf
 from .mathjax_filter import MATHJAX_PREVIEW_CSP
 
@@ -350,9 +351,36 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                     if set(args) - {"path", "back"}:
                         raise BrowserError("Unexpected PDF parameters")
                     self._serve_pdf(rel)
+                elif parsed.path == "/djvu-page":
+                    if set(args) - {"path", "page"}:
+                        raise BrowserError("Unexpected DjVu parameters")
+                    raw_page = args.get("page", "1")
+                    if not raw_page.isdecimal() or len(raw_page) > 5:
+                        raise BrowserError("Invalid DjVu page")
+                    self._send(200, djvu_page(files, rel, int(raw_page)), "image/png")
                 elif parsed.path == "/view":
-                    if set(args) - {"path", "back"}:
+                    if set(args) - {"path", "back", "chapter", "page"}:
                         raise BrowserError("Unexpected view parameters")
+                    kind = handler_for(rel)["view"]
+                    if kind == "epub":
+                        raw_chapter = args.get("chapter", "0")
+                        if not raw_chapter.isdecimal() or len(raw_chapter) > 5:
+                            raise BrowserError("Invalid EPUB chapter")
+                        self._send(200, page(rel, epub_page(files, rel, int(raw_chapter))))
+                        return
+                    if kind == "djvu":
+                        raw_page = args.get("page", "1")
+                        if not raw_page.isdecimal() or len(raw_page) > 5 or int(raw_page) < 1:
+                            raise BrowserError("Invalid DjVu page")
+                        number = int(raw_page)
+                        previous = (f'<a href="{escape(link("/view", rel) + "&page=" + str(number-1), quote=True)}">← Previous</a> '
+                                    if number > 1 else "")
+                        following = f' <a href="{escape(link("/view", rel) + "&page=" + str(number+1), quote=True)}">Next →</a>'
+                        src = escape(link("/djvu-page", rel) + "&page=" + str(number), quote=True)
+                        body = (f"<h2>{escape(rel)}</h2><nav>{previous}Page {number}{following}</nav>"
+                                f'<p><img src="{src}" alt="DjVu page {number}" style="max-width:100%;height:auto"></p>')
+                        self._send(200, page(rel, body))
+                        return
                     suffix = files.resolve(rel).suffix.casefold()
                     if suffix == ".pdf":
                         self._serve_pdf(rel)
