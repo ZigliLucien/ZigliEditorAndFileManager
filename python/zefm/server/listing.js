@@ -68,16 +68,15 @@
       const item = crumbs[i];
       const a = make("a", "", item.name);
       a.href = pathUrl("/listing", item.path);
-      a.addEventListener("click", (event) => {
-        if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
-        event.preventDefault();
-        navigate(item.path);
-      });
       area.append(a);
     }
     $("directory-title").textContent = data.directory;
-    $("folder-up").disabled = data.parent === null;
-    $("folder-home").disabled = data.relative === ".";
+    // Native links work without the JavaScript navigation interception.
+    // The selected root is the file-manager Home, not the OS home folder.
+    $("folder-home").href = pathUrl("/listing", ".");
+    $("folder-up").href = pathUrl("/listing", data.parent || ".");
+    $("folder-up").setAttribute("aria-disabled", String(data.parent === null));
+    $("folder-home").setAttribute("aria-disabled", String(data.relative === "."));
     $("basic-listing").href = pathUrl("/browse", data.relative);
     document.title = data.directory + " · ZEFM Listing";
   }
@@ -413,8 +412,6 @@
     }, 160);
   });
   $("find-file").addEventListener("click", () => $("filter").focus());
-  $("folder-up").addEventListener("click", navigateParent);
-  $("folder-home").addEventListener("click", () => navigate("."));
   $("refresh").addEventListener("click", () =>
     refresh(state.data ? state.data.relative : ".", state.page + 1));
   function pageFromUrl(query) {
