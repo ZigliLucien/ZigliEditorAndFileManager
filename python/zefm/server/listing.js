@@ -35,10 +35,17 @@
       clearTimeout(filterTimer);
       filterTimer = null;
     }
+    // A directory change starts at page 1 without silently inheriting
+    // the prior directory's filename filter or changing its sort order.
     state.filter = "";
     $("filter").value = "";
     if (recordHistory) history.pushState({path, page: 1}, "", listingUrl(path));
     refresh(path, 1);
+  }
+
+  function navigateParent() {
+    if (!state.data || !state.data.parent) return;
+    navigate(state.data.parent);
   }
 
   function selectPage(index, recordHistory = true, scrollToFiles = true) {
@@ -69,6 +76,8 @@
       area.append(a);
     }
     $("directory-title").textContent = data.directory;
+    $("folder-up").disabled = data.parent === null;
+    $("folder-home").disabled = data.relative === ".";
     $("basic-listing").href = pathUrl("/browse", data.relative);
     document.title = data.directory + " · ZEFM Listing";
   }
@@ -273,13 +282,17 @@
       const b = make("button", "gofm-nav", label);
       b.type = "button";
       b.disabled = disabled;
-      b.addEventListener("click", () => selectPage(page, true, scroll));
+      b.addEventListener("click", () => {
+        if (label === "Top") {
+          window.scrollTo({top: 0, behavior: "smooth"});
+          if (state.page === 0) return;
+        }
+        selectPage(page, true, scroll);
+      });
       nav.append(b);
       return b;
     }
-    navButton("Top", 0, false, false).addEventListener("click", () => {
-      window.scrollTo({top: 0, behavior: "smooth"});
-    });
+    navButton("Top", 0, false, false);
     navButton("Previous", state.page - 1, state.page === 0);
     nav.append(make("span", "gofm-current",
       "Listing " + (state.page + 1) + " of " + count));
@@ -329,6 +342,13 @@
       state.directory = data.relative;
       $("listing-info").classList.remove("error");
       state.page = data.page - 1;
+      // Page counts can shrink after deletion/moves or filter changes.
+      // Keep the URL consistent with the page the server actually returned.
+      const actual = listingUrl(data.relative, data.page);
+      if (location.pathname === "/listing" &&
+          new URLSearchParams(location.search).get("page") !== String(data.page)) {
+        history.replaceState({path: data.relative, page: data.page}, "", actual);
+      }
       renderBreadcrumbs(state.data);
       renderDirectories(state.data);
       renderFiles();
@@ -393,6 +413,8 @@
     }, 160);
   });
   $("find-file").addEventListener("click", () => $("filter").focus());
+  $("folder-up").addEventListener("click", navigateParent);
+  $("folder-home").addEventListener("click", () => navigate("."));
   $("refresh").addEventListener("click", () =>
     refresh(state.data ? state.data.relative : ".", state.page + 1));
   function pageFromUrl(query) {
