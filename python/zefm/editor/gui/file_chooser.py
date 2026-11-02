@@ -28,6 +28,14 @@ def wheel_steps(event):
     return -1 if delta > 0 else 1
 
 
+def next_row(items, selected, step):
+    """Select a bounded row offset, even with no current selection."""
+    if not items:
+        return None
+    current = selected if selected in items else items[0]
+    return items[max(0, min(len(items) - 1, items.index(current) + step))]
+
+
 def directory_entries(folder):
     """Directories first, then files, sorted case-insensitively."""
     entries = [p for p in Path(folder).iterdir() if not p.is_symlink()]
@@ -75,6 +83,9 @@ class FileChooser(tk.Toplevel):
         # or other dialogs. Linux wheel buttons and Windows/macOS MouseWheel.
         for event in ("<MouseWheel>", "<Button-4>", "<Button-5>"):
             self.tree.bind(event, self.on_wheel)
+            bar.bind(event, self.on_wheel)
+            # On X11 an event may hit the blank area surrounding the list.
+            area.bind(event, self.on_wheel)
         self.tree.bind("<Double-1>", self.activate)
         self.tree.bind("<Return>", self.activate)
         self.tree.bind("<BackSpace>", lambda event: self.go_up() or "break")
@@ -125,14 +136,17 @@ class FileChooser(tk.Toplevel):
         if not items:
             return "break"
         selected = self.tree.selection()
-        current = selected[0] if selected else items[0]
         step = wheel_steps(event)
         if step:
-            index = max(0, min(len(items) - 1, items.index(current) + step))
-            target = items[index]
+            target = next_row(items, selected[0] if selected else None, step)
             self.tree.selection_set(target)
             self.tree.focus(target)
             self.tree.see(target)
+            # Updating the filename directly avoids race conditions between
+            # wheel events and Tk's queued <<TreeviewSelect>> virtual event.
+            path = self.paths.get(target)
+            if path is not None:
+                self.name.set(path.name if path.is_file() else "")
         return "break"
 
     def selection_changed(self, event=None):
