@@ -221,7 +221,7 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                                            or not (1 <= len(args["page"]) <= 9)
                                            or int(args["page"]) < 1):
                         raise BrowserError("Invalid listing page")
-                    if args.get("sort", "filename") not in {
+                    if args.get("sort", "timekey") not in {
                             "filename", "filetype", "timekey", "size", "notes"}:
                         raise BrowserError("Invalid listing sort")
                     if len(args.get("filter", "")) > 200:
@@ -237,7 +237,7 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                     if not raw_page.isdecimal() or len(raw_page) > 7:
                         raise BrowserError("Invalid page number")
                     data = paged_listing(files, rel, page=int(raw_page),
-                                         sort=args.get("sort", "filename"),
+                                         sort=args.get("sort", "timekey"),
                                          filter_text=args.get("filter", ""),
                                          notes_path=notes_path)
                     self._send(200, json.dumps(data, ensure_ascii=False).encode("utf-8"),
