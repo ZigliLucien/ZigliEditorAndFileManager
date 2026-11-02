@@ -7,7 +7,7 @@ from pathlib import Path
 import mimetypes
 
 _VIEW = {
-    ".pdf": "pdf", ".epub": "epub", ".djvu": "djvu", ".djv": "djvu",
+    ".pdf": "pdf", ".ps": "postscript", ".eps": "postscript", ".epub": "epub", ".djvu": "djvu", ".djv": "djvu",
     ".html": "html", ".htm": "html", ".xhtml": "html",
     ".md": "markdown", ".markdown": "markdown", ".tex": "text",
 }
