@@ -421,3 +421,36 @@ Mathematical inline delimiters `$…$` and `\\(…\\)`, and display
 delimiters `$$…$$` and `\\[…\\]` are supported. The preview
 runs in an isolated browser sandbox; normal HTML pages still disallow
 scripts. No jQuery or remote legacy MathJax 2 APIs are required.
+
+## v59 — choose editor, file manager or both at startup
+
+Use the new common launcher from `python/`:
+
+```sh
+python3 -m zefm --mode editor
+python3 -m zefm --mode files
+python3 -m zefm --mode both
+```
+
+`editor` is the default when `--mode` is omitted. `files` runs
+only the local HTTP file manager and opens the original-style GoFM
+listing in your default browser; it does **not** create a Tk window.
+`both` starts the Tk editor and the browser listing from the same
+process, sharing one local file-manager service, editor-open callbacks,
+Notes and file-in-use checks. The server closes when the editor exits.
+
+For `files` and `both`, use `--root DIR` to choose the browser
+root and `--port N` to use a particular loopback port (default
+automatic). `--no-browser` starts the service without opening a tab;
+the standalone mode prints the address. In `both` mode the root
+defaults to the editor's configured working directory; in `files`
+mode it defaults to your home directory.
+
+The existing commands are preserved:
+
+```sh
+python3 -m zefm.editor.gui.tk_editor
+python3 -m zefm.server.http --root ~/Documents
+```
+
+Type `python3 -m zefm --help` for complete options.
