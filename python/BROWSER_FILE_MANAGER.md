@@ -491,3 +491,30 @@ download route (subject to its current file-size limit). Neither format
 runs untrusted embedded scripts or external programs from inside archives.
 The EPUB and DjVu readers are initial implementations requiring browser
 testing on Slackware/macOS/Alpine.
+
+
+## v63 — port-8000 extension-command workflow
+
+The user's local `server.py` mapped extensions to subprocess commands:
+`.ipynb` → `jupyter nbconvert --to html --stdout`,
+`.json` → `jq .`, `.xml` → `xq .`, `.md` → `mdownpl`,
+`.tex` → `goTEX`, and `.ps` → `goPS`.
+ZEFM now shares the **extension-to-preview** behavior without importing
+the old CGI scripts or exposing an arbitrary command runner.
+
+- `.json`: pretty-print parsed JSON as escaped HTML text using stdlib `json`.
+- `.xml`: pretty-print XML as escaped HTML text using stdlib `minidom`.
+  This retains XML, rather than reproducing `xq .`'s XML-to-JSON output.
+- `.ipynb`: optional `jupyter nbconvert --to html --stdout` using
+  argv-based subprocess, timeout, output-size limit, and no shell.
+  The resulting notebook HTML is served with a restrictive CSP that
+  blocks executable scripts and remote resources; advanced notebook
+  interactions may not display.
+- Existing Markdown (Discount), TeX (LuaLaTeX build), and PS/EPS
+  (Ghostscript) handlers are unchanged.
+
+All new preview paths use the current root-confined file resolver. No CGI
+or public port-8000 listener is created. The browser server remains
+loopback-only and the source files remain unmodified.
+
+Run tests: `python3 -m unittest discover -s tests -v`.
