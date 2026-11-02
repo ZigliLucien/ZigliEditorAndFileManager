@@ -150,7 +150,7 @@
         }
         return;
       case "view":
-        if (["pdf", "html", "htm", "md", "markdown"].includes(row.type)) {
+        if (["pdf", "html", "htm", "md", "markdown", "epub", "djvu", "djv"].includes(row.type)) {
           const route = row.type === "pdf" ? "/pdf" : "/view";
           window.open(operationUrl(route, path), "_blank", "noopener");
         } else {
