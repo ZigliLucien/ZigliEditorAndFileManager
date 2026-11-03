@@ -137,7 +137,8 @@
       case "notes": location.href = operationUrl("/notes", path); return;
       case "quick": location.href = operationUrl("/edit", path); return;
       case "build":
-        window.open(operationUrl("/build", path), "_blank", "noopener");
+        // Same-tab navigation keeps the listing in browser Back history.
+        location.assign(operationUrl("/build", path));
         return;
       case "edit":
         if (hasEditor) {
@@ -149,12 +150,9 @@
         }
         return;
       case "view":
-        if (["pdf", "ps", "eps", "json", "xml", "ipynb", "html", "htm", "md", "markdown", "epub", "djvu", "djv", "jpg", "jpeg", "png", "gif", "webp", "bmp", "avif", "zip", "jar", "war", "ear", "tar", "tgz", "tbz", "tbz2", "txz"].includes(row.type)) {
-          const route = row.type === "pdf" ? "/pdf" : "/view";
-          window.open(operationUrl(route, path), "_blank", "noopener");
-        } else {
-          location.href = operationUrl("/view", path);
-        }
+        // All recognized viewers, including PDF and HTML, use this tab.
+        // The URL retains the listing's path/page/sort as a return hint.
+        location.assign(operationUrl(row.type === "pdf" ? "/pdf" : "/view", path));
         return;
     }
   }
