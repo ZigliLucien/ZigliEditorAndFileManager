@@ -28,7 +28,7 @@ def site_url(relative: str) -> str:
     return "/site/" + "/".join(quote(part, safe="") for part in Path(relative).parts)
 
 
-def site_resource(files, url_path: str):
+def site_relative_path(url_path: str):
     if not url_path.startswith("/site/"):
         raise BrowserError("Unknown resource route", 404)
     tail = url_path[len("/site/"):]
