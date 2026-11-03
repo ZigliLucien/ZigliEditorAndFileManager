@@ -518,3 +518,23 @@ or public port-8000 listener is created. The browser server remains
 loopback-only and the source files remain unmodified.
 
 Run tests: `python3 -m unittest discover -s tests -v`.
+
+
+## v64 — fix Home/Up when opening the remembered folder
+
+The Tk File menu used to pass the last-used editor working directory as
+the HTTP server root, making Home and Up unable to leave that directory.
+The launcher now separates a server browsing boundary from the initial
+listing folder. When invoked from the Tk File menu without an explicit
+root, the browser is rooted at the editor's configured home directory
+and opens at the remembered folder within that home.
+
+If the remembered directory lies outside the configured home, only its
+immediate parent is used as a restricted browsing root; the entire
+filesystem is never exposed implicitly. An explicit `--root` remains a
+strict boundary as before. The browser still listens on loopback only.
+
+The original Home, Up, and breadcrumb links continue to use
+`/listing?path=...`. Browser root is a security boundary, not necessarily
+the folder shown on the first page. Tests are in
+`tests/test_browser_root_navigation.py`.
