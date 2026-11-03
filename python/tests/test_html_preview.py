@@ -53,6 +53,31 @@ class HtmlPreviewTests(unittest.TestCase):
             self.assertEqual(status, 200)
             self.assertIn(mime, h["Content-Type"])
 
+    def test_local_html_links_to_other_html_and_pdf(self):
+        (self.root / "docs" / "next.html").write_text(
+            '<p>Other page</p><a href="paper.pdf">Read PDF</a>', encoding="utf-8")
+        (self.root / "docs" / "paper.pdf").write_bytes(
+            b"%PDF-1.4\\n1 0 obj\\n<<>>\\nendobj\\n%%EOF\\n")
+        status, html, headers, _ = self.get("/site/docs/next.html")
+        self.assertEqual(status, 200)
+        self.assertIn(b'paper.pdf', html)
+        self.assertIn("allow-top-navigation-by-user-activation",
+                      headers["Content-Security-Policy"])
+        self.assertNotIn("allow-scripts", headers["Content-Security-Policy"])
+        self.assertNotIn("allow-forms", headers["Content-Security-Policy"])
+        status, pdf, headers, _ = self.get("/site/docs/paper.pdf")
+        self.assertEqual(status, 200)
+        self.assertEqual(headers["Content-Type"], "application/pdf")
+        self.assertEqual(headers["Content-Disposition"], "inline")
+        self.assertTrue(pdf.startswith(b"%PDF-"))
+        status, _, _, _ = self.get("/site/docs/next.html")
+        self.assertEqual(status, 200)
+
+    def test_pdf_link_cannot_escape_root(self):
+        (self.root / "docs" / "paper.pdf").write_bytes(b"%PDF-1.4\\n%%EOF\\n")
+        self.assertNotEqual(self.get("/site/docs/%2e%2e/private.bin")[0], 200)
+        self.assertNotEqual(self.get("/site/docs/untrusted.js")[0], 200)
+
     def test_confined_resources_and_forbidden_script(self):
         (self.root / "docs" / "unsafe.js").write_text("alert(1)")
         for url in ("/site/../private.bin", "/site/docs/unsafe.js",
