@@ -24,6 +24,11 @@ _TYPES = {
 }
 
 
+# HTML, CSS, images and fonts may load as passive resources. All other
+# linked extensions go through the normal ZEFM View dispatcher instead.
+STATIC_SITE_EXTENSIONS = frozenset(_TYPES)
+
+
 def site_url(relative: str) -> str:
     return "/site/" + "/".join(quote(part, safe="") for part in Path(relative).parts)
 
