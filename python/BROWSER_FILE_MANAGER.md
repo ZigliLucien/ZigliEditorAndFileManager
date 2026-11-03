@@ -581,3 +581,19 @@ URLs outside the root and unknown/missing files remain rejected. External
 and absolute file:/// links are not rewritten automatically.
 
 Regression coverage: tests/test_html_preview.py.
+
+
+## v67 — previews stay in the current tab
+
+The styled listing previously opened PDF, HTML, images, books and archives
+with `window.open(..., "_blank")`, and PDF builds likewise used a separate
+tab. This prevented ordinary browser Back from returning to the listing.
+
+File View and Build now navigate in the **same tab** using normal browser
+history. The original listing URL retains the current path, page, sort and
+filter, so Back returns to the previous listing view. The change applies to
+clicks **in the ZEFM listing**; explicit `target="_blank"` links inside
+a user's own HTML documents, Ctrl/Cmd-click, and browser new-tab commands
+still follow normal browser behavior. Navigation remains root-confined.
+
+Regression coverage: `tests/test_same_tab_navigation.py`.
