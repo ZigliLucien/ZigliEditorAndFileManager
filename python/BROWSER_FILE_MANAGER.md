@@ -538,3 +538,22 @@ The original Home, Up, and breadcrumb links continue to use
 `/listing?path=...`. Browser root is a security boundary, not necessarily
 the folder shown on the first page. Tests are in
 `tests/test_browser_root_navigation.py`.
+
+
+## v65 — hyperlinks inside local HTML previews
+
+The original HTML preview allowlist omitted PDF, so relative `<a href="paper.pdf">`
+links returned an HTML preview resource error. Clicking HTML links also
+encountered the document sandbox's top-level navigation restriction.
+
+The `/site/` handler now recognizes linked `.pdf` documents and delegates
+them to the existing bounded PDF viewer, including its byte-range support
+and PDF signature check. Other HTML files still load as sandboxed HTML.
+The CSP permits explicit user-activated top-level navigation while retaining
+restrictions on scripts, forms, and same-origin privilege. Files remain
+confined to the configured browsing root. Ordinary links use their normal
+browser-relative URL resolution; links using the original machine's
+`file://` URLs are not automatically rewritten.
+
+Test coverage: `tests/test_html_preview.py`. Browser click behavior still
+requires manual verification in Firefox/Safari.
