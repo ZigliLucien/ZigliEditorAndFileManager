@@ -65,8 +65,9 @@ def site_resource(files, url_path: str):
 
 
 HTML_PREVIEW_CSP = (
-    "sandbox; default-src 'none'; "
+    "default-src 'none'; "
     "style-src 'self' 'unsafe-inline'; img-src 'self' data:; "
     "font-src 'self'; base-uri 'none'; form-action 'none'; "
-    "frame-ancestors 'none'; object-src 'none'"
+    "frame-ancestors 'none'; object-src 'none'; "
+    "sandbox allow-top-navigation-by-user-activation"
 )
