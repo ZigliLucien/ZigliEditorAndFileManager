@@ -1534,8 +1534,13 @@ class Window:
         Both modes share one server and the same Tk-safe editor callbacks.
         """
         from ...server.http import BrowserServer
-        directory = directory if directory is not None else self.working_directory.initial_directory()
-        root = str(Path(directory).expanduser().resolve())
+        from ...server.browser_location import browser_location
+        from urllib.parse import urlencode
+        browse_root, start = browser_location(
+            self.working_directory.home,
+            self.working_directory.initial_directory(),
+            explicit_root=directory)
+        root = str(browse_root)
         try:
             if (self.local_browser is not None
                     and (self.local_browser.files.root != Path(root)
@@ -1549,9 +1554,10 @@ class Window:
             url = self.local_browser.start()
             if self.browser_poll_id is None:
                 self.browser_poll_id = self.root.after(150, self._drain_browser_requests)
+            listing_url = url + "listing?" + urlencode({"path": start})
             if open_browser:
-                webbrowser.open(url + "listing")
-            self.status.set(f"ZEFM original-style file listing: {url}listing (root: {root})")
+                webbrowser.open(listing_url)
+            self.status.set(f"ZEFM file listing: {listing_url} (root: {root})")
             return url
         except (OSError, ValueError) as exc:
             messagebox.showerror("Local file manager", str(exc), parent=self.root)
