@@ -557,3 +557,27 @@ browser-relative URL resolution; links using the original machine's
 
 Test coverage: `tests/test_html_preview.py`. Browser click behavior still
 requires manual verification in Firefox/Safari.
+
+
+## v66 — link any local file extension from an HTML page
+
+In the sandboxed local HTML preview, relative hyperlinks no longer stop at a
+short allowlist of HTML/CSS/images/PDF. The `/site/` route now identifies the
+linked file within the configured root and delegates non-static files to the
+same `/view` handler used by the original-style listing:
+
+- PDF links use the built-in byte-range PDF viewer.
+- JPG/PNG/GIF/WebP and other passive image resources remain directly served.
+- EPUB, DjVu, PS/EPS, Markdown, JSON, XML, notebook and text links go to their
+  existing viewers/converters where available.
+- ZIP/JAR/TAR archives show read-only contents.
+- Unsupported or unknown binary types use the existing bounded download route.
+
+This is link support, not a promise that every binary format has a renderer.
+Scripts are not served as active script resources; a clicked .js file opens as
+escaped source text, and document CSP continues to prevent script execution.
+All links remain restricted by the same filesystem boundary and size limits;
+URLs outside the root and unknown/missing files remain rejected. External
+and absolute file:/// links are not rewritten automatically.
+
+Regression coverage: tests/test_html_preview.py.
