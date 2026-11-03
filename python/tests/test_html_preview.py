@@ -7,7 +7,7 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 from zefm.server.http import BrowserServer
-from zefm.server.html_preview import site_url
+from zefm.server.html_preview import site_url, site_relative_path
 
 
 class HtmlPreviewTests(unittest.TestCase):
@@ -37,6 +37,14 @@ class HtmlPreviewTests(unittest.TestCase):
                 return result.status, result.read(), dict(result.headers), result.geturl()
         except HTTPError as err:
             return err.code, err.read(), dict(err.headers), err.geturl()
+
+    def test_site_relative_path_export_and_server_import(self):
+        # Catch startup failures from mismatched function names in http.py.
+        from zefm.server.http import BrowserServer
+        self.assertTrue(BrowserServer)
+        self.assertEqual(site_relative_path("/site/docs/paper.pdf"), "docs/paper.pdf")
+        with self.assertRaises(Exception):
+            site_relative_path("/site/docs/../private.pdf")
 
     def test_html_is_rendered_not_escaped_and_relative_assets_work(self):
         code, body, headers, url = self.get("/view?" + urlencode({"path":"docs/" + self.html.name}))
