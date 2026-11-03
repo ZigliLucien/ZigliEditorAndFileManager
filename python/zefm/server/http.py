@@ -25,7 +25,7 @@ from .listing_paging import paged_listing
 from .pdf_delivery import select_pdf, byte_range
 from .rename_ops import RenameManager
 from .navigation import safe_listing_return
-from .html_preview import site_url, site_resource, HTML_PREVIEW_CSP
+from .html_preview import site_url, site_resource, site_relative_path, HTML_PREVIEW_CSP
 from .file_types import handler_for
 from .book_preview import epub_page, djvu_page
 from .archive_preview import archive_listing
@@ -208,6 +208,12 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                 if parsed.path.startswith("/site/"):
                     if args:
                         raise BrowserError("Unexpected site resource parameters")
+                    site_relative = site_relative_path(parsed.path)
+                    if Path(site_relative).suffix.casefold() == ".pdf":
+                        # Resolve clicked PDF links using the same range-capable
+                        # delivery path as a PDF opened from the file listing.
+                        self._serve_pdf(site_relative)
+                        return
                     data, media_type, html_document = site_resource(files, parsed.path)
                     self._send(200, data, media_type,
                                {"Content-Security-Policy": HTML_PREVIEW_CSP}
