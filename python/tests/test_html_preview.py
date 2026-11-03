@@ -88,12 +88,43 @@ class HtmlPreviewTests(unittest.TestCase):
 
     def test_confined_resources_and_forbidden_script(self):
         (self.root / "docs" / "unsafe.js").write_text("alert(1)")
-        for url in ("/site/../private.bin", "/site/docs/unsafe.js",
-                    "/site/docs/no.pdf", "/site/docs/nonexistent.png"):
+        for url in ("/site/../private.bin", "/site/docs/no.pdf",
+                    "/site/docs/nonexistent.png"):
             with self.subTest(url=url):
                 status, _, _, _ = self.get(url)
                 self.assertNotEqual(status, 200)
         self.assertEqual(self.get("/site/docs/theme.css")[0], 200)
+        # A JS hyperlink is a source-text view, never a script resource.
+        status, body, headers, _ = self.get("/site/docs/unsafe.js")
+        self.assertEqual(status, 200)
+        self.assertIn(b"alert", body)
+        self.assertIn("text/html", headers["Content-Type"])
+
+    def test_linked_extensions_follow_normal_view_dispatch(self):
+        from zipfile import ZipFile
+        (self.root / "docs" / "data.json").write_text(
+            '{"answer":42}', encoding="utf-8")
+        (self.root / "docs" / "source.py").write_text(
+            'print("hello")', encoding="utf-8")
+        (self.root / "docs" / "file.unknown").write_bytes(b"opaque payload")
+        (self.root / "docs" / "script.js").write_text(
+            "alert('not executed')", encoding="utf-8")
+        with ZipFile(self.root / "docs" / "bundle.jar", "w") as archive:
+            archive.writestr("Example.class", b"binary")
+        cases = (
+            ("/site/docs/data.json", b"answer", "text/html"),
+            ("/site/docs/source.py", b"print", "text/html"),
+            ("/site/docs/script.js", b"alert", "text/html"),
+            ("/site/docs/bundle.jar", b"Example.class", "text/html"),
+            ("/site/docs/file.unknown", b"opaque payload", "application/octet-stream"),
+        )
+        for uri, expected, mime in cases:
+            with self.subTest(uri=uri):
+                status, body, headers, target = self.get(uri)
+                self.assertEqual(status, 200)
+                self.assertIn(expected, body)
+                self.assertIn(mime, headers["Content-Type"])
+                self.assertNotEqual(target.split("?", 1)[0], self.server.url.rstrip("/") + uri)
 
     def test_normal_text_pdf_routes_unchanged(self):
         (self.root / "docs" / "plain.txt").write_text("text")
