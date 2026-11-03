@@ -43,6 +43,11 @@ def site_resource(files, url_path: str):
     if ("\\" in relative or any(bit in (".", "..", "") for bit in relative.split("/"))
             or relative.startswith("/")):
         raise BrowserError("Invalid local resource path", 403)
+    return relative
+
+
+def site_resource(files, url_path):
+    relative = site_relative_path(url_path)
     path = files.resolve(relative)
     if (not path.is_file() or (files.root / relative).is_symlink()):
         raise BrowserError("Static resource not found", 404)
