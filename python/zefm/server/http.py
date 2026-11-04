@@ -154,6 +154,8 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
             header = (f"<h1>Files: {escape(str(directory))}</h1>"
                       f'<p><a href="{escape(link("/listing", files.relative(directory)), quote=True)}">'
                       'Original ZEFM-style listing</a></p>')
+            header += (f'<p><a href="{escape(link("/new-file", crumb), quote=True)}">'
+                       'New file</a></p>')
             if directory != files.root:
                 parent = files.relative(directory.parent)
                 header += f'<p><a href="{escape(link("/browse", parent), quote=True)}">↑ Parent</a></p>'
@@ -242,6 +244,26 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                                if html_document else None)
                 elif parsed.path in ("/", "/browse"):
                     self._send(200, self._render_listing(rel))
+                elif parsed.path == "/new-file":
+                    if set(args) - {"path", "back"}:
+                        raise BrowserError("Unexpected new-file parameters")
+                    directory, _ = files.list_directory(rel)
+                    directory_relative = files.relative(directory)
+                    back = escape(safe_listing_return(
+                        files, back_state, directory_relative), quote=True)
+                    form = (
+                        f'<p><a href="{back}">← Back to directory</a></p>'
+                        f'<h2>New file in: {escape(directory_relative)}</h2>'
+                        '<p>Creates an empty file only if its name does not exist. '
+                        'You can edit the new file afterward.</p>'
+                        '<form action="/new-file" method="post" accept-charset="utf-8">'
+                        f'<input type="hidden" name="csrf" value="{escape(token, quote=True)}">'
+                        f'<input type="hidden" name="path" value="{escape(directory_relative, quote=True)}">'
+                        f'<input type="hidden" name="back" value="{escape(back_state or "", quote=True)}">'
+                        '<label>Filename <input name="name" required maxlength="255" '
+                        'autocomplete="off" autofocus></label> '
+                        '<button type="submit">Create file</button></form>')
+                    self._send(200, page("New file", form))
                 elif parsed.path == "/search-text":
                     if set(args) - {"path", "q", "case"}:
                         raise BrowserError("Unexpected search parameters")
@@ -650,6 +672,21 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                         return
                     self._send(200, json.dumps(result, ensure_ascii=False).encode("utf-8"),
                                "application/json; charset=utf-8")
+                elif route=="/new-file":
+                    if (set(args) - {"csrf", "path", "name", "back"}
+                            or not {"csrf", "path", "name"} <= set(args)):
+                        raise BrowserError("Unexpected new-file parameters")
+                    created = files.create_file(args["path"], args["name"])
+                    relative = files.relative(created)
+                    back = escape(safe_listing_return(
+                        files, return_to, files.relative(created.parent)), quote=True)
+                    edit_url = link("/edit", relative)
+                    if return_to:
+                        edit_url += "&" + urlencode({"back": return_to})
+                    self._send(201, page("New file created",
+                        f'<h2>Created file: {escape(relative)}</h2>'
+                        f'<p><a href="{escape(edit_url, quote=True)}">Quick edit new file</a> '
+                        f'· <a href="{back}">Back to directory</a></p>'))
                 elif route=="/mkdir":
                     if set(args) - {"csrf", "path", "name", "back"} or not {"csrf", "path", "name"} <= set(args):
                         raise BrowserError("Unexpected create-directory parameters")
