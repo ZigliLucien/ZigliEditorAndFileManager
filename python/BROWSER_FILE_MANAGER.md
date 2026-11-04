@@ -717,3 +717,25 @@ Tests: `tests/test_content_search.py`. The workflow also runs
 `compileall` to catch Python syntax regressions before the main suite.
 Legacy ServPakDir `Search.java` semantics still require source-level
 comparison; this is a safe workflow adaptation, not a parity claim.
+
+
+## v74 — New File browser operation (FileOps adaptation)
+
+The styled original ZEFM listing's previously disabled **New File** control
+now opens a dedicated form scoped to the current directory. The basic listing
+provides the same action. After creating the file, the response links to
+**Quick edit new file** or **Back to directory**. The styled listing carries
+its page, filename filter and sort state to the form and back.
+
+Creation uses `LocalFiles.create_file()`: only one validated UTF-8 filename,
+within the configured browsing root; a new empty file is created with owner
+read/write (subject to umask) using `os.open(O_CREAT|O_EXCL)`.
+Existing files, directories and symlinks are **never overwritten**.
+The GET form validates the directory, and the POST requires the current
+loopback session's CSRF token, allowed form keys, and a valid same-origin
+return URL. No code runs, no SQL is used, and the editor's unsaved buffers
+are not changed.
+
+Tests: `tests/test_new_file_workflow.py` plus all existing file-manager
+tests. This is a safe Python adaptation of a FileOps workflow, not yet
+confirmed as verbatim Java method parity.
