@@ -136,3 +136,12 @@ footer{margin:36px auto 0;padding-top:12px;border-top:1px solid #eee;text-align:
 #directory-grid td{padding:2px 6px;text-align:left;line-height:1.2;font-size:12.5px}
 .top-panels{min-height:0;margin-bottom:14px}
 @media(max-width:820px){#directory-grid td{padding:2px 3px}}
+
+/* Full alphabetical extension jump index (visible only in File Type mode). */
+#filetype-index{margin:0 0 12px;padding:7px 8px;border:1px solid #dedede;background:#fbfbf7;font-size:12px}
+#filetype-index[hidden]{display:none}
+.filetype-heading{display:block;margin:0 0 6px;font-size:12px;font-weight:600;color:#536070}
+.filetype-choices{display:flex;flex-wrap:wrap;gap:3px 5px}
+.filetype-choice{border:1px solid #d9dce2;border-radius:3px;background:#fff;color:#4444ee;padding:2px 6px;font-size:12px;cursor:pointer}
+.filetype-choice:hover{background:#ffffdf;color:#b68105}
+.filetype-choice[aria-current="page"]{background:#ffffdf;border-color:#888;font-weight:700;text-decoration:underline}
