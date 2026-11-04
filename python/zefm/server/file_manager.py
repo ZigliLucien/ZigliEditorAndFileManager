@@ -68,6 +68,31 @@ class LocalFiles:
         return p, entries
 
 
+    def create_file(self, relative: str, name: str) -> Path:
+        """Create a new, empty UTF-8-compatible file without overwriting.
+
+        Relative is a browser-root-confined parent directory. Exclusive
+        creation prevents overwriting existing files, including symlinks.
+        The original Java FileOps behavior is not assumed here.
+        """
+        parent = self.resolve(relative)
+        if not parent.is_dir():
+            raise BrowserError("Parent directory not found", 404)
+        filename = _child_name(name)
+        target = parent / filename
+        flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+        if hasattr(os, "O_NOFOLLOW"):
+            flags |= os.O_NOFOLLOW
+        try:
+            descriptor = os.open(target, flags, 0o600)
+        except FileExistsError as exc:
+            raise BrowserError("A file or directory with that name already exists", 409) from exc
+        except OSError as exc:
+            raise BrowserError(f"Cannot create file: {exc}", 403) from exc
+        else:
+            os.close(descriptor)
+        return target
+
     def create_directory(self, relative: str, name: str) -> Path:
         """Create one subdirectory; never overwrite any existing entry."""
         parent = self.resolve(relative)
