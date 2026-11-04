@@ -19,7 +19,7 @@ _ARCHIVES = {".zip", ".jar", ".war", ".ear", ".tar", ".tgz",
              ".tar.gz", ".tbz", ".tbz2", ".tar.bz2", ".txz", ".tar.xz"}
 _TEXT = {".txt", ".log", ".sty", ".cls", ".bib", ".aux", ".bbl",
          ".py", ".java", ".c", ".h", ".cc", ".cpp", ".rs", ".el",
-         ".rst", ".org", ".text", ".readme", ".asc", ".nfo", ".diff", ".patch",
+         ".rst", ".org", ".text", ".readme", ".asc", ".nfo", ".diff", ".patch", ".svg",
          ".lua", ".sh", ".bash", ".zsh", ".js", ".mjs", ".css",
          ".xml", ".xsl", ".xslt", ".xsd", ".json", ".jsonl",
          ".yaml", ".yml", ".toml", ".ini", ".conf", ".cfg",
@@ -61,7 +61,7 @@ def handler_for(name):
         view = "archive"
     elif ext in _TEXT:
         view = "text"
-    elif ext in _BINARY or ext == ".svg":
+    elif ext in _BINARY:
         view = "download"
     else:
         view = "auto"  # Inspect unknown content before deciding View vs Download.
