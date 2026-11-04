@@ -94,7 +94,7 @@ def listing_shell(hostname: str, token: str, desktop_editor: bool) -> bytes:
             '<div id="directory-title">ZEFM file listing</div></div>'
             f'<aside id="local"><a href="/" id="home-name">zefm@{title}</a>'
             '<ul class="utility-links">'
-            '<li><button type="button" disabled title="New file is not ported">New File</button></li>'
+            '<li><a id="new-file" href="/new-file?path=.">New File</a></li>'
             '<li><a href="/search-text?path=." id="search-string">Search String</a></li>'
             '<li><button type="button" id="find-file">Find File</button></li>'
             '<li><button type="button" disabled title="Database search is not ported">Text Search</button></li>'
