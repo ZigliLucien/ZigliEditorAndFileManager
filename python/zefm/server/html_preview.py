@@ -7,7 +7,9 @@ resource extensions is exposed from the selected filesystem root.
 from __future__ import annotations
 
 from pathlib import Path
-from urllib.parse import quote, unquote
+from html import escape as html_escape, unescape as html_unescape
+import re
+from urllib.parse import quote, unquote, urlsplit
 
 from .file_manager import BrowserError
 
@@ -55,6 +57,44 @@ def site_relative_path(url_path: str):
     return "/".join(components)
 
 
+# Rewrite only explicit local hyperlinks/resources. The browser cannot follow
+# file:// links from an http:// origin; filesystem paths must be mapped through
+# the root-confined /site/ endpoint. No external URLs are rewritten.
+_LOCAL_ATTRIBUTES = re.compile(r"""(?i)\\b(href|src)\\s*=\\s*([\\x22\\x27])(.*?)\\2""", re.DOTALL)
+
+
+def rewrite_local_links(document: str, files) -> str:
+    def replace(match):
+        raw = html_unescape(match.group(3).strip())
+        parsed = urlsplit(raw)
+        target = None
+        if parsed.scheme.casefold() == "file" and parsed.netloc.lower() in ("", "localhost"):
+            target = Path(unquote(parsed.path))
+        elif not parsed.scheme and not parsed.netloc and parsed.path.startswith("/"):
+            # A root-relative URL may name an actual absolute filesystem
+            # location, or a location relative to the configured ZEFM root.
+            absolute = Path(unquote(parsed.path))
+            if absolute.is_relative_to(files.root):
+                target = absolute
+            else:
+                target = files.root / unquote(parsed.path).lstrip("/")
+        if target is None:
+            return match.group(0)
+        candidate = target.resolve()
+        if not candidate.is_relative_to(files.root) or not candidate.exists():
+            return match.group(0)
+        relative = files.relative(candidate)
+        if relative == ".":
+            return match.group(0)
+        url = site_url(relative)
+        if candidate.is_dir():
+            url += "/"
+        if parsed.fragment:
+            url += "#" + quote(unquote(parsed.fragment), safe="-_.~")
+        return match.group(1) + "=" + match.group(2) + html_escape(url, quote=True) + match.group(2)
+    return _LOCAL_ATTRIBUTES.sub(replace, document)
+
+
 def site_resource(files, url_path):
     relative = site_relative_path(url_path)
     path = files.resolve(relative)
@@ -72,9 +112,11 @@ def site_resource(files, url_path):
         raise BrowserError("HTML preview resource too large", 413)
     if suffix in (".html", ".htm", ".css"):
         try:
-            data.decode("utf-8")
+            decoded = data.decode("utf-8")
         except UnicodeDecodeError as exc:
             raise BrowserError("HTML preview expects UTF-8 text", 415) from exc
+        if suffix in (".html", ".htm"):
+            data = rewrite_local_links(decoded, files).encode("utf-8")
     return data, _TYPES[suffix], suffix in (".html", ".htm")
 
 
