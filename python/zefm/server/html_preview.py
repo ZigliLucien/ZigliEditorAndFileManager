@@ -18,6 +18,7 @@ MAX_RESOURCE_BYTES = 16 * 1024 * 1024
 _TYPES = {
     ".html": "text/html; charset=utf-8",
     ".htm": "text/html; charset=utf-8",
+    ".xhtml": "application/xhtml+xml; charset=utf-8",
     ".css": "text/css; charset=utf-8",
     ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
     ".gif": "image/gif", ".webp": "image/webp",
@@ -104,18 +105,18 @@ def site_resource(files, url_path):
     if suffix not in _TYPES:
         raise BrowserError("Resource type not permitted in HTML preview", 415)
     size = path.stat().st_size
-    limit = MAX_HTML_BYTES if suffix in (".htm", ".html", ".css") else MAX_RESOURCE_BYTES
+    limit = MAX_HTML_BYTES if suffix in (".htm", ".html", ".xhtml", ".css") else MAX_RESOURCE_BYTES
     if size > limit:
         raise BrowserError("HTML preview resource too large", 413)
     data = path.read_bytes()
     if len(data) > limit:
         raise BrowserError("HTML preview resource too large", 413)
-    if suffix in (".html", ".htm", ".css"):
+    if suffix in (".html", ".htm", ".xhtml", ".css"):
         try:
             decoded = data.decode("utf-8")
         except UnicodeDecodeError as exc:
             raise BrowserError("HTML preview expects UTF-8 text", 415) from exc
-        if suffix in (".html", ".htm"):
+        if suffix in (".html", ".htm", ".xhtml"):
             data = rewrite_local_links(decoded, files).encode("utf-8")
     return data, _TYPES[suffix], suffix in (".html", ".htm")
 
