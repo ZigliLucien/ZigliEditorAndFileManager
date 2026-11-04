@@ -7,8 +7,10 @@ only build trusted TeX files.
 """
 from __future__ import annotations
 
-from html import escape
+from html import escape, unescape
 import hashlib
+import re
+from uuid import uuid4
 from pathlib import Path
 import shutil
 import subprocess
@@ -35,6 +37,37 @@ def checked_source(files, relative, *, for_build=False):
     if path.stat().st_size > MAX_SOURCE_BYTES:
         raise BrowserError("Document exceeds browser source limit", 413)
     return path, descriptor
+
+
+# Discount's nohtml option intentionally suppresses arbitrary inline HTML.
+# Preserve only safely recognized, simple foreground-color spans in Markdown.
+# The source is never sent as executable HTML.
+_COLOR_SPAN = re.compile(
+    r'<span\\s+style\\s*=\\s*(?:["\\']?color\\s*:\\s*(orange|red|blue|green|purple|gray|grey|black)["\\']?)\\s*>'
+    r'([^<>\\n]*)</span>', re.IGNORECASE
+)
+
+
+def _protect_color_spans(markdown: str):
+    replacements = {}
+    key = "ZEFMINLINE" + uuid4().hex.upper()
+    def substitute(match):
+        token = key + "TOKEN" + str(len(replacements)) + "END"
+        color = match.group(1).casefold()
+        if color == "grey":
+            color = "gray"
+        # Escape source text before restoring the intentional inline span.
+        replacements[token] = (
+            '<span style="color:' + color + '">' +
+            escape(unescape(match.group(2))) + '</span>')
+        return token
+    return _COLOR_SPAN.sub(substitute, markdown), replacements
+
+
+def _restore_color_spans(html: str, replacements: dict):
+    for token, safe_span in replacements.items():
+        html = html.replace(token, safe_span)
+    return html
 
 
 def _discount_command():
@@ -78,8 +111,10 @@ def markdown_html(files, relative):
         text = source.read_bytes().decode("utf-8")
     except UnicodeDecodeError as exc:
         raise BrowserError("Markdown file is not UTF-8", 415) from exc
-    rendered = _discount_render(text, source)
+    prepared, spans = _protect_color_spans(text)
+    rendered = _discount_render(prepared, source)
     if rendered is not None:
+        rendered = _restore_color_spans(rendered, spans)
         return inject_mathjax(format_math_html(rendered)).encode("utf-8")
     fallback = ("<!doctype html><html><head><meta charset='utf-8'>"
             "<meta name='viewport' content='width=device-width,initial-scale=1'>"
