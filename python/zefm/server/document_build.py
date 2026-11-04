@@ -43,8 +43,8 @@ def checked_source(files, relative, *, for_build=False):
 # Preserve only safely recognized, simple foreground-color spans in Markdown.
 # The source is never sent as executable HTML.
 _COLOR_SPAN = re.compile(
-    r'<span\\s+style\\s*=\\s*(?:["\\']?color\\s*:\\s*(orange|red|blue|green|purple|gray|grey|black)["\\']?)\\s*>'
-    r'([^<>\\n]*)</span>', re.IGNORECASE
+    r"""<span\s+style\s*=\s*["']?color\s*:\s*(orange|red|blue|green|purple|gray|grey|black)["']?\s*>\s*([^<>\n]*)</span>""",
+    re.IGNORECASE,
 )
 
 
