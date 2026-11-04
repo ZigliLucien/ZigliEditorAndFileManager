@@ -448,7 +448,7 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                         self._send(200, markdown_html(files, rel),
                                    extra={"Content-Security-Policy": MATHJAX_PREVIEW_CSP})
                         return
-                    if suffix in (".html", ".htm"):
+                    if suffix in (".html", ".htm", ".xhtml"):
                         # Redirect so relative CSS/images resolve beside the
                         # HTML document instead of under the /view endpoint.
                         self._send(302, b"", extra={"Location": site_url(rel)})
