@@ -683,10 +683,19 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                     edit_url = link("/edit", relative)
                     if return_to:
                         edit_url += "&" + urlencode({"back": return_to})
+                    desktop_form = ""
+                    if open_in_editor is not None:
+                        desktop_form = (
+                            '<form action="/open-editor" method="post" accept-charset="utf-8">'
+                            f'<input type="hidden" name="csrf" value="{escape(token, quote=True)}">'
+                            f'<input type="hidden" name="path" value="{escape(relative, quote=True)}">'
+                            f'<input type="hidden" name="back" value="{escape(return_to or "", quote=True)}">'
+                            '<button type="submit">Open new file in ZEFM editor</button></form>')
                     self._send(201, page("New file created",
                         f'<h2>Created file: {escape(relative)}</h2>'
                         f'<p><a href="{escape(edit_url, quote=True)}">Quick edit new file</a> '
-                        f'· <a href="{back}">Back to directory</a></p>'))
+                        f'· <a href="{back}">Back to directory</a></p>'
+                        + desktop_form))
                 elif route=="/mkdir":
                     if set(args) - {"csrf", "path", "name", "back"} or not {"csrf", "path", "name"} <= set(args):
                         raise BrowserError("Unexpected create-directory parameters")
