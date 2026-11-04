@@ -25,6 +25,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y python3-tk xvfb
+      - name: Compile all Python modules before running tests
+        run: python3 -m compileall -q python/zefm python/tests
       - name: Check browser JavaScript syntax
         run: |
           node --check python/zefm/server/listing.js
