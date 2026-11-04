@@ -652,3 +652,25 @@ directory and any filename filter, not every extension supported by the
 system globally.
 
 Tests: `tests/test_delimited_and_filetype_index.py`.
+
+
+## v71 — preview readable files before downloading
+
+- `.yid` is a Yiddish UTF-8 text file, shown in a browser `<pre>` with
+  `lang="yi"`, `dir="rtl"`, preserved line breaks, and escaped contents.
+- `.info` is treated as ordinary text.
+- Additional text/source extensions and SVG source use safe escaped text
+  preview. SVG is not executed as an active graphic in this mode.
+- Unknown extensions are no longer automatically downloaded. View reads
+  at most 4 MiB, checks UTF-8 decoding and rejects NUL bytes or binary
+  control characters, then displays likely text as escaped HTML.
+- Known binary formats still download unless a specific viewer exists.
+  Unknown likely-binary files fall back to the existing bounded Download
+  route. Files larger than the preview cap also fall back to Download.
+- Preview limits are independent of Quick Edit's 1 MiB safety limit;
+  an inline text preview does not imply that editing is available.
+
+Run `python3 -m unittest tests.test_text_preview
+tests.test_text_view_http tests.test_extension_registry_v62 -v` from `python/`.
+Regression tests cover RTL Hebrew/Yiddish Unicode, escaped markup,
+plain Info files, arbitrary unknown UTF-8 extensions, and binary fallback.
