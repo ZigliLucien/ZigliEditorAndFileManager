@@ -100,6 +100,31 @@ class NewFileHttpTests(unittest.TestCase):
         self.assertIn("textarea", edit_page)
         self.assertEqual(self.request("/new-file", fields)[0], 409)
 
+    def test_new_file_offers_existing_desktop_editor_bridge(self):
+        opened = []
+        editor_server = BrowserServer(self.root, open_in_editor=opened.append)
+        editor_server.start()
+        self.addCleanup(editor_server.close)
+        origin = editor_server.url.rstrip("/")
+        new_path = "docs/שלום.txt"
+        create_fields = {"csrf": editor_server.token, "path": "docs",
+                         "name": "שלום.txt"}
+        request = Request(origin + "/new-file",
+                          data=urlencode(create_fields).encode("utf-8"),
+                          headers={"Content-Type": "application/x-www-form-urlencoded"})
+        with urlopen(request, timeout=5) as response:
+            self.assertEqual(response.status, 201)
+            html = response.read().decode("utf-8")
+            self.assertIn("Open new file in ZEFM editor", html)
+            self.assertIn('action="/open-editor"', html)
+        editor_fields = {"csrf": editor_server.token, "path": new_path}
+        request = Request(origin + "/open-editor",
+                          data=urlencode(editor_fields).encode("utf-8"),
+                          headers={"Content-Type": "application/x-www-form-urlencoded"})
+        with urlopen(request, timeout=5) as response:
+            self.assertEqual(response.status, 200)
+        self.assertEqual(opened, [str(self.root / new_path)])
+
     def test_reject_forged_requests_without_creating_files(self):
         basic = {"csrf": self.server.token, "path": "docs", "name": "new.txt"}
         for bad in (
