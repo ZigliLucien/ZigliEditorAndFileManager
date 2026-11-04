@@ -597,3 +597,23 @@ a user's own HTML documents, Ctrl/Cmd-click, and browser new-tab commands
 still follow normal browser behavior. Navigation remains root-confined.
 
 Regression coverage: `tests/test_same_tab_navigation.py`.
+
+
+## v68 — links to local directories and filesystem paths
+
+Relative HTML hyperlinks to an existing folder (with or without a
+trailing slash) now redirect to the standard ZEFM directory listing.
+The `/site/` validator allows one trailing slash but still forbids
+traversal components and paths leaving the browser root.
+
+For existing files under the configured root, HTML attributes `href`
+and `src` containing `file:///...`, `file://localhost/...`, or
+absolute filesystem/root-relative paths are mapped to safe `/site/`
+URLs. Nonlocal links are not rewritten. The destination uses the same
+file-extension dispatch as the directory listing; files outside the
+root remain inaccessible. Unlike a full HTML parser, attribute
+rewriting targets quoted attributes and does not attempt to fix
+JavaScript-generated links, CSS URLs, or arbitrary URL schemes.
+The browser remains loopback-only.
+
+Tests: `tests/test_html_preview.py`; live-browser verification required.
