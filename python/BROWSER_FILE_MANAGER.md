@@ -739,3 +739,10 @@ are not changed.
 Tests: `tests/test_new_file_workflow.py` plus all existing file-manager
 tests. This is a safe Python adaptation of a FileOps workflow, not yet
 confirmed as verbatim Java method parity.
+
+
+The v74 New File result also offers **Open new file in ZEFM editor** when the
+desktop callback is available, using the existing CSRF-protected
+`/open-editor` route and Tk-thread scheduling bridge. Browser-only mode
+keeps Quick Edit and Back links. The operation is intentionally
+non-destructive and does not alter current editor buffers.
