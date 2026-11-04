@@ -45,10 +45,14 @@ def site_relative_path(url_path: str):
         raise BrowserError("Invalid UTF-8 resource path") from exc
     # Backslashes and navigation elements are not needed in ordinary HTML
     # resource links. Explicitly reject rather than normalize.
-    if ("\\" in relative or any(bit in (".", "..", "") for bit in relative.split("/"))
-            or relative.startswith("/")):
+    # A single trailing slash is normal for directory hyperlinks, whereas
+    # empty components in the middle, dot segments, and traversal are forbidden.
+    components = relative.rstrip("/").split("/")
+    if (("\\" in relative or relative.startswith("/")
+            or relative.endswith("//")
+            or any(part in (".", "..", "") for part in components))):
         raise BrowserError("Invalid local resource path", 403)
-    return relative
+    return "/".join(components)
 
 
 def site_resource(files, url_path):
