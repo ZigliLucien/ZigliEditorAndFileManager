@@ -31,6 +31,7 @@ from .book_preview import epub_page, djvu_page
 from .archive_preview import archive_listing
 from .postscript_preview import postscript_pdf
 from .image_preview import image_preview
+from .text_preview import preview_text
 from .delimited_preview import csv_preview
 from .structured_preview import transformed_document
 from .document_build import markdown_html, checked_source, build_pdf
@@ -417,7 +418,16 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                         data = image_preview(files, rel, descriptor["extension"])
                         self._send(200, data, descriptor["mime"])
                         return
-                    if kind == "download":
+                    if kind in ("download", "auto"):
+                        if kind == "auto":
+                            preview = preview_text(files, rel, automatic=True)
+                            if preview is not None:
+                                back = escape(safe_listing_return(
+                                    files, back_state,
+                                    files.relative(files.resolve(rel).parent)), quote=True)
+                                self._send(200, page(rel,
+                                    f'<p><a href="{back}">← Back</a></p>' + preview))
+                                return
                         self._send(302, b"", extra={"Location": link("/raw", rel)})
                         return
                     if kind == "epub":
@@ -453,11 +463,16 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                         # HTML document instead of under the /view endpoint.
                         self._send(302, b"", extra={"Location": site_url(rel)})
                         return
-                    text, _ = files.read_text(rel)
-                    content = (f'<p><a href="{escape(safe_listing_return(files, back_state, files.relative(files.resolve(rel).parent)), quote=True)}">← Back</a> '
-                               f'<a href="{escape(link("/edit", rel), quote=True)}">Quick edit</a></p>'
-                               f"<h2>{escape(rel)}</h2><pre>{escape(text)}</pre>")
-                    self._send(200, page(rel, content))
+                    preview = preview_text(files, rel)
+                    back = escape(safe_listing_return(
+                        files, back_state,
+                        files.relative(files.resolve(rel).parent)), quote=True)
+                    quick_edit = (f' <a href="{escape(link("/edit", rel), quote=True)}">'
+                                  'Quick edit</a>'
+                                  if files.resolve(rel).stat().st_size <= MAX_EDIT_BYTES
+                                  else "")
+                    self._send(200, page(rel, f'<p><a href="{back}">← Back</a>'
+                                              + quick_edit + '</p>' + preview))
                 elif parsed.path == "/edit":
                     if set(args) - {"path", "dir", "back"}:
                         raise BrowserError("Unexpected edit parameters", 400)
