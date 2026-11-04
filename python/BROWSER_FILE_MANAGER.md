@@ -674,3 +674,22 @@ Run `python3 -m unittest tests.test_text_preview
 tests.test_text_view_http tests.test_extension_registry_v62 -v` from `python/`.
 Regression tests cover RTL Hebrew/Yiddish Unicode, escaped markup,
 plain Info files, arbitrary unknown UTF-8 extensions, and binary fallback.
+
+
+## v72 — INFO80.md inline color spans
+
+Discount's Markdown preview intentionally uses `nohtml` to suppress raw
+HTML from untrusted Markdown. The user's Roku `INFO80.md` has inline
+`<span style=color:orange>label</span>` labels, which were previously
+suppressed by this setting. The Markdown adapter now protects only simple
+foreground-color spans with an explicit small allowlist (orange, red,
+blue, green, purple, gray/grey, black), renders Markdown with the same
+`nohtml` option, and restores the labels as escaped-text HTML color
+spans afterward. Arbitrary inline HTML is **not enabled**. Markdown PDF
+build uses the same transformation.
+
+The fallback when Discount is not installed remains the readable, escaped
+Markdown source, rather than pretending to render formatted Markdown.
+Tests: `python3 -m unittest tests.test_markdown_inline_spans -v`.
+This addresses the stripped-label case; other Markdown preview failures
+should be diagnosed using the exact HTTP error/visible output.
