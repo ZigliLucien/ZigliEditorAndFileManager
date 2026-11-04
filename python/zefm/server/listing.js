@@ -259,6 +259,7 @@
       body.append(tr);
     }
 
+    renderFiletypeIndex(state.data.references);
     renderGoFMPages(state.data.references, count);
     $("listing-info").textContent =
       state.data.total_files + " files · " + state.data.folders.length + " directories" +
@@ -267,6 +268,27 @@
       (state.filter ? " · filtered" : "");
     $("sort-summary").textContent = state.sort +
       (state.sort === "timekey" || state.sort === "size" ? " (descending)" : "");
+  }
+
+  function renderFiletypeIndex(references) {
+    const area = $("filetype-index");
+    area.replaceChildren();
+    area.hidden = state.sort !== "filetype";
+    if (area.hidden) return;
+    const heading = make("strong", "filetype-heading",
+                         "All file types (" + references.length + ") — choose an extension:");
+    area.append(heading);
+    const choices = make("div", "filetype-choices");
+    references.forEach((reference, i) => {
+      const button = make("button", "filetype-choice",
+                          "." + reference.label + " (" + (reference.end - reference.start + 1) + ")");
+      button.type = "button";
+      button.title = "Show all " + reference.label + " files";
+      if (state.page === i) button.setAttribute("aria-current", "page");
+      button.addEventListener("click", () => selectPage(i));
+      choices.append(button);
+    });
+    area.append(choices);
   }
 
   function renderGoFMPages(references, count) {
@@ -301,7 +323,9 @@
     const refs = make("div", "gofm-references");
     // As in GoFM, reveal page references through the next page; never render
     // a sprawling list of all 120 possible refs for a huge directory at once.
-    const shown = Math.min(count, state.page + 2);
+    // The complete filetype jump list is displayed above the files.
+    // Preserve progressive GoFM pagination for other sort modes.
+    const shown = state.sort === "filetype" ? count : Math.min(count, state.page + 2);
     for (let i = 0; i < shown; i++) {
       const descriptor = references[i].label;
       const b = make("button", "gofm-reference", descriptor);
