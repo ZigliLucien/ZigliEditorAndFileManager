@@ -628,3 +628,27 @@ binary checks using `bytes.fromhex`. It also verifies the WebP RIFF/WEBP
 marker and AVIF ftyp brand rather than just a generic prefix, with bounded
 reading and size limits. All image files still require being within the
 configured browser root. Tests: `tests/test_image_preview.py`.
+
+
+## v70 — CSV/TSV tables and complete filetype jump index
+
+Opening `.csv` or `.tsv` from the file listing (or a local HTML
+hyperlink) renders a read-only HTML table, with the first row used as
+column headings and browser-escaped cell contents. A **Markdown table**
+link gives a Markdown source representation. The Python stdlib `csv`
+parser handles quoted fields, commas, Unicode and multiline fields.
+For TSV, it uses a tab delimiter. The preview is limited to 2 MiB input,
+1,000 rows, 100 columns, and 12,000 characters per cell. No files are
+modified and no spreadsheet formulas are evaluated.
+
+When **Sort by → File Type** is selected, a compact, complete alphabetical
+extension index appears above the file list. Each entry shows the
+extension and count of matching files and jumps directly to that type's
+page; all available types in the selected directory are shown, including
+those beyond the first two pages. The existing bottom GoFM references
+are also fully visible for File Type mode; other sort modes retain their
+progressive page references. The extension list reflects the current
+directory and any filename filter, not every extension supported by the
+system globally.
+
+Tests: `tests/test_delimited_and_filetype_index.py`.
