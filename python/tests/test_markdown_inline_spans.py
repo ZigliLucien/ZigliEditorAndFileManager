@@ -21,6 +21,18 @@ ROKU_SAMPLE = (
 
 
 class MarkdownInlineSpanTests(unittest.TestCase):
+    def test_markdown_module_parses_and_color_pattern_matches(self):
+        import ast
+        import re
+        from zefm.server.document_build import _COLOR_SPAN
+        module_path = Path(__file__).resolve().parents[1] / "zefm" / "server" / "document_build.py"
+        ast.parse(module_path.read_text(encoding="utf-8"))
+        self.assertIsNotNone(_COLOR_SPAN.search(
+            '<span style=color:orange>deviceType</span>'))
+        self.assertIsNotNone(_COLOR_SPAN.search(
+            '<span style="color:orange">friendlyName</span>'))
+
+
     def test_all_color_spans_are_protected(self):
         prepared, spans = _protect_color_spans(ROKU_SAMPLE)
         self.assertEqual(len(spans), 5)
