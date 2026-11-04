@@ -107,26 +107,35 @@ class LocalFiles:
             raise BrowserError(f"Cannot create directory: {exc}", 403) from exc
         return target
 
-    def copy_file(self, relative: str, new_name: str) -> Path:
-        """Copy a file next to itself, atomically publishing without overwrite.
+    def copy_file(self, relative: str, new_name: str,
+                  destination_directory: str | None = None) -> Path:
+        """Copy one file without overwriting, optionally into another directory.
 
-        A private temporary file is filled and fsynced first, then a hardlink
-        publishes the completed copy only if the target does not already exist.
-        Neither source nor target may escape the selected browser root.
+        A private temporary file is filled and fsynced in the destination
+        directory, then published by an exclusive hardlink. No source or
+        destination may escape the browser's selected filesystem root.
         """
         source = self.resolve(relative)
         if not source.is_file() or (self.root / relative).is_symlink():
             raise BrowserError("Source must be a regular file, not a symlink", 404)
-        target = source.parent / _child_name(new_name)
+        if destination_directory is None:
+            parent = source.parent
+        else:
+            parent = self.resolve(destination_directory)
+            if (self.root / destination_directory).is_symlink():
+                raise BrowserError("Destination cannot be a symbolic link", 403)
+            if not parent.is_dir():
+                raise BrowserError("Destination directory not found", 404)
+        target = parent / _child_name(new_name)
         if source == target:
-            raise BrowserError("Choose a different filename for the copy", 409)
+            raise BrowserError("Choose a different filename or destination directory", 409)
         temporary = None
         try:
             original = source.stat()
             if original.st_size > MAX_COPY_BYTES:
                 raise BrowserError("File too large to copy in the browser", 413)
             with source.open("rb") as reader:
-                with tempfile.NamedTemporaryFile(dir=source.parent,
+                with tempfile.NamedTemporaryFile(dir=parent,
                                                  prefix=".zefm-copy-", delete=False) as writer:
                     temporary = Path(writer.name)
                     total = 0
@@ -142,8 +151,7 @@ class LocalFiles:
             if ((original.st_ino, original.st_size, original.st_mtime_ns)
                     != (current.st_ino, current.st_size, current.st_mtime_ns)):
                 raise BrowserError("Source changed during copying; retry", 409)
-            # On POSIX this fails atomically when target exists, including
-            # a symlink. Unlike os.rename/os.replace it can never clobber.
+            # Atomic no-clobber publication even when a symlink exists at target.
             os.link(temporary, target)
             return target
         except FileExistsError as exc:
