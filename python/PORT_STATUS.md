@@ -379,3 +379,21 @@ listing's directory/page/sort/filter context.
 - Tests check wheel direction/bounds, 62-file three-page navigation,
   nested Unicode directory breadcrumbs, no-editor standalone shell
   and standalone launcher operation.
+
+
+### v74 — ServPakDir New File workflow
+
+- The browser file manager now offers New File in both the styled and basic
+  listings. It opens a directory-scoped form and creates an empty file with
+  exclusive no-overwrite semantics using the same LocalFiles boundary.
+- Filenames are validated as single UTF-8 names; existing files, directories
+  and symlinks are preserved. POST creation requires the loopback session's
+  CSRF token. Back navigation preserves the styled listing's sort, filter,
+  directory and page state.
+- A successful creation offers browser Quick Edit. When the browser is
+  integrated with the desktop TPEditor, it additionally offers the existing
+  `/open-editor` bridge. The browser never edits an existing unsaved
+  desktop buffer without the editor's own guards.
+- `tests/test_new_file_workflow.py` adds unit and HTTP integration coverage.
+  Run the Python suite/GUI smoke tests locally; no Java source parity claim
+  or verified GitHub Actions passing status is made for this increment.
