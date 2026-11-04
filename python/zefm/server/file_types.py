@@ -12,16 +12,19 @@ _VIEW = {
     ".md": "markdown", ".markdown": "markdown", ".tex": "text",
     ".json": "structured", ".xml": "structured", ".ipynb": "structured",
     ".csv": "delimited", ".tsv": "delimited",
+    ".yid": "yiddish", ".info": "text",
 }
 _IMAGES = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".avif"}
 _ARCHIVES = {".zip", ".jar", ".war", ".ear", ".tar", ".tgz",
              ".tar.gz", ".tbz", ".tbz2", ".tar.bz2", ".txz", ".tar.xz"}
 _TEXT = {".txt", ".log", ".sty", ".cls", ".bib", ".aux", ".bbl",
          ".py", ".java", ".c", ".h", ".cc", ".cpp", ".rs", ".el",
+         ".rst", ".org", ".text", ".readme", ".asc", ".nfo", ".diff", ".patch",
          ".lua", ".sh", ".bash", ".zsh", ".js", ".mjs", ".css",
          ".xml", ".xsl", ".xslt", ".xsd", ".json", ".jsonl",
          ".yaml", ".yml", ".toml", ".ini", ".conf", ".cfg",
          ".properties", ".csv", ".tsv", ".sql", ".rb", ".pl",
+         ".ini", ".desktop", ".service", ".unit", ".gitignore",
          ".r", ".R", ".f", ".f90", ".maple", ".mpl"}
 _BINARY = {".gz", ".bz2", ".xz", ".zst", ".7z", ".rar", ".class",
            ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
@@ -36,6 +39,7 @@ _MIME = {
     ".png": "image/png", ".gif": "image/gif",
     ".svg": "image/svg+xml", ".mp3": "audio/mpeg",
     ".tex": "application/x-tex", ".dvi": "application/x-dvi",
+    ".yid": "text/plain; charset=utf-8", ".info": "text/plain; charset=utf-8",
 }
 _BUILDABLE = {".md": "discount", ".markdown": "discount", ".tex": "lualatex"}
 _COMPOUND = (".tar.gz", ".tar.bz2", ".tar.xz")
@@ -60,7 +64,7 @@ def handler_for(name):
     elif ext in _BINARY or ext == ".svg":
         view = "download"
     else:
-        view = "download"  # Never decode an unknown binary as UTF-8.
+        view = "auto"  # Inspect unknown content before deciding View vs Download.
     mime = _MIME.get(ext) or mimetypes.guess_type(str(name))[0] or "application/octet-stream"
     return {"view": view, "build": _BUILDABLE.get(ext), "mime": mime,
             "extension": ext}
