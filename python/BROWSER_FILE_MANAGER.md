@@ -746,3 +746,23 @@ desktop callback is available, using the existing CSRF-protected
 `/open-editor` route and Tk-thread scheduling bridge. Browser-only mode
 keeps Quick Edit and Back links. The operation is intentionally
 non-destructive and does not alter current editor buffers.
+
+
+## v75 — source-guided cross-directory copy
+
+The Copy form now accepts a filename and a **Destination directory**
+relative to the selected browser root, defaulting to the source
+directory. It can create a new filename in that directory or copy
+into another existing directory. Existing two-argument
+`LocalFiles.copy_file` calls and browser Copy POSTs without the new
+parameter still copy within the source directory. No target can
+be overwritten, including symlinks.
+
+After copying, the page offers **Back to source directory** (retaining
+the original listing state) and **Open destination directory**. The
+original source is preserved. No Notes are copied to the destination.
+The safe, bounded implementation and tests are based on the behavior
+of `NetsManager/XCommands.java`'s `runC` Copy path.
+
+Regression test: `python3 -m unittest tests.test_copy_to_directory -v`.
+Retest existing `tests.test_file_operations` as well.
