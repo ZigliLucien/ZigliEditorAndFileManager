@@ -61,6 +61,20 @@ class HtmlPreviewTests(unittest.TestCase):
             self.assertEqual(status, 200)
             self.assertIn(mime, h["Content-Type"])
 
+    def test_xhtml_links_follow_sandboxed_html_preview(self):
+        xhtml = self.root / "docs" / "page.xhtml"
+        xhtml.write_text(
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            '<html xmlns="http://www.w3.org/1999/xhtml">'
+            '<body><p>XHTML page</p><a href="next.html">Next</a></body></html>',
+            encoding="utf-8")
+        status, body, headers, url = self.get("/view?path=docs%2Fpage.xhtml")
+        self.assertEqual(status, 200)
+        self.assertIn(b"XHTML page", body)
+        self.assertIn("/site/docs/page.xhtml", url)
+        self.assertIn("application/xhtml+xml", headers["Content-Type"])
+        self.assertIn("sandbox", headers["Content-Security-Policy"])
+
     def test_absolute_local_file_links_are_rewritten_within_root(self):
         (self.root / "docs" / "data.txt").write_text("example text", encoding="utf-8")
         (self.root / "docs" / "sub").mkdir(exist_ok=True)
