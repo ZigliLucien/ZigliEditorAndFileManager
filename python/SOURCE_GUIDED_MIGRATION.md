@@ -82,3 +82,32 @@ validates the filename, and never overwrites an existing entry or symlink.
 This is explicitly an adaptation from the FileOps workflow requirements;
 the exact implementation and UI semantics of original `FileOps.java`
 have not been reverified against its source for this increment.
+
+
+## XCommands.runC — copy files to a different directory
+
+Source inspected: `NetsManager/XCommands.java`, the overload
+`runC(String req, boolean move)`. In the original Java code, a Copy
+operation accepts either a new filename in the current directory or a
+destination path; when the destination names a directory, the source
+filename is appended. The operation dispatches to
+`ZEdit.Commands.copy(XCommands.actfile, targfile, move)`.
+
+The Python adaptation now accepts a **destination directory relative to
+the selected browsing root** and a separate new filename.
+`LocalFiles.copy_file(relative, new_name, destination_directory=None)`
+preserves the original two-argument same-directory interface. It
+validates source and destination paths, refuses destination directory
+symlinks, limits copies to 64 MiB, writes a temporary file in the
+destination directory, and uses an exclusive hardlink to publish only
+when the target name is unused. It never overwrites existing entries.
+Cross-directory copy is available from the existing Copy file form.
+
+Legacy Java allowed path conventions and a more permissive command
+router. The Python version intentionally restricts destinations to
+the chosen root, requires CSRF for POST requests, and preserves existing
+return-state navigation. Notes remain attached to the source file;
+this implementation does not duplicate database/Notes records. This
+matches the absence of active annotation transfer in the inspected
+`runC` block (the corresponding code was commented out), but is not
+a claim of full Java FileOps parity.
