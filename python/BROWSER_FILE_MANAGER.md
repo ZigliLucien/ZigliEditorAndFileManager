@@ -617,3 +617,14 @@ JavaScript-generated links, CSS URLs, or arbitrary URL schemes.
 The browser remains loopback-only.
 
 Tests: `tests/test_html_preview.py`; live-browser verification required.
+
+
+## v69 — correct JPEG and PNG binary signatures
+
+The image View handler previously checked literal backslash-escaped text
+instead of binary JPEG/PNG magic bytes, producing `Invalid image signature`
+for valid images. `server/image_preview.py` now performs the appropriate
+binary checks using `bytes.fromhex`. It also verifies the WebP RIFF/WEBP
+marker and AVIF ftyp brand rather than just a generic prefix, with bounded
+reading and size limits. All image files still require being within the
+configured browser root. Tests: `tests/test_image_preview.py`.
