@@ -693,3 +693,27 @@ Markdown source, rather than pretending to render formatted Markdown.
 Tests: `python3 -m unittest tests.test_markdown_inline_spans -v`.
 This addresses the stripped-label case; other Markdown preview failures
 should be diagnosed using the exact HTTP error/visible output.
+
+
+## v73 — Search String: browser text-content search
+
+The styled file manager's previously disabled `Search String` control now
+opens `/search-text?path=...` with the current directory. The existing
+filename filter remains unchanged. The new search finds text *within* files,
+including nested directories, and lists escaped file paths, line numbers,
+and excerpts. Click a result to View that file in the same browser tab;
+Back returns to the search results.
+
+The search is read-only and confined to the selected browser root. It
+excludes hidden entries, symlinks, recognized binary file formats, files
+larger than 1 MiB and invalid UTF-8. Bounds: 8 levels deep, 100
+directories, 5,000 entries, 500 candidate text files, 12 MiB read in
+total, 100 results. Reaching a bound yields an incomplete-results notice.
+Default matching uses Unicode `casefold()`; an optional case-sensitive
+checkbox switches to exact substring matching. No SQL, external search
+service, or shell is involved.
+
+Tests: `tests/test_content_search.py`. The workflow also runs
+`compileall` to catch Python syntax regressions before the main suite.
+Legacy ServPakDir `Search.java` semantics still require source-level
+comparison; this is a safe workflow adaptation, not a parity claim.
