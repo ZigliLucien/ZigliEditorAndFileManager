@@ -39,6 +39,15 @@ class TablePreviewTests(unittest.TestCase):
 
 
 class FiletypeJumpIndexTests(unittest.TestCase):
+    def test_frontend_renders_full_index(self):
+        script = (Path(__file__).resolve().parents[1] /
+                  "zefm" / "server" / "listing.js").read_text(encoding="utf-8")
+        self.assertIn("function renderFiletypeIndex(references)", script)
+        self.assertIn("references.forEach((reference, i)", script)
+        self.assertIn('area.hidden = state.sort !== "filetype"', script)
+        self.assertIn('selectPage(i)', script)
+
+
     def test_all_extensions_are_returned_not_just_next_few(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
