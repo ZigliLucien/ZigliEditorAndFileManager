@@ -118,7 +118,7 @@ def site_resource(files, url_path):
             raise BrowserError("HTML preview expects UTF-8 text", 415) from exc
         if suffix in (".html", ".htm", ".xhtml"):
             data = rewrite_local_links(decoded, files).encode("utf-8")
-    return data, _TYPES[suffix], suffix in (".html", ".htm")
+    return data, _TYPES[suffix], suffix in (".html", ".htm", ".xhtml")
 
 
 HTML_PREVIEW_CSP = (
