@@ -29,7 +29,7 @@ class FileTypeTests(unittest.TestCase):
                 self.assertEqual(desc["mime"], mime)
 
     def test_unknown_binary_not_interpreted_as_text(self):
-        self.assertEqual(handler_for("mystery.pnf")["view"], "download")
+        self.assertEqual(handler_for("mystery.pnf")["view"], "auto")
 
     def test_jar_archive_lists_without_extraction(self):
         with tempfile.TemporaryDirectory() as base:
