@@ -167,9 +167,11 @@ def build_pdf(files, relative):
                 text = source.read_bytes().decode("utf-8")
             except UnicodeDecodeError as exc:
                 raise BrowserError("Markdown file is not UTF-8", 415) from exc
-            html = _discount_render(text, source)
+            prepared, spans = _protect_color_spans(text)
+            html = _discount_render(prepared, source)
             if html is None:
                 raise BrowserError("Discount Markdown conversion failed", 422)
+            html = _restore_color_spans(html, spans)
             (temporary / "document.html").write_text(format_math_html(html), encoding="utf-8")
         command = _command(source, temporary, descriptor)
         started = time.monotonic()
