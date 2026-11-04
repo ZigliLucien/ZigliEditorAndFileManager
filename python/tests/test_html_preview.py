@@ -52,7 +52,7 @@ class HtmlPreviewTests(unittest.TestCase):
         self.assertEqual(headers["Content-Type"], "text/html; charset=utf-8")
         self.assertEqual(body.decode(), self.html_text)
         self.assertIn("/site/docs/", url)
-        self.assertIn("sandbox;", headers["Content-Security-Policy"])
+        self.assertIn("sandbox allow-top-navigation-by-user-activation", headers["Content-Security-Policy"])
         self.assertNotIn("allow-scripts", headers["Content-Security-Policy"])
         self.assertNotIn("allow-same-origin", headers["Content-Security-Policy"])
         for path, mime in (("/site/docs/theme.css", "text/css"),
@@ -173,7 +173,10 @@ class HtmlPreviewTests(unittest.TestCase):
         self.assertIn(b"<pre>text</pre>", body)
 
     def test_bad_extension_rejected(self):
-        self.assertEqual(self.get("/site/private.bin")[0], 415)
+        code, body, headers, target = self.get("/site/private.bin")
+        self.assertEqual(code, 200)
+        self.assertEqual(body, b"secrets")
+        self.assertIn("application/octet-stream", headers["Content-Type"])
         self.assertEqual(self.get("/view?path=docs%2Fabsent.html")[0], 404)
 
 
