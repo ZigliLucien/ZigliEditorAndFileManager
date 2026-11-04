@@ -68,3 +68,17 @@ The existing **Find filename** filter is separate, unchanged and still fast
 within a directory; this new feature searches file *contents*. Regression
 tests: `tests/test_content_search.py`. Interactive browser verification and
 actual Java Search.java output comparison remain pending.
+
+
+## New File — next ServPakDir FileOps migration increment
+
+The browser listing's New File action is now wired to an independent,
+filesystem-only `LocalFiles.create_file()` operation and a CSRF-protected
+HTTP form. It creates an empty UTF-8-ready file exclusively, then offers
+the existing Quick Edit workflow. Unlike unrestricted Java file actions,
+this implementation confines writes to the selected browser root,
+validates the filename, and never overwrites an existing entry or symlink.
+
+This is explicitly an adaptation from the FileOps workflow requirements;
+the exact implementation and UI semantics of original `FileOps.java`
+have not been reverified against its source for this increment.
