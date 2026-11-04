@@ -61,6 +61,25 @@ class HtmlPreviewTests(unittest.TestCase):
             self.assertEqual(status, 200)
             self.assertIn(mime, h["Content-Type"])
 
+    def test_html_directory_links_open_file_listing(self):
+        (self.root / "docs" / "sub").mkdir()
+        (self.root / "docs" / "sub" / "readme.txt").write_text(
+            "nested document", encoding="utf-8")
+        # A relative HTML href="sub/" or href="sub" should navigate to
+        # the normal ZEFM directory listing, not yield a file error.
+        for uri in ("/site/docs/sub", "/site/docs/sub/"):
+            with self.subTest(uri=uri):
+                code, html, headers, final_url = self.get(uri)
+                self.assertEqual(code, 200)
+                self.assertIn(b'id="folder-home"', html)
+                self.assertIn("/listing?path=docs%2Fsub", final_url)
+
+    def test_site_link_outside_root_denied(self):
+        with self.assertRaises(Exception):
+            site_relative_path("/site/docs/../..")
+        status, _, _, _ = self.get("/site/docs/missing-folder/")
+        self.assertEqual(status, 404)
+
     def test_local_html_links_to_other_html_and_pdf(self):
         (self.root / "docs" / "next.html").write_text(
             '<p>Other page</p><a href="paper.pdf">Read PDF</a>', encoding="utf-8")
