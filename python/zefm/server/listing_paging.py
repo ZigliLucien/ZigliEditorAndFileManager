@@ -11,6 +11,7 @@ from datetime import datetime
 from pathlib import Path
 
 from .file_manager import BrowserError
+from .file_types import extension_for
 from .listing_view import MAX_LIST_ENTRIES
 from ..storage.word_notes import WordNotes
 
@@ -64,7 +65,7 @@ def paged_listing(files, relative=".", *, page=1, sort="timekey", filter_text=""
                 documents.append({
                     "name": entry.name, "path": files.relative(entry),
                     "modified": info.st_mtime, "size": info.st_size,
-                    "type": entry.suffix[1:].lower() or "none"
+                    "type": extension_for(entry.name).lstrip(".") or "none"
                 })
         except (FileNotFoundError, PermissionError):
             continue
