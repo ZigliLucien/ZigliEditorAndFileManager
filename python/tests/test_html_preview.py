@@ -61,6 +61,27 @@ class HtmlPreviewTests(unittest.TestCase):
             self.assertEqual(status, 200)
             self.assertIn(mime, h["Content-Type"])
 
+    def test_absolute_local_file_links_are_rewritten_within_root(self):
+        (self.root / "docs" / "data.txt").write_text("example text", encoding="utf-8")
+        (self.root / "docs" / "sub").mkdir(exist_ok=True)
+        html = ('<a href="' + (self.root / "docs" / "data.txt").as_uri()
+                + '">file URL</a><a href="/docs/data.txt">root-relative</a>'
+                + '<a href="' + (self.root / "docs" / "sub").as_uri()
+                + '">directory</a>'
+                + '<a href="https://example.org/page">external</a>'
+                + '<a href="file:///etc/passwd">outside</a>')
+        (self.root / "docs" / "links.html").write_text(html, encoding="utf-8")
+        code, output, _, _ = self.get("/site/docs/links.html")
+        self.assertEqual(code, 200)
+        self.assertIn(b'/site/docs/data.txt', output)
+        self.assertIn(b'/site/docs/sub/', output)
+        self.assertIn(b'https://example.org/page', output)
+        self.assertIn(b'file:///etc/passwd', output)
+        self.assertNotIn((self.root / "docs" / "data.txt").as_uri().encode(), output)
+        code, text, _, _ = self.get("/site/docs/data.txt")
+        self.assertEqual(code, 200)
+        self.assertIn(b'example text', text)
+
     def test_html_directory_links_open_file_listing(self):
         (self.root / "docs" / "sub").mkdir()
         (self.root / "docs" / "sub" / "readme.txt").write_text(
