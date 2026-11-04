@@ -33,6 +33,7 @@ from .postscript_preview import postscript_pdf
 from .image_preview import image_preview
 from .text_preview import preview_text
 from .delimited_preview import csv_preview
+from .content_search import search_text
 from .structured_preview import transformed_document
 from .document_build import markdown_html, checked_source, build_pdf
 from .mathjax_filter import MATHJAX_PREVIEW_CSP
@@ -241,6 +242,48 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                                if html_document else None)
                 elif parsed.path in ("/", "/browse"):
                     self._send(200, self._render_listing(rel))
+                elif parsed.path == "/search-text":
+                    if set(args) - {"path", "q", "case"}:
+                        raise BrowserError("Unexpected search parameters")
+                    directory, _ = files.list_directory(rel)
+                    scope = files.relative(directory)
+                    query = args.get("q", "")
+                    case_sensitive = args.get("case") == "1"
+                    if args.get("case", "0") not in ("0", "1"):
+                        raise BrowserError("Invalid case sensitivity flag")
+                    listing_back = escape(link("/listing", scope), quote=True)
+                    fields = ('<h1>Search file contents</h1>'
+                              f'<p><a href="{listing_back}">← Back to directory</a></p>'
+                              '<form method="get" action="/search-text" accept-charset="utf-8">'
+                              f'<input type="hidden" name="path" value="{escape(scope, quote=True)}">'
+                              '<label>Text <input type="search" name="q" required maxlength="200" '
+                              f'value="{escape(query, quote=True)}"></label> '
+                              '<label><input type="checkbox" name="case" value="1"'
+                              + (' checked' if case_sensitive else '') + '> Match case</label> '
+                              '<button type="submit">Search</button></form>'
+                              '<p><small>Searches this directory and subdirectories; '
+                              'only readable UTF-8 files within browsing root. '
+                              'At most 100 matching lines are shown.</small></p>')
+                    if query:
+                        result = search_text(files, scope, query, case_sensitive=case_sensitive)
+                        summary = (f'<p>{len(result.hits)} matching lines in '
+                                   f'{result.files_scanned} examined files'
+                                   + (' (limit reached; results incomplete)' if result.truncated else '')
+                                   + '.</p>')
+                        rows = []
+                        for hit in result.hits:
+                            url = escape(link("/view", hit.path), quote=True)
+                            rows.append('<tr><td><a href="' + url + '">'
+                                        + escape(hit.path) + '</a></td><td>'
+                                        + str(hit.line) + '</td><td><code>'
+                                        + escape(hit.excerpt) + '</code></td></tr>')
+                        body = (fields + summary
+                                + '<table><thead><tr><th>File</th><th>Line</th>'
+                                '<th>Matching text</th></tr></thead><tbody>'
+                                + ''.join(rows) + '</tbody></table>')
+                    else:
+                        body = fields
+                    self._send(200, page("Search String", body))
                 elif parsed.path == "/listing":
                     if set(args) - {"path", "page", "sort", "filter"}:
                         raise BrowserError("Unexpected listing parameters")
