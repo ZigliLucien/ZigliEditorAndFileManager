@@ -397,3 +397,21 @@ listing's directory/page/sort/filter context.
 - `tests/test_new_file_workflow.py` adds unit and HTTP integration coverage.
   Run the Python suite/GUI smoke tests locally; no Java source parity claim
   or verified GitHub Actions passing status is made for this increment.
+
+
+### v75 — XCommands.runC copy destination support
+
+- Inspected the original `NetsManager/XCommands.java` copy workflow:
+  the old Copy form accepts destinations outside the source directory.
+- Extended the Python `LocalFiles.copy_file` with an optional,
+  browsing-root-relative destination directory. The implementation
+  retains the existing source copy contract, guarded destination
+  handling, bounded data transfer and exclusive no-clobber publishing.
+- The browser Copy form now defaults to the source directory but lets
+  the user select a different existing directory and filename.
+  The result links back to the source listing or into the destination.
+- Unit/HTTP tests cover Unicode names, no-clobber, symlink/traversal
+  restrictions, regression of the older same-directory signature,
+  CSRF and other forged form inputs.
+- The implementation has been committed; full suite execution and
+  interactive Slackware testing remain unverified.
