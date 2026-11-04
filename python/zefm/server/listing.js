@@ -78,6 +78,7 @@
     $("folder-up").setAttribute("aria-disabled", String(data.parent === null));
     $("folder-home").setAttribute("aria-disabled", String(data.relative === "."));
     $("basic-listing").href = pathUrl("/browse", data.relative);
+    $("search-string").href = pathUrl("/search-text", data.relative);
     document.title = data.directory + " · ZEFM Listing";
   }
 
