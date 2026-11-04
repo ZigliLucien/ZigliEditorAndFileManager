@@ -423,23 +423,29 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                     if set(args) - {"path", "back"}:
                         raise BrowserError("Unexpected copy parameters")
                     source = files.resolve(rel)
-                    if not source.is_file():
+                    if not source.is_file() or (files.root / rel).is_symlink():
                         raise BrowserError("Source file not found", 404)
                     if source.stat().st_size > MAX_COPY_BYTES:
                         raise BrowserError("File too large to copy in browser", 413)
-                    back = escape(safe_listing_return(files, back_state, files.relative(source.parent)), quote=True)
+                    back = escape(safe_listing_return(
+                        files, back_state, files.relative(source.parent)), quote=True)
                     default_name = "Copy of " + source.name
+                    default_directory = files.relative(source.parent)
                     content = (
                         f'<p><a href="{back}">← Back to directory</a></p>'
                         f'<h2>Copy file: {escape(rel)}</h2>'
-                        '<p>Make a copy in the same directory. Existing files are never replaced.</p>'
+                        '<p>Copy within the current directory or to another directory '
+                        'inside the selected ZEFM root. Existing files are never replaced.</p>'
                         '<form method="post" action="/copy" accept-charset="utf-8">'
                         f'<input type="hidden" name="csrf" value="{escape(token, quote=True)}">'
                         f'<input type="hidden" name="path" value="{escape(rel, quote=True)}">'
-                        f'<input type="hidden" name="back" value="{escape(back_state or "",quote=True)}">'
-                        f'<label>New filename: <input name="name" maxlength="255" required'
-                        f' value="{escape(default_name, quote=True)}"></label> '
-                        '<button type="submit">Create copy</button></form>'
+                        f'<input type="hidden" name="back" value="{escape(back_state or "", quote=True)}">'
+                        f'<p><label>New filename: <input name="name" maxlength="255" required'
+                        f' value="{escape(default_name, quote=True)}"></label></p>'
+                        '<p><label>Destination directory (relative to ZEFM root): '
+                        f'<input name="destination" size="48" required '
+                        f'value="{escape(default_directory, quote=True)}"></label></p>'
+                        '<p><button type="submit">Create copy</button></p></form>'
                     )
                     self._send(200, page("Copy file", content))
                 elif parsed.path == "/pdf":
@@ -730,13 +736,19 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                         f'<p><a href="{back}">Return to previous listing</a> · '
                         f'<a href="{destination_link}">Open destination directory</a></p>'))
                 elif route=="/copy":
-                    if set(args) - {"csrf", "path", "name", "back"} or not {"csrf", "path", "name"} <= set(args):
+                    if (set(args) - {"csrf", "path", "name", "destination", "back"}
+                            or not {"csrf", "path", "name"} <= set(args)):
                         raise BrowserError("Unexpected copy parameters")
-                    copied = files.copy_file(args["path"], args["name"])
-                    back = escape(safe_listing_return(files, return_to, files.relative(copied.parent)), quote=True)
+                    copied = files.copy_file(
+                        args["path"], args["name"], args.get("destination"))
+                    source_parent = files.relative(files.resolve(args["path"]).parent)
+                    back = escape(safe_listing_return(files, return_to, source_parent),
+                                  quote=True)
+                    target_url = escape(link("/listing", files.relative(copied.parent)), quote=True)
                     self._send(201, page("File copied",
-                        f'<h2>Copied to: {escape(copied.name)}</h2>'
-                        f'<p><a href="{back}">Back to directory</a></p>'))
+                        f'<h2>Copied to: {escape(files.relative(copied))}</h2>'
+                        f'<p><a href="{back}">Back to source directory</a> · '
+                        f'<a href="{target_url}">Open destination directory</a></p>'))
                 elif route=="/open-editor":
                     if open_in_editor is None:
                         raise BrowserError("Desktop editor integration unavailable", 404)
