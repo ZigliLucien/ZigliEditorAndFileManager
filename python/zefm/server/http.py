@@ -30,6 +30,7 @@ from .file_types import handler_for
 from .book_preview import epub_page, djvu_page
 from .archive_preview import archive_listing
 from .postscript_preview import postscript_pdf
+from .image_preview import image_preview
 from .structured_preview import transformed_document
 from .document_build import markdown_html, checked_source, build_pdf
 from .mathjax_filter import MATHJAX_PREVIEW_CSP
@@ -409,19 +410,7 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                         self._send(200, page(rel, archive_listing(files, rel)))
                         return
                     if kind == "image":
-                        image = files.resolve(rel)
-                        if not image.is_file() or image.stat().st_size > 32 * 1024 * 1024:
-                            raise BrowserError("Image missing or too large to preview", 413)
-                        data = image.read_bytes()
-                        signatures = {".png": (b"\\x89PNG\\r\\n\\x1a\\n",),
-                                      ".jpg": (b"\\xff\\xd8\\xff",),
-                                      ".jpeg": (b"\\xff\\xd8\\xff",),
-                                      ".gif": (b"GIF87a", b"GIF89a"),
-                                      ".webp": (b"RIFF",),
-                                      ".bmp": (b"BM",),
-                                      ".avif": (b"\\x00\\x00\\x00",)}
-                        if not any(data.startswith(sig) for sig in signatures.get(descriptor["extension"], ())):
-                            raise BrowserError("Invalid image signature", 415)
+                        data = image_preview(files, rel, descriptor["extension"])
                         self._send(200, data, descriptor["mime"])
                         return
                     if kind == "download":
