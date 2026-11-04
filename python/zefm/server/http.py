@@ -31,6 +31,7 @@ from .book_preview import epub_page, djvu_page
 from .archive_preview import archive_listing
 from .postscript_preview import postscript_pdf
 from .image_preview import image_preview
+from .delimited_preview import csv_preview
 from .structured_preview import transformed_document
 from .document_build import markdown_html, checked_source, build_pdf
 from .mathjax_filter import MATHJAX_PREVIEW_CSP
@@ -387,10 +388,13 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                         raise BrowserError("Invalid DjVu page")
                     self._send(200, djvu_page(files, rel, int(raw_page)), "image/png")
                 elif parsed.path == "/view":
-                    if set(args) - {"path", "back", "chapter", "page"}:
+                    if set(args) - {"path", "back", "chapter", "page", "format"}:
                         raise BrowserError("Unexpected view parameters")
                     descriptor = handler_for(rel)
                     kind = descriptor["view"]
+                    if kind == "delimited":
+                        self._send(200, page(rel, csv_preview(files, rel, args.get("format", "html"))))
+                        return
                     if kind == "structured":
                         content = transformed_document(files, rel)
                         if descriptor["extension"] == ".ipynb":
