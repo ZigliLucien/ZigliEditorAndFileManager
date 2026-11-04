@@ -122,6 +122,7 @@ def listing_shell(hostname: str, token: str, desktop_editor: bool) -> bytes:
             '<button type="submit">Create</button></form>'
             '</section></div>'
             '<section class="file-panel">'
+            '<nav id="filetype-index" aria-label="All available file types" hidden></nav>'
             '<fieldset id="file-operations"><legend>File operations</legend>'
             '<label class="op v"><input type="radio" name="fileops" value="view" checked> view</label>'
             '<label class="op c"><input type="radio" name="fileops" value="copy"> copy</label>'
