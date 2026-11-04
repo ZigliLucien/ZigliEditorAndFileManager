@@ -42,7 +42,7 @@ class TextPreviewTests(unittest.TestCase):
             root = Path(directory)
             (root / "binary.xyz").write_bytes(bytes.fromhex("00 ff 01 02"))
             self.assertIsNone(preview_text(LocalFiles(root), "binary.xyz", automatic=True))
-        self.assertIsNone(readable_utf8(b'\\xff\\xfe\\x00'))
+        self.assertIsNone(readable_utf8(bytes.fromhex("ff fe 00")))
         self.assertEqual(readable_utf8(b"plain\r\ntext"), "plain\r\ntext")
 
     def test_large_unknown_binary_not_loaded(self):
