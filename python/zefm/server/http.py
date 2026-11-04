@@ -210,8 +210,16 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                         raise BrowserError("Unexpected site resource parameters")
                     site_relative = site_relative_path(parsed.path)
                     site_file = files.resolve(site_relative)
-                    if not site_file.is_file() or (files.root / site_relative).is_symlink():
-                        raise BrowserError("Linked file not found", 404)
+                    if (files.root / site_relative).is_symlink():
+                        raise BrowserError("Linked symbolic links are not browsable", 403)
+                    if site_file.is_dir():
+                        # HTML hyperlinks can point to a directory, not just
+                        # a file. The normal listing route owns directories.
+                        self._send(302, b"", extra={
+                            "Location": link("/listing", site_relative)})
+                        return
+                    if not site_file.is_file():
+                        raise BrowserError("Linked file or directory not found", 404)
                     extension = site_file.suffix.casefold()
                     if extension == ".pdf":
                         # Linked PDFs retain native browser range requests.
