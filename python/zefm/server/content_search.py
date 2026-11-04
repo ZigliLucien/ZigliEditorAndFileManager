@@ -15,6 +15,8 @@ from .file_types import handler_for
 MAX_QUERY_CHARS = 200
 MAX_DEPTH = 8
 MAX_FILES = 500
+MAX_DIRECTORIES = 100
+MAX_ENTRIES = 5000
 MAX_FILE_BYTES = 1 * 1024 * 1024
 MAX_TOTAL_BYTES = 12 * 1024 * 1024
 MAX_RESULTS = 100
@@ -52,17 +54,27 @@ def search_text(files, directory: str, query: str, *,
     hits = []
     scanned = 0
     total_bytes = 0
+    directories_visited = 0
+    entries_visited = 0
     truncated = False
     # LIFO traversal is sorted deterministically for stable search output.
     stack = [(starting, 0)]
     while stack:
+        if directories_visited >= MAX_DIRECTORIES:
+            truncated = True
+            break
         folder, depth = stack.pop()
+        directories_visited += 1
         try:
             entries = sorted(folder.iterdir(), key=lambda x: x.name.casefold())
         except OSError:
             continue
         subdirs = []
         for path in entries:
+            entries_visited += 1
+            if entries_visited > MAX_ENTRIES:
+                truncated = True
+                break
             if path.name.startswith(".") or path.is_symlink():
                 continue
             try:
