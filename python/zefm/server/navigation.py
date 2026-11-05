@@ -30,7 +30,8 @@ def safe_listing_return(files, candidate, default_path="."):
     directory = files.resolve(path)
     if not directory.is_dir():
         raise BrowserError("Return directory not found", 404)
-    sort = args.get("sort", ["filename"])[0]
+    # listing.js omits sort=timekey because Date/Time is the default.
+    sort = args.get("sort", ["timekey"])[0]
     filt = args.get("filter", [""])[0]
     page = args.get("page", ["1"])[0]
     if sort not in _ALLOWED_SORTS or len(filt) > 200 or not page.isascii() or not page.isdecimal() or len(page) > 7 or not 1 <= int(page) <= 1000000:
