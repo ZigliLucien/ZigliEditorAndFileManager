@@ -112,6 +112,18 @@ class CopyToDirectoryHttpTests(unittest.TestCase):
         self.assertIn("Open destination directory", result)
         self.assertIn("sort=filetype", result)
 
+    def test_copy_return_keeps_implicit_date_time_sort(self):
+        # The styled listing omits sort=timekey from the URL.
+        # Confirm the form's Back link does not switch to Filename sort.
+        back = "/listing?path=source&page=1"
+        form = {"csrf": self.server.token, "path": "source/notes.md",
+                "name": "dated.md", "destination": "archive", "back": back}
+        status, result = self.request("/copy", form)
+        self.assertEqual(status, 201, result)
+        self.assertIn("Back to source directory", result)
+        self.assertIn("sort=timekey", result)
+        self.assertNotIn("sort=filename", result)
+
     def test_forged_directory_and_existing_file_rejected(self):
         form = {"csrf": self.server.token, "path": "source/notes.md",
                 "name": "notes.md", "destination": "archive"}
