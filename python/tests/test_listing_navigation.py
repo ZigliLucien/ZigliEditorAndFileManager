@@ -19,6 +19,20 @@ class NavigationValidationTests(unittest.TestCase):
         self.files = LocalFiles(self.t.name)
         (Path(self.t.name) / "Sub").mkdir()
 
+    def test_implicit_date_sort_is_preserved(self):
+        # listing.js intentionally omits sort=timekey from ordinary links.
+        # File operations must not reinterpret its absence as 'filename'.
+        incoming = "/listing?path=Sub&page=2"
+        outgoing = safe_listing_return(self.files, incoming)
+        self.assertIn("sort=timekey", outgoing)
+        self.assertNotIn("sort=filename", outgoing)
+        self.assertEqual(
+            safe_listing_return(self.files, "/listing?path=Sub&sort=filename"),
+            "/listing?path=Sub&page=1&sort=filename&filter=")
+        self.assertEqual(
+            safe_listing_return(self.files, None, "Sub"),
+            "/listing?path=Sub")
+
     def test_roundtrip_and_guard(self):
         url = "/listing?" + urlencode({"path":"Sub", "page":"3",
                  "sort":"timekey", "filter":"cœur ייִדיש"})
