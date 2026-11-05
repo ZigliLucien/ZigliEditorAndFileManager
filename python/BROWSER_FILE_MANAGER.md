@@ -766,3 +766,15 @@ of `NetsManager/XCommands.java`'s `runC` Copy path.
 
 Regression test: `python3 -m unittest tests.test_copy_to_directory -v`.
 Retest existing `tests.test_file_operations` as well.
+
+
+## v76 — preserve default Date/Time sorting after file operations
+
+The styled listing represents its default `timekey` (newest-first)
+sort by *omitting* the `sort` URL parameter. The server's
+`safe_listing_return` had incorrectly interpreted a missing sort as
+`filename`, so Copy and other file operations could return to
+alphabetical ordering. A missing sort now correctly means `timekey`.
+Explicit `sort=filename` and other sort values remain unchanged.
+Added regression checks in `test_listing_navigation.py` and
+`test_copy_to_directory.py`.
