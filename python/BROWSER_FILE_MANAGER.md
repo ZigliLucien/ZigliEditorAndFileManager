@@ -807,3 +807,21 @@ Regression tests: `tests/test_trash_workflow.py`.
 The GitHub Actions CI suite also caught and prompted correction of an
 overescaped regex in HTML local-link rewriting and outdated expectations
 in legacy preview/listing tests.
+
+
+## v78 — Quick Edit saves notify TPEditor promptly
+
+In `--mode both` (or when launched from TPEditor), a successful
+browser Quick Edit Save sends the file's canonical path through the
+existing HTTP→Tk queue bridge. When the active desktop buffer refers
+to that file, the editor promptly displays its existing nonmodal
+**changed on disk** notice with **Reload from disk...** and
+**Dismiss this change**. It never reloads automatically or discards
+unsaved text. Inactive buffers are checked when selected.
+
+This avoids the previous wait for the editor's periodic three-second
+disk monitor while preserving its conflict detection. A failed or
+stale-digest browser save never signals a successful change. Standalone
+browser mode continues without any dependency on Tk.
+
+Regression test: `tests.test_browser_save_bridge`.
