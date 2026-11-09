@@ -161,3 +161,17 @@ selection. A rejected browser save sends no signal. Standalone
 
 This is a new, safer integration contract; it does **not** pretend to
 reproduce the original Java threading or Swing internals.
+
+
+## Per-buffer browser revision awareness (Tk synchronization)
+
+The existing Python browser/editor callback now examines all open
+TPEditor buffers for a saved file rather than notifying only the
+selected tab. The HTTP side still sends *only a path* into a queue,
+and the Tk main thread performs digest comparisons. External-change
+revision markers are distinct from the editor's ordinary unsaved-state
+marker and do not modify the buffer or its Undo history.
+
+The implementation extends the previous v78 bridge without reviving
+Java's shared mutable Swing/socket state. The existing digest baseline
+and revision-specific dismissal logic remain authoritative.
