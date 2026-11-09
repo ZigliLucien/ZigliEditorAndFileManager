@@ -778,3 +778,32 @@ alphabetical ordering. A missing sort now correctly means `timekey`.
 Explicit `sort=filename` and other sort values remain unchanged.
 Added regression checks in `test_listing_navigation.py` and
 `test_copy_to_directory.py`.
+
+
+## v77 — Confirmed Delete → recoverable Trash, with Restore
+
+The previously disabled **dele** radio operation is now enabled.
+Selecting it and clicking a filename, or choosing **Move to Trash**
+from the right-click menu, opens a confirmation page. The basic
+listing also offers a **Trash...** file link. Confirming moves
+a regular file to `.zefm-trash/<id>/file/<filename>` within the selected
+root, retaining its WordNotes under the new filename. This is not
+permanent deletion. A top-level **Trash** link opens recoverable
+items and a CSRF-protected **Restore** button for each file.
+
+Restoration requires the original parent directory to exist and the
+original filename to be available; neither Restore nor Trash replaces
+existing files. Symlinks and files open in TPEditor are rejected.
+Only regular files are supported in this increment; deleting folders,
+emptying Trash permanently, and undo for already removed folders are
+not offered. The initial Trash view lists at most 200 valid entries.
+
+All browser file operations continue to use same-tab navigation.
+Returning from the confirmation page preserves the GoFM listing state
+including the newest-first Date/Time default. The selected file-operation
+radio is honored when clicking filenames; View remains the default.
+
+Regression tests: `tests/test_trash_workflow.py`.
+The GitHub Actions CI suite also caught and prompted correction of an
+overescaped regex in HTML local-link rewriting and outdated expectations
+in legacy preview/listing tests.
