@@ -1198,6 +1198,11 @@ class Window:
             if mapped:return mapped
             return
         if event.state & 0x0c:return  # preserve existing Ctrl/Alt shortcuts
+        # Function keys (F1 Save, F5 Undo, F6 Redo, etc.) are registered
+        # through the same menu shortcut bindings in either editor mode.
+        # Returning "break" here would swallow them before bind_all runs.
+        if event.keysym.startswith("F") and event.keysym[1:].isdigit():
+            return
         if event.char=="i":
             self.vim_normal=False
             widget,_=self.current()
