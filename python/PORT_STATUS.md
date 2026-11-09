@@ -435,3 +435,22 @@ listing's directory/page/sort/filter context.
   malicious requests, rollback and normal browser navigation.
 - GitHub Actions compilation and regression suite used to identify
   and fix HTML local-link parsing and stale test expectations.
+
+
+### v78 — instant browser-save notification to desktop editor
+
+- Extended the existing queue-only browser/Tk bridge to notify an
+  open active TPEditor tab after a successful browser Quick Edit save,
+  without waiting for the usual 3-second disk monitor tick.
+- `BrowserServer` receives an optional `file_saved` callback; the
+  integrated Tk launcher sends its event to a dedicated thread-safe
+  `Queue`. Tk handles the SHA-256 external-change notice on the main
+  thread only.
+- The editor does not automatically overwrite or reload a buffer;
+  its existing nonmodal Reload/Dismiss notice and conflict-safe Save
+  semantics remain in force. Inactive tabs still check on selection.
+- This works from both the file manager and the dedicated RTL browser
+  editor, and does not alter standalone `--mode files` behavior.
+- New `tests/test_browser_save_bridge.py` covers notification success,
+  rejected saves and preservation of unsaved editor content (GUI tests
+  run through Xvfb in CI).
