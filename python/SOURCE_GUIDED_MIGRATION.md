@@ -192,3 +192,13 @@ It reuses the File menu's bounded UTF-8 recent-file model and the
 same file-open command, preserving recent-file deduplication and
 existing-buffer navigation. This is a Python usability adaptation,
 not a revival of the Java XML/XSLT browser pipeline.
+
+
+## Vim-style NORMAL-mode search prompt layout
+
+The Tk editor's `_vim_key` handler already implemented `/`, `?`,
+`:` and `n`. The regression was in Tk geometry management, not
+pattern parsing: `_vim_prompt` inserted its bottom-entry after the
+already-packed expanding Notebook, so the entry was obscured. The
+prompt is now inserted before the Notebook, retaining the reserved
+permanent Save-status row and existing normal/insert mode controls.
