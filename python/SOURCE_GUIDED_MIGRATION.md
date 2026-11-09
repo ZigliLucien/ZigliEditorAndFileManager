@@ -111,3 +111,28 @@ this implementation does not duplicate database/Notes records. This
 matches the absence of active annotation transfer in the inspected
 `runC` block (the corresponding code was commented out), but is not
 a claim of full Java FileOps parity.
+
+
+## XCommands.runX — Delete as recoverable local Trash
+
+Source inspected: `NetsManager/XCommands.java`, method `runX`. The
+original Java implementation deleted a file directly with
+`new File(XCommands.actfile).delete()` and attempted to delete associated
+MySQL `annotations` records. This was a destructive one-way operation.
+
+The Python implementation deliberately chooses a safer migration:
+the browser's **Delete** operation first presents a confirmation page
+and then moves a *regular file* to the hidden `.zefm-trash` directory
+inside the chosen browsing root. Each item has a private per-item
+directory, JSON original-location record and unchanged file contents.
+`TrashManager` uses the same Notes-preserving `RenameManager.move`
+logic as ordinary Move. Restore returns the file and its WordNotes to
+their original location, refusing collisions and missing directories.
+
+There is **no permanent-delete HTTP route**. The browser requires the
+per-session CSRF token and an explicit confirmation value, rejects
+symbolic-link files, protects open desktop-editor buffers through
+`file_in_use`, and never overwrites a file during restoration.
+The original Java behavior is thus identified precisely, with the
+intentional safer departure documented rather than silently claimed
+as strict parity.
