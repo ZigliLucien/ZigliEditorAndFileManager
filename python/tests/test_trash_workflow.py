@@ -160,7 +160,7 @@ class TrashBrowserTests(unittest.TestCase):
         self.assertIn('value="delete"', html)
         self.assertNotIn('value="delete" disabled', html)
         self.assertIn('id="trash-link"', html)
-        status, basic = self.request("/")
+        status, basic = self.request("/browse?path=docs")
         self.assertEqual(status, 200)
         self.assertIn("Trash...", basic)
 
