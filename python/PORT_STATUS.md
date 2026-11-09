@@ -524,3 +524,17 @@ listing's directory/page/sort/filter context.
 - Added Tk/Xvfb regression coverage for `Esc` → `/` → pattern →
   Return, `n` next match, backward `?`, colon commands, actual Tk
   key-event bindings, and INSERT-mode behavior.
+
+
+### v83 — F5 Undo / F6 Redo in both editor modes
+
+- Verified historical `Edit → Undo (F5)` and `Edit → Redo (F6)`
+  in the shared TPEditorX-derived command registry. Both commands use
+  Tk Text's native per-buffer undo history.
+- Fixed NORMAL-mode `_vim_key` swallowing unmodified function-key
+  events before the menu/shortcut registry received them. Function
+  keys now dispatch through the same shortcut bindings as INSERT mode.
+- On macOS, preserved native Copy/Cut/Paste bindings but installed
+  the distinct historical F5/F6 Undo/Redo shortcuts explicitly.
+- Added `test_function_key_undo_gui.py` to exercise real Tk F5/F6
+  key events in both modes, plus revised keyboard-policy tests.
