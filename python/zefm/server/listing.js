@@ -136,6 +136,7 @@
       case "copy": location.href = operationUrl("/copy", path); return;
       case "rename": location.href = operationUrl("/rename", path); return;
       case "move": location.href = operationUrl("/move", path); return;
+      case "delete": location.href = operationUrl("/delete", path); return;
       case "notes": location.href = operationUrl("/notes", path); return;
       case "quick": location.href = operationUrl("/edit", path); return;
       case "build":
@@ -182,6 +183,7 @@
     menuReturnFocus = source;
     const options = [
       ["View", "view"], ["Copy", "copy"], ["Rename", "rename"], ["Move", "move"],
+      ["Move to Trash", "delete"],
       ["Edit", "edit"], ["Quick Edit", "quick"], ["Notes", "notes"]
     ];
     if (["md", "markdown", "tex"].includes(row.type)) {
@@ -228,8 +230,8 @@
       const first = make("td");
       const button = make("button", "filename-button", item.name);
       button.type = "button";
-      button.title = "Left click to view; right click for file operations: " + item.name;
-      button.addEventListener("click", () => activateFile(item, "view"));
+      button.title = "Left click for selected operation; right click for file menu: " + item.name;
+      button.addEventListener("click", () => activateFile(item, chosenMode()));
       button.addEventListener("contextmenu", (event) => showFileMenu(event, item, button));
       button.addEventListener("keydown", (event) => {
         if (event.key === "F10" && event.shiftKey) showFileMenu(event, item, button);
@@ -393,7 +395,7 @@
   }
 
   function setupKeyboard() {
-    const modes = {v: "view", c: "copy", e: "edit", q: "quick", n: "notes", m: "move"};
+    const modes = {v: "view", c: "copy", e: "edit", q: "quick", n: "notes", m: "move", d: "delete"};
     document.addEventListener("keydown", (event) => {
       if (event.altKey || event.ctrlKey || event.metaKey) return;
       const focused = document.activeElement;
