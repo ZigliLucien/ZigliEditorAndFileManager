@@ -825,3 +825,24 @@ stale-digest browser save never signals a successful change. Standalone
 browser mode continues without any dependency on Tk.
 
 Regression test: `tests.test_browser_save_bridge`.
+
+
+## v79 — pending disk revisions on inactive TPEditor tabs
+
+When the file manager is integrated with TPEditor, saving a file in
+the browser now marks every open editor tab for that file, even if
+the tab is inactive. A `↻` prefix on a tab means **changed on disk,
+review before editing**. The existing `*` prefix continues to mean
+**unsaved editor changes**, independently, so both may appear together.
+
+Clicking an affected tab displays the same nonmodal
+**Reload from disk... / Dismiss this change** notice. Neither
+browser saves nor notifications silently replace an editor buffer.
+Reloading or dismissing clears the indicator for that revision; a later
+save can create another notice. If the browser saves identical content,
+no false revision indicator appears.
+
+Only successful browser saves trigger the prompt queue. External
+non-browser file changes are still detected through the existing
+active-tab polling and on tab selection, without scanning all
+inactive files on every timer tick.
