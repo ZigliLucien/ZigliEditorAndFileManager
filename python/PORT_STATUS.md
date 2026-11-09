@@ -415,3 +415,23 @@ listing's directory/page/sort/filter context.
   CSRF and other forged form inputs.
 - The implementation has been committed; full suite execution and
   interactive Slackware testing remain unverified.
+
+
+### v77 — source-guided recoverable Delete/Restore
+
+- Inspected the original `NetsManager/XCommands.java:runX` deletion
+  path, including its MySQL annotation cleanup.
+- Added `zefm/server/trash_ops.py`: regular-file Trash with unique
+  private storage directories and an original-path JSON record.
+  The existing Notes-aware no-clobber Move service moves files into
+  Trash and back, preserving annotations.
+- Wired `/delete` (GET confirmation, protected POST),
+  `/trash` (GET list) and `/restore` (CSRF-protected POST)
+  into the browser; enabled original-style dele radio and context
+  menu, plus a Trash link in both browser layouts.
+- No permanent deletion or arbitrary remote command execution.
+  Directory deletion/restore is deliberately out of scope.
+- Added unit/HTTP tests for Unicode, Notes, collisions, open buffers,
+  malicious requests, rollback and normal browser navigation.
+- GitHub Actions compilation and regression suite used to identify
+  and fix HTML local-link parsing and stale test expectations.
