@@ -136,3 +136,28 @@ symbolic-link files, protects open desktop-editor buffers through
 The original Java behavior is thus identified precisely, with the
 intentional safer departure documented rather than silently claimed
 as strict parity.
+
+
+## Browser Quick Edit → TPEditor save notification
+
+The old Java distribution couples `NetsManager/ZConnection.java` request
+handling to `NetsManager/QuickEditor.java` and
+`ZEdit/TPEditorX.java`. The Python port deliberately separates the
+HTTP server thread from Tk UI operations: the existing
+`/open-editor` route queues a filename and Tk processes it on its
+main thread.
+
+The same architecture now handles successful browser Quick Edit saves.
+`BrowserServer(..., file_saved=callback)` only invokes its optional
+callback after `LocalFiles.save_text` succeeds, with the absolute
+root-confined file path. The desktop editor supplies a
+`Queue.put` callback; its regular 150 ms UI-thread queue drain
+checks whether the active tab owns the saved file and immediately
+runs the already-existing SHA-256 external-change detector. This
+raises the nonmodal Reload/Dismiss notice without replacing an
+editor buffer. Inactive tabs retain the existing notification on
+selection. A rejected browser save sends no signal. Standalone
+`--mode files` works without Tk or a callback.
+
+This is a new, safer integration contract; it does **not** pretend to
+reproduce the original Java threading or Swing internals.
