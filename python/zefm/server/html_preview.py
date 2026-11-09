@@ -61,7 +61,7 @@ def site_relative_path(url_path: str):
 # Rewrite only explicit local hyperlinks/resources. The browser cannot follow
 # file:// links from an http:// origin; filesystem paths must be mapped through
 # the root-confined /site/ endpoint. No external URLs are rewritten.
-_LOCAL_ATTRIBUTES = re.compile(r"""(?i)\\b(href|src)\\s*=\\s*([\\x22\\x27])(.*?)\\2""", re.DOTALL)
+_LOCAL_ATTRIBUTES = re.compile(r"""(?i)\b(href|src)\s*=\s*([\x22\x27])(.*?)\2""", re.DOTALL)
 
 
 def rewrite_local_links(document: str, files) -> str:
