@@ -494,3 +494,19 @@ listing's directory/page/sort/filter context.
   external-change/unsaved-edit protections remain in force.
 - Added Tk/Xvfb GUI regression coverage in
   `tests/test_save_status_recent_popup_gui.py`.
+
+
+### v81 — status bar visibility fix
+
+- Fixed a Tk geometry regression: the full cursor/mode/JSON status
+  label was packed first and could consume the entire status-bar row,
+  leaving the Save indicator and RTL button unmapped. The bottom bar
+  now reserves columns for Save and RTL, with the detailed status
+  flexing to the available space.
+- Packed the bottom bar before the expanding Notebook, so resizing
+  the window does not hide the bar beneath the horizontal text scrollbar.
+  External-change notices are inserted above the Notebook but below
+  the permanent status bar.
+- GUI regression checks require the Saved indicator to be mapped,
+  visible within a 640-pixel-wide editor window even with an
+  artificially long status message, and still show a successful save.
