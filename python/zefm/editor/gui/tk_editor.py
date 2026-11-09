@@ -1213,7 +1213,11 @@ class Window:
     def _vim_prompt(self,prefix):
         self.command_label.configure(text=prefix)
         self.command_value.set("")
-        self.command_bar.pack(side="bottom",fill="x")
+        # This bar is shown only for /, ? and : commands. The Notebook is
+        # already packed with expand=True, so inserting the prompt *after*
+        # it can leave the command entry unmapped and make '/' look broken.
+        # Reserve space above the permanent status row and below the editor.
+        self.command_bar.pack(side="bottom", fill="x", before=self.tabs)
         self.command_entry.focus_set()
 
     def _vim_cancel(self,event=None):
