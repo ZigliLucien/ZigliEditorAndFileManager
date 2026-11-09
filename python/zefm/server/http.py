@@ -63,7 +63,7 @@ def note_version(record) -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
-def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, open_in_editor=None, file_in_use=None):
+def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, open_in_editor=None, file_in_use=None, file_saved=None):
     note_lock=threading.RLock()
     rename_manager = RenameManager(files, notes_path, file_in_use)
     trash_manager = TrashManager(files, rename_manager)
@@ -878,6 +878,15 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                         if key not in args:
                             raise BrowserError("Missing form parameter")
                     files.save_text(args["path"], args["content"], args["digest"])
+                    # HTTP workers signal a queue only; Tk widgets are never
+                    # accessed outside the desktop editor's main thread.
+                    if file_saved is not None:
+                        try:
+                            file_saved(str(files.resolve(args["path"])))
+                        except Exception:
+                            # The file has already been saved successfully;
+                            # a notification failure must not report Save failed.
+                            pass
                     self._send(200, page("Saved", f"<h2>Saved: {escape(args['path'])}</h2>"
                                f'<p><a href="{escape(safe_listing_return(files, return_to, files.relative(files.resolve(args["path"]).parent)), quote=True)}">Back to directory</a></p>'
                                "<p>If this file is open in the desktop editor, reload it there before editing further.</p>"))
@@ -890,11 +899,11 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
 
 
 class BrowserServer:
-    def __init__(self, root: str, port: int = 0, notes_path=None, open_in_editor=None, file_in_use=None):
+    def __init__(self, root: str, port: int = 0, notes_path=None, open_in_editor=None, file_in_use=None, file_saved=None):
         self.files = LocalFiles(root)
         self.token = secrets.token_urlsafe(32)
         server = ThreadingHTTPServer(("127.0.0.1", port), make_handler(self.files, self.token,
-                                                  lambda: server.server_address[1], notes_path, open_in_editor, file_in_use))
+                                                  lambda: server.server_address[1], notes_path, open_in_editor, file_in_use, file_saved))
         server.daemon_threads = True
         self.server = server
         self.thread = None
