@@ -64,6 +64,7 @@ class Window:
         self.local_browser = None  # Start only on explicit File menu request.
         self.mail_browser = None  # Separately scoped local Maildir reader.
         self.browser_open_requests = Queue()
+        self.browser_saved_requests = Queue()
         self._browser_open_paths = frozenset()
         self.browser_poll_id = None
         self.recent_files = RecentFiles()
@@ -1481,6 +1482,21 @@ class Window:
                 self.root.lift()
         except Empty:
             pass
+        # Browser Quick Edit saves send path notifications through a Queue.
+        # Check only the selected buffer immediately. Inactive buffers are
+        # checked when their tabs are selected; no user edits are replaced.
+        saved_paths = set()
+        try:
+            while True:
+                saved_paths.add(Path(self.browser_saved_requests.get_nowait()).resolve())
+        except Empty:
+            pass
+        if saved_paths:
+            tab = self.tabs.select()
+            if tab in self.views:
+                current_path = self.views[tab][1].state.buffer.path
+                if current_path and Path(current_path).expanduser().resolve() in saved_paths:
+                    self._check_external_changes()
         self._refresh_browser_open_paths()
         if self.local_browser is not None:
             self.browser_poll_id = self.root.after(150, self._drain_browser_requests)
@@ -1517,7 +1533,8 @@ class Window:
             if self.local_browser is None:
                 self.local_browser = BrowserServer(
                     str(directory), open_in_editor=self.browser_open_requests.put,
-                    file_in_use=self._browser_file_in_use)
+                    file_in_use=self._browser_file_in_use,
+                    file_saved=self.browser_saved_requests.put)
             url = self.local_browser.start()
             if self.browser_poll_id is None:
                 self.browser_poll_id = self.root.after(150, self._drain_browser_requests)
@@ -1550,7 +1567,8 @@ class Window:
             if self.local_browser is None:
                 self.local_browser = BrowserServer(
                     root, port=port, open_in_editor=self.browser_open_requests.put,
-                    file_in_use=self._browser_file_in_use)
+                    file_in_use=self._browser_file_in_use,
+                    file_saved=self.browser_saved_requests.put)
             url = self.local_browser.start()
             if self.browser_poll_id is None:
                 self.browser_poll_id = self.root.after(150, self._drain_browser_requests)
