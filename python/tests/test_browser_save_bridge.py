@@ -104,6 +104,72 @@ class BrowserSaveTkTests(unittest.TestCase):
         self.assertEqual(widget.get("1.0", "end-1c"), "original")
         self.assertFalse(editor.state.buffer.modified)
 
+    def test_inactive_tab_marked_until_selected_and_reloaded(self):
+        other = Path(self.temp.name) / "other.txt"
+        other.write_text("unrelated file", encoding="utf-8")
+        self.app._open_path(str(other))
+        self.root.update()
+        inactive = next(tab for tab, (_widget, editor) in self.app.views.items()
+                        if editor.state.buffer.path == str(self.path))
+        self.browser_save("changed while inactive")
+        self.app._drain_browser_requests()
+        self.root.update()
+        self.assertIn(inactive, self.app.external_changed_tabs)
+        self.assertTrue(self.app.tabs.tab(inactive, "text").startswith("↻ "))
+        self.assertFalse(self.app.external_notice.winfo_manager())
+
+        self.app.tabs.select(inactive)
+        self.root.update()
+        self.assertEqual(self.app.external_notice.winfo_manager(), "pack")
+        widget, editor = self.app.current()
+        self.assertEqual(widget.get("1.0", "end-1c"), "original")
+        self.assertFalse(editor.state.buffer.modified)
+        self.app._reload_external()
+        self.root.update()
+        self.assertEqual(widget.get("1.0", "end-1c"), "changed while inactive")
+        self.assertNotIn(inactive, self.app.external_changed_tabs)
+        self.assertNotIn("↻", self.app.tabs.tab(inactive, "text"))
+
+    def test_inactive_unsaved_buffer_preserves_both_indicators_and_text(self):
+        widget, editor = self.app.current()
+        active_tab = self.app.tabs.select()
+        widget.insert("end", " private unsaved text")
+        self.root.update()
+        other = Path(self.temp.name) / "other.txt"
+        other.write_text("other", encoding="utf-8")
+        self.app._open_path(str(other))
+        self.root.update()
+
+        self.browser_save("different disk contents")
+        self.app._drain_browser_requests()
+        self.root.update()
+        self.assertTrue(self.app.tabs.tab(active_tab, "text").startswith("* ↻ "))
+        self.assertTrue(editor.state.buffer.modified)
+        self.assertFalse(self.app.external_notice.winfo_manager())
+
+        self.app.tabs.select(active_tab)
+        self.root.update()
+        self.assertIn("changed on disk", self.app.external_notice_text.get())
+        self.assertEqual(widget.get("1.0", "end-1c"), "original private unsaved text")
+        self.assertEqual(self.path.read_text(encoding="utf-8"), "different disk contents")
+        self.app._dismiss_external()
+        self.assertNotIn("↻", self.app.tabs.tab(active_tab, "text"))
+        self.assertTrue(self.app.tabs.tab(active_tab, "text").startswith("* "))
+        self.assertIn("private unsaved text", widget.get("1.0", "end-1c"))
+
+    def test_unchanged_content_does_not_mark_inactive_buffer(self):
+        other = Path(self.temp.name) / "other.txt"
+        other.write_text("other", encoding="utf-8")
+        self.app._open_path(str(other))
+        self.root.update()
+        tab = next(tab for tab, (_widget, editor) in self.app.views.items()
+                   if editor.state.buffer.path == str(self.path))
+        self.browser_save("original")
+        self.app._drain_browser_requests()
+        self.root.update()
+        self.assertNotIn(tab, self.app.external_changed_tabs)
+        self.assertNotIn("↻", self.app.tabs.tab(tab, "text"))
+
     def test_unsaved_editor_text_survives_browser_save(self):
         widget, editor = self.app.current()
         widget.insert("end", " unsaved in editor")
