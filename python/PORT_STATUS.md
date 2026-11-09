@@ -510,3 +510,17 @@ listing's directory/page/sort/filter context.
 - GUI regression checks require the Saved indicator to be mapped,
   visible within a 640-pixel-wide editor window even with an
   artificially long status message, and still show a successful save.
+
+
+### v82 — Vim '/' search prompt restored after status-bar layout change
+
+- The editor's NORMAL-mode `/`, `?`, and `:` keys still dispatched
+  correctly, but the transient command field was packed *after* the
+  expanding notebook. After the recent bottom-bar geometry changes the
+  field could be completely off-screen, making searches appear broken.
+- Insert the command bar explicitly before the notebook in Tk's pack
+  order. It remains above the permanent status bar and receives focus,
+  including in narrow windows.
+- Added Tk/Xvfb regression coverage for `Esc` → `/` → pattern →
+  Return, `n` next match, backward `?`, colon commands, actual Tk
+  key-event bindings, and INSERT-mode behavior.
