@@ -55,6 +55,19 @@ class VimPromptVisibilityTests(unittest.TestCase):
         self.assertNotEqual(widget.index("sel.first"), initial)
         self.assertEqual(widget.get("1.0", "end-1c"), "first alpha second alpha third")
 
+    def test_actual_tk_slash_key_binding_opens_prompt(self):
+        widget, _editor = self.app.current()
+        widget.focus_set()
+        self.root.update()
+        widget.event_generate("<KeyPress-Escape>")
+        self.root.update()
+        self.assertTrue(self.app.vim_normal)
+        widget.event_generate("<KeyPress-slash>")
+        self.root.update()
+        self.assertEqual(self.app.command_label.cget("text"), "/")
+        self.assertTrue(self.app.command_entry.winfo_ismapped())
+        self.app._vim_cancel()
+
     def test_backward_search_and_colon_command_remain_visible(self):
         widget, _editor = self.app.current()
         self.app._vim_key(self.key("Escape", "\x1b"))
