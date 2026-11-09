@@ -54,7 +54,7 @@ class TrashManager:
         except (UnicodeError, ValueError, OSError) as exc:
             raise BrowserError("Unreadable Trash record", 409) from exc
         original = record.get("original") if isinstance(record, dict) else None
-        if (record.get("version") != 1 or not isinstance(original, str)
+        if (not isinstance(record, dict) or record.get("version") != 1 or not isinstance(original, str)
                 or not isinstance(record.get("time"), (int, float))):
             raise BrowserError("Invalid Trash record", 409)
         # Relative to the user's chosen root, and never inside Trash.
@@ -77,8 +77,10 @@ class TrashManager:
         root = self._root(create=True)
         item_id = secrets.token_hex(16)
         item = root / item_id
+        owned = False
         try:
             item.mkdir(mode=0o700)
+            owned = True
             destination = item / "file"
             destination.mkdir(mode=0o700)
             record = {"version": 1, "original": self.files.relative(source),
@@ -94,7 +96,7 @@ class TrashManager:
         finally:
             # If the move failed, remove only empty temporary directories.
             # If a file was moved despite a failure, retain it for recovery.
-            if item.is_dir():
+            if owned and item.is_dir():
                 destination = item / "file"
                 if destination.is_dir() and not any(destination.iterdir()):
                     destination.rmdir()
