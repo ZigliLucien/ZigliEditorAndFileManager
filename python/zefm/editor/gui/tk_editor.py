@@ -38,7 +38,8 @@ class Window:
         self.root = root or tk.Tk()
         self.root.title("ZEFM Python editor (preview)")
         self.tabs = ttk.Notebook(self.root)
-        self.tabs.pack(fill="both", expand=True)
+        # Pack the notebook after bottom controls so resizing cannot unmap the
+        # Save/status row when the Text widget requests a large minimum size.
         self.font_settings_path=Path.home()/".config"/"zefm"/"font.json"
         font_options=read_font(self.font_settings_path)
         # Prefer a native-looking monospace font on macOS, but preserve saved preferences.
@@ -119,6 +120,7 @@ class Window:
                               for item in items] for group,items in self.menus.items()}
         self._make_menus()
         self.recent_popup = tk.Menu(self.root, tearoff=False)
+        self.tabs.pack(fill="both", expand=True)
         self.new_buffer()
         self.tabs.bind("<<NotebookTabChanged>>", self._tab_changed)
         self.disk_poll_id = self.root.after(3000, self._disk_monitor_tick)
@@ -217,7 +219,7 @@ class Window:
             self.external_notice_text.set(f"Cannot check {Path(path).name}: {exc}")
             self.external_reload.configure(state="disabled")
             if not self.external_notice.winfo_manager():
-                self.external_notice.pack(side="bottom", fill="x")
+                self.external_notice.pack(side="bottom", fill="x", before=self.tabs)
             return
         baseline = self.disk_signatures.get(tab)
         pending = self.external_dismissals.pending(tab, baseline, current)
@@ -233,7 +235,7 @@ class Window:
         self.external_notice_text.set(message)
         self.external_reload.configure(state="normal" if current is not None else "disabled")
         if not self.external_notice.winfo_manager():
-            self.external_notice.pack(side="bottom", fill="x")
+            self.external_notice.pack(side="bottom", fill="x", before=self.tabs)
 
     def _tab_changed(self, event=None):
         widget, _editor = self.current()
