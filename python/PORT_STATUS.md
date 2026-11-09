@@ -473,3 +473,24 @@ listing's directory/page/sort/filter context.
   reloaded or overwritten, and standalone file-manager behavior is unchanged.
 - Regression cases added to `tests/test_browser_save_bridge.py` for
   inactive-tab changes, unsaved buffer protection, and unchanged saves.
+
+
+### v80 — persistent Save status and right-click Recent Files
+
+- Added a separate bottom-margin status indicator in the Tk editor,
+  independent of the long line/column/mode message. Successful disk writes
+  show `✓ Saved: filename`; edited buffers show `● Unsaved changes`.
+  The Saved indicator survives cursor movement and remains specific to the
+  selected buffer. A declined conflict overwrite or failed write must not
+  claim Save succeeded.
+- Right-clicking within the Tk editor opens the existing bounded,
+  persistent Recent Files history (full UTF-8 paths), plus Open File
+  and Clear Recent Files commands. macOS Control-click is supported as
+  an alternative context-menu gesture. The File → Recent Files submenu
+  and editor popup use a single menu-population implementation; no new
+  history store or separate list is maintained.
+- Selecting a recent file uses the existing `_open_path` behavior:
+  already-open buffers are reselected rather than duplicated and
+  external-change/unsaved-edit protections remain in force.
+- Added Tk/Xvfb GUI regression coverage in
+  `tests/test_save_status_recent_popup_gui.py`.
