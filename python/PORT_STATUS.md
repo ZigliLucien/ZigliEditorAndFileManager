@@ -454,3 +454,22 @@ listing's directory/page/sort/filter context.
 - New `tests/test_browser_save_bridge.py` covers notification success,
   rejected saves and preservation of unsaved editor content (GUI tests
   run through Xvfb in CI).
+
+
+### v79 — per-buffer external revision markers for browser saves
+
+- Browser Quick Edit now signals **all** matching TPEditor buffers,
+  including inactive tabs, through the existing HTTP→Tk queue.
+- Tk marks an externally changed tab with `↻`; unsaved desktop edits
+  independently retain the `*` marker (both may appear). The current
+  tab still receives the nonmodal Reload/Dismiss notice immediately;
+  selecting an inactive marked tab displays that same notice.
+- Reverting/reloading or explicitly dismissing the observed disk
+  revision clears its marker. Dismissal remains revision-specific:
+  subsequent browser changes are detected again.
+- The handler computes SHA-256 only for paths supplied by successful
+  browser saves, not all files every 150 ms. The pre-existing periodic
+  disk monitor still checks the active buffer. No buffer is automatically
+  reloaded or overwritten, and standalone file-manager behavior is unchanged.
+- Regression cases added to `tests/test_browser_save_bridge.py` for
+  inactive-tab changes, unsaved buffer protection, and unchanged saves.
