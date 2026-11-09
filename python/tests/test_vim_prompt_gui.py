@@ -57,8 +57,11 @@ class VimPromptVisibilityTests(unittest.TestCase):
 
     def test_actual_tk_slash_key_binding_opens_prompt(self):
         widget, _editor = self.app.current()
-        widget.focus_set()
+        # Xvfb has no window manager: focus_set does not acquire keyboard
+        # focus in that environment, so synthetic key events are discarded.
+        widget.focus_force()
         self.root.update()
+        self.assertIs(self.root.focus_get(), widget)
         widget.event_generate("<KeyPress-Escape>")
         self.root.update()
         self.assertTrue(self.app.vim_normal)
