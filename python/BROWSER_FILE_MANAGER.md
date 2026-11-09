@@ -846,3 +846,20 @@ Only successful browser saves trigger the prompt queue. External
 non-browser file changes are still detected through the existing
 active-tab polling and on tab selection, without scanning all
 inactive files on every timer tick.
+
+
+## v80 — desktop Save indicator and right-click Recent Files
+
+In desktop `--mode editor` or `--mode both`, a successful TPEditor
+Save displays **✓ Saved: filename** in a dedicated field on the bottom
+edge, where it remains visible even as the cursor moves. Editing that
+buffer switches the indicator to **● Unsaved changes**. The field
+tracks the selected buffer; a cancelled/failed save does not announce
+success. This is separate from the `↻` browser-revision tab marker.
+
+Right-click inside any Tk editor text area to open **Recent Files**
+without going to the File menu. The popup shares its list with
+**File → Recent Files**, displays full UTF-8 paths, and offers
+**Open File...** and **Clear Recent Files**. On macOS Control-click
+works too. Opening a file already present in a tab reselects that tab
+rather than opening a duplicate.
