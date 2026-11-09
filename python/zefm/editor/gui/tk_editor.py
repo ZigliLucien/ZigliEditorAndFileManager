@@ -77,18 +77,21 @@ class Window:
         self.status = tk.StringVar(value="Ready")
         self.status_bar = ttk.Frame(self.root)
         self.status_bar.pack(side="bottom", fill="x")
-        ttk.Label(self.status_bar, textvariable=self.status, anchor="w").pack(
-            side="left", fill="x", expand=True)
-        # Dedicated save-state field: never buried at the end of the long
-        # cursor/mode/language status line, and not cleared by cursor motion.
+        # Reserve visible space for Save/RTL regardless of the length of the
+        # cursor/mode/JSON status text. A long packed label previously hid both.
+        self.status_bar.columnconfigure(0, weight=1)
+        self.status_detail_label = ttk.Label(
+            self.status_bar, textvariable=self.status, anchor="w", width=1)
+        self.status_detail_label.grid(row=0, column=0, sticky="ew", padx=(5, 4))
         self.save_indicator = tk.StringVar(value="")
         self.save_indicator_label = ttk.Label(
-            self.status_bar, textvariable=self.save_indicator, anchor="e")
-        self.save_indicator_label.pack(side="right", padx=(10, 6))
-        # Tk 8.6 cannot reorder Unicode RTL glyphs. A direct button opens
-        # the already-working browser editor without altering saved text.
+            self.status_bar, textvariable=self.save_indicator,
+            anchor="e", width=26)
+        self.save_indicator_label.grid(row=0, column=1, sticky="e", padx=(4, 6))
+        # Keep the existing RTL browser shortcut at the bottom-right.
         ttk.Button(self.status_bar, text="RTL Browser",
-                   command=self.edit_current_file_rtl).pack(side="right", padx=4)
+                   command=self.edit_current_file_rtl).grid(
+                       row=0, column=2, sticky="e", padx=(0, 5), pady=2)
         # A nonmodal warning above the status line; it never replaces user edits.
         self.external_notice_text = tk.StringVar()
         self.external_notice = ttk.Frame(self.root, padding=(6, 4))
