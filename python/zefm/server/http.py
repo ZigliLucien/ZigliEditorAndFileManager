@@ -24,6 +24,7 @@ from .listing_view import listing_data, listing_shell
 from .listing_paging import paged_listing
 from .pdf_delivery import select_pdf, byte_range
 from .rename_ops import RenameManager
+from .trash_ops import TrashManager
 from .navigation import safe_listing_return
 from .html_preview import site_url, site_resource, site_relative_path, HTML_PREVIEW_CSP, STATIC_SITE_EXTENSIONS
 from .file_types import handler_for
@@ -65,6 +66,7 @@ def note_version(record) -> str:
 def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, open_in_editor=None, file_in_use=None):
     note_lock=threading.RLock()
     rename_manager = RenameManager(files, notes_path, file_in_use)
+    trash_manager = TrashManager(files, rename_manager)
     class BrowserHandler(BaseHTTPRequestHandler):
         server_version = "ZEFM-local/1"
 
@@ -156,6 +158,7 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                       'Original ZEFM-style listing</a></p>')
             header += (f'<p><a href="{escape(link("/new-file", crumb), quote=True)}">'
                        'New file</a></p>')
+            header += '<p><a href="/trash">Recoverable Trash</a></p>'
             if directory != files.root:
                 parent = files.relative(directory.parent)
                 header += f'<p><a href="{escape(link("/browse", parent), quote=True)}">↑ Parent</a></p>'
@@ -169,6 +172,8 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
             )
             rows = []
             for entry in entries:
+                if entry.name == ".zefm-trash":
+                    continue
                 rel = files.relative(entry)
                 is_dir = entry.is_dir()
                 action = "browse" if is_dir else ("pdf" if entry.suffix.casefold() == ".pdf" else "view")
@@ -190,6 +195,7 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                                   f' &nbsp; <a href="{escape(link("/notes", rel), quote=True)}">Notes</a>')
                 if not is_dir:
                     links += f' &nbsp; <a href="{escape(link("/move", rel), quote=True)}">Move...</a>'
+                    links += f' &nbsp; <a href="{escape(link("/delete", rel), quote=True)}">Trash...</a>'
                 if not is_dir and open_in_editor is not None:
                     links += (' &nbsp; <form action="/open-editor" method="post" style="display:inline">'
                               f'<input type="hidden" name="csrf" value="{escape(token,quote=True)}">'
@@ -419,6 +425,58 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                         '<button type="submit">Move file</button></form>'
                     )
                     self._send(200, page("Move file", content))
+                elif parsed.path == "/delete":
+                    if set(args) - {"path", "back"}:
+                        raise BrowserError("Unexpected Trash parameters")
+                    source = files.resolve(rel)
+                    if (not source.is_file() or (files.root / rel).is_symlink()
+                            or ".zefm-trash" in Path(rel).parts):
+                        raise BrowserError("Only ordinary files can be moved to Trash", 404)
+                    back = escape(safe_listing_return(
+                        files, back_state, files.relative(source.parent)), quote=True)
+                    content = (
+                        f'<p><a href="{back}">← Cancel and return to directory</a></p>'
+                        f'<h2>Move to Trash: {escape(rel)}</h2>'
+                        '<p>The file and its attached Notes will be saved in a '
+                        'recoverable Trash under the ZEFM browsing root. '
+                        'Nothing is permanently deleted. Close any open editor '
+                        'buffer before proceeding.</p>'
+                        '<form method="post" action="/delete" accept-charset="utf-8">'
+                        f'<input type="hidden" name="csrf" value="{escape(token, quote=True)}">'
+                        f'<input type="hidden" name="path" value="{escape(rel, quote=True)}">'
+                        f'<input type="hidden" name="back" value="{escape(back_state or "", quote=True)}">'
+                        '<button type="submit" name="confirm" value="trash">'
+                        'Move file to Trash</button></form>'
+                    )
+                    self._send(200, page("Move file to Trash", content))
+                elif parsed.path == "/trash":
+                    if set(args):
+                        raise BrowserError("Unexpected Trash list parameters")
+                    entries = trash_manager.list_items()
+                    rows = []
+                    for entry in entries:
+                        item_id = entry["id"]
+                        name = escape(entry["original"])
+                        stamp = __import__("datetime").datetime.fromtimestamp(
+                            entry["time"]).strftime("%Y-%m-%d %H:%M")
+                        rows.append(
+                            '<tr><td>' + name + '</td><td>' + escape(stamp) +
+                            '</td><td><form action="/restore" method="post">'
+                            f'<input type="hidden" name="csrf" value="{escape(token, quote=True)}">'
+                            f'<input type="hidden" name="id" value="{item_id}">'
+                            '<button type="submit">Restore</button></form></td></tr>')
+                    content = (
+                        '<h1>Recoverable Trash</h1>'
+                        '<p><a href="/listing?path=.">← Back to files</a></p>'
+                        '<p>Files and their attached Notes can be restored, '
+                        'provided the original directory still exists and '
+                        'the original filename is unused. '
+                        'ZEFM does not permanently delete these files.</p>'
+                        + ('<table><thead><tr><th>Original location</th>'
+                           '<th>Moved to Trash</th><th>Action</th></tr>'
+                           '</thead><tbody>' + ''.join(rows) + '</tbody></table>'
+                           if rows else '<p>Trash is empty.</p>'))
+                    self._send(200, page("Recoverable Trash", content))
                 elif parsed.path == "/copy":
                     if set(args) - {"path", "back"}:
                         raise BrowserError("Unexpected copy parameters")
@@ -735,6 +793,34 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                         f'<p>{count} attached Notes retained.</p>'
                         f'<p><a href="{back}">Return to previous listing</a> · '
                         f'<a href="{destination_link}">Open destination directory</a></p>'))
+                elif route=="/delete":
+                    if (set(args) - {"csrf", "path", "confirm", "back"}
+                            or not {"csrf", "path", "confirm"} <= set(args)
+                            or args["confirm"] != "trash"):
+                        raise BrowserError("Trash confirmation required")
+                    source = files.resolve(args["path"])
+                    source_parent = files.relative(source.parent)
+                    back = escape(safe_listing_return(files, return_to, source_parent),
+                                  quote=True)
+                    with note_lock:
+                        item_id, count = trash_manager.trash(args["path"])
+                    self._send(200, page("File moved to Trash",
+                        f'<h2>Moved to Trash: {escape(args["path"])}</h2>'
+                        f'<p>{count} attached Notes retained for restoration.</p>'
+                        f'<p><a href="{back}">Return to directory</a> · '
+                        '<a href="/trash">Open Trash and Restore</a></p>'))
+                elif route=="/restore":
+                    if set(args) != {"csrf", "id"}:
+                        raise BrowserError("Unexpected Restore parameters")
+                    with note_lock:
+                        restored, count = trash_manager.restore(args["id"])
+                    back = escape(link("/listing", files.relative(restored.parent)),
+                                  quote=True)
+                    self._send(200, page("File restored",
+                        f'<h2>Restored: {escape(files.relative(restored))}</h2>'
+                        f'<p>{count} attached Notes restored.</p>'
+                        f'<p><a href="{back}">Open restored directory</a> · '
+                        '<a href="/trash">Back to Trash</a></p>'))
                 elif route=="/copy":
                     if (set(args) - {"csrf", "path", "name", "destination", "back"}
                             or not {"csrf", "path", "name"} <= set(args)):
