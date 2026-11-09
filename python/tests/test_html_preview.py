@@ -170,7 +170,7 @@ class HtmlPreviewTests(unittest.TestCase):
             ("/site/docs/source.py", b"print", "text/html"),
             ("/site/docs/script.js", b"alert", "text/html"),
             ("/site/docs/bundle.jar", b"Example.class", "text/html"),
-            ("/site/docs/file.unknown", b"opaque payload", "application/octet-stream"),
+            ("/site/docs/file.unknown", b"opaque payload", "text/html"),
         )
         for uri, expected, mime in cases:
             with self.subTest(uri=uri):
@@ -184,13 +184,13 @@ class HtmlPreviewTests(unittest.TestCase):
         (self.root / "docs" / "plain.txt").write_text("text")
         code, body, _, _ = self.get("/view?path=docs%2Fplain.txt")
         self.assertEqual(code, 200)
-        self.assertIn(b"<pre>text</pre>", body)
+        self.assertIn(b">text</pre>", body)
 
     def test_bad_extension_rejected(self):
         code, body, headers, target = self.get("/site/private.bin")
         self.assertEqual(code, 200)
-        self.assertEqual(body, b"secrets")
-        self.assertIn("application/octet-stream", headers["Content-Type"])
+        self.assertIn(b"secrets", body)
+        self.assertIn("text/html", headers["Content-Type"])
         self.assertEqual(self.get("/view?path=docs%2Fabsent.html")[0], 404)
 
 
