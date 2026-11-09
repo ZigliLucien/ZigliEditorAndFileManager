@@ -79,6 +79,12 @@ class Window:
         self.status_bar.pack(side="bottom", fill="x")
         ttk.Label(self.status_bar, textvariable=self.status, anchor="w").pack(
             side="left", fill="x", expand=True)
+        # Dedicated save-state field: never buried at the end of the long
+        # cursor/mode/language status line, and not cleared by cursor motion.
+        self.save_indicator = tk.StringVar(value="")
+        self.save_indicator_label = ttk.Label(
+            self.status_bar, textvariable=self.save_indicator, anchor="e")
+        self.save_indicator_label.pack(side="right", padx=(10, 6))
         # Tk 8.6 cannot reorder Unicode RTL glyphs. A direct button opens
         # the already-working browser editor without altering saved text.
         ttk.Button(self.status_bar, text="RTL Browser",
@@ -109,6 +115,7 @@ class Window:
         self.menus = {group:[Command("Debug Python" if item.label=="Trace" else item.label,item.shortcut)
                               for item in items] for group,items in self.menus.items()}
         self._make_menus()
+        self.recent_popup = tk.Menu(self.root, tearoff=False)
         self.new_buffer()
         self.tabs.bind("<<NotebookTabChanged>>", self._tab_changed)
         self.disk_poll_id = self.root.after(3000, self._disk_monitor_tick)
@@ -138,6 +145,9 @@ class Window:
         widget.bind("<KeyPress>", self._vim_key)
         widget.bind("<Tab>", self._mode_tab)
         widget.bind("<ButtonRelease-1>", lambda event,w=widget:self._status(w))
+        widget.bind("<Button-3>", self._show_recent_files_popup)
+        if sys.platform == "darwin":
+            widget.bind("<Control-Button-1>", self._show_recent_files_popup)
         self._status(widget)
         self._refresh_browser_open_paths()
         return widget
@@ -171,9 +181,17 @@ class Window:
             label += "  |  Keys: " + (active_keymap + " (Alt)" if active_keymap else "System")
             label += "  |  NORMAL (Esc to edit)" if self.vim_normal else "  |  INSERT (Esc for commands)"
             saved=self.saved_messages.get(self.tabs.select())
-            if saved and not self.current()[1].state.buffer.modified:
+            modified=self.current()[1].state.buffer.modified
+            if saved and not modified:
                 label += f"  |  {saved}"
             self.status.set(label)
+            # Keep this visible even when the detailed status becomes long.
+            if modified:
+                self.save_indicator.set("● Unsaved changes")
+            elif saved:
+                self.save_indicator.set("✓ " + saved)
+            else:
+                self.save_indicator.set("")
 
     def _hide_external_notice(self):
         if self.external_notice.winfo_manager():
@@ -1382,18 +1400,33 @@ class Window:
             self.status.set(f"Working directory: {self.working_directory.initial_directory()}")
 
     def _populate_recent_files(self):
-        menu=self.recent_menu
-        if menu is None:return
-        menu.delete(0,'end')
+        """Populate the File → Recent Files submenu using the shared builder."""
+        if self.recent_menu is not None:
+            self._fill_recent_files_menu(self.recent_menu)
+
+    def _fill_recent_files_menu(self, menu):
+        """Build a fresh, current list for either recent-files menu."""
+        menu.delete(0, "end")
         if not self.recent_files.entries:
-            menu.add_command(label='(No recent files)',state='disabled')
-        for i,path in enumerate(self.recent_files.entries):
-            # Preserve full path in the menu to distinguish same-named files.
-            menu.add_command(label=f'{i+1}. {path}',
-                             command=lambda p=path:self.open_recent_file(p))
+            menu.add_command(label="(No recent files)", state="disabled")
+        for index, path in enumerate(self.recent_files.entries, 1):
+            # Show full UTF-8 paths to distinguish same-named files.
+            menu.add_command(label=f"{index}. {path}",
+                             command=lambda p=path: self.open_recent_file(p))
         menu.add_separator()
-        menu.add_command(label='Clear Recent Files',command=self._clear_recent_files,
-                         state='normal' if self.recent_files.entries else 'disabled')
+        menu.add_command(label="Open File...", command=self.open_file)
+        menu.add_command(label="Clear Recent Files",
+                         command=self._clear_recent_files,
+                         state="normal" if self.recent_files.entries else "disabled")
+
+    def _show_recent_files_popup(self, event):
+        """Right-click in a Tk editor buffer to reach the recent-file list."""
+        self._fill_recent_files_menu(self.recent_popup)
+        try:
+            self.recent_popup.tk_popup(event.x_root, event.y_root)
+        finally:
+            self.recent_popup.grab_release()
+        return "break"
 
     def _clear_recent_files(self):
         self.recent_files.clear()
@@ -1471,6 +1504,8 @@ class Window:
                 f"{Path(path).name} has changed on disk since ZEFM opened or last saved it.\n\n"
                 "Overwrite the newer disk version with the editor buffer?",
                 parent=self.root):
+                self.saved_messages[current_tab]=None
+                self.save_indicator.set("Save cancelled")
                 self.status.set("Save cancelled: file changed outside ZEFM")
                 return
         editor.state.buffer.text=widget.get("1.0","end-1c")
@@ -1489,7 +1524,10 @@ class Window:
             self._update_title(widget,editor)
             self.saved_messages[self.tabs.select()]=f"Saved: {Path(path).name}"
             self._status(widget)
-        except (OSError,UnicodeError) as exc:messagebox.showerror("Save failed",str(exc),parent=self.root)
+        except (OSError,UnicodeError) as exc:
+            self.saved_messages[current_tab]=None
+            self.save_indicator.set("Save failed")
+            messagebox.showerror("Save failed",str(exc),parent=self.root)
 
     def _drain_browser_requests(self):
         """Process HTTP-originated requests exclusively on the Tk main thread."""
