@@ -175,3 +175,20 @@ marker and do not modify the buffer or its Undo history.
 The implementation extends the previous v78 bridge without reviving
 Java's shared mutable Swing/socket state. The existing digest baseline
 and revision-specific dismissal logic remain authoritative.
+
+
+## TPEditor desktop usability — Save confirmation and Recent Files popup
+
+The Python Tk editor now reserves a dedicated bottom status-field
+for the last successful save of the active buffer. Unlike a transient
+message appended to cursor/mode information, `✓ Saved: filename`
+remains visible until that buffer changes, at which point the status
+becomes `● Unsaved changes`. The indication is per-buffer; unsuccessful
+or cancelled saves never claim success. It supplements the tab `*`
+(unsaved) and `↻` (external revision) markers.
+
+Editor text right-click now exposes a compact Recent Files popup.
+It reuses the File menu's bounded UTF-8 recent-file model and the
+same file-open command, preserving recent-file deduplication and
+existing-buffer navigation. This is a Python usability adaptation,
+not a revival of the Java XML/XSLT browser pipeline.
