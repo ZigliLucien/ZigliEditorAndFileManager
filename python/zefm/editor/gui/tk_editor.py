@@ -49,6 +49,8 @@ class Window:
         self.saved_messages = {}
         self.disk_signatures = {}
         self.external_dismissals = ExternalChangeDismissals()
+        # Tab IDs with unacknowledged external disk revisions; text is untouched.
+        self.external_changed_tabs = set()
         settings=load_config(Path(__file__).resolve().parents[3] / "config/zefm.json")
         self.working_directory=WorkingDirectory(settings["home_directory"],settings["remember_last_directory"],
             state_path=Path.home()/".config"/"zefm"/"session.json")
@@ -197,7 +199,9 @@ class Window:
                 self.external_notice.pack(side="bottom", fill="x")
             return
         baseline = self.disk_signatures.get(tab)
-        if not self.external_dismissals.pending(tab, baseline, current):
+        pending = self.external_dismissals.pending(tab, baseline, current)
+        self._set_external_changed(tab, pending)
+        if not pending:
             self._hide_external_notice()
             return
         self.noticed_signature = current
@@ -250,11 +254,25 @@ class Window:
             self._update_title(widget,editor)
             self._status(widget)
 
+    def _set_external_changed(self, tab, pending):
+        """Mark a tab needing disk review, independently of unsaved edits."""
+        old = tab in self.external_changed_tabs
+        if old == pending:
+            return
+        if pending:
+            self.external_changed_tabs.add(tab)
+        else:
+            self.external_changed_tabs.discard(tab)
+        if tab in self.views:
+            self._update_title(*self.views[tab])
+
     def _update_title(self,widget,editor):
         for tab,(w,e) in self.views.items():
             if w is widget:
                 name=Path(editor.state.buffer.path).name if editor.state.buffer.path else "Untitled"
-                self.tabs.tab(tab,text=("* " if editor.state.buffer.modified else "")+name)
+                prefix = ("* " if editor.state.buffer.modified else "")
+                prefix += ("↻ " if tab in self.external_changed_tabs else "")
+                self.tabs.tab(tab,text=prefix+name)
                 break
 
     def _mode_tab(self,event):
@@ -1072,6 +1090,7 @@ class Window:
         self.saved_messages.pop(tab,None)
         self.disk_signatures.pop(tab,None)
         self.external_dismissals.reset(tab)
+        self.external_changed_tabs.discard(tab)
         self.buffer_modes.pop(tab,None)
         self.buffer_languages.pop(tab,None)
         self.buffer_keymaps.pop(tab,None)
@@ -1492,11 +1511,28 @@ class Window:
         except Empty:
             pass
         if saved_paths:
-            tab = self.tabs.select()
-            if tab in self.views:
-                current_path = self.views[tab][1].state.buffer.path
-                if current_path and Path(current_path).expanduser().resolve() in saved_paths:
+            active = self.tabs.select()
+            # Notify all matching tabs now, even if they are not selected.
+            # Hash only saved paths, not every open file on each timer tick.
+            signatures = {}
+            for tab, (_widget, editor) in self.views.items():
+                path = editor.state.buffer.path
+                if not path:
+                    continue
+                canonical = Path(path).expanduser().resolve()
+                if canonical not in saved_paths:
+                    continue
+                if tab == active:
                     self._check_external_changes()
+                    continue
+                try:
+                    if canonical not in signatures:
+                        signatures[canonical] = disk_signature(canonical)
+                    pending = self.external_dismissals.pending(
+                        tab, self.disk_signatures.get(tab), signatures[canonical])
+                except OSError:
+                    continue
+                self._set_external_changed(tab, pending)
         self._refresh_browser_open_paths()
         if self.local_browser is not None:
             self.browser_poll_id = self.root.after(150, self._drain_browser_requests)
