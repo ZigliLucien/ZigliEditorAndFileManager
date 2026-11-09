@@ -50,6 +50,31 @@ class SaveStatusRecentPopupTests(unittest.TestCase):
         self.assertEqual(self.app.save_indicator.get(), "● Unsaved changes")
         self.assertTrue(editor.state.buffer.modified)
 
+    def test_saved_status_remains_visible_below_slider_after_resize(self):
+        # A previous Tk layout placed the notebook first and packed the
+        # lengthy cursor/mode label before Save, hiding Save at small widths.
+        widget, _editor = self.app.current()
+        widget.insert("end", " updated")
+        self.root.update()
+        self.app.save_file()
+        self.root.update()
+        self.assertIn("✓ Saved:", self.app.save_indicator.get())
+
+        # An arbitrarily long JSON/cursor message must never claim all the
+        # bottom-row space or push the Save field off the window.
+        self.app.status.set("Long status " * 120)
+        self.root.geometry("640x420")
+        self.root.update()
+        indicator = self.app.save_indicator_label
+        self.assertEqual(indicator.winfo_manager(), "grid")
+        self.assertTrue(self.app.status_bar.winfo_ismapped())
+        self.assertTrue(indicator.winfo_ismapped())
+        self.assertGreater(indicator.winfo_width(), 100)
+        self.assertLessEqual(indicator.winfo_rootx() + indicator.winfo_width(),
+                             self.root.winfo_rootx() + self.root.winfo_width())
+        self.assertGreater(indicator.winfo_rooty(), widget.winfo_rooty())
+        self.assertEqual(self.app.save_indicator.get(), "✓ Saved: cœur ייִדיש.txt")
+
     def test_indicator_is_per_buffer_not_stale_after_tab_switch(self):
         widget, _editor = self.app.current()
         widget.insert("end", " edited")
