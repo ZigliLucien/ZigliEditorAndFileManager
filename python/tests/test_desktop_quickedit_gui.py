@@ -2,8 +2,8 @@
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import mock
-from urllib.parse import parse_qs, urlsplit
-from urllib.request import urlopen
+from urllib.parse import parse_qs, urlencode, urlsplit
+from urllib.request import Request, urlopen
 import tkinter as tk
 import unittest
 
@@ -48,6 +48,31 @@ class DesktopQuickEditGuiTests(unittest.TestCase):
         self.assertIn("bonjour שלום", body)
         self.assertIn('action="/edit"', body)
         self.assertIn("Browser Quick Edit opened", self.app.status.get())
+
+    def test_browser_save_roundtrip_triggers_tk_change_notice(self):
+        widget, editor = self.app.current()
+        url = self.browser_url()
+        params = parse_qs(urlsplit(url).query)
+        relative = params["path"][0]
+        previous, digest = self.app.local_browser.files.read_text(relative)
+        self.assertEqual(previous, "bonjour שלום")
+        data = urlencode({
+            "csrf": self.app.local_browser.token,
+            "path": relative, "digest": digest,
+            "content": "edited via runQ browser bridge"
+        }).encode("utf-8")
+        request = Request(
+            self.app.local_browser.url + "edit",
+            data=data, headers={"Content-Type": "application/x-www-form-urlencoded"})
+        with urlopen(request, timeout=5) as response:
+            self.assertEqual(response.status, 200)
+        self.app._drain_browser_requests()
+        self.root.update()
+        self.assertEqual(self.path.read_text(encoding="utf-8"),
+                         "edited via runQ browser bridge")
+        self.assertEqual(widget.get("1.0", "end-1c"), "bonjour שלום")
+        self.assertIn("changed on disk", self.app.external_notice_text.get())
+        self.assertFalse(editor.state.buffer.modified)
 
     def test_existing_browser_root_reused_and_nested_relative_path(self):
         with mock.patch("zefm.editor.gui.tk_editor.webbrowser.open"):
