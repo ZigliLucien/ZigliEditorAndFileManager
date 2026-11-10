@@ -202,3 +202,34 @@ pattern parsing: `_vim_prompt` inserted its bottom-entry after the
 already-packed expanding Notebook, so the entry was obscured. The
 prompt is now inserted before the Notebook, retaining the reserved
 permanent Save-status row and existing normal/insert mode controls.
+
+
+## XCommands.runQ — QuickEditor from TPEditor
+
+The original Java `NetsManager/XCommands.java` implements
+`runQ(String req)` by delegating to `runE(req, true)`, which opens
+`NetsManager.QuickEditor(filepath)`. The existing Python browser
+`/edit` route already handled small UTF-8 Quick Edit files, but
+TPEditor previously offered only a direct RTL browser command.
+
+The File menu now includes **Quick Edit Current File in Browser...**
+for standard left-to-right text. Both that command and the preexisting
+**Edit Current File RTL in Browser...** share
+`Window.edit_current_file_in_browser(direction)`. It requires the
+current buffer to have been saved and to have no pending unsaved
+changes; checks the on-disk file is UTF-8 and at most 1 MiB; reuses
+an existing loopback BrowserServer if it contains the file; and uses
+the bounded `/edit` route, with the correct root-relative Unicode
+path and `dir=ltr` or `dir=rtl`.
+
+The browser's revision-checked Save continues to notify Tk through
+the queue-backed `file_saved` callback. No direct HTTP-to-Tk widget
+calls or automatic buffer replacement occur. Files outside a running
+browser root retain the pre-existing behavior of switching to a
+browser rooted at the selected file's directory when the user
+explicitly invokes the desktop command.
+
+This completes the *desktop launch* part of the Java QuickEditor
+workflow without porting Swing or XML/XSLT code verbatim. Java's
+QuickEditor UI and database features are not claimed to be fully
+equivalent to the Python HTML Quick Edit page.
