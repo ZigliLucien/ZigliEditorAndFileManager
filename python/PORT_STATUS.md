@@ -538,3 +538,23 @@ listing's directory/page/sort/filter context.
   the distinct historical F5/F6 Undo/Redo shortcuts explicitly.
 - Added `test_function_key_undo_gui.py` to exercise real Tk F5/F6
   key events in both modes, plus revised keyboard-policy tests.
+
+
+### v84 — complete desktop-to-browser Quick Edit path
+
+- Source-guided by `NetsManager/XCommands.java:runQ`, the Java
+  workflow that launches `QuickEditor`.
+- Added File → **Quick Edit Current File in Browser...** for standard
+  UTF-8 text, alongside the existing RTL variant. Both share one
+  implementation rather than duplicating server lifecycle logic.
+- Existing BrowserServer is reused for files within its selected
+  root; otherwise the desktop command opens a root limited to the
+  file's directory. Save requires a disk-backed, unmodified Tk
+  buffer, valid UTF-8 and the existing 1 MiB edit limit.
+- Browser Save still sends a queued external-change notice to Tk
+  instead of replacing the open buffer; revision checks and no-clobber
+  safety remain unchanged.
+- Added Tk/Xvfb regression tests covering LTR/RTL links, Unicode
+  paths, live HTML form, same-server reuse, full browser-save/Tk
+  notification round-trip, unsaved/untitled buffers, binary and
+  oversized files.
