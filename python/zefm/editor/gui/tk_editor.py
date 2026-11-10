@@ -1007,6 +1007,7 @@ class Window:
                 menu.add_command(label="Close Buffer",command=self.close_buffer,accelerator="Ctrl+Shift+W")
                 menu.add_command(label="Set Working Directory...",command=self.set_working_directory)
                 menu.add_command(label="Open Local File Manager in Browser...",command=self.open_local_file_manager)
+                menu.add_command(label="Quick Edit Current File in Browser...",command=self.edit_current_file_in_browser)
                 menu.add_command(label="Edit Current File RTL in Browser...",command=self.edit_current_file_rtl)
                 menu.add_command(label="Open Local Email Archive in Browser...",command=self.open_local_email_archive)
                 self.recent_menu=tk.Menu(menu,tearoff=False,postcommand=self._populate_recent_files)
@@ -1589,47 +1590,64 @@ class Window:
         if self.local_browser is not None:
             self.browser_poll_id = self.root.after(150, self._drain_browser_requests)
 
-    def edit_current_file_rtl(self):
-        """Edit the saved file in a browser with real RTL cursor/layout support.
+    def edit_current_file_in_browser(self, direction="ltr"):
+        """Open the saved buffer in browser Quick Edit, preserving Tk edits.
 
-        This is intentionally a disk-based bridge: unsaved Tk edits are never
-        uploaded or discarded, and the browser's digest-protected Save applies.
+        Equivalent in purpose to the old Java runQ QuickEditor path. Use an
+        existing root-confined browser when possible; the browser never reads
+        unsaved Text-widget content. HTTP saves notify the editor via its queue.
         """
+        if direction not in ("ltr", "rtl"):
+            raise ValueError("Browser editing direction must be ltr or rtl")
         widget, editor = self.current()
-        if not widget:
+        if widget is None:
             return
         path = editor.state.buffer.path
+        label = "RTL editing" if direction == "rtl" else "Browser Quick Edit"
         if not path:
-            messagebox.showinfo("RTL editing", "Save the file before opening its RTL browser editor.",
-                                parent=self.root)
+            messagebox.showinfo(
+                label, "Save the file before editing it in the browser.",
+                parent=self.root)
             return
-        if (editor.state.buffer.modified or
-                widget.get("1.0", "end-1c") != editor.state.buffer.text):
-            messagebox.showwarning("Unsaved changes",
-                "Please save this buffer before editing it in the RTL browser. "
+        if (editor.state.buffer.modified
+                or widget.get("1.0", "end-1c") != editor.state.buffer.text):
+            messagebox.showwarning(
+                "Unsaved changes",
+                "Please save this buffer before editing it in the browser. "
                 "ZEFM will not discard unsaved changes.", parent=self.root)
             return
         try:
             from ...server.http import BrowserServer
+            from ...server.file_manager import MAX_EDIT_BYTES
             resolved = Path(path).expanduser().resolve()
             if not resolved.is_file():
                 raise OSError(f"File does not exist: {resolved}")
-            directory = resolved.parent
-            if self.local_browser is not None and self.local_browser.files.root != directory:
+            # Quick Edit is a bounded UTF-8 editor, not a binary file viewer.
+            if resolved.stat().st_size > MAX_EDIT_BYTES:
+                raise OSError("File is too large for browser Quick Edit (1 MiB maximum).")
+            resolved.read_bytes().decode("utf-8")
+            if (self.local_browser is not None and
+                    not resolved.is_relative_to(self.local_browser.files.root)):
                 self.local_browser.close()
                 self.local_browser = None
             if self.local_browser is None:
                 self.local_browser = BrowserServer(
-                    str(directory), open_in_editor=self.browser_open_requests.put,
+                    str(resolved.parent),
+                    open_in_editor=self.browser_open_requests.put,
                     file_in_use=self._browser_file_in_use,
                     file_saved=self.browser_saved_requests.put)
             url = self.local_browser.start()
             if self.browser_poll_id is None:
                 self.browser_poll_id = self.root.after(150, self._drain_browser_requests)
-            webbrowser.open(url + "edit?" + urlencode({"path": resolved.name, "dir": "rtl"}))
-            self.status.set("RTL browser editor opened; save there, then reload in ZEFM.")
-        except (OSError, ValueError) as exc:
-            messagebox.showerror("RTL editing", str(exc), parent=self.root)
+            relative = self.local_browser.files.relative(resolved)
+            webbrowser.open(url + "edit?" + urlencode({"path": relative, "dir": direction}))
+            self.status.set("Browser Quick Edit opened; Save there, then review the disk-change notice in TPEditor.")
+        except (OSError, UnicodeError, ValueError) as exc:
+            messagebox.showerror(label, str(exc), parent=self.root)
+
+    def edit_current_file_rtl(self):
+        """Open the current saved file in native browser RTL editing."""
+        return self.edit_current_file_in_browser(direction="rtl")
 
     def open_local_file_manager(self, directory=None, port=0, open_browser=True):
         """Start or reuse the loopback file manager.
