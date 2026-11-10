@@ -125,7 +125,12 @@ class DesktopQuickEditGuiTests(unittest.TestCase):
 
     def test_file_menu_exposes_quick_edit(self):
         menu = self.root.nametowidget(self.root["menu"])
-        file_menu = menu.nametowidget(menu.entrycget(0, "menu"))
+        # Tk may add a tear-off entry at index zero; find the File cascade
+        # by label, not a platform-dependent menu index.
+        file_index = next(i for i in range(menu.index("end") + 1)
+                          if menu.type(i) == "cascade"
+                          and menu.entrycget(i, "label") == "File")
+        file_menu = self.root.nametowidget(menu.entrycget(file_index, "menu"))
         labels = [file_menu.entrycget(i, "label")
                   for i in range(file_menu.index("end") + 1)
                   if file_menu.type(i) == "command"]
