@@ -18,6 +18,8 @@ class DesktopQuickEditGuiTests(unittest.TestCase):
             self.skipTest("Tk display unavailable")
         self.addCleanup(self.root.destroy)
         self.app = Window(self.root)
+        self.addCleanup(lambda: self.app.local_browser.close()
+                        if self.app.local_browser is not None else None)
         self.temp = TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.directory = Path(self.temp.name)
@@ -68,7 +70,7 @@ class DesktopQuickEditGuiTests(unittest.TestCase):
         widget, _editor = self.app.current()
         widget.insert("end", " unsaved")
         self.root.update()
-        with mock.patch("zefm.editor.gui.tk_editor.webbrowser.open") as browser, \\
+        with mock.patch("zefm.editor.gui.tk_editor.webbrowser.open") as browser, \
              mock.patch("zefm.editor.gui.tk_editor.messagebox.showwarning") as warning:
             self.app.edit_current_file_in_browser()
         browser.assert_not_called()
@@ -79,17 +81,17 @@ class DesktopQuickEditGuiTests(unittest.TestCase):
     def test_untitled_buffer_must_be_saved_first(self):
         self.app.new_buffer()
         self.root.update()
-        with mock.patch("zefm.editor.gui.tk_editor.webbrowser.open") as browser, \\
+        with mock.patch("zefm.editor.gui.tk_editor.webbrowser.open") as browser, \
              mock.patch("zefm.editor.gui.tk_editor.messagebox.showinfo") as info:
             self.app.edit_current_file_in_browser()
         browser.assert_not_called()
         info.assert_called_once()
 
     def test_non_utf8_and_oversized_content_rejected(self):
-        for payload in (b"\\xff\\xfe\\x00", b"x" * (1024 * 1024 + 1)):
+        for payload in (b"\xff\xfe\x00", b"x" * (1024 * 1024 + 1)):
             self.path.write_bytes(payload)
-            with self.subTest(size=len(payload)), \\
-                 mock.patch("zefm.editor.gui.tk_editor.webbrowser.open") as browser, \\
+            with self.subTest(size=len(payload)), \
+                 mock.patch("zefm.editor.gui.tk_editor.webbrowser.open") as browser, \
                  mock.patch("zefm.editor.gui.tk_editor.messagebox.showerror") as error:
                 self.app.edit_current_file_in_browser()
                 browser.assert_not_called()
