@@ -863,3 +863,21 @@ without going to the File menu. The popup shares its list with
 **Open File...** and **Clear Recent Files**. On macOS Control-click
 works too. Opening a file already present in a tab reselects that tab
 rather than opening a duplicate.
+
+
+## v84 — open the current TPEditor file in browser Quick Edit
+
+From TPEditor File menu choose **Quick Edit Current File in Browser...**
+to launch ordinary LTR browser editing for the saved file. The
+existing **Edit Current File RTL in Browser...** remains available
+for right-to-left scripts and now uses the same launch mechanism.
+Both reuse the current file manager's loopback server when its root
+contains the selected file, rather than creating duplicate servers.
+Only saved, unmodified desktop buffers of UTF-8 text up to 1 MiB
+can be opened in Quick Edit.
+
+Save in the browser is protected by the existing file revision
+digest. It updates the disk file and notifies the desktop buffer to
+review its changed-on-disk status; it never silently replaces unsaved
+Tk text. This is an explicit user action, separate from the browser
+listing's Quick Edit link.
