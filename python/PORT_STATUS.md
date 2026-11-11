@@ -576,3 +576,25 @@ listing's directory/page/sort/filter context.
 - Added `tests/test_move_and_rename.py` covering Unicode filenames,
   POSIX modes, notes migration, existing API, conflict/rollback
   cases, CSRF and same-tab listing return state.
+
+
+### v86 — safe one-member archive extraction (XCommands.runT)
+
+- Revisited Java `NetsManager/XCommands.java:runT`: beyond
+  displaying ZIP/TAR contents, it could extract a chosen entry.
+- Archive previews now show **Extract…** for eligible individual
+  regular-file members, leading to a confirmation page.
+- New `archive_extract.py` performs streaming ZIP/JAR/WAR/EAR or
+  TAR-family member extraction to an existing root-relative
+  directory with an optional output filename.
+- No path recreation, remote commands, zip-slip, directory writes
+  outside the browsing root, symlinks/hardlinks, duplicate member
+  ambiguity, overwrite, or implicit execution.
+- 128 MiB archive, 5,000-member, and 64 MiB extracted-file caps.
+  Outputs are private mode 0600 and published atomically without
+  overwriting existing names.
+- Added GET/POST `/extract-entry` routes, with CSRF and strict
+  parameter validation. Added `tests/test_archive_extract.py`
+  for ZIP/TAR, Unicode, malicious members, no-clobber and HTTP.
+- The original archive_listing() default remains read-only
+  for callers that do not enable per-member extraction links.
