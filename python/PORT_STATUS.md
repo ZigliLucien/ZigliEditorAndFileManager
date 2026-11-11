@@ -558,3 +558,21 @@ listing's directory/page/sort/filter context.
   paths, live HTML form, same-server reuse, full browser-save/Tk
   notification round-trip, unsaved/untitled buffers, binary and
   oversized files.
+
+
+### v85 — combined Move and Rename (XCommands.runM)
+
+- Inspected the original Java `XCommands.runM/runC(req,true)`
+  workflow, which accepts destination paths and replacement names.
+- The Python browser Move form now defaults to the source folder and
+  accepts an optional new filename, allowing rename-in-place or
+  move-and-rename in one operation.
+- Extended `RenameManager.move` with a backward-compatible
+  `new_name=None` argument; Trash and other existing Move callers
+  still retain filenames by default.
+- Reused the existing Notes-preserving, no-overwrite and rollback
+  transaction. Rejects filename traversal, symlink collisions,
+  invalid directories and open desktop-editor files.
+- Added `tests/test_move_and_rename.py` covering Unicode filenames,
+  POSIX modes, notes migration, existing API, conflict/rollback
+  cases, CSRF and same-tab listing return state.
