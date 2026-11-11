@@ -259,3 +259,37 @@ no moving files open in TPEditor. It preserves the root boundary
 and browser Back listing state. It deliberately does not claim
 support for moving whole directories or Java's unrestricted
 filesystem destinations.
+
+
+## v86 — XCommands.runT: selected archive member extraction
+
+Source: `NetsManager/XCommands.java`, `runT(String req)`.
+The Java command could display a member of a ZIP/TAR archive or
+extract it under an implicit `Xtrax` path. The Python port previously
+offered only a bounded, read-only ZIP/JAR/TAR member listing.
+
+The new **Extract…** action is opt-in on individual ordinary-file
+members in the browser archive preview. It opens a separate confirmation
+form, whose destination is an existing directory relative to the
+selected browsing root and whose filename can be changed. Paths
+inside the archive are **not** recreated: members are extracted as
+individual flat files in the chosen directory. This avoids an
+untrusted archive silently creating directories or writing outside
+the root.
+
+`server/archive_extract.py` supports ZIP/JAR/WAR/EAR and the
+existing TAR formats (.tar, .tgz, .tar.gz, .tbz, .tar.bz2,
+.txz, .tar.xz). It rejects unsafe member names, duplicate names,
+symbolic links, hard links, directory entries, symlink destinations,
+absolute/traversal destination paths, and extraction into ZEFM
+internal Trash. The archive itself must be 128 MiB or smaller and
+contain at most 5,000 members; one selected member may expand to
+at most 64 MiB. Extraction is streaming and bounded, publishes only
+via an exclusive hardlink from a private temporary file, and never
+overwrites existing paths. Extracted files have mode 0600 and
+are never executed. The form requires the browser's CSRF token.
+Nothing is extracted just by viewing an archive.
+
+This replaces the permissive implicit `Xtrax` destination from
+Java with an explicit bounded filesystem transaction. It is
+intentionally not a full-archive extraction feature.
