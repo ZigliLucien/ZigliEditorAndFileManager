@@ -30,6 +30,7 @@ from .html_preview import site_url, site_resource, site_relative_path, HTML_PREV
 from .file_types import handler_for
 from .book_preview import epub_page, djvu_page
 from .archive_preview import archive_listing
+from .archive_extract import member_details, extract_entry
 from .postscript_preview import postscript_pdf
 from .image_preview import image_preview
 from .text_preview import preview_text
@@ -521,6 +522,38 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                     if not raw_page.isdecimal() or len(raw_page) > 5:
                         raise BrowserError("Invalid DjVu page")
                     self._send(200, djvu_page(files, rel, int(raw_page)), "image/png")
+                elif parsed.path == "/extract-entry":
+                    if set(args) != {"path", "member"}:
+                        raise BrowserError("Unexpected archive extraction parameters")
+                    member = args["member"]
+                    suggested, size = member_details(files, rel, member)
+                    archive_path = files.resolve(rel)
+                    folder = files.relative(archive_path.parent)
+                    back = escape(link("/view", rel), quote=True)
+                    content = (
+                        f'<p><a href="{back}">← Back to archive listing</a></p>'
+                        f'<h2>Extract one file from {escape(rel)}</h2>'
+                        f'<p>Archive member: <code>{escape(member)}</code> '
+                        f'({size} bytes)</p>'
+                        '<p>Only this regular file will be extracted. Nested '
+                        'archive paths are not recreated: output is placed '
+                        'directly in the chosen existing directory. '
+                        'Existing files are never overwritten. '
+                        'Extracted files have private (0600) permissions.</p>'
+                        '<form method="post" action="/extract-entry" '
+                        'accept-charset="utf-8">'
+                        f'<input type="hidden" name="csrf" value="{escape(token, quote=True)}">'
+                        f'<input type="hidden" name="path" value="{escape(rel, quote=True)}">'
+                        f'<input type="hidden" name="member" value="{escape(member, quote=True)}">'
+                        '<p><label>Destination directory (relative to browsing root): '
+                        f'<input name="destination" required value="{escape(folder, quote=True)}">'
+                        '</label></p>'
+                        '<p><label>Output filename: '
+                        f'<input name="name" required maxlength="255" value="{escape(suggested, quote=True)}">'
+                        '</label></p>'
+                        '<button type="submit">Extract this file</button></form>'
+                    )
+                    self._send(200, page("Extract archive member", content))
                 elif parsed.path == "/view":
                     if set(args) - {"path", "back", "chapter", "page", "format"}:
                         raise BrowserError("Unexpected view parameters")
@@ -545,7 +578,7 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                                    {"Content-Disposition": "inline"})
                         return
                     if kind == "archive":
-                        self._send(200, page(rel, archive_listing(files, rel)))
+                        self._send(200, page(rel, archive_listing(files, rel, enable_extract=True)))
                         return
                     if kind == "image":
                         data = image_preview(files, rel, descriptor["extension"])
@@ -783,6 +816,22 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                         f'<h2>Renamed to: {escape(renamed.name)}</h2>'
                         f'<p>{count} attached Notes retained under the new filename.</p>'
                         f'<p><a href="{back}">Back to original-style listing</a></p>'))
+                elif route=="/extract-entry":
+                    if (set(args) - {"csrf", "path", "member", "destination", "name"}
+                            or not {"csrf", "path", "member", "destination", "name"} <= set(args)):
+                        raise BrowserError("Unexpected archive extraction fields")
+                    target = extract_entry(
+                        files, args["path"], args["member"],
+                        args["destination"], args["name"])
+                    listing_url = escape(
+                        link("/listing", files.relative(target.parent)), quote=True)
+                    source_url = escape(link("/view", args["path"]), quote=True)
+                    self._send(201, page("Archive entry extracted",
+                        f'<h2>Extracted: {escape(files.relative(target))}</h2>'
+                        '<p>One regular file extracted, without replacing any '
+                        'existing file. The archive is unchanged.</p>'
+                        f'<p><a href="{listing_url}">Open destination directory</a> · '
+                        f'<a href="{source_url}">Back to archive listing</a></p>'))
                 elif route=="/move":
                     if (set(args) - {"csrf", "path", "destination", "new_name", "back"}
                             or not {"csrf", "path", "destination"} <= set(args)):
