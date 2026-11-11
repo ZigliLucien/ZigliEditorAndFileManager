@@ -1,11 +1,11 @@
 """Explicit, deliberately small local file-manager route registry."""
 GET_ROUTES = frozenset({
     "/", "/browse", "/new-file", "/view", "/edit", "/raw", "/notes", "/note-edit",
-    "/rtl-keymap.js", "/copy", "/rename", "/move", "/delete", "/trash", "/listing", "/listing.css", "/listing.js", "/math.css", "/mathjax-config.js",
+    "/rtl-keymap.js", "/copy", "/rename", "/move", "/delete", "/trash", "/extract-entry", "/listing", "/listing.css", "/listing.js", "/math.css", "/mathjax-config.js",
     "/api/files", "/api/listing-page", "/search-text", "/pdf", "/djvu-page", "/site/", "/build", "/build.js",
 })
 POST_ROUTES = frozenset({
-    "/edit", "/note-edit", "/new-file", "/open-editor", "/mkdir", "/copy", "/rename", "/move", "/delete", "/restore", "/build",
+    "/edit", "/note-edit", "/new-file", "/open-editor", "/mkdir", "/copy", "/rename", "/move", "/delete", "/restore", "/extract-entry", "/build",
 })
 
 
