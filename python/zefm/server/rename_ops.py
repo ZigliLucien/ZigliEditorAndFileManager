@@ -23,9 +23,14 @@ class RenameManager:
         """Rename a regular file within its existing directory."""
         return self._relocate(relative, new_name=new_name)
 
-    def move(self, relative, destination_directory):
-        """Move a file into another directory within this root, without overwrites."""
-        return self._relocate(relative, destination_directory=destination_directory)
+    def move(self, relative, destination_directory, new_name=None):
+        """Move a file, optionally renaming it, within the selected root.
+
+        The two-argument form retains the original filename for existing
+        callers, including Trash/Restore. A blank optional name also keeps it.
+        """
+        return self._relocate(relative, new_name=new_name,
+                              destination_directory=destination_directory)
 
     def _relocate(self, relative, new_name=None, destination_directory=None):
         with self._lock:
@@ -40,7 +45,9 @@ class RenameManager:
                     raise BrowserError("Destination directory not found", 404)
                 if (self.files.root / destination_directory).is_symlink():
                     raise BrowserError("Destination cannot be a symlink", 403)
-                destination = target_parent / source.name
+                destination = target_parent / (
+                    _child_name(new_name) if new_name is not None and new_name != ""
+                    else source.name)
             if source == destination:
                 raise BrowserError("Choose a different directory or name", 409)
             if self.file_in_use is not None and self.file_in_use(source):
