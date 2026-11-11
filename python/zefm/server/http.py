@@ -410,18 +410,22 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                     if not source.is_file() or (files.root / rel).is_symlink():
                         raise BrowserError("File not found for moving", 404)
                     back = escape(safe_listing_return(files, back_state, files.relative(source.parent)), quote=True)
+                    current_directory = escape(files.relative(source.parent), quote=True)
                     content = (
                         f'<p><a href="{back}">← Back</a></p>'
                         f'<h2>Move file: {escape(rel)}</h2>'
-                        '<p>Move to another existing directory inside this ZEFM root. '
+                        '<p>Move to another existing directory inside this ZEFM root, '
+                        'or rename it in the current directory. '
                         'No file will be overwritten; Notes move with the file. '
                         'Close any open desktop editor buffer first.</p>'
                         '<form method="post" action="/move" accept-charset="utf-8">'
                         f'<input type="hidden" name="csrf" value="{escape(token,quote=True)}">'
                         f'<input type="hidden" name="path" value="{escape(rel,quote=True)}">'
                         f'<input type="hidden" name="back" value="{escape(back_state or "",quote=True)}">'
-                        '<label>Destination directory (relative to browsing root): '
-                        '<input name="destination" required value="."></label> '
+                        '<p><label>Destination directory (relative to browsing root): '
+                        f'<input name="destination" required value="{current_directory}"></label></p>'
+                        '<p><label>New filename (optional, leave blank to keep the name): '
+                        '<input name="new_name" maxlength="255" value=""></label></p>'
                         '<button type="submit">Move file</button></form>'
                     )
                     self._send(200, page("Move file", content))
@@ -780,11 +784,12 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                         f'<p>{count} attached Notes retained under the new filename.</p>'
                         f'<p><a href="{back}">Back to original-style listing</a></p>'))
                 elif route=="/move":
-                    if (set(args) - {"csrf", "path", "destination", "back"}
+                    if (set(args) - {"csrf", "path", "destination", "new_name", "back"}
                             or not {"csrf", "path", "destination"} <= set(args)):
                         raise BrowserError("Unexpected move parameters")
                     with note_lock:
-                        moved, count = rename_manager.move(args["path"], args["destination"])
+                        moved, count = rename_manager.move(
+                            args["path"], args["destination"], args.get("new_name"))
                     back = escape(safe_listing_return(
                         files, return_to, files.relative(moved.parent)), quote=True)
                     destination_link = escape(link("/listing", files.relative(moved.parent)), quote=True)
