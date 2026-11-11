@@ -233,3 +233,29 @@ This completes the *desktop launch* part of the Java QuickEditor
 workflow without porting Swing or XML/XSLT code verbatim. Java's
 QuickEditor UI and database features are not claimed to be fully
 equivalent to the Python HTML Quick Edit page.
+
+
+## v85 — combined Move + Rename from XCommands.runM
+
+The source-guided audit of `NetsManager/XCommands.java` confirms
+that `runM` delegates to `runC(req, true)`. The Java form accepts
+either a replacement filename within the current directory or a path
+to another directory with an optional replacement filename. Until
+now Python Move required a destination directory and retained the
+original basename; Rename was a separate operation.
+
+The Python `RenameManager.move(relative, destination_directory,
+new_name=None)` now supports an optional replacement name as part
+of the same Notes-aware, no-clobber transaction. The original
+two-argument API remains valid (including Trash/Restore). A blank
+replacement name also preserves the current filename. The browser
+Move form defaults its destination to the source directory and
+offers an optional **New filename** field.
+
+The implementation uses the existing guarded hardlink publish,
+atomic WordNotes rewrite, and source unlink/rollback logic:
+no overwrite, no directory traversal, no symbolic-link destination,
+no moving files open in TPEditor. It preserves the root boundary
+and browser Back listing state. It deliberately does not claim
+support for moving whole directories or Java's unrestricted
+filesystem destinations.
