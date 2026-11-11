@@ -900,3 +900,23 @@ are not silently copied, overwritten, or moved outside the chosen
 root; folders are not moved by this action.
 
 Regression tests: `tests.test_move_and_rename`.
+
+
+## v86 — selectively extract ZIP/JAR/TAR entries
+
+Click an archive in the styled file listing to see its entries.
+Eligible regular files now have an **Extract…** link. Choosing one
+opens a separate confirmation form with a destination directory
+(default: archive's current directory) and an editable filename.
+The destination must already exist and remain inside the current
+ZEFM browsing root. The internal directory structure of the
+archive is not recreated; only the chosen member is extracted.
+
+Extraction never overwrites a file or symlink and never extracts
+links or directories. ZIP/JAR/WAR/EAR and common TAR variants
+are supported, with archive/member count and decompressed-size
+limits. Output files have owner-only permissions (0600). This
+operation does not execute extracted files or extract every
+archive entry. Merely viewing an archive does not write anything.
+
+Tests: `tests.test_archive_extract`.
