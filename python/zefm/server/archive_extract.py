@@ -125,13 +125,20 @@ def extract_entry(files, relative, member, destination_directory, new_name=""):
     destination = files.resolve(destination_directory)
     if not destination.is_dir():
         raise BrowserError("Destination directory does not exist", 404)
-    # Never accept a symlink in any part of the relative destination.
-    relative_path = destination.relative_to(files.root)
+    # Check the *supplied* path before its symlinks are resolved; examining
+    # only the final canonical path would miss a symlink to a directory
+    # elsewhere inside the root. The existing root is always trusted.
+    submitted = Path(destination_directory)
+    if ".." in submitted.parts:
+        raise BrowserError("Destination traversal is not allowed", 403)
+    if submitted.parts[:1] == (".zefm-trash",):
+        raise BrowserError("Cannot extract into ZEFM internal Trash", 403)
     current = files.root
-    for segment in relative_path.parts:
+    for segment in submitted.parts:
         current = current / segment
         if current.is_symlink():
             raise BrowserError("Destination contains a symbolic link", 403)
+    relative_path = destination.relative_to(files.root)
     if relative_path.parts[:1] == (".zefm-trash",):
         raise BrowserError("Cannot extract into ZEFM internal Trash", 403)
     filename = _child_name(new_name) if new_name else suggested
