@@ -881,3 +881,22 @@ digest. It updates the disk file and notifies the desktop buffer to
 review its changed-on-disk status; it never silently replaces unsaved
 Tk text. This is an explicit user action, separate from the browser
 listing's Quick Edit link.
+
+
+## v85 — move and rename in one step
+
+The styled listing's **move** radio and file context-menu Move option
+now open a form with **Destination directory** and an optional
+**New filename**. The destination starts at the file's current folder
+(instead of the browsing root). Leave the new filename blank to
+retain the original filename. Type a different name to rename in
+place or move to another directory under a new name in the
+same operation.
+
+Notes follow the file to its new absolute filename automatically.
+The existing no-overwrite policy, CSRF protection, Unicode handling,
+root confinement and TPEditor open-buffer check still apply. Files
+are not silently copied, overwritten, or moved outside the chosen
+root; folders are not moved by this action.
+
+Regression tests: `tests.test_move_and_rename`.
