@@ -105,10 +105,11 @@ class ArchiveMemberViewTests(unittest.TestCase):
         self.assertIn("View text", listing)
         self.assertIn("Extract…", listing)
         self.assertIn("member=notes%2Fc%C5%93ur+", listing)
-        self.assertNotIn("member=bytes%2Flarge.txt", listing.split("View text")[0] if False else
-                         "")  # large members cannot be previewed, but can be extracted
-        self.assertNotIn("member=bytes%2Fmalformed.txt", archive_listing(
-            self.files, "samples.zip", enable_preview=False, enable_extract=False))
+        large_row = next(row for row in listing.split("<tr>") if "bytes/large.txt" in row)
+        self.assertNotIn("View text", large_row)
+        self.assertIn("Extract…", large_row)
+        binary_row = next(row for row in listing.split("<tr>") if "bytes/malformed.txt" in row)
+        self.assertIn("View text", binary_row)  # Invalid UTF-8 is rejected on read.
         old = archive_listing(self.files, "samples.zip")
         self.assertIn("Read-only listing", old)
         self.assertNotIn("View text", old)
