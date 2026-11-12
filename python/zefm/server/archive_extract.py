@@ -7,6 +7,7 @@ No archive entry paths are recreated, no symlinks are extracted.
 """
 from __future__ import annotations
 
+import io
 import os
 from pathlib import Path, PurePosixPath
 import stat
@@ -19,6 +20,7 @@ from .file_manager import BrowserError, _child_name
 from .file_types import handler_for
 
 MAX_EXTRACT_BYTES = 64 * 1024 * 1024
+MAX_PREVIEW_BYTES = 1 * 1024 * 1024
 _CHUNK = 1024 * 1024
 
 
@@ -112,6 +114,53 @@ def member_details(files, relative, member):
     """Return a safe default filename and byte count for the confirmation."""
     _, name, size = _checked_member(files, relative, member)
     return name, size
+
+
+
+def view_text_member(files, relative, member):
+    """Read one small, ordinary UTF-8 archive member without writing a file.
+
+    The byte limit and member metadata are checked *before* decompression.
+    Streaming checks ensure even an archive with a forged size cannot push
+    more data than declared or allowed into the in-memory preview.
+    """
+    source, _filename, expected_size = _checked_member(files, relative, member)
+    if expected_size > MAX_PREVIEW_BYTES:
+        raise BrowserError("Archive member exceeds the 1 MiB text preview limit", 413)
+    original = source.stat()
+    output = io.BytesIO()
+    try:
+        if source.name.casefold().endswith((".zip", ".jar", ".war", ".ear")):
+            with ZipFile(source) as archive:
+                info, size = _select_zip(archive, member)
+                if size != expected_size or size > MAX_PREVIEW_BYTES:
+                    raise BrowserError("Archive member changed; retry", 409)
+                with archive.open(info) as reader:
+                    _copy_limited(reader, output, expected_size)
+        else:
+            with tarfile.open(source, "r:*") as archive:
+                info, size = _select_tar(archive, member)
+                if size != expected_size or size > MAX_PREVIEW_BYTES:
+                    raise BrowserError("Archive member changed; retry", 409)
+                reader = archive.extractfile(info)
+                if reader is None:
+                    raise BrowserError("Archive member is unreadable", 415)
+                with reader:
+                    _copy_limited(reader, output, expected_size)
+        after = source.stat()
+        if ((original.st_ino, original.st_size, original.st_mtime_ns)
+                != (after.st_ino, after.st_size, after.st_mtime_ns)):
+            raise BrowserError("Archive changed during preview; retry", 409)
+    except (BadZipFile, tarfile.TarError, EOFError, RuntimeError, OSError) as exc:
+        raise BrowserError("Invalid or unreadable archive member", 415) from exc
+
+    data = output.getvalue()
+    if b"\\x00" in data:
+        raise BrowserError("Binary archive members cannot be previewed as text", 415)
+    try:
+        return data.decode("utf-8-sig")
+    except UnicodeDecodeError as exc:
+        raise BrowserError("Archive member is not UTF-8 text", 415) from exc
 
 
 def extract_entry(files, relative, member, destination_directory, new_name=""):
