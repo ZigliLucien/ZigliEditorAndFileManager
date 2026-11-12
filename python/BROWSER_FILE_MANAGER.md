@@ -920,3 +920,23 @@ operation does not execute extracted files or extract every
 archive entry. Merely viewing an archive does not write anything.
 
 Tests: `tests.test_archive_extract`.
+
+
+## v87 — view a text file inside an archive
+
+Open a ZIP/JAR/TAR archive from the browser listing. Alongside
+**Extract…**, small recognized text members now offer **View text**.
+Selecting it displays the original UTF-8 text directly in the browser,
+with line breaks preserved and HTML escaped. No file is extracted or
+executed. Unicode French, Yiddish, and other scripts are supported
+with automatic text direction in the preview. Use **Back to archive
+listing** to return.
+
+Only ordinary text-like members up to 1 MiB are offered as previews.
+Binary data, invalid UTF-8, embedded NUL bytes, unsafe paths,
+duplicate member names, and symlink/hardlink entries cannot be
+previewed. Unknown/binary extensions may still be eligible for the
+separate, explicitly confirmed Extract operation.
+
+The legacy `archive_listing` helper remains read-only by default.
+Test coverage: `tests.test_archive_member_view`.
