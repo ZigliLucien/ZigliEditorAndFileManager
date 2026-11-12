@@ -9,6 +9,8 @@ from __future__ import annotations
 
 from html import escape, unescape
 import hashlib
+import os
+import sys
 import re
 from uuid import uuid4
 from pathlib import Path
@@ -139,8 +141,16 @@ def _command(source, output_dir, descriptor):
                 str(output_dir / "document.pdf")]
     if descriptor["build"] == "lualatex":
         binary = shutil.which("lualatex")
+        if not binary and sys.platform == "darwin":
+            # Finder/Aqua-launched applications may not inherit the shell PATH.
+            # MacTeX publishes a stable symlink here; do not modify global PATH.
+            standard = Path("/Library/TeX/texbin/lualatex")
+            if standard.is_file() and os.access(standard, os.X_OK):
+                binary = str(standard)
         if not binary:
-            raise BrowserError("LuaLaTeX is not installed or not on PATH", 503)
+            raise BrowserError(
+                "LuaLaTeX was not found. On macOS check MacTeX at "
+                "/Library/TeX/texbin/lualatex; on other systems check PATH.", 503)
         return [binary, "-interaction=nonstopmode", "-halt-on-error",
                 "-no-shell-escape", f"-output-directory={output_dir}",
                 str(source)]
