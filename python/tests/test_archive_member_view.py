@@ -109,7 +109,7 @@ class ArchiveMemberViewTests(unittest.TestCase):
         self.assertNotIn("View text", large_row)
         self.assertIn("Extract…", large_row)
         binary_row = next(row for row in listing.split("<tr>") if "bytes/malformed.txt" in row)
-        self.assertIn("View text", binary_row)  # Invalid UTF-8 is rejected on read.
+        self.assertIn("View text", binary_row)  # Declared .txt; invalid UTF-8 is rejected on read.
         old = archive_listing(self.files, "samples.zip")
         self.assertIn("Read-only listing", old)
         self.assertNotIn("View text", old)
@@ -142,6 +142,9 @@ class ArchiveMemberViewBrowserTests(unittest.TestCase):
         self.assertEqual(code, 200)
         self.assertIn("View text", listing)
         self.assertIn("Extract…", listing)
+        binary_row = next(row for row in listing.split("<tr>") if "source/binary.bin" in row)
+        self.assertNotIn("View text", binary_row)
+        self.assertIn("Extract…", binary_row)
         target = "/view-entry?" + urlencode(
             {"path": "data.zip", "member": "source/français-ייִדיש.html"})
         code, preview = self.get(target)
