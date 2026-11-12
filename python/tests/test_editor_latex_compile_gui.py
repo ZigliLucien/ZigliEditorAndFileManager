@@ -20,7 +20,7 @@ class CompileLatexGuiTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.tex = Path(self.temp.name) / "math.tex"
         self.tex.write_text(
-            "\\documentclass{article}\\begin{document}Hello\\end{document}",
+            r"\\documentclass{article}\\begin{document}Hello\\end{document}",
             encoding="utf-8")
         self.app._open_path(str(self.tex))
         self.root.update()
