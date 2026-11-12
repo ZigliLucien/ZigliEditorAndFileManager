@@ -68,6 +68,9 @@ class Window:
         self.mail_browser = None  # Separately scoped local Maildir reader.
         self.browser_open_requests = Queue()
         self.browser_saved_requests = Queue()
+        self._compile_results = Queue()
+        self._compile_running = False
+        self._compile_poll_id = None
         self._browser_open_paths = frozenset()
         self.browser_poll_id = None
         self.recent_files = RecentFiles()
@@ -383,6 +386,86 @@ class Window:
             messagebox.showerror("JSON",str(exc),parent=self.root);return
         widget.delete("1.0","end");widget.insert("1.0",formatted)
 
+
+    def compile_latex(self):
+        """F4: compile a saved .tex buffer using the existing browser PDF builder.
+
+        Run the external engine in a worker so that Tk stays responsive. The
+        worker never touches Tk widgets. On completion, the main thread opens
+        diagnostics as a new buffer and the newly built PDF in the browser.
+        """
+        from threading import Thread
+        from ...server.document_build import build_pdf
+        from ...server.file_manager import LocalFiles
+
+        widget, editor = self.current()
+        if widget is None:
+            return
+        path = editor.state.buffer.path
+        if not path or Path(path).suffix.lower() != ".tex":
+            messagebox.showinfo("Compile LaTeX",
+                "Open or save a .tex document before using F4 Compile.",
+                parent=self.root)
+            return
+        if (editor.state.buffer.modified or
+                widget.get("1.0", "end-1c") != editor.state.buffer.text):
+            messagebox.showwarning("Unsaved LaTeX",
+                "Save the current buffer before compiling. F4 never compiles "
+                "an older disk version while unsaved edits are present.",
+                parent=self.root)
+            return
+        if self._compile_running:
+            self.status.set("A LaTeX build is already running")
+            return
+        source = Path(path).expanduser().resolve()
+        try:
+            if not source.is_file():
+                raise OSError("LaTeX source is missing")
+            if changed_on_disk(source, self.disk_signatures.get(self.tabs.select())):
+                raise OSError("Source changed on disk; reload or save before compiling")
+        except OSError as exc:
+            messagebox.showerror("Compile LaTeX", str(exc), parent=self.root)
+            return
+
+        self._compile_running = True
+        self.status.set(f"Compiling LaTeX: {source.name} (F4)")
+        # Preserve the source tab and leave the original buffer untouched.
+        def worker():
+            try:
+                files = LocalFiles(source.parent)
+                result = build_pdf(files, source.name)
+                payload = (source, result, None)
+            except Exception as exc:
+                payload = (source, None, str(exc))
+            self._compile_results.put(payload)
+
+        Thread(target=worker, name="zefm-lualatex", daemon=True).start()
+        self._compile_poll_id = self.root.after(120, self._poll_latex_build)
+
+    def _poll_latex_build(self):
+        """Consume compilation results on Tk's main thread only."""
+        self._compile_poll_id = None
+        try:
+            source, result, error = self._compile_results.get_nowait()
+        except Empty:
+            self._compile_poll_id = self.root.after(120, self._poll_latex_build)
+            return
+        self._compile_running = False
+        if error is not None:
+            self.status.set(f"LaTeX build failed: {error}")
+            messagebox.showerror("Compile LaTeX", error, parent=self.root)
+            return
+        log = result.get("log", "")
+        summary = ("SUCCESS" if result["ok"] else "FAILED")
+        self.new_buffer(text=f"LaTeX build {summary}: {source.name}\\n\\n{log}\\n")
+        if result["ok"]:
+            from ...server.file_manager import LocalFiles
+            pdf = LocalFiles(source.parent).resolve(result["pdf"])
+            self.status.set(f"LaTeX PDF built: {pdf.name}")
+            webbrowser.open(pdf.as_uri())
+        else:
+            self.status.set(f"LaTeX failed (exit {result.get('returncode', '?')}); see build log")
+
     def debug_python(self):
         """Launch pdb in a terminal for a saved Python file; never run via shell."""
         import subprocess,shutil
@@ -473,6 +556,7 @@ class Window:
         elif name=="Save As":self.save_file(as_new=True)
         elif name=="Quit":self.quit()
         elif name=="Debug Python":self.debug_python()
+        elif name=="Compile":self.compile_latex()
         elif name=="Revert File":self.revert_file()
         elif name=="Clear":
             if messagebox.askyesno("Clear buffer","Delete all text in this buffer?",parent=self.root):
@@ -1719,6 +1803,9 @@ class Window:
         if any(e.state.buffer.modified for _,e in self.views.values()):
             if not messagebox.askyesno("Unsaved changes","Quit with unsaved buffers?",parent=self.root):
                 return
+        if self._compile_poll_id is not None:
+            self.root.after_cancel(self._compile_poll_id)
+            self._compile_poll_id = None
         if self.disk_poll_id is not None:
             self.root.after_cancel(self.disk_poll_id)
             self.disk_poll_id = None
