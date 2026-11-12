@@ -598,3 +598,20 @@ listing's directory/page/sort/filter context.
   for ZIP/TAR, Unicode, malicious members, no-clobber and HTTP.
 - The original archive_listing() default remains read-only
   for callers that do not enable per-member extraction links.
+
+
+### v87 — view individual UTF-8 archive entries without extracting
+
+- Completed the second part of Java `XCommands.runT`: read-only
+  display of one ZIP/JAR/TAR archive member.
+- Archive listing offers **View text** for recognized textual extensions
+  up to 1 MiB, retaining **Extract…** as a separate, confirmed action.
+- New `view_text_member` uses the v86 safe member selectors and
+  streaming byte-count validation; rejects invalid UTF-8, NUL bytes,
+  oversized payloads, archive links, duplicate or unsafe names.
+- `GET /view-entry` renders escaped content in a read-only HTML
+  `<pre dir="auto">` with a Back link to the archive. No disk write,
+  JavaScript execution, or implicit extraction.
+- Tests in `tests/test_archive_member_view.py` cover Unicode/BOM,
+  HTML injection, ZIP/TAR, symlinks, invalid paths, decompression
+  caps, binary files and HTTP validation.
