@@ -90,6 +90,17 @@ class CompileLatexGuiTests(unittest.TestCase):
                  "log": "ok", "returncode": 0})
         build.assert_called_once()
 
+    def test_mac_compile_alternative_shortcut_is_registered(self):
+        # Simulate the macOS menu policy without relying on physical F4.
+        with patch("zefm.editor.gui.tk_editor.sys.platform", "darwin"):
+            mac_root = tk.Toplevel(self.root)
+            try:
+                mac_app = Window(mac_root)
+                self.assertTrue(mac_root.bind_all("<Command-Shift-B>"))
+                self.assertTrue(mac_root.bind_all("<F4>"))
+            finally:
+                mac_app.quit()
+
     def test_unsaved_buffer_is_not_compiled(self):
         widget, _ = self.app.current()
         widget.insert("end", "new unsaved text")
