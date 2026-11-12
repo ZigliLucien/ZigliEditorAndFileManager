@@ -67,6 +67,29 @@ class CompileLatexGuiTests(unittest.TestCase):
         widget, _ = self.app.current()
         self.assertIn("Undefined control sequence", widget.get("1.0", "end-1c"))
 
+    def test_saved_buffer_with_delayed_modified_notification_compiles(self):
+        # Tk may deliver <<Modified>> after F1 has already finished writing.
+        widget, editor = self.app.current()
+        widget.insert("end", " updated")
+        self.root.update()
+        self.app.save_file()
+        self.root.update()
+        self.assertFalse(editor.state.buffer.modified)
+        widget.edit_modified(True)
+        self.root.update()
+        self.assertFalse(editor.state.buffer.modified)
+        self.assertEqual(
+            self.app.saved_snapshots[self.app.tabs.select()],
+            widget.get("1.0", "end-1c"))
+        pdf = self.tex.parent / ".zefm-build" / "math.tex-test.pdf"
+        pdf.parent.mkdir(exist_ok=True)
+        pdf.write_bytes(b"%PDF-1.7\\n")
+        with patch("zefm.editor.gui.tk_editor.webbrowser.open"):
+            build = self._compile_synchronously(
+                {"ok": True, "pdf": ".zefm-build/math.tex-test.pdf",
+                 "log": "ok", "returncode": 0})
+        build.assert_called_once()
+
     def test_unsaved_buffer_is_not_compiled(self):
         widget, _ = self.app.current()
         widget.insert("end", "new unsaved text")
