@@ -142,6 +142,10 @@ class SaveStatusRecentPopupTests(unittest.TestCase):
         self.assertIn("Open File...", labels)
         self.assertIn("Clear Recent Files", labels)
         self.assertTrue(self.app.current()[0].bind("<Button-3>"))
+        widget = self.app.current()[0]
+        self.assertEqual(widget.bindtags()[0], "ZefmRecentFilesPopup")
+        self.assertTrue(self.root.bind_class("ZefmRecentFilesPopup", "<Button-3>"))
+        self.assertTrue(self.root.bind_class("ZefmRecentFilesPopup", "<Shift-F10>"))
 
 
 if __name__ == "__main__":
