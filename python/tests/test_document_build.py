@@ -87,6 +87,17 @@ class BuildModelTests(unittest.TestCase):
         self.assertTrue(result["ok"])
         self.assertIn("Rendered", result["log"])
 
+    def test_mactex_standard_path_when_gui_path_lacks_lualatex(self):
+        from zefm.server.document_build import _command
+        descriptor = handler_for("paper.tex")
+        with patch("zefm.server.document_build.sys.platform", "darwin"), \
+             patch("zefm.server.document_build.shutil.which", return_value=None), \
+             patch("zefm.server.document_build.Path.is_file", return_value=True), \
+             patch("zefm.server.document_build.os.access", return_value=True):
+            command = _command(self.tex, self.root, descriptor)
+        self.assertEqual(command[0], "/Library/TeX/texbin/lualatex")
+        self.assertIn("-no-shell-escape", command)
+
     def test_tex_success_verified_new_pdf(self):
         def fake_run(command, **kwargs):
             self.assertIn("-no-shell-escape", command)
