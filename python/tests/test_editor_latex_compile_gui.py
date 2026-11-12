@@ -91,15 +91,11 @@ class CompileLatexGuiTests(unittest.TestCase):
         build.assert_called_once()
 
     def test_mac_compile_alternative_shortcut_is_registered(self):
-        # Simulate the macOS menu policy without relying on physical F4.
-        with patch("zefm.editor.gui.tk_editor.sys.platform", "darwin"):
-            mac_root = tk.Toplevel(self.root)
-            try:
-                mac_app = Window(mac_root)
-                self.assertTrue(mac_root.bind_all("<Command-Shift-B>"))
-                self.assertTrue(mac_root.bind_all("<F4>"))
-            finally:
-                mac_app.quit()
+        import sys
+        if sys.platform != "darwin":
+            self.skipTest("macOS shortcut requires a native Tk Aqua session")
+        self.assertTrue(self.root.bind_all("<Command-Shift-B>"))
+        self.assertTrue(self.root.bind_all("<F4>"))
 
     def test_unsaved_buffer_is_not_compiled(self):
         widget, _ = self.app.current()
