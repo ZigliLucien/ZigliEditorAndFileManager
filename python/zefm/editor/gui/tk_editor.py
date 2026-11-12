@@ -161,6 +161,8 @@ class Window:
         if popup_tag not in widget.bindtags():
             widget.bindtags((popup_tag,) + widget.bindtags())
         self.root.bind_class(popup_tag, "<Button-3>", self._show_recent_files_popup)
+        # Keep the widget-level binding as a fallback for alternate Tk ports.
+        widget.bind("<Button-3>", self._show_recent_files_popup)
         if sys.platform == "darwin":
             self.root.bind_class(popup_tag, "<Button-2>", self._show_recent_files_popup)
             self.root.bind_class(popup_tag, "<Control-Button-1>", self._show_recent_files_popup)
