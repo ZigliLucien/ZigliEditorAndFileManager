@@ -661,3 +661,18 @@ listing's directory/page/sort/filter context.
 - Regression additions: GUI save→delayed Modified→F4 path and priority
   context-click binding checks. Native macOS interaction still requires
   testing in the user's editor environment.
+
+
+### v90 — Mac compilation accessibility
+
+- Preserved historical Run → Compile (F4) and its single shared action.
+- Added Command+Shift+B on macOS, with the alternative shown in the Run menu.
+  Apple hardware may consume F4 for system functions; Fn/Globe+F4 can also
+  produce a normal F4 event depending on keyboard settings.
+- The existing browser/editor LuaLaTeX builder now checks the standard MacTeX
+  executable `/Library/TeX/texbin/lualatex` if `lualatex` is absent from
+  `PATH` in an Aqua-launched process. It does not rewrite `PATH`, invoke
+  a shell or relax `-no-shell-escape`.
+- Added focused regression cases for native macOS shortcut registration and
+  MacTeX command lookup. A real Mac run is still required to tell whether
+  a physical F4 press, the environment, or a build error caused the report.
