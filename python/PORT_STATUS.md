@@ -615,3 +615,25 @@ listing's directory/page/sort/filter context.
 - Tests in `tests/test_archive_member_view.py` cover Unicode/BOM,
   HTML injection, ZIP/TAR, symlinks, invalid paths, decompression
   caps, binary files and HTTP validation.
+
+
+### v88 — Run → Compile (F4) from the Tk desktop editor
+
+- Restored the historical TPEditorX **Run → Compile (F4)** command, using
+  the already-implemented `zefm.server.document_build.build_pdf` pathway.
+- F4 requires a saved, unchanged-on-disk `.tex` buffer; an unsaved buffer
+  is never silently replaced by an older on-disk source. Compile refuses
+  missing/non-TeX sources and concurrent duplicate builds.
+- LuaLaTeX runs on a daemon worker; the main Tk event loop remains responsive.
+  Results are delivered through a queue on the Tk thread. Diagnostics appear
+  in a separate editor tab. A verified newly produced PDF opens in the
+  default browser on success; failed builds show their log, never a stale PDF.
+- Reuses existing `-no-shell-escape`, argv subprocess, 45-second timeout,
+  fresh output directory, source limits, PDF signature and size checks.
+  **Only compile trusted TeX**, since TeX itself is programmable and is not
+  made safe solely by `-no-shell-escape`.
+- GUI regression tests: `tests/test_editor_latex_compile_gui.py` (success,
+  failure diagnostics, dirty-buffer refusal, F4 command registry).
+- Remaining follow-up: LaTeX project root/master document selection,
+  bibliography/multiple passes, custom engines and SyncTeX integration.
+  Do not claim these are already implemented.
