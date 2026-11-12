@@ -643,3 +643,21 @@ listing's directory/page/sort/filter context.
   is **LaTeX-only**; other non-retired Run-mode commands still require a
   source-guided, explicitly configured command runner. Do not silently
   reinterpret the retired XML/CLSV modes as implemented.
+
+
+### v89 — macOS Recent Files context menu and F4 false-unsaved fix
+
+- Recent Files context clicks now use a priority Tk bindtag before the Text
+  widget's default class bindings, retaining the original right-click fallback.
+  On macOS, secondary mouse click, Button-2 variants, and Control-click are
+  recognized; Shift+F10 is an additional keyboard route. The File → Recent
+  Files menu continues to use the same list and commands.
+- Per-tab last-saved content snapshots distinguish a genuine unsaved edit from
+  delayed Tk `<<Modified>>` notifications. Save and Revert refresh that snapshot;
+  closing a tab releases it. F4 checks actual current text against the saved
+  snapshot rather than trusting a possibly stale modified flag.
+- True unsaved changes still block F4; the compiler never silently uses an
+  outdated disk copy. Existing external-change checks are preserved.
+- Regression additions: GUI save→delayed Modified→F4 path and priority
+  context-click binding checks. Native macOS interaction still requires
+  testing in the user's editor environment.
