@@ -62,7 +62,7 @@ def archive_listing(files, relative, *, enable_extract=False, enable_preview=Fal
                 if enable_preview and size <= MAX_PREVIEW_BYTES:
                     kind = handler_for(filename)["view"]
                     if kind in ("text", "markdown", "structured", "delimited",
-                                "yiddish", "html", "auto"):
+                                "yiddish", "html"):
                         view_href = "/view-entry?" + urlencode(
                             {"path": relative, "member": entry_name})
                         action = '<a href="' + escape(view_href, quote=True) + '">View text</a>'
