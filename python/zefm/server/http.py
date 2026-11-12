@@ -30,7 +30,7 @@ from .html_preview import site_url, site_resource, site_relative_path, HTML_PREV
 from .file_types import handler_for
 from .book_preview import epub_page, djvu_page
 from .archive_preview import archive_listing
-from .archive_extract import member_details, extract_entry
+from .archive_extract import member_details, extract_entry, view_text_member
 from .postscript_preview import postscript_pdf
 from .image_preview import image_preview
 from .text_preview import preview_text
@@ -522,6 +522,20 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                     if not raw_page.isdecimal() or len(raw_page) > 5:
                         raise BrowserError("Invalid DjVu page")
                     self._send(200, djvu_page(files, rel, int(raw_page)), "image/png")
+                elif parsed.path == "/view-entry":
+                    if set(args) != {"path", "member"}:
+                        raise BrowserError("Unexpected archive preview parameters")
+                    member = args["member"]
+                    text = view_text_member(files, rel, member)
+                    back = escape(link("/view", rel), quote=True)
+                    body = (
+                        f'<p><a href="{back}">← Back to archive listing</a></p>'
+                        f'<h2>Archive text member: {escape(member)}</h2>'
+                        '<p>Read-only UTF-8 preview; no file was extracted '
+                        'or executed. Only 1 MiB of text can be previewed.</p>'
+                        f'<pre dir="auto">{escape(text)}</pre>'
+                    )
+                    self._send(200, page("Archive text preview", body))
                 elif parsed.path == "/extract-entry":
                     if set(args) != {"path", "member"}:
                         raise BrowserError("Unexpected archive extraction parameters")
@@ -578,7 +592,7 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                                    {"Content-Disposition": "inline"})
                         return
                     if kind == "archive":
-                        self._send(200, page(rel, archive_listing(files, rel, enable_extract=True)))
+                        self._send(200, page(rel, archive_listing(files, rel, enable_extract=True, enable_preview=True)))
                         return
                     if kind == "image":
                         data = image_preview(files, rel, descriptor["extension"])
