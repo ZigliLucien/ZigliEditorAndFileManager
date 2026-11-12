@@ -155,7 +155,7 @@ def view_text_member(files, relative, member):
         raise BrowserError("Invalid or unreadable archive member", 415) from exc
 
     data = output.getvalue()
-    if b"\\x00" in data:
+    if b"\x00" in data:
         raise BrowserError("Binary archive members cannot be previewed as text", 415)
     try:
         return data.decode("utf-8-sig")
