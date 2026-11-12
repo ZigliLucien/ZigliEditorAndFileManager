@@ -293,3 +293,36 @@ Nothing is extracted just by viewing an archive.
 This replaces the permissive implicit `Xtrax` destination from
 Java with an explicit bounded filesystem transaction. It is
 intentionally not a full-archive extraction feature.
+
+
+## v87 — read-only individual archive member preview (XCommands.runT)
+
+The original Java `NetsManager/XCommands.java:runT` served two
+different archive-member operations: display text from the selected
+ZIP/TAR member, or extract it. v86 implemented deliberate, guarded
+single-member extraction. v87 completes the read-only half.
+
+The browser's ZIP/JAR/TAR listing now offers **View text** for recognized
+text-like entries of at most 1 MiB, alongside the previous **Extract…**
+action. The new `GET /view-entry?path=...&member=...` route loads
+that one member directly from the archive into bounded memory;
+it does not create directories, write a file, or invoke shell tools.
+
+The preview shares the v86 archive source/member validation:
+root-confined archive, safe member path, only ordinary files, no
+duplicate-name ambiguity, no archive symlinks or hard links, at most
+5,000 entries and at most 128 MiB compressed archive. Before and
+during decompression it enforces the 1 MiB output cap, verifies the
+expected byte count and rejects changed archives. Only strict UTF-8
+(or UTF-8 with BOM) without NUL bytes is displayed. All content
+is HTML-escaped and placed inside a non-executable `<pre dir="auto">`
+element, so literal JavaScript, HTML tags, and Yiddish text remain
+safe and readable. Unsupported/binary extensions are not advertised
+as text previews; falsely labeled binary content is still rejected.
+
+The default standalone `archive_listing()` interface remains
+read-only without action links. Browser integration enables the
+new preview and previously implemented extraction separately.
+New tests cover ZIP and TAR, RTL/Unicode, BOM, HTML escaping,
+binary rejection, oversize entries, unsafe member names, duplicates,
+link entries, and HTTP query validation.
