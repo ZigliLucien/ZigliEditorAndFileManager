@@ -48,6 +48,8 @@ class Window:
         self.editor_font=tkfont.Font(root=self.root,**font_options)
         self.views = {}
         self.saved_messages = {}
+        # Disk-synchronized text; a delayed Tk <<Modified>> is not an edit.
+        self.saved_snapshots = {}
         self.disk_signatures = {}
         self.external_dismissals = ExternalChangeDismissals()
         # Tab IDs with unacknowledged external disk revisions; text is untouched.
@@ -141,6 +143,7 @@ class Window:
         editor=TPEditor(self.clipboard,Buffer(text,path))
         self.views[str(frame)] = (widget,editor)
         self.saved_messages[str(frame)] = None
+        self.saved_snapshots[str(frame)] = text
         self.disk_signatures[str(frame)] = disk_signature(path) if path else None
         self.external_dismissals.reset(str(frame))
         self.buffer_modes[str(frame)] = self.mode_registry.detect(path,text)
@@ -153,9 +156,15 @@ class Window:
         widget.bind("<KeyPress>", self._vim_key)
         widget.bind("<Tab>", self._mode_tab)
         widget.bind("<ButtonRelease-1>", lambda event,w=widget:self._status(w))
-        widget.bind("<Button-3>", self._show_recent_files_popup)
+        # Prioritize native context clicks before Tk Text class bindings.
+        popup_tag = "ZefmRecentFilesPopup"
+        if popup_tag not in widget.bindtags():
+            widget.bindtags((popup_tag,) + widget.bindtags())
+        self.root.bind_class(popup_tag, "<Button-3>", self._show_recent_files_popup)
         if sys.platform == "darwin":
-            widget.bind("<Control-Button-1>", self._show_recent_files_popup)
+            self.root.bind_class(popup_tag, "<Button-2>", self._show_recent_files_popup)
+            self.root.bind_class(popup_tag, "<Control-Button-1>", self._show_recent_files_popup)
+        self.root.bind_class(popup_tag, "<Shift-F10>", self._show_recent_files_popup)
         self._status(widget)
         self._refresh_browser_open_paths()
         return widget
@@ -270,11 +279,14 @@ class Window:
                         self.buffer_keymaps.get(tab) == "Yiddish"):
                     self._apply_rtl_alignment(tab)
                     break
-            editor.state.buffer.text=widget.get("1.0","end-1c")
-            editor.state.buffer.modified=True
-            for tab,(w,e) in self.views.items():
+            content = widget.get("1.0", "end-1c")
+            editor.state.buffer.text = content
+            for tab, (w, e) in self.views.items():
                 if w is widget:
-                    self.saved_messages[tab]=None
+                    editor.state.buffer.modified = (
+                        content != self.saved_snapshots.get(tab, content))
+                    if editor.state.buffer.modified:
+                        self.saved_messages[tab] = None
                     break
             widget.edit_modified(False)
             self._update_title(widget,editor)
@@ -407,8 +419,8 @@ class Window:
                 "Open or save a .tex document before using F4 Compile.",
                 parent=self.root)
             return
-        if (editor.state.buffer.modified or
-                widget.get("1.0", "end-1c") != editor.state.buffer.text):
+        content = widget.get("1.0", "end-1c")
+        if content != self.saved_snapshots.get(self.tabs.select(), content):
             messagebox.showwarning("Unsaved LaTeX",
                 "Save the current buffer before compiling. F4 never compiles "
                 "an older disk version while unsaved edits are present.",
@@ -417,6 +429,10 @@ class Window:
         if self._compile_running:
             self.status.set("A LaTeX build is already running")
             return
+        # Normalize stale dirty state left by pending Tk modified events.
+        editor.state.buffer.modified = False
+        editor.state.buffer.text = content
+        self._update_title(widget, editor)
         source = Path(path).expanduser().resolve()
         try:
             if not source.is_file():
@@ -1196,6 +1212,7 @@ class Window:
         self.tabs.forget(tab)
         del self.views[tab]
         self.saved_messages.pop(tab,None)
+        self.saved_snapshots.pop(tab,None)
         self.disk_signatures.pop(tab,None)
         self.external_dismissals.reset(tab)
         self.external_changed_tabs.discard(tab)
@@ -1481,6 +1498,7 @@ class Window:
             widget.delete("1.0","end");widget.insert("1.0",b.text)
             widget.edit_reset();widget.edit_modified(False)
             editor.state.buffer=b
+            self.saved_snapshots[self.tabs.select()] = b.text
             self.disk_signatures[self.tabs.select()]=disk_signature(b.path)
             self.external_dismissals.reset(self.tabs.select())
             self._check_external_changes()
@@ -1621,7 +1639,8 @@ class Window:
             widget.edit_modified(False)
             editor.state.buffer.modified=False
             self._update_title(widget,editor)
-            self.saved_messages[self.tabs.select()]=f"Saved: {Path(path).name}"
+            self.saved_snapshots[current_tab] = editor.state.buffer.text
+            self.saved_messages[current_tab]=f"Saved: {Path(path).name}"
             self._status(widget)
         except (OSError,UnicodeError) as exc:
             self.saved_messages[current_tab]=None
