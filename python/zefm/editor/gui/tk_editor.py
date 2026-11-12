@@ -457,7 +457,7 @@ class Window:
             return
         log = result.get("log", "")
         summary = ("SUCCESS" if result["ok"] else "FAILED")
-        self.new_buffer(text=f"LaTeX build {summary}: {source.name}\\n\\n{log}\\n")
+        self.new_buffer(text=f"LaTeX build {summary}: {source.name}\n\n{log}\n")
         if result["ok"]:
             from ...server.file_manager import LocalFiles
             pdf = LocalFiles(source.parent).resolve(result["pdf"])
