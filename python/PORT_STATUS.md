@@ -637,3 +637,9 @@ listing's directory/page/sort/filter context.
 - Remaining follow-up: LaTeX project root/master document selection,
   bibliography/multiple passes, custom engines and SyncTeX integration.
   Do not claim these are already implemented.
+  The Java `TPEditorX.Compile()` was more general: it selected a mode's
+  `runcommand`, saved the buffer, and either dispatched special handlers
+  (`trax`, `perl`, `clsv`) or ran a configured external command. The new F4
+  is **LaTeX-only**; other non-retired Run-mode commands still require a
+  source-guided, explicitly configured command runner. Do not silently
+  reinterpret the retired XML/CLSV modes as implemented.
