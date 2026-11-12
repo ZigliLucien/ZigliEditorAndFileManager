@@ -1118,6 +1118,8 @@ class Window:
             for item in items:
                 shortcut=item.shortcut
                 shown=shortcut.replace("Ctrl","Cmd") if sys.platform=="darwin" and shortcut else shortcut
+                if sys.platform=="darwin" and item.label=="Compile":
+                    shown = "F4 / Cmd+Shift+B"
                 menu.add_command(label=item.label,accelerator=shown or "",
                                  command=lambda name=item.label:self.action(name))
                 if shortcut and install_editor_shortcut(item.label,sys.platform):
@@ -1192,6 +1194,11 @@ class Window:
         fonts.add_command(label="Toggle Italic",command=lambda:self._set_font_style(slant="roman" if self.editor_font.actual("slant")=="italic" else "italic"))
         bar.add_cascade(label="Fonts",menu=fonts)
         self.root.configure(menu=bar)
+        if sys.platform=="darwin":
+            # macOS may reserve the physical F4 key for system features.
+            # Always offer an ordinary Command shortcut to the same handler.
+            self.root.bind_all("<Command-Shift-B>",
+                               lambda event:self._key(event,"Compile"))
         self.root.bind_all("<Control-n>",lambda e:self._key(e,"New Buffer"))
         self.root.bind_all("<Control-Shift-W>",lambda e:self._key(e,"Close Buffer"))
         if sys.platform=="darwin":
