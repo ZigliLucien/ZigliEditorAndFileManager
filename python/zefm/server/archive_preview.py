@@ -6,13 +6,14 @@ import tarfile
 from urllib.parse import urlencode
 from zipfile import ZipFile, BadZipFile
 from .file_manager import BrowserError
+from .file_types import handler_for
 
 MAX_ARCHIVE_BYTES = 128 * 1024 * 1024
 MAX_MEMBERS = 5000
 DISPLAY_MEMBERS = 500
 
 
-def archive_listing(files, relative, *, enable_extract=False):
+def archive_listing(files, relative, *, enable_extract=False, enable_preview=False):
     path = files.resolve(relative)
     if not path.is_file() or (files.root / relative).is_symlink():
         raise BrowserError("Archive not found", 404)
@@ -45,36 +46,50 @@ def archive_listing(files, relative, *, enable_extract=False):
 
     # Import only when building optional links: the extraction module reuses
     # the member-count/size constants defined above.
-    if enable_extract:
-        from .archive_extract import MAX_EXTRACT_BYTES, _member_name
+    if enable_extract or enable_preview:
+        from .archive_extract import MAX_EXTRACT_BYTES, MAX_PREVIEW_BYTES, _member_name
     counts = Counter(entry[0] for entry in entries)
     rows = []
     for entry_name, size, directory, regular in entries[:DISPLAY_MEMBERS]:
         suffix = "/" if directory and not entry_name.endswith("/") else ""
         action = ""
-        if enable_extract and regular and size <= MAX_EXTRACT_BYTES and counts[entry_name] == 1:
+        if regular and counts[entry_name] == 1 and (enable_extract or enable_preview):
             try:
-                _member_name(entry_name)
+                filename = _member_name(entry_name)
             except BrowserError:
                 pass
             else:
-                href = "/extract-entry?" + urlencode({"path": relative, "member": entry_name})
-                action = '<a href="' + escape(href, quote=True) + '">Extract…</a>'
+                if enable_preview and size <= MAX_PREVIEW_BYTES:
+                    kind = handler_for(filename)["view"]
+                    if kind in ("text", "markdown", "structured", "delimited",
+                                "yiddish", "html", "auto"):
+                        view_href = "/view-entry?" + urlencode(
+                            {"path": relative, "member": entry_name})
+                        action = '<a href="' + escape(view_href, quote=True) + '">View text</a>'
+                if enable_extract and size <= MAX_EXTRACT_BYTES:
+                    href = "/extract-entry?" + urlencode(
+                        {"path": relative, "member": entry_name})
+                    action += (' · ' if action else '') + (
+                        '<a href="' + escape(href, quote=True) + '">Extract…</a>')
         cells = ("<tr><td style='text-align:left'>" + escape(entry_name + suffix) +
                  "</td><td style='text-align:right'>" + str(size) + "</td>")
-        if enable_extract:
+        if enable_extract or enable_preview:
             cells += "<td>" + action + "</td>"
         rows.append(cells + "</tr>")
 
     note = (f"<p>Showing first {DISPLAY_MEMBERS} of {len(entries)} entries.</p>"
             if len(entries) > DISPLAY_MEMBERS else
             f"<p>{len(entries)} entries.</p>")
-    message = ("<p>Select Extract… for one regular file; extraction requires "
-               "confirmation and never overwrites an existing file.</p>"
-               if enable_extract else
-               "<p>Read-only listing; no files are extracted or executed.</p>")
+    if enable_preview:
+        message = ("<p>View text reads small UTF-8 members without extracting; "
+                   "Extract… requires confirmation and never overwrites.</p>")
+    elif enable_extract:
+        message = ("<p>Select Extract… for one regular file; extraction requires "
+                   "confirmation and never overwrites an existing file.</p>")
+    else:
+        message = "<p>Read-only listing; no files are extracted or executed.</p>"
     columns = "<th>Member</th><th>Bytes</th>" + (
-        "<th>Action</th>" if enable_extract else "")
+        "<th>Action</th>" if enable_extract or enable_preview else "")
     return ("<h2>Archive: " + escape(path.name) + "</h2>" +
             message + note + "<table><tr>" + columns + "</tr>" +
             "".join(rows) + "</table>")
