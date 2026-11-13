@@ -15,7 +15,6 @@ import re
 from uuid import uuid4
 from pathlib import Path
 import shutil
-import stat
 import subprocess
 import tempfile
 import time
@@ -266,11 +265,15 @@ def build_pdf(files, relative, *, publish_adjacent=False):
         # No overwrite: atomically publish a new file in the same filesystem.
         # Old PDFs remain accessible and no previous result is mistaken for
         # the current successful compilation.
+        os.link(produced, final, follow_symlinks=False)
         if publish_adjacent and descriptor["build"] == "lualatex":
-            adjacent = _publish_adjacent_pdf(produced, source)
+            try:
+                adjacent = _publish_adjacent_pdf(produced, source)
+            except Exception:
+                final.unlink(missing_ok=True)
+                raise
         else:
             adjacent = None
-        os.link(produced, final, follow_symlinks=False)
         result = {"ok": True, "pdf": files.relative(final), "log": log,
                   "returncode": 0, "elapsed": elapsed}
         if adjacent is not None:
