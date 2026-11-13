@@ -17,6 +17,7 @@ from ...config import load as load_config
 from ..working_directory import WorkingDirectory
 from ..external_changes import disk_signature, changed_on_disk, ExternalChangeDismissals
 from ..recent_files import RecentFiles
+from ..latex_master import resolve_latex_master
 from ..font_settings import read_font, write_font
 from ..language_tools import LANGUAGES, language_dictionary, expand_suffix
 from ..legacy_keymaps import read_keymap,translation
@@ -50,6 +51,7 @@ class Window:
         self.saved_messages = {}
         # Disk-synchronized text; a delayed Tk <<Modified>> is not an edit.
         self.saved_snapshots = {}
+        self.latex_masters = {}  # Explicit per-tab master documents (session-local).
         self.disk_signatures = {}
         self.external_dismissals = ExternalChangeDismissals()
         # Tab IDs with unacknowledged external disk revisions; text is untouched.
@@ -144,6 +146,7 @@ class Window:
         self.views[str(frame)] = (widget,editor)
         self.saved_messages[str(frame)] = None
         self.saved_snapshots[str(frame)] = text
+        self.latex_masters[str(frame)] = None
         self.disk_signatures[str(frame)] = disk_signature(path) if path else None
         self.external_dismissals.reset(str(frame))
         self.buffer_modes[str(frame)] = self.mode_registry.detect(path,text)
@@ -401,6 +404,39 @@ class Window:
         widget.delete("1.0","end");widget.insert("1.0",formatted)
 
 
+    def set_latex_master(self):
+        """Choose a project master for the active .tex buffer (session only)."""
+        widget, editor = self.current()
+        if widget is None or not editor.state.buffer.path:
+            messagebox.showinfo("LaTeX Master", "Open a saved .tex file first.",
+                                parent=self.root)
+            return
+        source = Path(editor.state.buffer.path).expanduser().resolve()
+        if source.suffix.lower() != ".tex":
+            messagebox.showinfo("LaTeX Master", "Select a .tex buffer first.",
+                                parent=self.root)
+            return
+        chosen = filedialog.askopenfilename(
+            parent=self.root, title="Select LaTeX master document",
+            initialdir=str(source.parent),
+            filetypes=[("LaTeX documents", "*.tex"), ("All files", "*")])
+        if not chosen:
+            return
+        try:
+            master = resolve_latex_master(source, "", chosen)
+        except ValueError as exc:
+            messagebox.showerror("LaTeX Master", str(exc), parent=self.root)
+            return
+        self.latex_masters[self.tabs.select()] = master
+        self.status.set(f"LaTeX master for {source.name}: {master}")
+
+    def clear_latex_master(self):
+        """Return to the source file or its % !TEX root directive."""
+        tab = self.tabs.select()
+        if tab:
+            self.latex_masters[tab] = None
+            self.status.set("Explicit LaTeX master cleared")
+
     def compile_latex(self):
         """F4: compile a saved .tex buffer using the existing browser PDF builder.
 
@@ -435,13 +471,26 @@ class Window:
         editor.state.buffer.modified = False
         editor.state.buffer.text = content
         self._update_title(widget, editor)
-        source = Path(path).expanduser().resolve()
+        current_source = Path(path).expanduser().resolve()
         try:
-            if not source.is_file():
+            if not current_source.is_file():
                 raise OSError("LaTeX source is missing")
-            if changed_on_disk(source, self.disk_signatures.get(self.tabs.select())):
+            if changed_on_disk(current_source, self.disk_signatures.get(self.tabs.select())):
                 raise OSError("Source changed on disk; reload or save before compiling")
-        except OSError as exc:
+            source = resolve_latex_master(
+                current_source, content, self.latex_masters.get(self.tabs.select()))
+            # A master opened elsewhere in the editor must be saved before
+            # starting an external compile; never use an older disk version.
+            for tab, (other_widget, other_editor) in self.views.items():
+                other_path = other_editor.state.buffer.path
+                if other_path and Path(other_path).expanduser().resolve() == source:
+                    current_text = other_widget.get("1.0", "end-1c")
+                    if current_text != self.saved_snapshots.get(tab, current_text):
+                        raise ValueError("Save the LaTeX master buffer before compiling")
+                    if changed_on_disk(source, self.disk_signatures.get(tab)):
+                        raise ValueError("LaTeX master changed on disk; reload or save it")
+                    break
+        except (OSError, ValueError) as exc:
             messagebox.showerror("Compile LaTeX", str(exc), parent=self.root)
             return
 
@@ -1133,6 +1182,12 @@ class Window:
                     if sys.platform=="darwin" and shortcut.startswith("Ctrl+"):
                         mac="<"+"-".join(["Command"]+modifiers[1:]+[key])+">"
                         self.root.bind_all(mac,lambda event,name=item.label:self._key(event,name))
+            if group == "Run":
+                menu.add_separator()
+                menu.add_command(label="Set LaTeX Master...",
+                                 command=self.set_latex_master)
+                menu.add_command(label="Clear LaTeX Master",
+                                 command=self.clear_latex_master)
             bar.add_cascade(label=group,menu=menu)
         mode_menu=tk.Menu(bar,tearoff=False)
         mode_menu.add_command(label="Select Buffer Mode...",command=self.select_buffer_mode)
@@ -1222,6 +1277,7 @@ class Window:
         del self.views[tab]
         self.saved_messages.pop(tab,None)
         self.saved_snapshots.pop(tab,None)
+        self.latex_masters.pop(tab,None)
         self.disk_signatures.pop(tab,None)
         self.external_dismissals.reset(tab)
         self.external_changed_tabs.discard(tab)
