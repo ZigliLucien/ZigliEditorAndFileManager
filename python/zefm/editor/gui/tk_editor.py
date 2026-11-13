@@ -18,6 +18,7 @@ from ..working_directory import WorkingDirectory
 from ..external_changes import disk_signature, changed_on_disk, ExternalChangeDismissals
 from ..recent_files import RecentFiles
 from ..latex_master import resolve_latex_master
+from ..latex_master_preferences import LatexMasterPreferences
 from ..font_settings import read_font, write_font
 from ..language_tools import LANGUAGES, language_dictionary, expand_suffix
 from ..legacy_keymaps import read_keymap,translation
@@ -51,7 +52,8 @@ class Window:
         self.saved_messages = {}
         # Disk-synchronized text; a delayed Tk <<Modified>> is not an edit.
         self.saved_snapshots = {}
-        self.latex_masters = {}  # Explicit per-tab master documents (session-local).
+        self.latex_masters = {}  # Per-tab overrides loaded from local preferences.
+        self.latex_master_preferences = LatexMasterPreferences()
         self.disk_signatures = {}
         self.external_dismissals = ExternalChangeDismissals()
         # Tab IDs with unacknowledged external disk revisions; text is untouched.
@@ -146,7 +148,8 @@ class Window:
         self.views[str(frame)] = (widget,editor)
         self.saved_messages[str(frame)] = None
         self.saved_snapshots[str(frame)] = text
-        self.latex_masters[str(frame)] = None
+        self.latex_masters[str(frame)] = (
+            self.latex_master_preferences.get(path) if path else None)
         self.disk_signatures[str(frame)] = disk_signature(path) if path else None
         self.external_dismissals.reset(str(frame))
         self.buffer_modes[str(frame)] = self.mode_registry.detect(path,text)
@@ -427,16 +430,31 @@ class Window:
         except ValueError as exc:
             messagebox.showerror("LaTeX Master", str(exc), parent=self.root)
             return
+        try:
+            master = self.latex_master_preferences.set(source, master)
+        except (OSError, ValueError) as exc:
+            messagebox.showerror("LaTeX Master", f"Could not save master selection: {exc}",
+                                 parent=self.root)
+            return
         self.latex_masters[self.tabs.select()] = master
-        self.status.set(f"LaTeX master for {source.name}: {master}")
+        self.status.set(f"LaTeX master for {source.name}: {master} (remembered)")
 
     def clear_latex_master(self):
         """Return to the source file or its % !TEX root directive."""
         tab = self.tabs.select()
         if tab:
+            _widget, editor = self.current()
+            source = editor.state.buffer.path
+            if source:
+                try:
+                    self.latex_master_preferences.clear(source)
+                except OSError as exc:
+                    messagebox.showerror("LaTeX Master",
+                                         f"Could not clear saved selection: {exc}",
+                                         parent=self.root)
+                    return
             self.latex_masters[tab] = None
             self.status.set("Explicit LaTeX master cleared")
-
     def compile_latex(self):
         """F4: compile a saved .tex buffer using the existing browser PDF builder.
 
@@ -1705,6 +1723,10 @@ class Window:
             editor.state.buffer.modified=False
             self._update_title(widget,editor)
             self.saved_snapshots[current_tab] = editor.state.buffer.text
+            if not same_path:
+                # Save As changes the source identity. Reload only a preference
+                # associated with the new path, not the previous file's master.
+                self.latex_masters[current_tab] = self.latex_master_preferences.get(path)
             self.saved_messages[current_tab]=f"Saved: {Path(path).name}"
             self._status(widget)
         except (OSError,UnicodeError) as exc:
