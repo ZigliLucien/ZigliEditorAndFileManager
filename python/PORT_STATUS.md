@@ -701,3 +701,24 @@ listing's directory/page/sort/filter context.
   `TPEditorX.Compile()` also supported general runcommands beyond TeX;
   this remains on the feature-parity checklist. Multi-file bibliography
   projects should be tested on Linux and Mac with real TeX installations.
+
+
+### v92 — fresh PDF per successful compilation (Mac/browser cache)
+
+- Each successful PDF build now publishes a unique filename in the existing
+  source-local `.zefm-build` directory; the previous stable source-hash
+  filename could cause the browser's built-in PDF viewer to show a cached
+  result even after a successful recompile.
+- Fresh filenames are produced by both editor F4 / Run → Compile and the
+  browser builder. The editor opens the new file URL following success.
+- A no-clobber hard-link publication leaves earlier successful PDFs intact.
+  Failed builds still publish no new PDF. This intentionally produces
+  multiple generated PDFs until an explicit cleanup/retention policy is
+  implemented.
+- Regression test `test_repeated_tex_builds_publish_distinct_pdf_paths`
+  checks two consecutive builds produce separate paths and preserve both
+  results. Existing TeX builder mocks were aligned with the v91 shared
+  multi-pass runner.
+- GUI/manual verification remains necessary on Mac and Linux. If the PDF
+  still shows stale material, inspect the new PDF's path and the build log
+  before changing TeX inputs or browser configuration.
