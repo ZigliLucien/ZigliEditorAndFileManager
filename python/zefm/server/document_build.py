@@ -15,6 +15,7 @@ import re
 from uuid import uuid4
 from pathlib import Path
 import shutil
+import stat
 import subprocess
 import tempfile
 import time
@@ -158,11 +159,48 @@ def _command(source, output_dir, descriptor):
     raise BrowserError("File type cannot be built", 415)
 
 
-def build_pdf(files, relative):
+def _publish_adjacent_pdf(produced: Path, source: Path) -> Path:
+    """Atomically update source.with_suffix('.pdf') after a verified build.
+
+    The desktop Compile command intentionally updates the conventional
+    TeX output, unlike browser builds, which retain their isolated previews.
+    Refuse symlinks and nonregular targets rather than following them.
+    """
+    destination = source.with_suffix(".pdf")
+    if destination.is_symlink() or (
+            destination.exists() and not destination.is_file()):
+        raise BrowserError("PDF destination must be a regular file, not a link or directory", 409)
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(
+                prefix=".zefm-pdf-", suffix=".tmp", dir=source.parent,
+                delete=False) as out:
+            temporary = Path(out.name)
+            with produced.open("rb") as incoming:
+                shutil.copyfileobj(incoming, out)
+            out.flush()
+            os.fsync(out.fileno())
+        # Recheck immediately before publication; os.replace never follows
+        # a destination symlink, but we also avoid replacing a named link.
+        if destination.is_symlink() or (
+                destination.exists() and not destination.is_file()):
+            raise BrowserError("PDF destination changed to an unsafe file", 409)
+        os.replace(temporary, destination)
+        return destination
+    except OSError as exc:
+        raise BrowserError(f"Could not update {destination.name}: {exc}", 500) from exc
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+
+
+def build_pdf(files, relative, *, publish_adjacent=False):
     """Compile to a new PDF, returning its root-relative path and log.
 
     Builds are deliberately performed in a new temporary directory. A PDF
     already present from a previous build never counts as a successful result.
+    The desktop editor explicitly requests publish_adjacent=True to refresh
+    the ordinary source-name PDF after a successful and validated build.
     """
     source, descriptor = checked_source(files, relative, for_build=True)
     output_base = source.parent / ".zefm-build"
@@ -228,8 +266,15 @@ def build_pdf(files, relative):
         # No overwrite: atomically publish a new file in the same filesystem.
         # Old PDFs remain accessible and no previous result is mistaken for
         # the current successful compilation.
+        if publish_adjacent and descriptor["build"] == "lualatex":
+            adjacent = _publish_adjacent_pdf(produced, source)
+        else:
+            adjacent = None
         os.link(produced, final, follow_symlinks=False)
-        return {"ok": True, "pdf": files.relative(final), "log": log,
-                "returncode": 0, "elapsed": elapsed}
+        result = {"ok": True, "pdf": files.relative(final), "log": log,
+                  "returncode": 0, "elapsed": elapsed}
+        if adjacent is not None:
+            result["output_pdf"] = files.relative(adjacent)
+        return result
     finally:
         shutil.rmtree(temporary, ignore_errors=True)
