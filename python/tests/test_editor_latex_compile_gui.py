@@ -101,7 +101,7 @@ class CompileLatexGuiTests(unittest.TestCase):
         root_source = Path(self.temp.name) / "main.tex"
         root_source.write_text("main", encoding="utf-8")
         self.app.current()[0].insert(
-            "1.0", "% !TEX root = main.tex\\n")
+            "1.0", "% !TEX root = main.tex\n")
         self.root.update()
         self.app.save_file()
         self.root.update()
