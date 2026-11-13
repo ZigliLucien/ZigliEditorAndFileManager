@@ -110,7 +110,7 @@ class BuildModelTests(unittest.TestCase):
                 stderr = ""
             return Result()
         with patch("zefm.server.document_build.shutil.which", return_value="/usr/bin/lualatex"), \
-             patch("zefm.server.document_build.subprocess.run", side_effect=fake_run):
+             patch("zefm.server.latex_sequence.subprocess.run", side_effect=fake_run):
             result = build_pdf(self.files, "paper.tex")
         self.assertTrue(result["ok"])
         self.assertIn("compiled", result["log"])
@@ -152,7 +152,7 @@ class BuildModelTests(unittest.TestCase):
             stdout = "! Undefined control sequence"
             stderr = "compile failed"
         with patch("zefm.server.document_build.shutil.which", return_value="/usr/bin/lualatex"), \
-             patch("zefm.server.document_build.subprocess.run", return_value=Result()):
+             patch("zefm.server.latex_sequence.subprocess.run", return_value=Result()):
             result = build_pdf(self.files, "paper.tex")
         self.assertFalse(result["ok"])
         self.assertNotIn("pdf", result)
