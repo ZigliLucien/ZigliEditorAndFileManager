@@ -65,26 +65,26 @@ def run_tex_sequence(command: list[str], source: Path, directory: Path,
             raise RuntimeError(f"{label} timed out after {timeout} seconds") from exc
         except OSError as exc:
             raise RuntimeError(f"Could not launch {label}: {exc}") from exc
-        logs.append(f"=== {label} (exit {proc.returncode}) ===\\n"
-                    + (proc.stdout or "") + "\\n" + (proc.stderr or ""))
+        logs.append(f"=== {label} (exit {proc.returncode}) ===\n"
+                    + (proc.stdout or "") + "\n" + (proc.stderr or ""))
         return proc.returncode
 
     rc = run(command, source.parent, "LuaLaTeX pass 1")
     if rc:
-        return rc, "\\n".join(logs)[-MAX_LOG:], round(time.monotonic()-started, 2)
+        return rc, "\n".join(logs)[-MAX_LOG:], round(time.monotonic()-started, 2)
     tool = bibliography_tool(directory, source.stem)
     extra = 0
     if tool:
         try:
             argv = _bibliography_argv(tool, directory, source.stem)
         except RuntimeError as exc:
-            return 127, ("\\n".join(logs) + "\\n" + str(exc))[-MAX_LOG:], round(time.monotonic()-started, 2)
+            return 127, ("\n".join(logs) + "\n" + str(exc))[-MAX_LOG:], round(time.monotonic()-started, 2)
         rc = run(argv, directory if tool == "bibtex" else source.parent, tool)
         if rc:
-            return rc, "\\n".join(logs)[-MAX_LOG:], round(time.monotonic()-started, 2)
+            return rc, "\n".join(logs)[-MAX_LOG:], round(time.monotonic()-started, 2)
         extra = 1
     for n in range(2, passes + extra + 1):
         rc = run(command, source.parent, f"LuaLaTeX pass {n}")
         if rc:
-            return rc, "\\n".join(logs)[-MAX_LOG:], round(time.monotonic()-started, 2)
-    return 0, "\\n".join(logs)[-MAX_LOG:], round(time.monotonic()-started, 2)
+            return rc, "\n".join(logs)[-MAX_LOG:], round(time.monotonic()-started, 2)
+    return 0, "\n".join(logs)[-MAX_LOG:], round(time.monotonic()-started, 2)
