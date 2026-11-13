@@ -451,7 +451,7 @@ class Window:
         def worker():
             try:
                 files = LocalFiles(source.parent)
-                result = build_pdf(files, source.name)
+                result = build_pdf(files, source.name, publish_adjacent=True)
                 payload = (source, result, None)
             except Exception as exc:
                 payload = (source, None, str(exc))
@@ -479,7 +479,7 @@ class Window:
         if result["ok"]:
             from ...server.file_manager import LocalFiles
             pdf = LocalFiles(source.parent).resolve(result["pdf"])
-            self.status.set(f"LaTeX PDF built: {pdf.name}")
+            self.status.set(f"LaTeX PDF updated: {result.get('output_pdf', pdf.name)}")
             webbrowser.open(pdf.as_uri())
         else:
             self.status.set(f"LaTeX failed (exit {result.get('returncode', '?')}); see build log")
