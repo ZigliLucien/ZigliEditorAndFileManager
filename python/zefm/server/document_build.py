@@ -23,6 +23,7 @@ from .file_manager import BrowserError
 from .file_types import handler_for
 from .math_presentation import format_math_html
 from .mathjax_filter import inject_mathjax
+from .latex_sequence import run_tex_sequence
 
 MAX_SOURCE_BYTES = 2 * 1024 * 1024
 MAX_PDF_BYTES = 128 * 1024 * 1024
@@ -185,23 +186,31 @@ def build_pdf(files, relative):
             (temporary / "document.html").write_text(format_math_html(html), encoding="utf-8")
         command = _command(source, temporary, descriptor)
         started = time.monotonic()
-        try:
-            process = subprocess.run(command, cwd=source.parent,
-                                     capture_output=True, text=True,
-                                     errors="replace", timeout=BUILD_TIMEOUT,
-                                     check=False, stdin=subprocess.DEVNULL)
-        except subprocess.TimeoutExpired as exc:
-            raise BrowserError("PDF compilation exceeded 45 seconds", 408) from exc
-        except OSError as exc:
-            raise BrowserError(f"Could not launch PDF engine: {exc}", 503) from exc
-        log = ((process.stdout or "") + "\n" + (process.stderr or ""))[-MAX_OUTPUT:]
+        if descriptor["build"] == "lualatex":
+            # Both desktop F4 and browser Compile use the same bounded
+            # multi-pass pipeline, including bibliography when detected.
+            rc, log, elapsed = run_tex_sequence(
+                command, source, temporary, timeout=BUILD_TIMEOUT)
+        else:
+            try:
+                process = subprocess.run(command, cwd=source.parent,
+                                         capture_output=True, text=True,
+                                         errors="replace", timeout=BUILD_TIMEOUT,
+                                         check=False, stdin=subprocess.DEVNULL)
+            except subprocess.TimeoutExpired as exc:
+                raise BrowserError("PDF compilation exceeded 45 seconds", 408) from exc
+            except OSError as exc:
+                raise BrowserError(f"Could not launch PDF engine: {exc}", 503) from exc
+            rc = process.returncode
+            log = ((process.stdout or "") + "\n" + (process.stderr or ""))[-MAX_OUTPUT:]
+            elapsed = round(time.monotonic() - started, 2)
         if descriptor["build"] == "lualatex":
             produced = temporary / (source.stem + ".pdf")
         else:
             produced = temporary / "document.pdf"
-        if process.returncode != 0:
-            return {"ok": False, "log": log, "returncode": process.returncode,
-                    "elapsed": round(time.monotonic() - started, 2)}
+        if rc != 0:
+            return {"ok": False, "log": log, "returncode": rc,
+                    "elapsed": elapsed}
         if not produced.is_file() or produced.is_symlink():
             return {"ok": False, "log": log + "\nNo PDF was produced.", "returncode": 0}
         if produced.stat().st_size > MAX_PDF_BYTES or produced.read_bytes()[:5] != b"%PDF-":
@@ -215,6 +224,6 @@ def build_pdf(files, relative):
             raise BrowserError("Build output destination is a symlink", 409)
         produced.replace(final)
         return {"ok": True, "pdf": files.relative(final), "log": log,
-                "returncode": 0, "elapsed": round(time.monotonic() - started, 2)}
+                "returncode": 0, "elapsed": elapsed}
     finally:
         shutil.rmtree(temporary, ignore_errors=True)
