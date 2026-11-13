@@ -769,3 +769,26 @@ listing's directory/page/sort/filter context.
   `latexmk` selection, configurable non-TeX runcommands inherited from
   Java `TPEditorX.Compile()`, diagnostics-to-source navigation and SyncTeX.
   This release does not claim those items implemented.
+
+
+### v95 — persistent LaTeX master selections
+
+- Explicit **Run → Set LaTeX Master...** selections now persist across editor
+  restarts, indexed by the canonical source `.tex` filename. The mapping
+  is private local state in `~/.config/zefm/latex_masters.json`, UTF-8 JSON,
+  not part of the repository or any project file.
+- Reopening a source buffer automatically restores its saved explicit
+  master, which takes precedence over a `% !TEX root = ...` comment.
+  **Run → Clear LaTeX Master** removes the saved override and returns to
+  the source's directive, or to single-file compilation.
+- Save As intentionally switches to the preference belonging to the new
+  pathname; it does not silently transfer the old file's master setting.
+- Preferences are validated, length-bounded and written via a uniquely named
+  temporary file and atomic replacement. Invalid/corrupt JSON is ignored.
+  A deleted master is reported at compile time rather than silently falling
+  back to a different document.
+- Regression tests in `tests.test_latex_master_preferences` cover Unicode,
+  reopening, clearing, independent source files, directive precedence,
+  corruption and missing masters.
+- The existing source-guided migration checklist still includes general
+  Java Run commands, engine selection, compile log navigation and SyncTeX.
