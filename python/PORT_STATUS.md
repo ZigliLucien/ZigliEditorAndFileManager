@@ -722,3 +722,26 @@ listing's directory/page/sort/filter context.
 - GUI/manual verification remains necessary on Mac and Linux. If the PDF
   still shows stale material, inspect the new PDF's path and the build log
   before changing TeX inputs or browser configuration.
+
+
+### v93 — desktop Compile updates the conventional filename.pdf
+
+- Clarified the v92 behavior following a Mac report: unique PDFs in
+  `.zefm-build` fixed browser staleness, but did **not** update
+  `filename.pdf` alongside `filename.tex`. That was a separate defect.
+- The desktop Run → Compile action now requests
+  `build_pdf(..., publish_adjacent=True)`. After a successful validated
+  LuaLaTeX build, `filename.pdf` is atomically replaced in the source
+  directory, and the status line identifies that output.
+- A uniquely named preview also remains in `.zefm-build`, and that is the
+  URL opened in the browser to avoid stale PDF cache. Browser-triggered
+  compilation continues to use its original isolated output behavior and
+  does not replace the adjacent document.
+- Existing regular PDFs are updated only following successful builds.
+  Existing symlinks and nonregular destination paths are refused. Publication
+  stages the PDF in the source directory and performs an atomic replacement;
+  failed compilation never modifies the existing conventional PDF.
+- Added regression coverage for adjacent replacement, isolated browser
+  builds, symlinks and failed compilations.
+- This does not yet provide selectable output directories, LaTeX master-file
+  selection, or automatic cleanup of old unique preview PDFs.
