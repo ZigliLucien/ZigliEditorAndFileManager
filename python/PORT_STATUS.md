@@ -745,3 +745,27 @@ listing's directory/page/sort/filter context.
   builds, symlinks and failed compilations.
 - This does not yet provide selectable output directories, LaTeX master-file
   selection, or automatic cleanup of old unique preview PDFs.
+
+
+### v94 — explicit LaTeX master document and TeX root directive
+
+- The Run menu now offers **Set LaTeX Master...** and **Clear LaTeX
+  Master** in addition to the historical F4 Compile action. The chosen
+  master is stored for the current editor tab for the session only.
+- Alternatively, a section/subdocument can start with
+  `% !TEX root = ../main.tex`. The directive is recognized among the
+  first 20 lines, relative to the subdocument's parent directory.
+  An explicit Run-menu master overrides this comment. When neither is
+  given the existing single-file compile behavior is unchanged.
+- A missing master, non-`.tex` master or symbolic-link master is refused.
+  When the master is open in another tab, compiling its older disk copy is
+  blocked if that buffer has unsaved edits or changed on disk.
+- The selected master uses the existing browser/editor LuaLaTeX builder,
+  bibliography passes, fresh preview and **adjacent master.pdf update**.
+  The section file remains the selected editor buffer and is not replaced.
+- Tests: `tests.test_latex_master` and additions to
+  `tests.test_editor_latex_compile_gui`.
+- **Remaining parity work:** persistent per-project master configuration,
+  `latexmk` selection, configurable non-TeX runcommands inherited from
+  Java `TPEditorX.Compile()`, diagnostics-to-source navigation and SyncTeX.
+  This release does not claim those items implemented.
