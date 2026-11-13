@@ -97,6 +97,54 @@ class CompileLatexGuiTests(unittest.TestCase):
         self.assertTrue(self.root.bind_all("<Command-Shift-B>"))
         self.assertTrue(self.root.bind_all("<F4>"))
 
+    def test_magic_comment_compiles_project_master_not_section(self):
+        root_source = Path(self.temp.name) / "main.tex"
+        root_source.write_text("main", encoding="utf-8")
+        self.app.current()[0].insert(
+            "1.0", "% !TEX root = main.tex\\n")
+        self.root.update()
+        self.app.save_file()
+        self.root.update()
+        pdf = Path(self.temp.name) / ".zefm-build" / "main-preview.pdf"
+        pdf.parent.mkdir(exist_ok=True)
+        pdf.write_bytes(b"%PDF-1.7\\n")
+        with patch("zefm.editor.gui.tk_editor.webbrowser.open"):
+            build = self._compile_synchronously(
+                {"ok": True, "pdf": ".zefm-build/main-preview.pdf",
+                 "output_pdf": "main.pdf", "log": "ok", "returncode": 0})
+        self.assertEqual(build.call_args.args[1], "main.tex")
+        self.assertTrue(build.call_args.kwargs["publish_adjacent"])
+
+    def test_explicit_master_overrides_directive(self):
+        alternate = Path(self.temp.name) / "alternate.tex"
+        alternate.write_text("alternate", encoding="utf-8")
+        self.app.latex_masters[self.app.tabs.select()] = alternate
+        pdf = Path(self.temp.name) / ".zefm-build" / "alternate-preview.pdf"
+        pdf.parent.mkdir(exist_ok=True)
+        pdf.write_bytes(b"%PDF-1.7\\n")
+        with patch("zefm.editor.gui.tk_editor.webbrowser.open"):
+            build = self._compile_synchronously(
+                {"ok": True, "pdf": ".zefm-build/alternate-preview.pdf",
+                 "log": "ok", "returncode": 0})
+        self.assertEqual(build.call_args.args[1], "alternate.tex")
+
+    def test_dirty_open_master_is_not_compiled(self):
+        master = Path(self.temp.name) / "main.tex"
+        master.write_text("main", encoding="utf-8")
+        self.app.latex_masters[self.app.tabs.select()] = master
+        section_tab = self.app.tabs.select()
+        self.app._open_path(master)
+        self.app.current()[0].insert("end", " unsaved")
+        self.root.update()
+        self.app.tabs.select(section_tab)
+        self.root.update()
+        with patch("zefm.server.document_build.build_pdf") as build, \
+             patch("zefm.editor.gui.tk_editor.messagebox.showerror") as error:
+            self.app.action("Compile")
+        build.assert_not_called()
+        error.assert_called_once()
+        self.assertIn("Save the LaTeX master", error.call_args.args[1])
+
     def test_unsaved_buffer_is_not_compiled(self):
         widget, _ = self.app.current()
         widget.insert("end", "new unsaved text")
