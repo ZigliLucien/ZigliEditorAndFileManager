@@ -676,3 +676,28 @@ listing's directory/page/sort/filter context.
 - Added focused regression cases for native macOS shortcut registration and
   MacTeX command lookup. A real Mac run is still required to tell whether
   a physical F4 press, the environment, or a build error caused the report.
+
+
+### v91 — multi-pass LuaLaTeX and automatic bibliography processing
+
+- Extended the existing `document_build.build_pdf` entry point used by
+  both desktop F4 and browser Compile, rather than duplicating the runner.
+- Default TeX compilation now runs two LuaLaTeX passes for references.
+  After the first successful pass, a generated `.bcf` selects Biber or a
+  generated `.aux` containing `\\bibdata{` selects BibTeX. Successful
+  bibliography processing triggers a third LuaLaTeX pass. No bibliography
+  metadata means no bibliography tool is invoked.
+- All commands are argv-based without shell execution; each subprocess has
+  an explicit timeout and captured log. BibTeX input search includes the
+  source directory. A missing bibliography tool or failed pass stops the
+  sequence. The existing fresh-build output validation still prevents opening
+  a stale PDF as a successful new build.
+- `tests/test_latex_sequence.py` covers plain two-pass builds, BibTeX,
+  Biber priority, missing tools, error short circuiting, timeouts and
+  generated-metadata detection. Existing `test_document_build.py` continues
+  to verify browser behavior, output validation and LuaLaTeX argv.
+- **Still outstanding**: selecting a master file for a subdocument, explicit
+  command configuration, `latexmk`, and SyncTeX navigation. Legacy
+  `TPEditorX.Compile()` also supported general runcommands beyond TeX;
+  this remains on the feature-parity checklist. Multi-file bibliography
+  projects should be tested on Linux and Mac with real TeX installations.
