@@ -117,6 +117,35 @@ class BuildModelTests(unittest.TestCase):
         self.assertTrue((self.root / result["pdf"]).is_file())
         self.assertTrue(result["pdf"].endswith(".pdf"))
 
+    def test_repeated_tex_builds_publish_distinct_pdf_paths(self):
+        # The old stable path was overwritten, leaving the Mac's PDF viewer
+        # displaying a cached copy. Each successful build needs a fresh URL.
+        count = [0]
+        def fake_run(command, **kwargs):
+            count[0] += 1
+            directory = next(value.split("=", 1)[1] for value in command
+                             if value.startswith("-output-directory="))
+            (Path(directory) / "paper.pdf").write_bytes(
+                b"%PDF-1.7\\n" + str(count[0]).encode())
+            class Result:
+                returncode = 0
+                stdout = "compiled"
+                stderr = ""
+            return Result()
+        with patch("zefm.server.document_build.shutil.which",
+                   return_value="/usr/bin/lualatex"), \
+             patch("zefm.server.latex_sequence.subprocess.run",
+                   side_effect=fake_run):
+            first = build_pdf(self.files, "paper.tex")
+            second = build_pdf(self.files, "paper.tex")
+        self.assertTrue(first["ok"])
+        self.assertTrue(second["ok"])
+        self.assertNotEqual(first["pdf"], second["pdf"])
+        self.assertTrue((self.root / first["pdf"]).is_file())
+        self.assertTrue((self.root / second["pdf"]).is_file())
+        self.assertNotEqual((self.root / first["pdf"]).read_bytes(),
+                            (self.root / second["pdf"]).read_bytes())
+
     def test_build_failure_does_not_open_stale_pdf(self):
         class Result:
             returncode = 1
