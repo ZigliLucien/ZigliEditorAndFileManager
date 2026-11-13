@@ -219,10 +219,16 @@ def build_pdf(files, relative):
         # Never overwrite an existing user file: output_base is dedicated
         # to ZEFM-generated files only.
         digest = hashlib.sha256(str(source).encode("utf-8")).hexdigest()[:12]
-        final = output_base / (source.name + "-" + digest + ".pdf")
-        if final.is_symlink():
-            raise BrowserError("Build output destination is a symlink", 409)
-        produced.replace(final)
+        # A fresh URL for every build prevents browsers (especially native
+        # PDF viewers handling file:// URLs) from showing a cached old PDF.
+        # The source digest keeps names identifiable; the nonce identifies
+        # this particular compilation.
+        final = output_base / (
+            source.name + "-" + digest + "-" + uuid4().hex + ".pdf")
+        # No overwrite: atomically publish a new file in the same filesystem.
+        # Old PDFs remain accessible and no previous result is mistaken for
+        # the current successful compilation.
+        os.link(produced, final, follow_symlinks=False)
         return {"ok": True, "pdf": files.relative(final), "log": log,
                 "returncode": 0, "elapsed": elapsed}
     finally:
