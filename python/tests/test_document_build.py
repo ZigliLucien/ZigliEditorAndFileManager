@@ -146,6 +146,83 @@ class BuildModelTests(unittest.TestCase):
         self.assertNotEqual((self.root / first["pdf"]).read_bytes(),
                             (self.root / second["pdf"]).read_bytes())
 
+    def test_editor_build_updates_adjacent_pdf_atomically(self):
+        adjacent = self.root / "paper.pdf"
+        adjacent.write_bytes(b"%PDF-1.7\\nold")
+        def fake_run(command, **kwargs):
+            directory = next(value.split("=", 1)[1] for value in command
+                             if value.startswith("-output-directory="))
+            (Path(directory) / "paper.pdf").write_bytes(b"%PDF-1.7\\nnew")
+            class Result:
+                returncode = 0
+                stdout = "compiled"
+                stderr = ""
+            return Result()
+        with patch("zefm.server.document_build.shutil.which",
+                   return_value="/usr/bin/lualatex"), \
+             patch("zefm.server.latex_sequence.subprocess.run", side_effect=fake_run):
+            result = build_pdf(self.files, "paper.tex", publish_adjacent=True)
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["output_pdf"], "paper.pdf")
+        self.assertEqual(adjacent.read_bytes(), b"%PDF-1.7\\nnew")
+        self.assertNotEqual(result["pdf"], "paper.pdf")
+        self.assertTrue((self.root / result["pdf"]).exists())
+
+    def test_browser_build_does_not_replace_adjacent_pdf(self):
+        adjacent = self.root / "paper.pdf"
+        adjacent.write_bytes(b"%PDF-1.7\\nkeep")
+        def fake_run(command, **kwargs):
+            directory = next(value.split("=", 1)[1] for value in command
+                             if value.startswith("-output-directory="))
+            (Path(directory) / "paper.pdf").write_bytes(b"%PDF-1.7\\nbuilt")
+            class Result:
+                returncode = 0
+                stdout = "compiled"
+                stderr = ""
+            return Result()
+        with patch("zefm.server.document_build.shutil.which",
+                   return_value="/usr/bin/lualatex"), \
+             patch("zefm.server.latex_sequence.subprocess.run", side_effect=fake_run):
+            result = build_pdf(self.files, "paper.tex")
+        self.assertTrue(result["ok"])
+        self.assertNotIn("output_pdf", result)
+        self.assertEqual(adjacent.read_bytes(), b"%PDF-1.7\\nkeep")
+
+    def test_editor_build_refuses_pdf_symlink(self):
+        adjacent = self.root / "paper.pdf"
+        outside = self.root / "outside.pdf"
+        outside.write_bytes(b"%PDF-1.7\\nkeep")
+        adjacent.symlink_to(outside)
+        def fake_run(command, **kwargs):
+            directory = next(value.split("=", 1)[1] for value in command
+                             if value.startswith("-output-directory="))
+            (Path(directory) / "paper.pdf").write_bytes(b"%PDF-1.7\\nnew")
+            class Result:
+                returncode = 0
+                stdout = ""
+                stderr = ""
+            return Result()
+        with patch("zefm.server.document_build.shutil.which",
+                   return_value="/usr/bin/lualatex"), \
+             patch("zefm.server.latex_sequence.subprocess.run", side_effect=fake_run):
+            with self.assertRaises(BrowserError):
+                build_pdf(self.files, "paper.tex", publish_adjacent=True)
+        self.assertEqual(outside.read_bytes(), b"%PDF-1.7\\nkeep")
+
+    def test_failed_editor_build_leaves_existing_pdf_unchanged(self):
+        adjacent = self.root / "paper.pdf"
+        adjacent.write_bytes(b"%PDF-1.7\\nold")
+        class Result:
+            returncode = 1
+            stdout = "! error"
+            stderr = ""
+        with patch("zefm.server.document_build.shutil.which",
+                   return_value="/usr/bin/lualatex"), \
+             patch("zefm.server.latex_sequence.subprocess.run", return_value=Result()):
+            result = build_pdf(self.files, "paper.tex", publish_adjacent=True)
+        self.assertFalse(result["ok"])
+        self.assertEqual(adjacent.read_bytes(), b"%PDF-1.7\\nold")
+
     def test_build_failure_does_not_open_stale_pdf(self):
         class Result:
             returncode = 1
