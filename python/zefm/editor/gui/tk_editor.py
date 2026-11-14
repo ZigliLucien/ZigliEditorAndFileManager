@@ -21,6 +21,7 @@ from ..latex_master import resolve_latex_master
 from ..latex_master_preferences import LatexMasterPreferences
 from ..latex_diagnostics import parse_latex_errors
 from ..synctex_forward import synctex_page, pdf_page_uri
+from ..pdf_viewer import PdfViewerPreference, launch_okular
 from ..run_commands import RunCommands, execute_command
 from ..latex_engine_preferences import LatexEnginePreference, ENGINES
 from ..font_settings import read_font, write_font
@@ -82,6 +83,7 @@ class Window:
         self.browser_saved_requests = Queue()
         self._compile_results = Queue()
         self.latest_synctex_pdfs = {}  # Master path -> matching fresh preview PDF
+        self.pdf_viewer = PdfViewerPreference()
         self._synctex_results = Queue()
         self._synctex_busy = False
         self._synctex_poll_id = None
@@ -552,6 +554,20 @@ class Window:
                 break
         return "break"
 
+    def select_pdf_viewer(self):
+        """Choose browser (portable default) or installed Okular."""
+        choice = simpledialog.askstring(
+            "PDF viewer", "Choose browser or okular:",
+            initialvalue=self.pdf_viewer.viewer, parent=self.root)
+        if choice is None:
+            return
+        try:
+            self.pdf_viewer.set(choice.strip().lower())
+        except (OSError, ValueError) as exc:
+            messagebox.showerror("PDF viewer", str(exc), parent=self.root)
+            return
+        self.status.set(f"PDF viewer: {self.pdf_viewer.viewer}")
+
     def forward_synctex(self):
         """Open the PDF page corresponding to the cursor's saved TeX line."""
         from threading import Thread
@@ -588,6 +604,14 @@ class Window:
             self.status.set("A SyncTeX lookup is already running")
             return
         line, column = map(int, widget.index("insert").split("."))
+        if self.pdf_viewer.viewer == "okular":
+            try:
+                launch_okular(preview, source=source, line=line)
+            except ValueError as exc:
+                messagebox.showerror("Forward SyncTeX", str(exc), parent=self.root)
+            else:
+                self.status.set(f"Okular SyncTeX: {source.name}:{line}")
+            return
         self._synctex_busy = True
         self.status.set(f"SyncTeX lookup: {source.name}:{line}")
         def worker():
@@ -690,6 +714,7 @@ class Window:
             return
 
         self._compile_running = True
+        self.latest_synctex_pdfs.pop(source, None)
         engine = self.latex_engine_preference.engine
         self.status.set(f"Compiling {source.name} with {engine} (F4)")
         # Preserve the source tab and leave the original buffer untouched.
@@ -727,7 +752,14 @@ class Window:
             if result.get("synctex"):
                 self.latest_synctex_pdfs[source] = pdf
             self.status.set(f"LaTeX PDF updated: {result.get('output_pdf', pdf.name)}")
-            webbrowser.open(pdf.as_uri())
+            if self.pdf_viewer.viewer == "okular":
+                try:
+                    launch_okular(pdf)
+                except ValueError as exc:
+                    self.status.set(f"Okular unavailable: {exc}; opening browser")
+                    webbrowser.open(pdf.as_uri())
+            else:
+                webbrowser.open(pdf.as_uri())
         else:
             self.status.set(f"LaTeX failed (exit {result.get('returncode', '?')}); see build log")
 
@@ -1488,6 +1520,8 @@ class Window:
                                  command=self.next_latex_error)
                 menu.add_command(label="Forward SyncTeX to PDF",
                                  command=self.forward_synctex)
+                menu.add_command(label="Select PDF Viewer...",
+                                 command=self.select_pdf_viewer)
                 menu.add_separator()
                 menu.add_command(label="Configure Run Command...",
                                  command=self.configure_run_command)
