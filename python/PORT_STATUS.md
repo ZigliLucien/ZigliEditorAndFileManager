@@ -792,3 +792,30 @@ listing's directory/page/sort/filter context.
   corruption and missing masters.
 - The existing source-guided migration checklist still includes general
   Java Run commands, engine selection, compile log navigation and SyncTeX.
+
+
+### v96 — LaTeX compilation errors navigate back to source
+
+- The existing editor Run → Compile still uses the v91-v95 build pipeline:
+  multiple LuaLaTeX passes, bibliography support, persistent master choices,
+  fresh browser previews, and conventional adjacent PDF updates.
+- Compilation logs now highlight recognized TeX errors carrying source line
+  numbers. Double-click the highlighted error, or choose
+  **Run → Next LaTeX Error**, to navigate to its source tab and select the
+  reported line. Next Error cycles through the last build's diagnostics.
+- Recognizes `file.tex:line: message` records and traditional TeX
+  `! message` followed by `l.NUMBER`. Conventional parenthesized
+  `.tex` file breadcrumbs help locate errors in included project files.
+  Entries without a trustworthy line number remain readable but are not
+  assigned a guessed source location.
+- Navigation reuses already-open editor tabs and preserves unsaved edits.
+  Automatic navigation refuses missing, symlink, non-TeX or outside-master-
+  directory files. A reported line is clamped to the current document length.
+- Added pure parser regression tests and Tk GUI tests for direct navigation
+  and refusing paths outside the project.
+- Limitations: TeX's nested file log can be ambiguous, especially after
+  includes close; `-file-line-error` or SyncTeX will improve exactness in
+  future revisions. Native Mac/Linux interaction and the full suite still
+  require testing against a local checkout.
+- The Java feature audit remains open for configurable Run commands,
+  selectable LaTeX engines, and SyncTeX.
