@@ -19,6 +19,7 @@ from ..external_changes import disk_signature, changed_on_disk, ExternalChangeDi
 from ..recent_files import RecentFiles
 from ..latex_master import resolve_latex_master
 from ..latex_master_preferences import LatexMasterPreferences
+from ..latex_diagnostics import parse_latex_errors
 from ..font_settings import read_font, write_font
 from ..language_tools import LANGUAGES, language_dictionary, expand_suffix
 from ..legacy_keymaps import read_keymap,translation
@@ -53,6 +54,8 @@ class Window:
         # Disk-synchronized text; a delayed Tk <<Modified>> is not an edit.
         self.saved_snapshots = {}
         self.latex_masters = {}  # Per-tab overrides loaded from local preferences.
+        self.latex_error_lists = {}  # Log-tab -> (diagnostics, next index, master).
+        self.last_latex_log_tab = None
         self.latex_master_preferences = LatexMasterPreferences()
         self.disk_signatures = {}
         self.external_dismissals = ExternalChangeDismissals()
@@ -455,6 +458,88 @@ class Window:
                     return
             self.latex_masters[tab] = None
             self.status.set("Explicit LaTeX master cleared")
+    def open_latex_error(self, diagnostic, master):
+        """Visit a compiler-reported source line without replacing edits."""
+        target = diagnostic.path
+        # TeX diagnostics can contain paths originating in untrusted source.
+        # Do not open arbitrary files from a compiler message.
+        if (not target.is_relative_to(master.parent)
+                or target.suffix.lower() != ".tex"
+                or target.is_symlink() or not target.is_file()):
+            messagebox.showwarning(
+                "LaTeX diagnostics",
+                f"Source is outside this project, missing, or unsafe: {target}",
+                parent=self.root)
+            return
+        self._open_path(target)
+        widget, editor = self.current()
+        if widget is None or not editor.state.buffer.path:
+            return
+        if Path(editor.state.buffer.path).expanduser().resolve() != target:
+            return
+        # Clamp a stale compiler line number if the file changed since build.
+        last_line = int(widget.index("end-1c").split(".")[0])
+        line = max(1, min(diagnostic.line, last_line))
+        position = f"{line}.0"
+        widget.mark_set("insert", position)
+        widget.tag_remove("sel", "1.0", "end")
+        widget.tag_add("sel", position, f"{line}.end")
+        widget.see(position)
+        widget.focus_set()
+        self.status.set(f"LaTeX: {target.name}:{line}: {diagnostic.message}")
+
+    def next_latex_error(self):
+        """Visit the next diagnostic from the last compilation log."""
+        tab = self.tabs.select()
+        if tab not in self.latex_error_lists:
+            tab = self.last_latex_log_tab
+        if tab is None or tab not in self.latex_error_lists:
+            self.status.set("No LaTeX source-line errors in the last build")
+            return
+        items, number, master = self.latex_error_lists[tab]
+        if not items:
+            self.status.set("No LaTeX source-line errors in the last build")
+            return
+        diagnostic = items[number % len(items)]
+        self.latex_error_lists[tab] = (items, number + 1, master)
+        self.open_latex_error(diagnostic, master)
+
+    def _show_latex_log(self, source, result):
+        """Preserve compiler output and link recognized error lines."""
+        log = result.get("log", "")
+        summary = "SUCCESS" if result["ok"] else "FAILED"
+        widget = self.new_buffer(
+            text=f"LaTeX build {summary}: {source.name}\n\n{log}\n")
+        tab = self.tabs.select()
+        items = parse_latex_errors(log, source)
+        self.latex_error_lists[tab] = (items, 0, source)
+        self.last_latex_log_tab = tab
+        if items:
+            widget.tag_configure("latex_error", foreground="#b03030",
+                                 underline=True)
+            for diagnostic in items:
+                # The log begins after a title and an empty line.
+                line = diagnostic.log_line + 2
+                widget.tag_add("latex_error", f"{line}.0", f"{line}.end")
+            widget.tag_bind("latex_error", "<Double-Button-1>",
+                            lambda event: self._open_clicked_latex_error(event, tab))
+            self.status.set(
+                f"{len(items)} LaTeX source-line error(s); double-click or Run → Next LaTeX Error")
+        return widget
+
+    def _open_clicked_latex_error(self, event, tab):
+        entry = self.latex_error_lists.get(tab)
+        if not entry:
+            return "break"
+        items, _number, master = entry
+        log_line = int(event.widget.index(f"@{event.x},{event.y}").split(".")[0]) - 2
+        for index, diagnostic in enumerate(items):
+            if diagnostic.log_line == log_line:
+                self.latex_error_lists[tab] = (items, index + 1, master)
+                self.open_latex_error(diagnostic, master)
+                break
+        return "break"
+
     def compile_latex(self):
         """F4: compile a saved .tex buffer using the existing browser PDF builder.
 
@@ -540,9 +625,7 @@ class Window:
             self.status.set(f"LaTeX build failed: {error}")
             messagebox.showerror("Compile LaTeX", error, parent=self.root)
             return
-        log = result.get("log", "")
-        summary = ("SUCCESS" if result["ok"] else "FAILED")
-        self.new_buffer(text=f"LaTeX build {summary}: {source.name}\n\n{log}\n")
+        self._show_latex_log(source, result)
         if result["ok"]:
             from ...server.file_manager import LocalFiles
             pdf = LocalFiles(source.parent).resolve(result["pdf"])
@@ -1206,6 +1289,8 @@ class Window:
                                  command=self.set_latex_master)
                 menu.add_command(label="Clear LaTeX Master",
                                  command=self.clear_latex_master)
+                menu.add_command(label="Next LaTeX Error",
+                                 command=self.next_latex_error)
             bar.add_cascade(label=group,menu=menu)
         mode_menu=tk.Menu(bar,tearoff=False)
         mode_menu.add_command(label="Select Buffer Mode...",command=self.select_buffer_mode)
@@ -1296,6 +1381,9 @@ class Window:
         self.saved_messages.pop(tab,None)
         self.saved_snapshots.pop(tab,None)
         self.latex_masters.pop(tab,None)
+        self.latex_error_lists.pop(tab,None)
+        if self.last_latex_log_tab == tab:
+            self.last_latex_log_tab = None
         self.disk_signatures.pop(tab,None)
         self.external_dismissals.reset(tab)
         self.external_changed_tabs.discard(tab)
