@@ -146,6 +146,49 @@ class BuildModelTests(unittest.TestCase):
         self.assertNotEqual((self.root / first["pdf"]).read_bytes(),
                             (self.root / second["pdf"]).read_bytes())
 
+    def test_tex_build_publishes_matching_synctex_preview(self):
+        def fake_run(command, **kwargs):
+            self.assertIn("-synctex=1", command)
+            directory = Path(next(value.split("=", 1)[1] for value in command
+                             if value.startswith("-output-directory=")))
+            (directory / "paper.pdf").write_bytes(b"%PDF-1.7\nnew")
+            (directory / "paper.synctex.gz").write_bytes(b"synctex-bytes")
+            class Result:
+                returncode = 0
+                stdout = "compiled"
+                stderr = ""
+            return Result()
+        with patch("zefm.server.document_build.shutil.which",
+                   return_value="/usr/bin/lualatex"), \
+             patch("zefm.server.latex_sequence.subprocess.run",
+                   side_effect=fake_run):
+            result = build_pdf(self.files, "paper.tex", publish_adjacent=True)
+        self.assertTrue(result["ok"])
+        pdf = self.root / result["pdf"]
+        companion = self.root / result["synctex"]
+        self.assertEqual(companion, pdf.with_suffix(".synctex.gz"))
+        self.assertEqual(companion.read_bytes(), b"synctex-bytes")
+        self.assertEqual(result["output_pdf"], "paper.pdf")
+        self.assertTrue((self.root / "paper.pdf").is_file())
+
+    def test_no_synctex_metadata_is_not_a_compile_failure(self):
+        def fake_run(command, **kwargs):
+            directory = Path(next(value.split("=", 1)[1] for value in command
+                             if value.startswith("-output-directory=")))
+            (directory / "paper.pdf").write_bytes(b"%PDF-1.7\nnew")
+            class Result:
+                returncode = 0
+                stdout = "compiled"
+                stderr = ""
+            return Result()
+        with patch("zefm.server.document_build.shutil.which",
+                   return_value="/usr/bin/lualatex"), \
+             patch("zefm.server.latex_sequence.subprocess.run",
+                   side_effect=fake_run):
+            result = build_pdf(self.files, "paper.tex", publish_adjacent=True)
+        self.assertTrue(result["ok"])
+        self.assertNotIn("synctex", result)
+
     def test_editor_build_updates_adjacent_pdf_atomically(self):
         adjacent = self.root / "paper.pdf"
         adjacent.write_bytes(b"%PDF-1.7\\nold")
