@@ -9,6 +9,7 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
+import sys
 
 _PAGE = re.compile(r"^Page:\s*(\d+)\s*$", re.MULTILINE)
 
@@ -32,6 +33,10 @@ def synctex_page(source: Path, line: int, pdf: Path, *, column: int = 1,
     if not isinstance(line, int) or line < 1 or not isinstance(column, int) or column < 1:
         raise ValueError("Invalid LaTeX source location")
     executable = shutil.which("synctex")
+    if not executable and sys.platform == "darwin":
+        candidate = Path("/Library/TeX/texbin/synctex")
+        if candidate.is_file():
+            executable = str(candidate)
     if not executable:
         raise ValueError("The synctex command is not installed or on PATH")
     argv = [executable, "view", "-i", f"{line}:{column}:{source}",
