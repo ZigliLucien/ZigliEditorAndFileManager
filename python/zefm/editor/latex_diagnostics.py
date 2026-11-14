@@ -31,7 +31,7 @@ def parse_latex_errors(log: str, master: Path) -> list[LatexDiagnostic]:
     pending: tuple[str, int, Path] | None = None
     lines = log.splitlines()
     for index, text in enumerate(lines, start=1):
-        if text.startswith("=== LuaLaTeX pass"):
+        if re.match(r"^=== (?:LuaLaTeX|lualatex|pdflatex|xelatex) pass", text):
             current = master
             pending = None
         match = _FILE_OPEN.search(text)
