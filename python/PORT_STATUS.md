@@ -819,3 +819,34 @@ listing's directory/page/sort/filter context.
   interaction and the full suite require testing against a local checkout.
 - The Java feature audit remains open for configurable Run commands,
   selectable LaTeX engines, and SyncTeX.
+
+
+### v97 — configurable mode-specific Run command (Java Compile parity)
+
+- Reviewed the original Java `TPEditorX.Compile()` and `runIt()`: Compile
+  saved the active document and dispatched a per-mode command through a
+  ProcessBuilder. This increment restores the **configurable external Run**
+  part without reviving retired XML/CLSV transformations.
+- The Tk **Run** menu now offers **Configure Run Command...**,
+  **Run Configured Command**, and **Clear Run Command**, separate from the
+  known-working LaTeX F4 Compile pipeline.
+- Configuration is a JSON argv array for the current buffer mode, e.g.
+  `["python3", "{file}"]`; supported interpolation tokens are
+  `{file}`, `{name}` and `{dir}`. The Python runner never invokes
+  `shell=True`, never splits command strings as the Java implementation
+  did, and runs with the file's parent as the working directory.
+- A configured Run command requires an existing saved file and refuses
+  in-memory unsaved edits or an unexpected external disk change. It runs
+  asynchronously to keep Tk responsive, captures stdout/stderr, enforces
+  a per-process 30-second timeout, and displays output in a new editor tab.
+- Mode mappings persist in local UTF-8 JSON at
+  `~/.config/zefm/run_commands.json`, written with atomic replacement.
+  No command is installed or automatically executed by default; the user
+  explicitly configures the external program to be run.
+- Regression suites: `tests.test_run_commands` and
+  `tests.test_run_commands_gui` cover JSON, Unicode filenames, argument
+  expansion, failure/timeout, saved-file protection and output-tab results.
+- **Still pending:** Java's mode-specific internal special handlers,
+  configurable LaTeX engines, SyncTeX, and the remaining previously noted
+  menu actions. Configured commands execute with the user's OS privileges
+  and must be treated as trusted local commands.
