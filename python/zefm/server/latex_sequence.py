@@ -1,4 +1,4 @@
-"""Bounded LuaLaTeX/BibTeX/Biber sequence shared by browser and desktop.
+"""Bounded LaTeX/BibTeX/Biber sequence shared by browser and desktop.
 
 Only run on trusted TeX sources. The caller owns an isolated build directory.
 """
@@ -43,12 +43,12 @@ def run_tex_sequence(command: list[str], source: Path, directory: Path,
                      *, timeout: int = 45, passes: int = LATEX_PASSES):
     """Run an isolated TeX sequence; return (returncode, combined_log, elapsed).
 
-    `command` is the existing secured LuaLaTeX argv, including no-shell-escape
+    `command` is the existing secured LaTeX argv, including no-shell-escape
     and a fresh output directory. Compile twice for references, or three times
     when bibliography processing is needed. Do not publish failed PDFs.
     """
     if not 1 <= passes <= MAX_LATEX_PASSES:
-        raise ValueError("Invalid LuaLaTeX pass count")
+        raise ValueError("Invalid LaTeX pass count")
     started = time.monotonic()
     logs = []
     # Child programs read/write files in the build directory, while TeX
@@ -69,7 +69,10 @@ def run_tex_sequence(command: list[str], source: Path, directory: Path,
                     + (proc.stdout or "") + "\n" + (proc.stderr or ""))
         return proc.returncode
 
-    rc = run(command, source.parent, "LuaLaTeX pass 1")
+    engine = Path(command[0]).name
+    if engine not in ("lualatex", "pdflatex", "xelatex"):
+        raise ValueError("Unrecognized TeX engine command")
+    rc = run(command, source.parent, f"{engine} pass 1")
     if rc:
         return rc, "\n".join(logs)[-MAX_LOG:], round(time.monotonic()-started, 2)
     tool = bibliography_tool(directory, source.stem)
@@ -84,7 +87,7 @@ def run_tex_sequence(command: list[str], source: Path, directory: Path,
             return rc, "\n".join(logs)[-MAX_LOG:], round(time.monotonic()-started, 2)
         extra = 1
     for n in range(2, passes + extra + 1):
-        rc = run(command, source.parent, f"LuaLaTeX pass {n}")
+        rc = run(command, source.parent, f"{engine} pass {n}")
         if rc:
             return rc, "\n".join(logs)[-MAX_LOG:], round(time.monotonic()-started, 2)
     return 0, "\n".join(logs)[-MAX_LOG:], round(time.monotonic()-started, 2)
