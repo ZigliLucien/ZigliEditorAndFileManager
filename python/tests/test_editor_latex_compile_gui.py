@@ -174,6 +174,18 @@ class CompileLatexGuiTests(unittest.TestCase):
             self.app.open_latex_error(diag, self.tex)
         warning.assert_called_once()
 
+    def test_selected_engine_is_forwarded_to_builder(self):
+        self.app.latex_engine_preference.engine = "xelatex"
+        pdf = self.tex.parent / ".zefm-build" / "math-engine-test.pdf"
+        pdf.parent.mkdir(exist_ok=True)
+        pdf.write_bytes(b"%PDF-1.7\\n")
+        with patch("zefm.editor.gui.tk_editor.webbrowser.open"):
+            build = self._compile_synchronously(
+                {"ok": True, "pdf": ".zefm-build/math-engine-test.pdf",
+                 "log": "ok", "returncode": 0})
+        self.assertEqual(build.call_args.kwargs["latex_engine"], "xelatex")
+        self.assertTrue(build.call_args.kwargs["publish_adjacent"])
+
     def test_unsaved_buffer_is_not_compiled(self):
         widget, _ = self.app.current()
         widget.insert("end", "new unsaved text")
