@@ -12,7 +12,7 @@ import re
 _FILE_LINE = re.compile(r"(?P<path>(?:[A-Za-z]:)?[^\s():]+\.tex):(?P<line>\d+):\s*(?P<message>.*)")
 _TEX_LINE = re.compile(r"^\s*l\.(\d+)\s")
 _ERROR = re.compile(r"^!\s*(.+)")
-_FILE_OPEN = re.compile(r"\((?P<path>(?:\./|\.\./|/)?[^()\s]+\.tex)(?=\s|$|\()")
+_FILE_OPEN = re.compile(r"\((?P<path>(?:\./|\.\./|/)?[^()\s]+\.tex)(?=\s|$|\(|\))")
 
 
 @dataclass(frozen=True)
