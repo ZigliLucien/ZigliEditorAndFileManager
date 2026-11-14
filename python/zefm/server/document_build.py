@@ -24,6 +24,7 @@ from .file_types import handler_for
 from .math_presentation import format_math_html
 from .mathjax_filter import inject_mathjax
 from .latex_sequence import run_tex_sequence
+from ..editor.latex_engine_preferences import validate_engine
 
 MAX_SOURCE_BYTES = 2 * 1024 * 1024
 MAX_PDF_BYTES = 128 * 1024 * 1024
@@ -129,7 +130,7 @@ def markdown_html(files, relative):
     return inject_mathjax(format_math_html(fallback)).encode("utf-8")
 
 
-def _command(source, output_dir, descriptor):
+def _command(source, output_dir, descriptor, *, latex_engine="lualatex"):
     if descriptor["build"] == "discount":
         # The Markdown build now follows Discount -> HTML -> PDF, not Pandoc.
         # The HTML conversion itself is done before this command is returned.
@@ -141,17 +142,17 @@ def _command(source, output_dir, descriptor):
         return [engine, str(output_dir / "document.html"),
                 str(output_dir / "document.pdf")]
     if descriptor["build"] == "lualatex":
-        binary = shutil.which("lualatex")
+        engine = validate_engine(latex_engine)
+        binary = shutil.which(engine)
         if not binary and sys.platform == "darwin":
-            # Finder/Aqua-launched applications may not inherit the shell PATH.
-            # MacTeX publishes a stable symlink here; do not modify global PATH.
-            standard = Path("/Library/TeX/texbin/lualatex")
+            # MacTeX provides this stable symlink even when GUI PATH differs.
+            standard = Path("/Library/TeX/texbin") / engine
             if standard.is_file() and os.access(standard, os.X_OK):
                 binary = str(standard)
         if not binary:
             raise BrowserError(
-                "LuaLaTeX was not found. On macOS check MacTeX at "
-                "/Library/TeX/texbin/lualatex; on other systems check PATH.", 503)
+                f"{engine} was not found. On macOS check "
+                f"/Library/TeX/texbin/{engine}; otherwise check PATH.", 503)
         return [binary, "-interaction=nonstopmode", "-halt-on-error",
                 "-file-line-error", "-no-shell-escape", f"-output-directory={output_dir}",
                 str(source)]
@@ -193,7 +194,7 @@ def _publish_adjacent_pdf(produced: Path, source: Path) -> Path:
             temporary.unlink(missing_ok=True)
 
 
-def build_pdf(files, relative, *, publish_adjacent=False):
+def build_pdf(files, relative, *, publish_adjacent=False, latex_engine="lualatex"):
     """Compile to a new PDF, returning its root-relative path and log.
 
     Builds are deliberately performed in a new temporary directory. A PDF
@@ -221,11 +222,12 @@ def build_pdf(files, relative, *, publish_adjacent=False):
                 raise BrowserError("Discount Markdown conversion failed", 422)
             html = _restore_color_spans(html, spans)
             (temporary / "document.html").write_text(format_math_html(html), encoding="utf-8")
-        command = _command(source, temporary, descriptor)
+        command = _command(source, temporary, descriptor,
+                           latex_engine=latex_engine)
         started = time.monotonic()
         if descriptor["build"] == "lualatex":
-            # Both desktop F4 and browser Compile use the same bounded
-            # multi-pass pipeline, including bibliography when detected.
+            # Desktop and browser use the same bounded multi-pass pipeline;
+            # engine choice is explicit (default remains LuaLaTeX).
             rc, log, elapsed = run_tex_sequence(
                 command, source, temporary, timeout=BUILD_TIMEOUT)
         else:
