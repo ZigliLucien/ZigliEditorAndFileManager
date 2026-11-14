@@ -186,6 +186,32 @@ class CompileLatexGuiTests(unittest.TestCase):
         self.assertEqual(build.call_args.kwargs["latex_engine"], "xelatex")
         self.assertTrue(build.call_args.kwargs["publish_adjacent"])
 
+    def test_forward_synctex_opens_matching_pdf_page(self):
+        preview = self.tex.parent / ".zefm-build" / "math-unique.pdf"
+        preview.parent.mkdir(exist_ok=True)
+        preview.write_bytes(b"%PDF-1.7\nnew")
+        self.app.latest_synctex_pdfs[self.tex.resolve()] = preview
+        with patch("zefm.editor.gui.tk_editor.synctex_page",
+                   return_value=3) as locate, \
+             patch("zefm.editor.gui.tk_editor.webbrowser.open") as opened, \
+             patch("threading.Thread") as thread:
+            thread.return_value.start.side_effect = (
+                lambda: thread.call_args.kwargs["target"]())
+            self.app.forward_synctex()
+            if self.app._synctex_poll_id is not None:
+                self.root.after_cancel(self.app._synctex_poll_id)
+                self.app._synctex_poll_id = None
+            self.app._poll_synctex()
+        self.assertEqual(locate.call_args.args[0], self.tex.resolve())
+        opened.assert_called_once_with(preview.as_uri() + "#page=3")
+
+    def test_forward_synctex_requires_fresh_compile(self):
+        with patch("zefm.editor.gui.tk_editor.synctex_page") as locate, \
+             patch("zefm.editor.gui.tk_editor.messagebox.showinfo") as info:
+            self.app.forward_synctex()
+        locate.assert_not_called()
+        info.assert_called_once()
+
     def test_unsaved_buffer_is_not_compiled(self):
         widget, _ = self.app.current()
         widget.insert("end", "new unsaved text")
