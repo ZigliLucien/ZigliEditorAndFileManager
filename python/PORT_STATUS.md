@@ -850,3 +850,25 @@ listing's directory/page/sort/filter context.
   configurable LaTeX engines, SyncTeX, and the remaining previously noted
   menu actions. Configured commands execute with the user's OS privileges
   and must be treated as trusted local commands.
+
+
+### v98 — persistent desktop LaTeX engine choice
+
+- Added **Run → Select LaTeX Engine...** for explicitly selecting
+  `lualatex`, `pdflatex`, or `xelatex`. LuaLaTeX remains the default.
+- The selected engine is stored as UTF-8 JSON in
+  `~/.config/zefm/latex_engine.json` with atomic writes. It affects the
+  Tk desktop Compile action; the browser builder's default remains LuaLaTeX.
+- The shared PDF builder validates the engine name against a fixed allowlist
+  and invokes it as an argv subprocess with `-no-shell-escape`,
+  `-file-line-error`, a bounded timeout, and the existing fresh output
+  directory. macOS MacTeX lookup works for all three engines.
+- Existing multipass bibliography processing, master-document resolution,
+  adjacent `filename.pdf` publication, fresh browser previews, and log
+  navigation remain on the shared path.
+- Tests: `tests.test_latex_engines` and a GUI engine-dispatch assertion
+  in `tests.test_editor_latex_compile_gui`. Existing unit tests still need
+  local CI/Mac/Linux execution to establish complete platform compatibility.
+- **Outstanding Java parity**: custom engine argv beyond the fixed
+  allowlist, SyncTeX navigation, previously inventoried legacy
+  mode-specific commands and remaining File/Run menu actions.
