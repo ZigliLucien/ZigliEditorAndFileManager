@@ -146,8 +146,11 @@ class CompileLatexGuiTests(unittest.TestCase):
         self.assertIn("Save the LaTeX master", error.call_args.args[1])
 
     def test_log_error_opens_source_line_without_changing_text(self):
-        self.tex.write_text("\n".join(["source"] * 25), encoding="utf-8")
-        self.app._open_path(self.tex)
+        source_widget, _ = self.app.current()
+        source_widget.delete("1.0", "end")
+        source_widget.insert("1.0", "\n".join(["source"] * 25))
+        self.root.update()
+        self.app.save_file()
         self.root.update()
         source_tab = self.app.tabs.select()
         original = self.app.current()[0].get("1.0", "end-1c")
