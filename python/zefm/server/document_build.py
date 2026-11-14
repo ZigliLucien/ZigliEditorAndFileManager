@@ -153,7 +153,7 @@ def _command(source, output_dir, descriptor):
                 "LuaLaTeX was not found. On macOS check MacTeX at "
                 "/Library/TeX/texbin/lualatex; on other systems check PATH.", 503)
         return [binary, "-interaction=nonstopmode", "-halt-on-error",
-                "-no-shell-escape", f"-output-directory={output_dir}",
+                "-file-line-error", "-no-shell-escape", f"-output-directory={output_dir}",
                 str(source)]
     raise BrowserError("File type cannot be built", 415)
 
