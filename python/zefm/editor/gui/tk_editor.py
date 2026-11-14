@@ -20,6 +20,7 @@ from ..recent_files import RecentFiles
 from ..latex_master import resolve_latex_master
 from ..latex_master_preferences import LatexMasterPreferences
 from ..latex_diagnostics import parse_latex_errors
+from ..run_commands import RunCommands, execute_command
 from ..font_settings import read_font, write_font
 from ..language_tools import LANGUAGES, language_dictionary, expand_suffix
 from ..legacy_keymaps import read_keymap,translation
@@ -78,6 +79,10 @@ class Window:
         self.browser_open_requests = Queue()
         self.browser_saved_requests = Queue()
         self._compile_results = Queue()
+        self.run_commands = RunCommands()
+        self._run_results = Queue()
+        self._run_busy = False
+        self._run_poll_id = None
         self._compile_running = False
         self._compile_poll_id = None
         self._browser_open_paths = frozenset()
@@ -633,6 +638,102 @@ class Window:
             webbrowser.open(pdf.as_uri())
         else:
             self.status.set(f"LaTeX failed (exit {result.get('returncode', '?')}); see build log")
+
+    def configure_run_command(self):
+        """Configure an argv array for this buffer mode, never a shell line."""
+        import json
+        widget, editor = self.current()
+        if widget is None:
+            return
+        mode = self.buffer_modes[self.tabs.select()].name
+        current = self.run_commands.get(mode)
+        answer = simpledialog.askstring(
+            "Run command for " + mode,
+            "Enter a JSON argument array. {file}, {name}, {dir} are allowed.\n"
+            'Example: ["python3", "{file}"]\n'
+            "This runs an external program with your user permissions.",
+            initialvalue=json.dumps(current if current is not None else
+                                    ["python3", "{file}"], ensure_ascii=False),
+            parent=self.root)
+        if answer is None:
+            return
+        try:
+            parsed = json.loads(answer)
+            self.run_commands.set(mode, parsed)
+        except (ValueError, TypeError, OSError) as exc:
+            messagebox.showerror("Run command", str(exc), parent=self.root)
+            return
+        self.status.set(f"Saved Run command for {mode}")
+
+    def clear_run_command(self):
+        widget, _editor = self.current()
+        if widget is None:
+            return
+        mode = self.buffer_modes[self.tabs.select()].name
+        try:
+            self.run_commands.clear(mode)
+        except OSError as exc:
+            messagebox.showerror("Run command", str(exc), parent=self.root)
+            return
+        self.status.set(f"Cleared Run command for {mode}")
+
+    def run_configured_command(self):
+        """Run only explicitly configured commands against a saved file."""
+        from threading import Thread
+        widget, editor = self.current()
+        if widget is None:
+            return
+        mode = self.buffer_modes[self.tabs.select()].name
+        argv = self.run_commands.get(mode)
+        if argv is None:
+            messagebox.showinfo(
+                "Run command", f"No Run command is configured for {mode}.\n"
+                "Choose Run → Configure Run Command... first.",
+                parent=self.root)
+            return
+        source_name = editor.state.buffer.path
+        if not source_name or widget.get("1.0", "end-1c") != (
+                self.saved_snapshots.get(self.tabs.select(), "")):
+            messagebox.showwarning("Run command",
+                                   "Save this buffer before running its command.",
+                                   parent=self.root)
+            return
+        source = Path(source_name).expanduser().resolve()
+        try:
+            if not source.is_file() or changed_on_disk(
+                    source, self.disk_signatures.get(self.tabs.select())):
+                raise OSError("Source changed on disk; reload or save before Run")
+        except OSError as exc:
+            messagebox.showerror("Run command", str(exc), parent=self.root)
+            return
+        if self._run_busy:
+            self.status.set("A configured Run command is already executing")
+            return
+        self._run_busy = True
+        self.status.set(f"Running configured {mode} command on {source.name}")
+        def worker():
+            try:
+                result = execute_command(argv, source)
+            except Exception as exc:
+                result = {"ok": False, "returncode": None, "log": str(exc)}
+            self._run_results.put((source, result))
+        Thread(target=worker, name="zefm-run-command", daemon=True).start()
+        self._run_poll_id = self.root.after(120, self._poll_run_command)
+
+    def _poll_run_command(self):
+        self._run_poll_id = None
+        try:
+            source, result = self._run_results.get_nowait()
+        except Empty:
+            self._run_poll_id = self.root.after(120, self._poll_run_command)
+            return
+        self._run_busy = False
+        outcome = "SUCCESS" if result["ok"] else "FAILED"
+        self.new_buffer(
+            text=f"Run {outcome}: {source.name}\n"
+                 f"Exit code: {result.get('returncode')}\n\n"
+                 + result.get("log", "") + "\n")
+        self.status.set(f"Run {outcome.lower()} for {source.name}; see output tab")
 
     def debug_python(self):
         """Launch pdb in a terminal for a saved Python file; never run via shell."""
@@ -1291,6 +1392,13 @@ class Window:
                                  command=self.clear_latex_master)
                 menu.add_command(label="Next LaTeX Error",
                                  command=self.next_latex_error)
+                menu.add_separator()
+                menu.add_command(label="Configure Run Command...",
+                                 command=self.configure_run_command)
+                menu.add_command(label="Run Configured Command",
+                                 command=self.run_configured_command)
+                menu.add_command(label="Clear Run Command",
+                                 command=self.clear_run_command)
             bar.add_cascade(label=group,menu=menu)
         mode_menu=tk.Menu(bar,tearoff=False)
         mode_menu.add_command(label="Select Buffer Mode...",command=self.select_buffer_mode)
@@ -1997,6 +2105,9 @@ class Window:
         if any(e.state.buffer.modified for _,e in self.views.values()):
             if not messagebox.askyesno("Unsaved changes","Quit with unsaved buffers?",parent=self.root):
                 return
+        if self._run_poll_id is not None:
+            self.root.after_cancel(self._run_poll_id)
+            self._run_poll_id = None
         if self._compile_poll_id is not None:
             self.root.after_cancel(self._compile_poll_id)
             self._compile_poll_id = None
