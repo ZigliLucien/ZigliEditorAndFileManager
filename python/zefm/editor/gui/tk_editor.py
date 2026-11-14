@@ -21,6 +21,7 @@ from ..latex_master import resolve_latex_master
 from ..latex_master_preferences import LatexMasterPreferences
 from ..latex_diagnostics import parse_latex_errors
 from ..run_commands import RunCommands, execute_command
+from ..latex_engine_preferences import LatexEnginePreference, ENGINES
 from ..font_settings import read_font, write_font
 from ..language_tools import LANGUAGES, language_dictionary, expand_suffix
 from ..legacy_keymaps import read_keymap,translation
@@ -80,6 +81,7 @@ class Window:
         self.browser_saved_requests = Queue()
         self._compile_results = Queue()
         self.run_commands = RunCommands()
+        self.latex_engine_preference = LatexEnginePreference()
         self._run_results = Queue()
         self._run_busy = False
         self._run_poll_id = None
@@ -545,6 +547,23 @@ class Window:
                 break
         return "break"
 
+    def set_latex_engine(self):
+        """Select a persistent desktop LaTeX engine; default is LuaLaTeX."""
+        current = self.latex_engine_preference.engine
+        choice = simpledialog.askstring(
+            "LaTeX engine",
+            "Engine: lualatex, pdflatex, or xelatex\n"
+            "LuaLaTeX remains the default for browser builds.",
+            initialvalue=current, parent=self.root)
+        if choice is None:
+            return
+        try:
+            self.latex_engine_preference.set(choice.strip().lower())
+        except (OSError, ValueError) as exc:
+            messagebox.showerror("LaTeX engine", str(exc), parent=self.root)
+            return
+        self.status.set(f"Desktop LaTeX engine: {self.latex_engine_preference.engine}")
+
     def compile_latex(self):
         """F4: compile a saved .tex buffer using the existing browser PDF builder.
 
@@ -603,12 +622,14 @@ class Window:
             return
 
         self._compile_running = True
-        self.status.set(f"Compiling LaTeX: {source.name} (F4)")
+        engine = self.latex_engine_preference.engine
+        self.status.set(f"Compiling {source.name} with {engine} (F4)")
         # Preserve the source tab and leave the original buffer untouched.
         def worker():
             try:
                 files = LocalFiles(source.parent)
-                result = build_pdf(files, source.name, publish_adjacent=True)
+                result = build_pdf(files, source.name, publish_adjacent=True,
+                                   latex_engine=engine)
                 payload = (source, result, None)
             except Exception as exc:
                 payload = (source, None, str(exc))
@@ -1390,6 +1411,8 @@ class Window:
                                  command=self.set_latex_master)
                 menu.add_command(label="Clear LaTeX Master",
                                  command=self.clear_latex_master)
+                menu.add_command(label="Select LaTeX Engine...",
+                                 command=self.set_latex_engine)
                 menu.add_command(label="Next LaTeX Error",
                                  command=self.next_latex_error)
                 menu.add_separator()
