@@ -145,6 +145,32 @@ class CompileLatexGuiTests(unittest.TestCase):
         error.assert_called_once()
         self.assertIn("Save the LaTeX master", error.call_args.args[1])
 
+    def test_log_error_opens_source_line_without_changing_text(self):
+        self.tex.write_text("\n".join(["source"] * 25), encoding="utf-8")
+        self.app._open_path(self.tex)
+        self.root.update()
+        source_tab = self.app.tabs.select()
+        original = self.app.current()[0].get("1.0", "end-1c")
+        log = "(./math.tex\n! Undefined control sequence.\nl.12 \\broken\n"
+        log_widget = self.app._show_latex_log(
+            self.tex, {"ok": False, "log": log})
+        log_tab = self.app.tabs.select()
+        self.assertIn(log_tab, self.app.latex_error_lists)
+        self.assertEqual(len(self.app.latex_error_lists[log_tab][0]), 1)
+        self.assertTrue(log_widget.tag_ranges("latex_error"))
+        self.app.next_latex_error()
+        self.assertEqual(self.app.tabs.select(), source_tab)
+        self.assertEqual(self.app.current()[0].index("insert"), "12.0")
+        self.assertEqual(self.app.current()[0].get("1.0", "end-1c"), original)
+
+    def test_log_error_rejects_source_outside_project(self):
+        other = Path(self.temp.name).parent / "outside.tex"
+        from zefm.editor.latex_diagnostics import LatexDiagnostic
+        diag = LatexDiagnostic(other, 2, "error", 1)
+        with patch("zefm.editor.gui.tk_editor.messagebox.showwarning") as warning:
+            self.app.open_latex_error(diag, self.tex)
+        warning.assert_called_once()
+
     def test_unsaved_buffer_is_not_compiled(self):
         widget, _ = self.app.current()
         widget.insert("end", "new unsaved text")
