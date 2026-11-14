@@ -872,3 +872,35 @@ listing's directory/page/sort/filter context.
 - **Outstanding Java parity**: custom engine argv beyond the fixed
   allowlist, SyncTeX navigation, previously inventoried legacy
   mode-specific commands and remaining File/Run menu actions.
+
+
+### v99 — forward SyncTeX and optional Okular PDF viewer
+
+- All three TeX engines request `-synctex=1`. A successful build can
+  publish the generated `.synctex.gz` alongside its uniquely named PDF
+  preview in `.zefm-build`. A build without an index still succeeds but
+  does not support forward search.
+- **Run → Forward SyncTeX to PDF** looks up the current source-line location
+  against the last successful compiled master in the editor session. For the
+  default browser viewer it invokes `synctex view` with an argv list and
+  bounded timeout, opening the resulting PDF with `#page=N`. The browser
+  may scroll to the page but cannot reliably mark the exact location.
+- The user can select **Run → Select PDF Viewer...**: `browser` or
+  `okular`. Browser remains the default, preserving existing behavior.
+  This preference persists in `~/.config/zefm/pdf_viewer.json`.
+  When Okular is selected, successful desktop compilations open their
+  unique PDF preview in Okular; the forward-search command uses Okular's
+  native `--unique file:///...pdf#src:LINE/source.tex` syntax, which can
+  highlight the corresponding PDF position. Okular must be installed
+  locally. If it cannot be launched for preview, the browser remains a
+  fallback.
+- For both viewers, master selection and normal adjacent
+  `filename.pdf` publication are unchanged. The SyncTeX index is associated
+  with the **unique preview PDF**, not a potentially stale adjacent PDF.
+  A newly started compile invalidates old per-master SyncTeX state.
+- Tests: `tests.test_synctex_forward`, `tests.test_pdf_viewer`,
+  extended `tests.test_document_build`, and GUI checks in
+  `tests.test_editor_latex_compile_gui`.
+- **Still pending:** reverse SyncTeX (Okular PDF click opening the ZEFM
+  editor), complete integration tests with installed Okular on Linux,
+  additional Java menu and mode-specific parity work.
