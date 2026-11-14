@@ -154,7 +154,8 @@ def _command(source, output_dir, descriptor, *, latex_engine="lualatex"):
                 f"{engine} was not found. On macOS check "
                 f"/Library/TeX/texbin/{engine}; otherwise check PATH.", 503)
         return [binary, "-interaction=nonstopmode", "-halt-on-error",
-                "-file-line-error", "-no-shell-escape", f"-output-directory={output_dir}",
+                "-file-line-error", "-synctex=1", "-no-shell-escape",
+                f"-output-directory={output_dir}",
                 str(source)]
     raise BrowserError("File type cannot be built", 415)
 
@@ -268,11 +269,26 @@ def build_pdf(files, relative, *, publish_adjacent=False, latex_engine="lualatex
         # Old PDFs remain accessible and no previous result is mistaken for
         # the current successful compilation.
         os.link(produced, final, follow_symlinks=False)
+        # Keep the SyncTeX index alongside this exact unique PDF preview.
+        # A missing index is an ordinary build without forward navigation.
+        sync_published = None
+        if descriptor["build"] == "lualatex":
+            sync_source = temporary / (source.stem + ".synctex.gz")
+            if (sync_source.is_file() and not sync_source.is_symlink()
+                    and sync_source.stat().st_size <= 32 * 1024 * 1024):
+                sync_published = final.with_suffix(".synctex.gz")
+                try:
+                    os.link(sync_source, sync_published, follow_symlinks=False)
+                except OSError:
+                    final.unlink(missing_ok=True)
+                    raise
         if publish_adjacent and descriptor["build"] == "lualatex":
             try:
                 adjacent = _publish_adjacent_pdf(produced, source)
             except Exception:
                 final.unlink(missing_ok=True)
+                if sync_published is not None:
+                    sync_published.unlink(missing_ok=True)
                 raise
         else:
             adjacent = None
@@ -280,6 +296,8 @@ def build_pdf(files, relative, *, publish_adjacent=False, latex_engine="lualatex
                   "returncode": 0, "elapsed": elapsed}
         if adjacent is not None:
             result["output_pdf"] = files.relative(adjacent)
+        if sync_published is not None:
+            result["synctex"] = files.relative(sync_published)
         return result
     finally:
         shutil.rmtree(temporary, ignore_errors=True)
