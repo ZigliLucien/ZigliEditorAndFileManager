@@ -813,9 +813,9 @@ listing's directory/page/sort/filter context.
   directory files. A reported line is clamped to the current document length.
 - Added pure parser regression tests and Tk GUI tests for direct navigation
   and refusing paths outside the project.
-- Limitations: TeX's nested file log can be ambiguous, especially after
-  includes close; `-file-line-error` or SyncTeX will improve exactness in
-  future revisions. Native Mac/Linux interaction and the full suite still
-  require testing against a local checkout.
+- LuaLaTeX now runs with `-file-line-error` to provide precise diagnostics
+  when available. Parenthesized-log fallback remains approximate, especially
+  after nested includes close. SyncTeX is still pending. Native Mac/Linux
+  interaction and the full suite require testing against a local checkout.
 - The Java feature audit remains open for configurable Run commands,
   selectable LaTeX engines, and SyncTeX.
