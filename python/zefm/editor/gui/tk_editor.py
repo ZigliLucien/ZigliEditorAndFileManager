@@ -20,6 +20,7 @@ from ..recent_files import RecentFiles
 from ..latex_master import resolve_latex_master
 from ..latex_master_preferences import LatexMasterPreferences
 from ..latex_diagnostics import parse_latex_errors
+from ..synctex_forward import synctex_page, pdf_page_uri
 from ..run_commands import RunCommands, execute_command
 from ..latex_engine_preferences import LatexEnginePreference, ENGINES
 from ..font_settings import read_font, write_font
@@ -80,6 +81,10 @@ class Window:
         self.browser_open_requests = Queue()
         self.browser_saved_requests = Queue()
         self._compile_results = Queue()
+        self.latest_synctex_pdfs = {}  # Master path -> matching fresh preview PDF
+        self._synctex_results = Queue()
+        self._synctex_busy = False
+        self._synctex_poll_id = None
         self.run_commands = RunCommands()
         self.latex_engine_preference = LatexEnginePreference()
         self._run_results = Queue()
@@ -547,6 +552,69 @@ class Window:
                 break
         return "break"
 
+    def forward_synctex(self):
+        """Open the PDF page corresponding to the cursor's saved TeX line."""
+        from threading import Thread
+        widget, editor = self.current()
+        if widget is None or not editor.state.buffer.path:
+            self.status.set("Open and compile a saved .tex file first")
+            return
+        source = Path(editor.state.buffer.path).expanduser().resolve()
+        if source.suffix.lower() != ".tex":
+            self.status.set("Forward SyncTeX requires a .tex file")
+            return
+        content = widget.get("1.0", "end-1c")
+        if content != self.saved_snapshots.get(self.tabs.select(), ""):
+            messagebox.showwarning("Forward SyncTeX",
+                "Save this buffer and compile before forward search.",
+                parent=self.root)
+            return
+        try:
+            if changed_on_disk(source, self.disk_signatures.get(self.tabs.select())):
+                raise ValueError("Source changed on disk; save or reload and compile")
+            master = resolve_latex_master(
+                source, content, self.latex_masters.get(self.tabs.select()))
+        except (OSError, ValueError) as exc:
+            messagebox.showerror("Forward SyncTeX", str(exc), parent=self.root)
+            return
+        preview = self.latest_synctex_pdfs.get(master)
+        if preview is None:
+            messagebox.showinfo("Forward SyncTeX",
+                "Compile this master in the current editor session first.\n"
+                "The compiler must produce a matching SyncTeX index.",
+                parent=self.root)
+            return
+        if self._synctex_busy:
+            self.status.set("A SyncTeX lookup is already running")
+            return
+        line, column = map(int, widget.index("insert").split("."))
+        self._synctex_busy = True
+        self.status.set(f"SyncTeX lookup: {source.name}:{line}")
+        def worker():
+            try:
+                page = synctex_page(source, line, preview, column=column + 1)
+                result = (preview, page, None)
+            except (OSError, ValueError) as exc:
+                result = (preview, None, str(exc))
+            self._synctex_results.put(result)
+        Thread(target=worker, daemon=True, name="zefm-synctex").start()
+        self._synctex_poll_id = self.root.after(120, self._poll_synctex)
+
+    def _poll_synctex(self):
+        self._synctex_poll_id = None
+        try:
+            preview, page, error = self._synctex_results.get_nowait()
+        except Empty:
+            self._synctex_poll_id = self.root.after(120, self._poll_synctex)
+            return
+        self._synctex_busy = False
+        if error is not None:
+            self.status.set(f"SyncTeX: {error}")
+            messagebox.showerror("Forward SyncTeX", error, parent=self.root)
+            return
+        webbrowser.open(pdf_page_uri(preview, page))
+        self.status.set(f"SyncTeX: PDF page {page}")
+
     def set_latex_engine(self):
         """Select a persistent desktop LaTeX engine; default is LuaLaTeX."""
         current = self.latex_engine_preference.engine
@@ -652,9 +720,12 @@ class Window:
             messagebox.showerror("Compile LaTeX", error, parent=self.root)
             return
         self._show_latex_log(source, result)
+        self.latest_synctex_pdfs.pop(source, None)
         if result["ok"]:
             from ...server.file_manager import LocalFiles
             pdf = LocalFiles(source.parent).resolve(result["pdf"])
+            if result.get("synctex"):
+                self.latest_synctex_pdfs[source] = pdf
             self.status.set(f"LaTeX PDF updated: {result.get('output_pdf', pdf.name)}")
             webbrowser.open(pdf.as_uri())
         else:
@@ -1415,6 +1486,8 @@ class Window:
                                  command=self.set_latex_engine)
                 menu.add_command(label="Next LaTeX Error",
                                  command=self.next_latex_error)
+                menu.add_command(label="Forward SyncTeX to PDF",
+                                 command=self.forward_synctex)
                 menu.add_separator()
                 menu.add_command(label="Configure Run Command...",
                                  command=self.configure_run_command)
