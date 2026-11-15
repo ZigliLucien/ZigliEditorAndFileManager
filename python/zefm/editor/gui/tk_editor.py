@@ -154,13 +154,10 @@ class Window:
         self.tabs.bind("<<NotebookTabChanged>>", self._tab_changed)
         self.disk_poll_id = self.root.after(3000, self._disk_monitor_tick)
         self.root.geometry("920x680")
-        # Optional Okular reverse search is local-only and does not block Tk.
-        try:
-            self.inverse_synctex.start()
-            self._inverse_synctex_poll_id = self.root.after(
-                150, self._drain_inverse_synctex)
-        except OSError as exc:
-            self.status.set(f"Inverse SyncTeX unavailable: {exc}")
+        # Only enable the listener when Okular is selected. Ordinary
+        # browser-only editor sessions do not need a background server.
+        if self.pdf_viewer.viewer == "okular":
+            self._start_inverse_synctex()
 
     def new_buffer(self, path=None, text=""):
         frame=ttk.Frame(self.tabs)
@@ -577,6 +574,8 @@ class Window:
             messagebox.showerror("PDF viewer", str(exc), parent=self.root)
             return
         self.status.set(f"PDF viewer: {self.pdf_viewer.viewer}")
+        if self.pdf_viewer.viewer == "okular":
+            self._start_inverse_synctex()
 
     def forward_synctex(self):
         """Open the PDF page corresponding to the cursor's saved TeX line."""
@@ -649,9 +648,24 @@ class Window:
         webbrowser.open(pdf_page_uri(preview, page))
         self.status.set(f"SyncTeX: PDF page {page}")
 
+    def _start_inverse_synctex(self):
+        if self.inverse_synctex.server is not None:
+            return True
+        try:
+            self.inverse_synctex.start()
+            self._inverse_synctex_poll_id = self.root.after(
+                150, self._drain_inverse_synctex)
+            return True
+        except OSError as exc:
+            self.status.set(f"Inverse SyncTeX unavailable: {exc}")
+            messagebox.showerror("Inverse SyncTeX", str(exc), parent=self.root)
+            return False
+
     def show_okular_inverse_command(self):
         """Show the exact command for Okular's Custom Text Editor field."""
         import shlex
+        if not self._start_inverse_synctex():
+            return
         script = Path(__file__).resolve().parents[1] / "inverse_synctex.py"
         # Quote paths (including spaces) without introducing shell execution
         # inside ZEFM. Okular invokes its custom editor command itself.
