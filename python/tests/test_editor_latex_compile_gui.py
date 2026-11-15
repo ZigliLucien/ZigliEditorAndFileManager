@@ -212,6 +212,18 @@ class CompileLatexGuiTests(unittest.TestCase):
         locate.assert_not_called()
         info.assert_called_once()
 
+    def test_okular_inverse_search_visits_source_line(self):
+        widget, _editor = self.app.current()
+        widget.delete("1.0", "end")
+        widget.insert("1.0", "\n".join(["line"] * 15))
+        self.root.update()
+        self.app.save_file()
+        self.root.update()
+        self.app.inverse_synctex.requests.put((str(self.tex.resolve()), 9, 3))
+        self.app._drain_inverse_synctex()
+        self.assertEqual(self.app.current()[0].index("insert"), "9.2")
+        self.assertIn("Okular", self.app.status.get())
+
     def test_f4_saves_dirty_buffer_before_compile(self):
         widget, _ = self.app.current()
         widget.insert("end", "new unsaved text")
