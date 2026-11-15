@@ -920,3 +920,34 @@ listing's directory/page/sort/filter context.
   browser/Okular preview and SyncTeX stay unchanged.
 - Updated GUI regression tests for dirty-buffer automatic saving, refused
   saves, and declined external-change overwrites.
+
+
+### v101 — Okular reverse SyncTeX to the Python editor
+
+- Added a companion to v99's forward SyncTeX navigation: Okular's inverse
+  search can now open the corresponding `.tex` file and move the cursor
+  to its reported line and column in an **already-running** ZEFM Tk editor.
+- In the editor use **Run → Okular Inverse Search Setup...** to copy the
+  installation-specific command. Paste it into Okular's
+  **Settings → Configure Okular → Editor → Custom Text Editor** field.
+  The command invokes the standalone
+  `python/zefm/editor/inverse_synctex.py` helper with `"%f" %l %c`
+  arguments. In Okular browse mode, **Shift-click** the PDF to navigate.
+  The inverse bridge is started automatically when the configured desktop
+  PDF viewer is Okular, or when the setup dialog is requested.
+- Reverse search does not spawn a second editor. A per-session random token
+  in `~/.config/zefm/inverse_synctex.json` authenticates the request sent
+  only to 127.0.0.1. The listener validates its UTF-8 payload and enqueues
+  a filename/line/column tuple. **Only Tk's main thread** touches widgets:
+  it selects an existing tab when possible, otherwise opens the file, then
+  scrolls to the requested location. Existing unsaved edits are preserved.
+- The bridge is opt-in for Okular users; normal browser-only editor sessions
+  do not start it. The state file is written atomically with mode 0600 on
+  POSIX; it is removed on normal editor Quit. Manual closing of an external
+  process may leave state until the next editor launch.
+- Tests: `tests.test_inverse_synctex` (authentication, UTF-8 paths,
+  validation, shutdown), plus a GUI cursor-navigation test in
+  `tests.test_editor_latex_compile_gui`.
+- **Still pending:** real KDE/Okular interaction verification, full Java
+  editor-menu parity, and robust multi-instance ownership of the local
+  bridge state when separate ZEFM editors are launched simultaneously.
