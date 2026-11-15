@@ -212,14 +212,48 @@ class CompileLatexGuiTests(unittest.TestCase):
         locate.assert_not_called()
         info.assert_called_once()
 
-    def test_unsaved_buffer_is_not_compiled(self):
+    def test_f4_saves_dirty_buffer_before_compile(self):
         widget, _ = self.app.current()
         widget.insert("end", "new unsaved text")
         self.root.update()
-        with patch("zefm.server.document_build.build_pdf") as build, \
-             patch("zefm.editor.gui.tk_editor.messagebox.showwarning"):
+        pdf = self.tex.parent / ".zefm-build" / "math-save-test.pdf"
+        pdf.parent.mkdir(exist_ok=True)
+        pdf.write_bytes(b"%PDF-1.7\\n")
+        with patch("zefm.editor.gui.tk_editor.webbrowser.open"):
+            build = self._compile_synchronously(
+                {"ok": True, "pdf": ".zefm-build/math-save-test.pdf",
+                 "log": "ok", "returncode": 0})
+        build.assert_called_once()
+        self.assertIn("new unsaved text", self.tex.read_text(encoding="utf-8"))
+        self.assertEqual(self.app.saved_snapshots[
+            next(tab for tab, (_w, e) in self.app.views.items()
+                 if e.state.buffer.path and Path(e.state.buffer.path).resolve() == self.tex.resolve())],
+            self.tex.read_text(encoding="utf-8"))
+
+    def test_failed_save_blocks_compile(self):
+        widget, _ = self.app.current()
+        widget.insert("end", "unsaved change")
+        self.root.update()
+        with patch.object(self.app, "save_file", return_value=None) as save, \
+             patch("zefm.server.document_build.build_pdf") as build:
             self.app.action("Compile")
+        save.assert_called_once()
         build.assert_not_called()
+        self.assertFalse(self.app._compile_running)
+
+    def test_external_change_save_cancel_blocks_compile(self):
+        widget, _ = self.app.current()
+        widget.insert("end", "local unsaved")
+        self.root.update()
+        self.tex.write_text("external revision", encoding="utf-8")
+        with patch("zefm.editor.gui.tk_editor.messagebox.askyesno",
+                   return_value=False) as declined, \
+             patch("zefm.server.document_build.build_pdf") as build:
+            self.app.action("Compile")
+        declined.assert_called_once()
+        build.assert_not_called()
+        self.assertEqual(self.tex.read_text(encoding="utf-8"),
+                         "external revision")
         self.assertFalse(self.app._compile_running)
 
 
