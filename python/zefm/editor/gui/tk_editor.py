@@ -657,7 +657,7 @@ class Window:
         self.status.set(f"Desktop LaTeX engine: {self.latex_engine_preference.engine}")
 
     def compile_latex(self):
-        """F4: compile a saved .tex buffer using the existing browser PDF builder.
+        """F4: save the active .tex buffer, then compile using the PDF builder.
 
         Run the external engine in a worker so that Tk stays responsive. The
         worker never touches Tk widgets. On completion, the main thread opens
@@ -676,20 +676,14 @@ class Window:
                 "Open or save a .tex document before using F4 Compile.",
                 parent=self.root)
             return
-        content = widget.get("1.0", "end-1c")
-        if content != self.saved_snapshots.get(self.tabs.select(), content):
-            messagebox.showwarning("Unsaved LaTeX",
-                "Save the current buffer before compiling. F4 never compiles "
-                "an older disk version while unsaved edits are present.",
-                parent=self.root)
-            return
         if self._compile_running:
             self.status.set("A LaTeX build is already running")
             return
-        # Normalize stale dirty state left by pending Tk modified events.
-        editor.state.buffer.modified = False
-        editor.state.buffer.text = content
-        self._update_title(widget, editor)
+        # Run → Compile and F4 share this action. Save before compiling and
+        # abort if the save was cancelled, blocked by external changes, or failed.
+        if self.save_file() is not True:
+            return
+        content = widget.get("1.0", "end-1c")
         current_source = Path(path).expanduser().resolve()
         try:
             if not current_source.is_file():
@@ -2055,6 +2049,7 @@ class Window:
                 self.latex_masters[current_tab] = self.latex_master_preferences.get(path)
             self.saved_messages[current_tab]=f"Saved: {Path(path).name}"
             self._status(widget)
+            return True
         except (OSError,UnicodeError) as exc:
             self.saved_messages[current_tab]=None
             self.save_indicator.set("Save failed")
