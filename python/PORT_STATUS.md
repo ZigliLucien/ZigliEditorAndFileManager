@@ -904,3 +904,19 @@ listing's directory/page/sort/filter context.
 - **Still pending:** reverse SyncTeX (Okular PDF click opening the ZEFM
   editor), complete integration tests with installed Okular on Linux,
   additional Java menu and mode-specific parity work.
+
+
+### v100 — F4 / Run → Compile now saves first
+
+- F4 and Run → Compile continue to dispatch the same Compile action.
+  For a saved `.tex` buffer, that action now invokes the regular Save
+  operation before compiling; users no longer have to press F1 separately.
+- `save_file()` reports `True` only after a successful save. Compile stops
+  without launching the PDF builder if saving is cancelled, encounters an
+  external file conflict, or fails. Existing external-change prompts and
+  editor save indicators are retained.
+- F4 continues to require an existing `.tex` filename. Master-document
+  validation, configured engines, multi-pass builds, adjacent PDF updates,
+  browser/Okular preview and SyncTeX stay unchanged.
+- Updated GUI regression tests for dirty-buffer automatic saving, refused
+  saves, and declined external-change overwrites.
