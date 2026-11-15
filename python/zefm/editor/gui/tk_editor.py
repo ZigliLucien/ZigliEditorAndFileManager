@@ -22,6 +22,7 @@ from ..latex_master_preferences import LatexMasterPreferences
 from ..latex_diagnostics import parse_latex_errors
 from ..synctex_forward import synctex_page, pdf_page_uri
 from ..pdf_viewer import PdfViewerPreference, launch_okular
+from ..inverse_synctex import InverseSynctexServer
 from ..run_commands import RunCommands, execute_command
 from ..latex_engine_preferences import LatexEnginePreference, ENGINES
 from ..font_settings import read_font, write_font
@@ -83,6 +84,8 @@ class Window:
         self.browser_saved_requests = Queue()
         self._compile_results = Queue()
         self.latest_synctex_pdfs = {}  # Master path -> matching fresh preview PDF
+        self.inverse_synctex = InverseSynctexServer()
+        self._inverse_synctex_poll_id = None
         self.pdf_viewer = PdfViewerPreference()
         self._synctex_results = Queue()
         self._synctex_busy = False
@@ -151,6 +154,13 @@ class Window:
         self.tabs.bind("<<NotebookTabChanged>>", self._tab_changed)
         self.disk_poll_id = self.root.after(3000, self._disk_monitor_tick)
         self.root.geometry("920x680")
+        # Optional Okular reverse search is local-only and does not block Tk.
+        try:
+            self.inverse_synctex.start()
+            self._inverse_synctex_poll_id = self.root.after(
+                150, self._drain_inverse_synctex)
+        except OSError as exc:
+            self.status.set(f"Inverse SyncTeX unavailable: {exc}")
 
     def new_buffer(self, path=None, text=""):
         frame=ttk.Frame(self.tabs)
@@ -638,6 +648,62 @@ class Window:
             return
         webbrowser.open(pdf_page_uri(preview, page))
         self.status.set(f"SyncTeX: PDF page {page}")
+
+    def show_okular_inverse_command(self):
+        """Show the exact command for Okular's Custom Text Editor field."""
+        import shlex
+        script = Path(__file__).resolve().parents[1] / "inverse_synctex.py"
+        # Quote paths (including spaces) without introducing shell execution
+        # inside ZEFM. Okular invokes its custom editor command itself.
+        command = (shlex.quote(sys.executable) + " " + shlex.quote(str(script))
+                   + ' "%f" %l %c')
+        dialog = tk.Toplevel(self.root)
+        dialog.title("Okular inverse SyncTeX setup")
+        dialog.transient(self.root)
+        ttk.Label(dialog, text=(
+            "In Okular: Settings → Configure Okular → Editor → "
+            "Custom Text Editor. Paste this command.\n"
+            "Shift-click the PDF in Browse mode to open the source in ZEFM."),
+            wraplength=610, padding=12).pack(fill="x")
+        entry = ttk.Entry(dialog, width=95)
+        entry.pack(fill="x", padx=12, pady=6)
+        entry.insert(0, command)
+        entry.select_range(0, "end")
+        ttk.Button(dialog, text="Copy Command",
+                   command=lambda: (self.root.clipboard_clear(),
+                                    self.root.clipboard_append(command),
+                                    self.status.set("Okular editor command copied"))).pack(
+                                        side="left", padx=12, pady=10)
+        ttk.Button(dialog, text="Close", command=dialog.destroy).pack(
+            side="right", padx=12, pady=10)
+
+    def _drain_inverse_synctex(self):
+        """Only Tk's main thread opens files or moves the insertion cursor."""
+        self._inverse_synctex_poll_id = None
+        try:
+            while True:
+                path, line, column = self.inverse_synctex.requests.get_nowait()
+                self._open_path(path)
+                widget, editor = self.current()
+                if widget is None or editor.state.buffer.path is None:
+                    continue
+                if Path(editor.state.buffer.path).expanduser().resolve() != Path(path):
+                    continue
+                end_line = int(widget.index("end-1c").split(".")[0])
+                row = max(1, min(line, end_line))
+                end_column = int(widget.index(f"{row}.end").split(".")[1])
+                col = max(0, min(column - 1, end_column))
+                position = f"{row}.{col}"
+                widget.mark_set("insert", position)
+                widget.see(position)
+                widget.focus_set()
+                self.root.lift()
+                self.status.set(f"Okular → {Path(path).name}:{row}:{col + 1}")
+        except Empty:
+            pass
+        if self.inverse_synctex.server is not None:
+            self._inverse_synctex_poll_id = self.root.after(
+                150, self._drain_inverse_synctex)
 
     def set_latex_engine(self):
         """Select a persistent desktop LaTeX engine; default is LuaLaTeX."""
@@ -1516,6 +1582,8 @@ class Window:
                                  command=self.forward_synctex)
                 menu.add_command(label="Select PDF Viewer...",
                                  command=self.select_pdf_viewer)
+                menu.add_command(label="Okular Inverse Search Setup...",
+                                 command=self.show_okular_inverse_command)
                 menu.add_separator()
                 menu.add_command(label="Configure Run Command...",
                                  command=self.configure_run_command)
@@ -2230,6 +2298,10 @@ class Window:
         if any(e.state.buffer.modified for _,e in self.views.values()):
             if not messagebox.askyesno("Unsaved changes","Quit with unsaved buffers?",parent=self.root):
                 return
+        if self._inverse_synctex_poll_id is not None:
+            self.root.after_cancel(self._inverse_synctex_poll_id)
+            self._inverse_synctex_poll_id = None
+        self.inverse_synctex.close()
         if self._run_poll_id is not None:
             self.root.after_cancel(self._run_poll_id)
             self._run_poll_id = None
