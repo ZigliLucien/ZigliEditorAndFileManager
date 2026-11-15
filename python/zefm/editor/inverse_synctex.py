@@ -131,3 +131,21 @@ class InverseSynctexServer:
                 self.state_path.unlink(missing_ok=True)
         except (OSError, ValueError):
             pass
+
+
+def main(argv=None):
+    """CLI entry for Okular Custom Text Editor: script %f %l %c."""
+    import argparse
+    parser = argparse.ArgumentParser(description="Send Okular location to running ZEFM")
+    parser.add_argument("file")
+    parser.add_argument("line", type=int)
+    parser.add_argument("column", type=int, nargs="?", default=1)
+    args = parser.parse_args(argv)
+    try:
+        send_location(args.file, args.line, args.column)
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        parser.exit(1, f"ZEFM inverse SyncTeX: {exc}\n")
+
+
+if __name__ == "__main__":
+    main()
