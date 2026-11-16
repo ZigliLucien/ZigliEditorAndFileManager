@@ -986,3 +986,27 @@ listing's directory/page/sort/filter context.
   appears in menu mappings or keybindings.
 - Continue auditing `Refresh Buffer`, `Print`, and the remaining
   shell/mail actions as separate decisions.
+
+
+### v104 — remove DBClear and keep Revert Buffer as a useful editor action
+
+- By user request, retired **DBClear** from the File menu and command registry.
+  Its old `Shift+F1` shortcut is unassigned and will not be recreated.
+- Renamed **Revert File** to **Revert Buffer**, retaining the existing
+  `Ctrl+F9` shortcut. The command reloads the active saved file from disk,
+  undoing **all unsaved changes** in that buffer, but not edits already
+  written with Save or F4 Save + Compile.
+- A confirmation explicitly explains that pending unsaved edits and undo
+  history will be discarded. Confirmation uses the live Tk Text contents,
+  not a possibly delayed `<<Modified>>` event. Cancel leaves the editor
+  text and disk untouched.
+- If the disk read fails or the file no longer exists, editor text is
+  preserved. Successful reload clears stale editor modification state and
+  refreshes the saved snapshot, disk signature, buffer mode and status.
+- Added `tests.test_revert_buffer_gui` covering confirmation, cancellation,
+  undo reset, live-content dirty checks, external disk revisions, missing
+  files, and untitled buffers. Shortcut tests assert DBClear retirement and
+  the Revert Buffer label and keyboard mapping.
+- Existing Undo (F5) remains appropriate for reversing individual edits.
+  A separate revision-history feature would be necessary to undo changes
+  that have already been saved to disk.
