@@ -190,7 +190,7 @@ class Window:
         self.buffer_keymaps[str(frame)] = None
         self.tabs.add(frame,text=path.rsplit("/",1)[-1] if path else "Untitled")
         self.tabs.select(frame);widget.focus_set()
-        widget.bind("<<Modified>>",lambda event,w=widget,e=editor:self._changed(w,e))
+        widget.bind("<<Modified>>",lambda event,w=widget,e=editor:(self._changed(w,e), self.root.after_idle(lambda: self._draw_line_numbers(w))))
         widget.bind("<KeyRelease>", lambda event,w=widget:(self._status(w), self._draw_line_numbers(w)))
         widget.bind("<KeyPress>", self._vim_key)
         widget.bind("<Tab>", self._mode_tab)
