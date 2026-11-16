@@ -28,6 +28,7 @@ from ..inverse_synctex import InverseSynctexServer
 from ..run_commands import RunCommands, execute_command
 from ..latex_engine_preferences import LatexEnginePreference, ENGINES
 from ..print_preview import write_print_preview
+from ..clickpad import PALETTES, palette_for
 from ..font_settings import read_font, write_font
 from ..language_tools import LANGUAGES, language_dictionary, expand_suffix
 from ..legacy_keymaps import read_keymap,translation
@@ -154,6 +155,19 @@ class Window:
                               for item in items] for group,items in self.menus.items()}
         self._make_menus()
         self.recent_popup = tk.Menu(self.root, tearoff=False)
+        # The ClickPad is hidden initially, as in the original editor.
+        # Its buttons are independent of the actual document text.
+        self.clickpad_frame = ttk.Frame(self.root, padding=3)
+        self.clickpad_palette = tk.StringVar(value="Math")
+        self.clickpad_selector = ttk.Combobox(
+            self.clickpad_frame, textvariable=self.clickpad_palette,
+            values=tuple(PALETTES), state="readonly", width=10)
+        self.clickpad_selector.pack(side="left", padx=(2, 6))
+        self.clickpad_selector.bind("<<ComboboxSelected>>",
+                                    lambda event: self._render_clickpad())
+        self.clickpad_buttons = ttk.Frame(self.clickpad_frame)
+        self.clickpad_buttons.pack(side="left", fill="x", expand=True)
+        self._render_clickpad()
         self.tabs.pack(fill="both", expand=True)
         self.new_buffer()
         self.tabs.bind("<<NotebookTabChanged>>", self._tab_changed)
@@ -1112,6 +1126,39 @@ class Window:
         self.status.set(
             f"Print preview: {title} — use browser Print (Ctrl+P / Cmd+P)")
 
+    def _render_clickpad(self):
+        """Replace palette buttons, never the current editor contents."""
+        for child in self.clickpad_buttons.winfo_children():
+            child.destroy()
+        name = self.clickpad_palette.get()
+        for symbol in PALETTES.get(name, PALETTES["Math"]):
+            ttk.Button(self.clickpad_buttons, text=symbol, width=max(2, min(10, len(symbol))),
+                       command=lambda value=symbol: self._insert_clickpad(value)).pack(
+                           side="left", padx=1)
+
+    def _insert_clickpad(self, value):
+        """Insert at the active cursor via Tk's Undo-aware Text widget."""
+        widget, editor = self.current()
+        if widget is None:
+            return
+        widget.insert("insert", value)
+        widget.focus_set()
+        self._status(widget)
+
+    def toggle_clickpad(self):
+        """Ctrl+F shows or hides a small Unicode/LaTeX character palette."""
+        if self.clickpad_frame.winfo_manager():
+            self.clickpad_frame.pack_forget()
+            self.status.set("ClickPad hidden")
+            return
+        widget, editor = self.current()
+        if editor is not None:
+            mode = self.buffer_modes.get(self.tabs.select())
+            self.clickpad_palette.set(palette_for(mode.name if mode else "text"))
+        self._render_clickpad()
+        self.clickpad_frame.pack(side="top", fill="x", before=self.tabs)
+        self.status.set("ClickPad shown; choose symbols to insert at cursor")
+
     def action(self, name):
         widget,editor=self.current()
         if not widget:return
@@ -1139,6 +1186,7 @@ class Window:
         elif name=="Revert Buffer":self.revert_buffer()
         elif name=="Refresh Buffer":self.refresh_buffer()
         elif name=="Print":self.print_buffer()
+        elif name=="Toggle ClickPad":self.toggle_clickpad()
         elif name=="Line Numbers":self.toggle_line_numbers()
         elif name=="Clear":
             if messagebox.askyesno("Clear buffer","Delete all text in this buffer?",parent=self.root):
