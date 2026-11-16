@@ -1010,3 +1010,23 @@ listing's directory/page/sort/filter context.
 - Existing Undo (F5) remains appropriate for reversing individual edits.
   A separate revision-history feature would be necessary to undo changes
   that have already been saved to disk.
+
+
+### v105 — F7 Refresh Buffer without undoing edits
+
+- Restored **Edit → Refresh Buffer (F7)** as a presentation-only refresh:
+  it recomputes the active buffer's saved/dirty indication, title,
+  line-number gutter and external-change notice, without reloading the
+  file from disk or touching editor text and cursor.
+- F7 does not reset the Tk Undo history, write files, or implicitly
+  discard unsaved changes. **Ctrl+F9 Revert Buffer** retains its separate,
+  explicitly destructive reload-and-reset behavior.
+- Clarification confirmed by the user: **F5 Undo remains available after
+  F1 Save**; saving does not reset the Tk Undo stack. Undoing after a
+  save changes the in-memory buffer and requires another Save to update
+  disk. This is different from reverting to the last saved version.
+- New GUI regressions in `tests.test_refresh_buffer_gui` cover F7
+  nondestructive refresh, external disk changes, preserved cursor,
+  Undo after Save + F7, and the existing menu shortcut.
+- Continue the source-guided audit with Print and remaining Java
+  Run/mail actions as appropriate.
