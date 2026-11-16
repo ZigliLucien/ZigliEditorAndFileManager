@@ -1055,3 +1055,30 @@ listing's directory/page/sort/filter context.
   F4 Save + Compile with browser/Okular remains unchanged.
 - Remaining Java features requiring a deliberate migration/retirement
   decision include older shell/mail menu commands and the ClickPad.
+
+
+### v107 — restore the optional ClickPad for Unicode/LaTeX input
+
+- Source-guided audit of `TPEditorX.java` confirmed the legacy
+  **Toggle ClickPad** action controls visibility of a mode-specific
+  on-screen insertion panel. The Python editor retained its Ctrl+F
+  shortcut but previously reported the command as not ported.
+- Added **Edit → Toggle ClickPad (Ctrl+F)**. The panel is **hidden
+  initially**, can be shown/hidden repeatedly, and has small selectable
+  Math, LaTeX and Yiddish palettes. LaTeX editing mode defaults to
+  LaTeX control words, while other modes default to mathematical
+  symbols; the user can change the palette at any time.
+- ClickPad buttons insert symbols or LaTeX sequences at the current
+  cursor using the active Tk Text widget. Edits participate in ordinary
+  Undo/Redo; files are **not** implicitly saved, and neither current
+  buffer selection nor the OS keyboard layout is altered.
+- The source-guided migration does **not** reconstruct every historical
+  `ClickPads/*.data` file or claim full mode-specific content parity.
+  The compact palettes are an initial useful subset.
+- New regression suites: `tests.test_editor_clickpad_gui` for
+  toggle/insertion/Undo/defaults and the original shortcut.
+- Original **Shell** is an arbitrary command prompt and overlaps the
+  existing, safer **Configure Run Command / Run Configured Command**
+  actions. Java **QuickMail** and **Get Mail** are also distinct from
+  the new browser-based local Maildir access. These older actions
+  remain for explicit retirement or a focused later implementation.
