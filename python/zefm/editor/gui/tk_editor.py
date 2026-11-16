@@ -7,6 +7,8 @@ handles typed input; controller handles the three explicit clipboard commands.
 import sys
 import re
 import webbrowser
+import tempfile
+from uuid import uuid4
 from queue import Queue, Empty
 from urllib.parse import urlencode
 from pathlib import Path
@@ -25,6 +27,7 @@ from ..pdf_viewer import PdfViewerPreference, launch_okular
 from ..inverse_synctex import InverseSynctexServer
 from ..run_commands import RunCommands, execute_command
 from ..latex_engine_preferences import LatexEnginePreference, ENGINES
+from ..print_preview import write_print_preview
 from ..font_settings import read_font, write_font
 from ..language_tools import LANGUAGES, language_dictionary, expand_suffix
 from ..legacy_keymaps import read_keymap,translation
@@ -55,6 +58,7 @@ class Window:
             font_options["family"]="Menlo"
         self.editor_font=tkfont.Font(root=self.root,**font_options)
         self.views = {}
+        self.print_preview_directory = None  # Created only for explicit Print.
         self.line_gutters = {}  # Tab -> (Canvas, enabled), never edits file contents.
         self.saved_messages = {}
         # Disk-synchronized text; a delayed Tk <<Modified>> is not an edit.
@@ -1075,6 +1079,39 @@ class Window:
         )
         widget.focus_set()
 
+    def print_buffer(self):
+        """Ctrl+P: print the live contents through the browser print dialog.
+
+        Do not auto-save, change editor text, or trigger any printer job.
+        The private temporary print previews live until the editor quits.
+        """
+        widget, editor = self.current()
+        if widget is None:
+            return
+        text = widget.get("1.0", "end-1c")
+        title = (Path(editor.state.buffer.path).name
+                 if editor.state.buffer.path else "Untitled buffer")
+        try:
+            if self.print_preview_directory is None:
+                self.print_preview_directory = tempfile.TemporaryDirectory(
+                    prefix="zefm-print-")
+            preview_path = (Path(self.print_preview_directory.name)
+                            / ("print-" + uuid4().hex + ".html"))
+            write_print_preview(text, title, preview_path)
+            if not webbrowser.open(preview_path.as_uri()):
+                self.status.set(f"Print preview saved at {preview_path}")
+                messagebox.showinfo(
+                    "Print Buffer",
+                    "The browser did not confirm opening the print preview. "
+                    f"Open this file in your browser:\n{preview_path}",
+                    parent=self.root)
+                return
+        except (OSError, ValueError) as exc:
+            messagebox.showerror("Print Buffer", str(exc), parent=self.root)
+            return
+        self.status.set(
+            f"Print preview: {title} — use browser Print (Ctrl+P / Cmd+P)")
+
     def action(self, name):
         widget,editor=self.current()
         if not widget:return
@@ -1101,6 +1138,7 @@ class Window:
         elif name=="Compile":self.compile_latex()
         elif name=="Revert Buffer":self.revert_buffer()
         elif name=="Refresh Buffer":self.refresh_buffer()
+        elif name=="Print":self.print_buffer()
         elif name=="Line Numbers":self.toggle_line_numbers()
         elif name=="Clear":
             if messagebox.askyesno("Clear buffer","Delete all text in this buffer?",parent=self.root):
@@ -2428,6 +2466,9 @@ class Window:
             self.root.after_cancel(self._inverse_synctex_poll_id)
             self._inverse_synctex_poll_id = None
         self.inverse_synctex.close()
+        if self.print_preview_directory is not None:
+            self.print_preview_directory.cleanup()
+            self.print_preview_directory = None
         if self._run_poll_id is not None:
             self.root.after_cancel(self._run_poll_id)
             self._run_poll_id = None
