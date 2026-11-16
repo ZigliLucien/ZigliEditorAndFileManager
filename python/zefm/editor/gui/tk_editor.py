@@ -1131,10 +1131,12 @@ class Window:
         for child in self.clickpad_buttons.winfo_children():
             child.destroy()
         name = self.clickpad_palette.get()
-        for symbol in PALETTES.get(name, PALETTES["Math"]):
-            ttk.Button(self.clickpad_buttons, text=symbol, width=max(2, min(10, len(symbol))),
-                       command=lambda value=symbol: self._insert_clickpad(value)).pack(
-                           side="left", padx=1)
+        for index, symbol in enumerate(PALETTES.get(name, PALETTES["Math"])):
+            ttk.Button(
+                self.clickpad_buttons, text=symbol,
+                width=max(2, min(10, len(symbol) + 1)),
+                command=lambda value=symbol: self._insert_clickpad(value)
+            ).grid(row=index // 10, column=index % 10, padx=1, pady=1)
 
     def _insert_clickpad(self, value):
         """Insert at the active cursor via Tk's Undo-aware Text widget."""
