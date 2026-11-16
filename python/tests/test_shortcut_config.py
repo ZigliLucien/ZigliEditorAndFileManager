@@ -32,6 +32,12 @@ class ShortcutTests(unittest.TestCase):
         self.assertNotIn('ConvertStyle', labels)
         self.assertNotIn('Shift+F2', shortcuts)
         self.assertNotIn('Shift+F3', shortcuts)
+        self.assertNotIn('DBClear', labels)
+        self.assertNotIn('Shift+F1', shortcuts)
+        self.assertNotIn('Revert File', labels)
+        self.assertIn('Revert Buffer', labels)
+        self.assertEqual(next(c.shortcut for c in menus['File']
+                              if c.label == 'Revert Buffer'), 'Ctrl+F9')
     def test_disable(self):
         menus = load_menus(self.config({'shortcuts': {'Find': None}}))
         self.assertIsNone(next(c.shortcut for c in menus['Edit'] if c.label == 'Find'))
