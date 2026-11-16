@@ -1051,6 +1051,30 @@ class Window:
             canvas.delete("all")
         self.status.set("Line numbers " + ("on" if enabled else "off"))
 
+    def refresh_buffer(self):
+        """F7: refresh Tk's presentation, never its underlying document.
+
+        Unlike Revert Buffer this operation does not read or write disk,
+        reset Undo, move the cursor, or discard unsaved text.
+        """
+        widget, editor = self.current()
+        if widget is None:
+            return
+        # Recompute the live modified state rather than relying on a delayed
+        # <<Modified>> event. This preserves Undo across Save operations.
+        tab = self.tabs.select()
+        live = widget.get("1.0", "end-1c")
+        editor.state.buffer.modified = (
+            live != self.saved_snapshots.get(tab, live))
+        self._update_title(widget, editor)
+        self._status(widget)
+        self._draw_line_numbers(widget)
+        self._check_external_changes()
+        self.status.set(
+            f"Refreshed buffer display: {Path(editor.state.buffer.path).name if editor.state.buffer.path else 'Untitled'}"
+        )
+        widget.focus_set()
+
     def action(self, name):
         widget,editor=self.current()
         if not widget:return
@@ -1076,6 +1100,7 @@ class Window:
         elif name=="Debug Python":self.debug_python()
         elif name=="Compile":self.compile_latex()
         elif name=="Revert Buffer":self.revert_buffer()
+        elif name=="Refresh Buffer":self.refresh_buffer()
         elif name=="Line Numbers":self.toggle_line_numbers()
         elif name=="Clear":
             if messagebox.askyesno("Clear buffer","Delete all text in this buffer?",parent=self.root):
