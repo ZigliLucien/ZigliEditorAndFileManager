@@ -951,3 +951,23 @@ listing's directory/page/sort/filter context.
 - **Still pending:** real KDE/Okular interaction verification, full Java
   editor-menu parity, and robust multi-instance ownership of the local
   bridge state when separate ZEFM editors are launched simultaneously.
+
+
+### v102 — restored original editor Line Numbers action
+
+- Checked the Python menu dispatcher against the legacy TPEditorX
+  menu/shortcut list. **Edit → Line Numbers (Ctrl+F2)** was displayed
+  but previously fell through to `Not yet ported`.
+- Implemented a separate Tk Canvas line-number gutter for each editor
+  tab, toggled by that existing registry command. Vertical scrolling and
+  text-change events redraw the visible source line numbers; the gutter
+  does not insert text into the file or alter undo/redo state.
+- Per-tab on/off status stays in memory only, and is removed when its
+  buffer closes. Existing editing, save-and-compile, PDF/Okular and
+  SyncTeX controls remain unchanged.
+- New Tk tests in `tests.test_editor_line_numbers_gui` exercise
+  toggling, text preservation, per-tab state, and the original shortcut.
+- Remaining original menu actions still requiring audit include
+  `Refresh Buffer`, `DocSave`, `ConvertStyle`, `Print`,
+  and legacy shell/mail commands. This release does not claim
+  those historical actions implemented.
