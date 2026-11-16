@@ -1030,3 +1030,28 @@ listing's directory/page/sort/filter context.
   Undo after Save + F7, and the existing menu shortcut.
 - Continue the source-guided audit with Print and remaining Java
   Run/mail actions as appropriate.
+
+
+### v106 — portable Print for the live editor buffer
+
+- Restored **File → Print (Ctrl+P)** as a portable HTML print-preview
+  action using the native browser print dialog. Unlike the legacy Java
+  `ZPrint` widget-printer implementation, this works across Linux and
+  macOS without forcing a specific CUPS or platform printer API.
+- The preview contains the **current in-memory buffer**, including unsaved
+  edits; no implicit Save, Undo reset, temporary edits or LaTeX compilation.
+  HTML/XML/code contents and filenames are escaped, and UTF-8 text (including
+  Yiddish and other scripts) is retained. A print stylesheet formats
+  plain text and uses an ordinary system monospace font where available.
+- The browser handles printer selection or **Save as PDF**. ZEFM never
+  silently dispatches a printer job. Temporary preview files are held in
+  an application-owned temporary directory until a normal Quit, when they
+  are cleaned up. A browser that reports failure to open gets a filename
+  the user can open manually.
+- Regression tests: `tests.test_print_buffer` verify content escaping,
+  size validation, unsaved content, unchanged on-disk contents, Undo after
+  Print, temporary-file cleanup, and the existing Ctrl+P registry binding.
+- Printing the buffer is separate from rendering the compiled LaTeX PDF:
+  F4 Save + Compile with browser/Okular remains unchanged.
+- Remaining Java features requiring a deliberate migration/retirement
+  decision include older shell/mail menu commands and the ClickPad.
