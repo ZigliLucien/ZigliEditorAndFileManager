@@ -10,8 +10,8 @@ class Command:
 
 MENUS = {
  "File": [Command(a,b) for a,b in zip(
- ["Open","Save","Save As","DocSave","DBClear","Revert File","ConvertStyle","Print","Quit"],
- ["F9","F1","F3","Shift+F2","Shift+F1","Ctrl+F9","Shift+F3","Ctrl+P","Ctrl+Q"])],
+ ["Open","Save","Save As","DBClear","Revert File","Print","Quit"],
+ ["F9","F1","F3","Shift+F1","Ctrl+F9","Ctrl+P","Ctrl+Q"])],
  "Edit": [Command(a,b) for a,b in zip(
  ["Refresh Buffer","Clear","Redo","Undo","Line Numbers","Find","Replace","Continue Find or Replace","Toggle ClickPad","Copy","Paste","Cut"],
  ["F7","F8","F6","F5","Ctrl+F2","Ctrl+S","Ctrl+Shift+R","Ctrl+R","Ctrl+F","Ctrl+C","Ctrl+V","Ctrl+X"])],
