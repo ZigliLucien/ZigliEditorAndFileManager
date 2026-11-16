@@ -1075,7 +1075,7 @@ class Window:
         elif name=="Quit":self.quit()
         elif name=="Debug Python":self.debug_python()
         elif name=="Compile":self.compile_latex()
-        elif name=="Revert File":self.revert_file()
+        elif name=="Revert Buffer":self.revert_buffer()
         elif name=="Line Numbers":self.toggle_line_numbers()
         elif name=="Clear":
             if messagebox.askyesno("Clear buffer","Delete all text in this buffer?",parent=self.root):
@@ -2025,26 +2025,60 @@ class Window:
         else:
             self.root.bell()
 
-    def revert_file(self):
-        widget,editor=self.current()
-        if not widget or not editor.state.buffer.path:return
-        if editor.state.buffer.modified and not messagebox.askyesno(
-            "Revert","Discard edits and reload from disk?",parent=self.root):return
+    def revert_buffer(self):
+        """Restore the current buffer from disk, discarding unsaved edits.
+
+        Ctrl+F9 intentionally reverts only the active buffer. Changes made
+        since the last Save are abandoned, never changes already saved.
+        """
+        widget, editor = self.current()
+        if widget is None:
+            return False
+        path = editor.state.buffer.path
+        if not path:
+            messagebox.showinfo("Revert Buffer",
+                "Save this untitled buffer before using Revert Buffer.",
+                parent=self.root)
+            return False
+        current = widget.get("1.0", "end-1c")
+        tab = self.tabs.select()
+        # Check actual Tk contents rather than delayed <<Modified>> flags.
+        if current != self.saved_snapshots.get(tab, current):
+            if not messagebox.askyesno("Revert Buffer",
+                    "Discard all unsaved changes in this buffer and reload "
+                    "the last saved version from disk?\n\n"
+                    "This also resets the buffer's Undo history.",
+                    parent=self.root):
+                self.status.set("Revert Buffer cancelled")
+                return False
         try:
             from ..files import open_buffer
-            b=open_buffer(editor.state.buffer.path)
-            widget.delete("1.0","end");widget.insert("1.0",b.text)
-            widget.edit_reset();widget.edit_modified(False)
-            editor.state.buffer=b
-            self.saved_snapshots[self.tabs.select()] = b.text
-            self.disk_signatures[self.tabs.select()]=disk_signature(b.path)
-            self.external_dismissals.reset(self.tabs.select())
-            self._check_external_changes()
-            self.saved_messages[self.tabs.select()]=None
-            self.buffer_modes[self.tabs.select()]=self.mode_registry.detect(b.path,b.text)
-            self.tabs.tab(self.tabs.select(),text=Path(b.path).name)
-        except (OSError,UnicodeError) as exc:
-            messagebox.showerror("Revert failed",str(exc),parent=self.root)
+            loaded = open_buffer(path)
+            signature = disk_signature(path)
+        except (OSError, UnicodeError) as exc:
+            messagebox.showerror("Revert Buffer failed", str(exc),
+                                 parent=self.root)
+            return False
+        # Do not modify any editor text until the disk read succeeds.
+        widget.delete("1.0", "end")
+        widget.insert("1.0", loaded.text)
+        widget.edit_reset()
+        widget.edit_modified(False)
+        editor.state.buffer = loaded
+        editor.state.buffer.modified = False
+        self.saved_snapshots[tab] = loaded.text
+        self.disk_signatures[tab] = signature
+        self.external_dismissals.reset(tab)
+        self.external_changed_tabs.discard(tab)
+        self.saved_messages[tab] = None
+        self.buffer_modes[tab] = self.mode_registry.detect(loaded.path, loaded.text)
+        self.tabs.tab(tab, text=Path(loaded.path).name)
+        self._update_title(widget, editor)
+        self._check_external_changes()
+        self._status(widget)
+        self.status.set(f"Reverted buffer: {Path(path).name} (last saved version)")
+        widget.focus_set()
+        return True
 
     def set_working_directory(self):
         path=filedialog.askdirectory(parent=self.root,initialdir=self.working_directory.initial_directory(),
