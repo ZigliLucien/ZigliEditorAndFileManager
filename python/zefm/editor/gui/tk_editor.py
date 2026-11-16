@@ -55,6 +55,7 @@ class Window:
             font_options["family"]="Menlo"
         self.editor_font=tkfont.Font(root=self.root,**font_options)
         self.views = {}
+        self.line_gutters = {}  # Tab -> (Canvas, enabled), never edits file contents.
         self.saved_messages = {}
         # Disk-synchronized text; a delayed Tk <<Modified>> is not an edit.
         self.saved_snapshots = {}
@@ -162,11 +163,19 @@ class Window:
     def new_buffer(self, path=None, text=""):
         frame=ttk.Frame(self.tabs)
         widget=tk.Text(frame, wrap="none", undo=True, maxundo=-1, font=self.editor_font)
+        gutter = tk.Canvas(frame, width=47, highlightthickness=0,
+                           background="#eeeeee")
         y=ttk.Scrollbar(frame, orient="vertical", command=widget.yview)
         x=ttk.Scrollbar(frame, orient="horizontal", command=widget.xview)
-        widget.configure(yscrollcommand=y.set, xscrollcommand=x.set)
+        def on_vertical_scroll(first, last, w=widget, canvas=gutter):
+            y.set(first, last)
+            self._draw_line_numbers(w, canvas)
+        widget.configure(yscrollcommand=on_vertical_scroll, xscrollcommand=x.set)
         y.pack(side="right",fill="y"); x.pack(side="bottom",fill="x")
-        widget.pack(fill="both",expand=True)
+        widget.pack(side="left",fill="both",expand=True)
+        gutter.bind("<Configure>", lambda event, w=widget, c=gutter:
+                    self._draw_line_numbers(w, c))
+        self.line_gutters[str(frame)] = (gutter, False)
         widget.insert("1.0",text);widget.edit_reset();widget.edit_modified(False)
         editor=TPEditor(self.clipboard,Buffer(text,path))
         self.views[str(frame)] = (widget,editor)
@@ -182,7 +191,7 @@ class Window:
         self.tabs.add(frame,text=path.rsplit("/",1)[-1] if path else "Untitled")
         self.tabs.select(frame);widget.focus_set()
         widget.bind("<<Modified>>",lambda event,w=widget,e=editor:self._changed(w,e))
-        widget.bind("<KeyRelease>", lambda event,w=widget:self._status(w))
+        widget.bind("<KeyRelease>", lambda event,w=widget:(self._status(w), self._draw_line_numbers(w)))
         widget.bind("<KeyPress>", self._vim_key)
         widget.bind("<Tab>", self._mode_tab)
         widget.bind("<ButtonRelease-1>", lambda event,w=widget:self._status(w))
@@ -1000,6 +1009,48 @@ class Window:
             if state.point not in (start,end): state.point=end
         except tk.TclError: pass
 
+    def _draw_line_numbers(self, widget, canvas=None):
+        """Render numbers in a separate gutter, without changing the buffer."""
+        tab = next((key for key, (w, _editor) in self.views.items()
+                    if w is widget), None)
+        record = self.line_gutters.get(tab)
+        if record is None or not record[1]:
+            return
+        canvas = canvas or record[0]
+        canvas.delete("all")
+        try:
+            index = widget.index("@0,0")
+            while True:
+                details = widget.dlineinfo(index)
+                if details is None:
+                    break
+                line = int(index.split(".")[0])
+                canvas.create_text(40, details[1] + details[3] / 2,
+                                   anchor="e", text=str(line),
+                                   font=self.editor_font, fill="#555555")
+                next_index = widget.index(f"{line + 1}.0")
+                if next_index == index or int(next_index.split(".")[0]) <= line:
+                    break
+                index = next_index
+        except tk.TclError:
+            pass
+
+    def toggle_line_numbers(self):
+        """Original Ctrl+F2 menu toggle; no additions to the saved text."""
+        tab = self.tabs.select()
+        if tab not in self.line_gutters:
+            return
+        canvas, enabled = self.line_gutters[tab]
+        enabled = not enabled
+        self.line_gutters[tab] = (canvas, enabled)
+        if enabled:
+            canvas.pack(side="left", before=self.views[tab][0], fill="y")
+            self._draw_line_numbers(self.views[tab][0], canvas)
+        else:
+            canvas.pack_forget()
+            canvas.delete("all")
+        self.status.set("Line numbers " + ("on" if enabled else "off"))
+
     def action(self, name):
         widget,editor=self.current()
         if not widget:return
@@ -1025,6 +1076,7 @@ class Window:
         elif name=="Debug Python":self.debug_python()
         elif name=="Compile":self.compile_latex()
         elif name=="Revert File":self.revert_file()
+        elif name=="Line Numbers":self.toggle_line_numbers()
         elif name=="Clear":
             if messagebox.askyesno("Clear buffer","Delete all text in this buffer?",parent=self.root):
                 widget.delete("1.0","end")
@@ -1694,6 +1746,7 @@ class Window:
         del self.views[tab]
         self.saved_messages.pop(tab,None)
         self.saved_snapshots.pop(tab,None)
+        self.line_gutters.pop(tab,None)
         self.latex_masters.pop(tab,None)
         self.latex_error_lists.pop(tab,None)
         if self.last_latex_log_tab == tab:
