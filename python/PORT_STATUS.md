@@ -971,3 +971,18 @@ listing's directory/page/sort/filter context.
   `Refresh Buffer`, `DocSave`, `ConvertStyle`, `Print`,
   and legacy shell/mail commands. This release does not claim
   those historical actions implemented.
+
+
+### v103 — retire DocSave and ConvertStyle by design
+
+- User confirmed the historical Java `DocSave` and `ConvertStyle`
+  features are **not needed** in the Python port. These are intentional
+  retirements, not pending parity tasks.
+- Removed both File-menu entries from the central editor command registry,
+  releasing their `Shift+F2` and `Shift+F3` shortcuts without reassigning
+  them. Normal `Save`, `Save As`, `F4` save-and-compile, and all existing
+  document formats retain their current behavior.
+- Added a shortcut-registry regression test ensuring neither retired item
+  appears in menu mappings or keybindings.
+- Continue auditing `Refresh Buffer`, `Print`, and the remaining
+  shell/mail actions as separate decisions.
