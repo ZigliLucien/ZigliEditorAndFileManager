@@ -50,6 +50,14 @@ class InterfaceFontsGuiTests(unittest.TestCase):
         self.assertEqual(style.lookup("Zefm.Status.TFrame", "background"), "#dce6f2")
         self.assertEqual(self.app.status_divider.winfo_manager(), "pack")
 
+    def test_interface_text_is_bold(self):
+        from tkinter import font as tkfont
+        self.assertEqual(self.app.interface_font.actual("weight"), "bold")
+        self.assertEqual(self.app.interface_emphasis_font.actual("weight"), "bold")
+        self.assertEqual(
+            tkfont.nametofont("TkMenuFont", root=self.root).actual("weight"),
+            "bold")
+
     def test_font_control_resizes_interface_only(self):
         old_editor_size = self.app.editor_font.actual("size")
         with patch("zefm.editor.gui.tk_editor.simpledialog.askinteger",
