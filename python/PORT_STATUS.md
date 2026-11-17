@@ -1141,3 +1141,28 @@ listing's directory/page/sort/filter context.
 - **QuickMail and Get Mail remain candidates for explicit implementation**
   rather than automatic retirement. Close Shell Window stays retired
   because output now lives in ordinary editor tabs.
+
+
+### v111 — open a real interactive terminal for Shell
+
+- On user request, changed **Run → Shell (Ctrl+Shift+Z)** to open a
+  **native interactive terminal**, rather than merely running a single
+  captured command. On Linux, launches `xterm` with an interactive
+  shell. On macOS, asks Terminal.app to open an interactive session
+  using `osascript`; macOS may ask the user to allow Terminal automation.
+- The terminal starts in the directory of the current saved file, or
+  ZEFM's configured working directory for untitled buffers. Opening
+  the terminal neither saves the buffer nor modifies its contents or
+  Undo history. The user can enter multiple commands and close the
+  terminal through its own native controls.
+- The v110 one-off safe argv runner is **not lost**: it is now exposed
+  separately as **Run → Run One-Off Command (Capture Output)...**.
+  This runner retains its bounded output, timeout, and Tk result tab,
+  while Shell remains fully interactive without an artificial timeout.
+- New `zefm.editor.terminal_launcher` isolates platform-specific
+  execution and path quoting. Tests in `tests.test_terminal_launcher`
+  validate Linux and macOS launch arguments, Unicode paths and error
+  handling. Updated `tests.test_shell_command` confirms the two
+  distinct Run menu workflows.
+- Requires `xterm` on Linux; no bundled emulator. Existing
+  **QuickMail** and **Get Mail** remain available for later porting.
