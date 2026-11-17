@@ -1302,3 +1302,27 @@ listing's directory/page/sort/filter context.
 - Extended `tests.test_shortcut_config` with reserved-key and invalid
   override cases. Menu labels and keybinding dispatch continue to
   originate from the same command registry.
+
+
+### v119 — atomic editor saves and recoverable disk errors
+
+- Audited the editor's save path following the external-change and
+  browser-editor integration. The old `save_buffer()` wrote directly
+  into the destination, so a failed write could truncate or partially
+  replace an existing document.
+- Saves now encode the full UTF-8 buffer into a temporary file in the
+  same directory, flush and fsync the file, then atomically replace
+  the destination. A failed write or replacement leaves the previous
+  destination contents intact; the temporary file is removed and the
+  editor buffer remains marked modified.
+- Existing POSIX file permissions are carried onto the replacement.
+  Newly created documents use private permissions (0600 on POSIX).
+  When saving through a symbolic link, its resolved target is replaced
+  without silently replacing the symbolic link itself.
+- The existing external-change confirmation remains in place before
+  each GUI save. Atomic replacement protects against partial writes,
+  not every concurrent edit occurring between the earlier comparison
+  and the replace operation.
+- Added `tests.test_atomic_save` for UTF-8 round trips, permission
+  preservation, symbolic links, simulated fsync failure and failed
+  replacement cleanup.
