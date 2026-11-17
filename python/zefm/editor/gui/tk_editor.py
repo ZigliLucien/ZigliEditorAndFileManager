@@ -1112,19 +1112,58 @@ class Window:
             preview_path = (Path(self.print_preview_directory.name)
                             / ("print-" + uuid4().hex + ".html"))
             write_print_preview(text, title, preview_path)
-            if not webbrowser.open(preview_path.as_uri()):
-                self.status.set(f"Print preview saved at {preview_path}")
-                messagebox.showinfo(
-                    "Print Buffer",
-                    "The browser did not confirm opening the print preview. "
-                    f"Open this file in your browser:\n{preview_path}",
-                    parent=self.root)
-                return
         except (OSError, ValueError) as exc:
             messagebox.showerror("Print Buffer", str(exc), parent=self.root)
             return
-        self.status.set(
-            f"Print preview: {title} — use browser Print (Ctrl+P / Cmd+P)")
+        # Never silently assume that webbrowser.open() succeeded. On some
+        # Linux desktops it reports success but opens no visible tab.
+        self._show_print_preview_dialog(preview_path, title)
+
+    def _show_print_preview_dialog(self, preview_path, title):
+        """Expose a concrete URL and an explicit browser-opening action."""
+        dialog = tk.Toplevel(self.root)
+        dialog.title(f"Print Buffer — {title}")
+        dialog.transient(self.root)
+        dialog.geometry("720x210")
+        ttk.Label(dialog, text=(
+            "Print preview created from the current buffer (including unsaved edits).\n"
+            "Choose Open in Browser, then use the browser's Print command "
+            "(Ctrl+P) or Save as PDF."),
+            padding=12, wraplength=675).pack(anchor="w", fill="x")
+        url = preview_path.as_uri()
+        address = ttk.Entry(dialog, width=100)
+        address.insert(0, url)
+        address.pack(fill="x", padx=12, pady=4)
+        address.select_range(0, "end")
+        def open_preview():
+            try:
+                opened = webbrowser.open_new_tab(url)
+            except (OSError, ValueError, webbrowser.Error) as exc:
+                opened = False
+                self.status.set(f"Browser launch failed: {exc}")
+            if not opened:
+                messagebox.showwarning(
+                    "Print Preview",
+                    "The browser did not confirm opening the preview. "
+                    "Copy the URL below and paste it into your browser's address bar.",
+                    parent=dialog)
+            else:
+                self.status.set(f"Opened print preview for {title}")
+        def copy_url():
+            self.root.clipboard_clear()
+            self.root.clipboard_append(url)
+            self.status.set("Print preview URL copied")
+        controls = ttk.Frame(dialog)
+        controls.pack(fill="x", padx=12, pady=12)
+        ttk.Button(controls, text="Open in Browser",
+                   command=open_preview).pack(side="left", padx=(0, 8))
+        ttk.Button(controls, text="Copy URL",
+                   command=copy_url).pack(side="left")
+        ttk.Button(controls, text="Close",
+                   command=dialog.destroy).pack(side="right")
+        self.status.set(f"Print preview ready: {preview_path}")
+        dialog.lift()
+        dialog.focus_set()
 
     def _render_clickpad(self):
         """Replace palette buttons, never the current editor contents."""
