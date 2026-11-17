@@ -44,11 +44,10 @@ class PrintBufferGuiTests(unittest.TestCase):
         widget.insert("end", " + unsaved <math> & שלום")
         self.root.update()
         before = widget.get("1.0", "end-1c")
-        with patch("zefm.editor.gui.tk_editor.webbrowser.open",
-                   return_value=True) as opened:
+        with patch.object(self.app, "_show_print_preview_dialog") as shown:
             self.app.action("Print")
-        opened.assert_called_once()
-        target = Path(opened.call_args.args[0].removeprefix("file://"))
+        shown.assert_called_once()
+        target = shown.call_args.args[0]
         html = target.read_text(encoding="utf-8")
         self.assertIn("unsaved &lt;math&gt; &amp; שלום", html)
         self.assertEqual(self.source.read_text(encoding="utf-8"), "saved")
@@ -57,13 +56,24 @@ class PrintBufferGuiTests(unittest.TestCase):
         self.assertEqual(widget.get("1.0", "end-1c"), "saved")
 
     def test_print_preview_is_cleaned_on_quit(self):
-        with patch("zefm.editor.gui.tk_editor.webbrowser.open",
-                   return_value=True):
+        with patch.object(self.app, "_show_print_preview_dialog"):
             self.app.action("Print")
         directory = Path(self.app.print_preview_directory.name)
         self.assertTrue(directory.is_dir())
         self.app.quit()
         self.assertFalse(directory.exists())
+
+    def test_print_shows_visible_dialog_without_silent_browser_launch(self):
+        with patch("zefm.editor.gui.tk_editor.webbrowser.open_new_tab") as browser:
+            self.app.action("Print")
+        browser.assert_not_called()
+        dialogs = [x for x in self.root.winfo_children()
+                   if isinstance(x, tk.Toplevel)]
+        self.assertTrue(dialogs, "Print should explain how to open the preview")
+        previews = list(Path(self.app.print_preview_directory.name)
+                        .glob("print-*.html"))
+        self.assertEqual(len(previews), 1)
+        dialogs[-1].destroy()
 
     def test_ctrl_p_is_registered(self):
         commands = {cmd.shortcut: cmd.label
