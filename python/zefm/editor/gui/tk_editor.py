@@ -202,16 +202,16 @@ class Window:
         # not hold references to repeatedly allocated fonts.
         if not hasattr(self, "interface_font"):
             self.interface_font = tkfont.Font(
-                root=self.root, family=default_family, size=size)
+                root=self.root, family=default_family, size=size, weight="bold")
             self.interface_emphasis_font = tkfont.Font(
                 root=self.root, family=default_family, size=size, weight="bold")
         else:
-            self.interface_font.configure(size=size)
+            self.interface_font.configure(size=size, weight="bold")
             self.interface_emphasis_font.configure(size=size)
         # Tk's native menu font is a separate named font on X11; on
         # macOS the native menu bar may use the system's own font policy.
         try:
-            tkfont.nametofont("TkMenuFont", root=self.root).configure(size=size)
+            tkfont.nametofont("TkMenuFont", root=self.root).configure(size=size, weight="bold")
         except tk.TclError:
             pass
         style = ttk.Style(self.root)
