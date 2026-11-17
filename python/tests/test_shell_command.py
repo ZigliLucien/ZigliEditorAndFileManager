@@ -41,7 +41,13 @@ class ShellMenuGuiTests(unittest.TestCase):
         self.app = Window(self.root)
         self.root.update()
 
-    def test_shell_dispatch_shows_output_tab(self):
+    def test_shell_opens_interactive_terminal_in_working_directory(self):
+        with patch("zefm.editor.gui.tk_editor.open_terminal") as opened:
+            self.app.action("Shell")
+        opened.assert_called_once()
+        self.assertFalse(self.app._run_busy)
+
+    def test_one_off_command_still_captures_output(self):
         with patch("zefm.editor.gui.tk_editor.simpledialog.askstring",
                    return_value='echo "hello world"'), \
              patch("zefm.editor.gui.tk_editor.run_shell_command",
@@ -50,7 +56,7 @@ class ShellMenuGuiTests(unittest.TestCase):
              patch("threading.Thread") as thread:
             thread.return_value.start.side_effect = (
                 lambda: thread.call_args.kwargs["target"]())
-            self.app.action("Shell")
+            self.app.run_shell_once()
             self.assertTrue(self.app._run_busy)
             if self.app._run_poll_id is not None:
                 self.root.after_cancel(self.app._run_poll_id)
@@ -60,11 +66,11 @@ class ShellMenuGuiTests(unittest.TestCase):
         self.assertIn("hello world", self.app.current()[0].get("1.0", "end-1c"))
         self.assertFalse(self.app._run_busy)
 
-    def test_cancel_does_not_execute(self):
+    def test_one_off_cancel_does_not_execute(self):
         with patch("zefm.editor.gui.tk_editor.simpledialog.askstring",
                    return_value=None), \
              patch("zefm.editor.gui.tk_editor.run_shell_command") as run:
-            self.app.action("Shell")
+            self.app.run_shell_once()
         run.assert_not_called()
 
     def test_original_shell_shortcut(self):
