@@ -27,6 +27,7 @@ from ..pdf_viewer import PdfViewerPreference, launch_okular
 from ..inverse_synctex import InverseSynctexServer
 from ..run_commands import RunCommands, execute_command
 from ..shell_command import parse_shell_command, run_shell_command
+from ..terminal_launcher import open_terminal
 from ..latex_engine_preferences import LatexEnginePreference, ENGINES
 from ..print_preview import write_print_preview
 from ..clickpad import PALETTES, palette_for
@@ -865,6 +866,21 @@ class Window:
         else:
             self.status.set(f"LaTeX failed (exit {result.get('returncode', '?')}); see build log")
 
+    def open_shell_terminal(self):
+        """Open an interactive xterm / Terminal.app at the active directory."""
+        widget, editor = self.current()
+        if widget is None:
+            return
+        path = editor.state.buffer.path
+        cwd = (Path(path).expanduser().resolve().parent if path
+               else Path(self.working_directory.initial_directory()))
+        try:
+            open_terminal(cwd)
+        except (OSError, ValueError) as exc:
+            messagebox.showerror("Open Shell", str(exc), parent=self.root)
+            return
+        self.status.set(f"Interactive terminal opened in {cwd}")
+
     def run_shell_once(self):
         """Legacy Shell menu: run one explicit argv command without a shell."""
         from threading import Thread
@@ -1264,7 +1280,7 @@ class Window:
         elif name=="Quit":self.quit()
         elif name=="Debug Python":self.debug_python()
         elif name=="Compile":self.compile_latex()
-        elif name=="Shell":self.run_shell_once()
+        elif name=="Shell":self.open_shell_terminal()
         elif name=="Revert Buffer":self.revert_buffer()
         elif name=="Refresh Buffer":self.refresh_buffer()
         elif name=="Print":self.print_buffer()
@@ -1844,6 +1860,8 @@ class Window:
                 menu.add_command(label="Okular Inverse Search Setup...",
                                  command=self.show_okular_inverse_command)
                 menu.add_separator()
+                menu.add_command(label="Run One-Off Command (Capture Output)...",
+                                 command=self.run_shell_once)
                 menu.add_command(label="Configure Run Command...",
                                  command=self.configure_run_command)
                 menu.add_command(label="Run Configured Command",
