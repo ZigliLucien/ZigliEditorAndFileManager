@@ -21,6 +21,7 @@ from ..external_changes import disk_signature, changed_on_disk, ExternalChangeDi
 from ..recent_files import RecentFiles
 from ..startup_file import last_recent_buffer
 from ..cursor_positions import CursorPositions
+from ..syntax_highlight import COLORS, MAX_CHARS, syntax_spans, latex_match
 from ..latex_master import resolve_latex_master
 from ..latex_master_preferences import LatexMasterPreferences
 from ..latex_diagnostics import parse_latex_errors
@@ -70,6 +71,7 @@ class Window:
         self.views = {}
         self.print_preview_directory = None  # Created only for explicit Print.
         self.line_gutters = {}  # Tab -> (Canvas, enabled), never edits file contents.
+        self._highlight_jobs = {}  # Debounced, per-tab presentation only.
         self.saved_messages = {}
         # Disk-synchronized text; a delayed Tk <<Modified>> is not an edit.
         self.saved_snapshots = {}
@@ -284,6 +286,73 @@ class Window:
                 self._status(widget)
         self.root.after_idle(reveal)
 
+    def _schedule_highlight(self, tab, delay=180):
+        if tab not in self.views:
+            return
+        job = self._highlight_jobs.pop(tab, None)
+        if job is not None:
+            self.root.after_cancel(job)
+        self._highlight_jobs[tab] = self.root.after(
+            delay, lambda t=tab: self._refresh_highlight(t))
+
+    def _refresh_highlight(self, tab):
+        self._highlight_jobs.pop(tab, None)
+        if tab not in self.views:
+            return
+        widget, _editor = self.views[tab]
+        text = widget.get("1.0", "end-1c")
+        mode = self.buffer_modes[tab].name
+        # Remove only ZEFM's syntax tags. Search, selections, RTL tags and
+        # the Text undo stack are never modified.
+        for style in COLORS:
+            widget.tag_remove("syntax_" + style, "1.0", "end")
+        widget.tag_remove("syntax_match", "1.0", "end")
+        widget.tag_remove("syntax_unmatched", "1.0", "end")
+        if len(text) > MAX_CHARS or mode not in ("latex", "python", "java"):
+            return
+        for a, b, style in syntax_spans(text, mode):
+            widget.tag_add("syntax_" + style,
+                           f"1.0 + {a} chars", f"1.0 + {b} chars")
+        self._update_delimiter_match(tab, text)
+
+    def _update_delimiter_match(self, tab, text=None):
+        if tab not in self.views:
+            return
+        widget, _editor = self.views[tab]
+        widget.tag_remove("syntax_match", "1.0", "end")
+        widget.tag_remove("syntax_unmatched", "1.0", "end")
+        if self.buffer_modes[tab].name != "latex":
+            return
+        if text is None:
+            text = widget.get("1.0", "end-1c")
+        if len(text) > MAX_CHARS:
+            return
+        cursor = len(widget.get("1.0", "insert"))
+        result = latex_match(text, cursor)
+        if result is None:
+            return
+        source, target = result
+        for offset in ((source, target) if target is not None else (source,)):
+            tag = "syntax_match" if target is not None else "syntax_unmatched"
+            widget.tag_add(tag,
+                           f"1.0 + {offset} chars",
+                           f"1.0 + {offset + 1} chars")
+        widget.tag_raise("syntax_match")
+        widget.tag_raise("syntax_unmatched")
+
+    def _configure_syntax_tags(self, widget):
+        for style, color in COLORS.items():
+            widget.tag_configure("syntax_" + style, foreground=color)
+        widget.tag_configure("syntax_match",
+                             background="#b7efd4", foreground="#123f2d")
+        widget.tag_configure("syntax_unmatched",
+                             background="#ffd1cb", foreground="#8a1520")
+
+    def _cursor_highlight(self, widget):
+        tab = next((t for t, (w, _) in self.views.items() if w is widget), None)
+        if tab:
+            self._update_delimiter_match(tab)
+
     def new_buffer(self, path=None, text=""):
         if self._last_active_tab:
             self._remember_cursor(self._last_active_tab)
@@ -303,6 +372,7 @@ class Window:
                     self._draw_line_numbers(w, c))
         self.line_gutters[str(frame)] = (gutter, False)
         widget.insert("1.0",text);widget.edit_reset();widget.edit_modified(False)
+        self._configure_syntax_tags(widget)
         editor=TPEditor(self.clipboard,Buffer(text,path))
         self.views[str(frame)] = (widget,editor)
         self.saved_messages[str(frame)] = None
@@ -319,10 +389,10 @@ class Window:
         self._last_active_tab = str(frame)
         self._restore_cursor(widget, path)
         widget.bind("<<Modified>>",lambda event,w=widget,e=editor:(self._changed(w,e), self.root.after_idle(lambda: self._draw_line_numbers(w))))
-        widget.bind("<KeyRelease>", lambda event,w=widget:(self._status(w), self._draw_line_numbers(w)))
+        widget.bind("<KeyRelease>", lambda event,w=widget:(self._status(w), self._draw_line_numbers(w), self._cursor_highlight(w)))
         widget.bind("<KeyPress>", self._vim_key)
         widget.bind("<Tab>", self._mode_tab)
-        widget.bind("<ButtonRelease-1>", lambda event,w=widget:self._status(w))
+        widget.bind("<ButtonRelease-1>", lambda event,w=widget:(self._status(w), self._cursor_highlight(w)))
         # Prioritize native context clicks before Tk Text class bindings.
         popup_tag = "ZefmRecentFilesPopup"
         if popup_tag not in widget.bindtags():
@@ -336,6 +406,7 @@ class Window:
         self.root.bind_class(popup_tag, "<Shift-F10>", self._show_recent_files_popup)
         self._status(widget)
         self._refresh_browser_open_paths()
+        self._schedule_highlight(str(frame), delay=10)
         return widget
 
     def _refresh_browser_open_paths(self):
@@ -427,6 +498,7 @@ class Window:
         widget, _editor = self.current()
         if widget is not None:
             self._status(widget)
+            self._cursor_highlight(widget)
         self._check_external_changes()
 
     def _disk_monitor_tick(self):
@@ -463,6 +535,10 @@ class Window:
                         self.saved_messages[tab] = None
                     break
             widget.edit_modified(False)
+            for tab, (w, _e) in self.views.items():
+                if w is widget:
+                    self._schedule_highlight(tab)
+                    break
             self._update_title(widget,editor)
             self._status(widget)
 
@@ -1184,6 +1260,7 @@ class Window:
         except ValueError as exc:
             messagebox.showerror('Buffer Mode',str(exc),parent=self.root);return
         self.buffer_modes[self.tabs.select()]=mode
+        self._schedule_highlight(self.tabs.select(), delay=1)
         self._status(widget)
 
     def _sync_selection(self, widget, editor):
@@ -1258,6 +1335,7 @@ class Window:
         self._update_title(widget, editor)
         self._status(widget)
         self._draw_line_numbers(widget)
+        self._schedule_highlight(tab, delay=1)
         self._check_external_changes()
         self.status.set(
             f"Refreshed buffer display: {Path(editor.state.buffer.path).name if editor.state.buffer.path else 'Untitled'}"
@@ -2079,6 +2157,9 @@ class Window:
             "Unsaved changes","Close this buffer without saving?",parent=self.root):
             return
         self._remember_cursor(tab)
+        job = self._highlight_jobs.pop(tab, None)
+        if job is not None:
+            self.root.after_cancel(job)
         self.tabs.forget(tab)
         del self.views[tab]
         self.saved_messages.pop(tab,None)
@@ -2409,6 +2490,7 @@ class Window:
         self.external_changed_tabs.discard(tab)
         self.saved_messages[tab] = None
         self.buffer_modes[tab] = self.mode_registry.detect(loaded.path, loaded.text)
+        self._schedule_highlight(tab, delay=1)
         self.tabs.tab(tab, text=Path(loaded.path).name)
         self._update_title(widget, editor)
         self._check_external_changes()
@@ -2787,6 +2869,9 @@ class Window:
         if self._compile_poll_id is not None:
             self.root.after_cancel(self._compile_poll_id)
             self._compile_poll_id = None
+        for job in self._highlight_jobs.values():
+            self.root.after_cancel(job)
+        self._highlight_jobs.clear()
         if self.disk_poll_id is not None:
             self.root.after_cancel(self.disk_poll_id)
             self.disk_poll_id = None
