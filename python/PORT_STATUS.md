@@ -1371,3 +1371,24 @@ listing's directory/page/sort/filter context.
   while automatic mode follows the restored file.
 - Added `tests.test_startup_recent_file` for Unicode restoration,
   stale entries, empty fallback, single-tab startup, and explicit New.
+
+
+### v122 — restore cursor position on reopening the last file
+
+- Added a separate, bounded UTF-8 JSON store
+  (`~/.config/zefm/cursor_positions.json`) for the insertion position of
+  recently edited documents. It is independent of the Recent Files list,
+  so tracking a cursor does **not** change which file is selected at startup.
+- On launch, the v121 last-recent-file restore now also positions the Tk
+  insertion cursor at its previous line and column and scrolls that point
+  into view once the widget is mapped. If a file has been shortened, Tk's
+  index normalization clamps the position to valid contents.
+- The cursor location is remembered when saving (including F4's
+  save-before-LaTeX-compile), creating a new buffer, switching tabs,
+  closing a tab, or completing a confirmed Quit. Cancelled Quit does
+  not replace the stored cursor position.
+- The cursor metadata is recorded atomically and never modifies
+  document text, saved snapshots or Undo history. Invalid historic
+  entries are ignored, with up to 100 file locations retained.
+- Added `tests.test_cursor_restore` for restored positions, Unicode
+  paths, shortened documents, tab changes and cancelled exits.
