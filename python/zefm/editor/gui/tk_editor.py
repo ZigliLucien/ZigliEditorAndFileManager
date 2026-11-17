@@ -337,8 +337,10 @@ class Window:
             widget.tag_add(tag,
                            f"1.0 + {offset} chars",
                            f"1.0 + {offset + 1} chars")
+        # Keep normal text selection visible above delimiter emphasis.
         widget.tag_raise("syntax_match")
         widget.tag_raise("syntax_unmatched")
+        widget.tag_raise("sel")
 
     def _configure_syntax_tags(self, widget):
         for style, color in COLORS.items():
@@ -347,6 +349,7 @@ class Window:
                              background="#b7efd4", foreground="#123f2d")
         widget.tag_configure("syntax_unmatched",
                              background="#ffd1cb", foreground="#8a1520")
+        widget.tag_raise("sel")
 
     def _cursor_highlight(self, widget):
         tab = next((t for t, (w, _) in self.views.items() if w is widget), None)
