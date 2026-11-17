@@ -32,7 +32,7 @@ def save_buffer(buffer, path=None):
             temporary = Path(output.name)
             if os.name == "posix":
                 os.fchmod(output.fileno(),
-                          original_mode if original_mode is not None else 0o666 & ~_umask())
+                          original_mode if original_mode is not None else 0o600)
             output.write(buffer.text)
             output.flush()
             os.fsync(output.fileno())
@@ -44,9 +44,3 @@ def save_buffer(buffer, path=None):
     buffer.path = str(p)
     buffer.modified = False
 
-
-def _umask():
-    """Inspect current process umask without permanently modifying it."""
-    mask = os.umask(0)
-    os.umask(mask)
-    return mask
