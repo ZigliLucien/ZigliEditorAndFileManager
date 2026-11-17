@@ -1392,3 +1392,27 @@ listing's directory/page/sort/filter context.
   entries are ignored, with up to 100 file locations retained.
 - Added `tests.test_cursor_restore` for restored positions, Unicode
   paths, shortened documents, tab changes and cancelled exits.
+
+
+### v123 — syntax highlighting (LaTeX, Python, Java) and LaTeX delimiter checks
+
+- Added lightweight, dependency-free coloring for `.tex`, `.py`,
+  and `.java` buffers. LaTeX commands, comments, and braces are colored;
+  Python and Java keywords, strings, comments, and numeric literals have
+  separate colors. The existing file-extension mode detection selects
+  the lexer automatically, and Mode → Select Buffer Mode updates it.
+- In LaTeX buffers, positioning the insertion cursor on or immediately
+  after a brace, bracket or parenthesis highlights **both matching
+  delimiters** in green; an unmatched delimiter is highlighted red.
+  Escaped delimiters (such as `\\{`) and text after an unescaped
+  `%` comment marker are ignored for bracket matching.
+- Tk Text tags implement highlighting without editing any document
+  text, adding undo steps, changing saved state, or interfering with
+  file content. Recoloring is debounced after edits and refreshed when
+  the mode or buffer changes. Files over 250,000 characters are left
+  uncolored in this initial implementation to avoid UI stalls.
+- Added `tests.test_syntax_highlight` for tokenization, comments,
+  escapes, nested delimiters, unmatched braces, mode selection, and
+  GUI tags preserving buffer text and modified state.
+- Scope: simple visual assistance, not a full LaTeX syntax validator
+  or Java/Python language server. No external packages required.
