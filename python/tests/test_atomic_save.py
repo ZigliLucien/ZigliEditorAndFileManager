@@ -33,6 +33,18 @@ class AtomicSaveTests(unittest.TestCase):
         save_buffer(buffer)
         self.assertEqual(self.target.stat().st_mode & 0o777, 0o640)
 
+    def test_save_through_symlink_preserves_link(self):
+        if os.name != "posix":
+            self.skipTest("Symlink behavior requires POSIX")
+        original = self.folder / "original.tex"
+        original.write_text("before", encoding="utf-8")
+        self.target.symlink_to(original)
+        buffer = Buffer(text="updated", path=str(self.target), modified=True)
+        save_buffer(buffer)
+        self.assertTrue(self.target.is_symlink())
+        self.assertEqual(original.read_text(encoding="utf-8"), "updated")
+        self.assertEqual(buffer.path, str(self.target))
+
     def test_replace_failure_preserves_existing_file_and_buffer_dirty(self):
         self.target.write_text("original", encoding="utf-8")
         buffer = Buffer(text="new content", path=str(self.target), modified=True)
