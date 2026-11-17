@@ -1326,3 +1326,26 @@ listing's directory/page/sort/filter context.
 - Added `tests.test_atomic_save` for UTF-8 round trips, permission
   preservation, symbolic links, simulated fsync failure and failed
   replacement cleanup.
+
+
+### v120 — prevent stale or unsaved Tk buffers from entering Browser Quick Edit
+
+- Audited coordination between the Tk editor and the browser Quick Edit
+  feature. The browser's POST path already refuses to save over a file
+  when its SHA-256 content digest differs from the version loaded into
+  the browser.
+- Fixed a separate Tk-side guard: `edit_current_file_in_browser()`
+  previously compared live Text content with `editor.state.buffer.text`,
+  which is updated on `<<Modified>>` and therefore can match **unsaved**
+  changes. It now compares against the tab's last saved snapshot,
+  updates the unsaved indicator when necessary, and refuses the browser
+  launch until the buffer has been saved.
+- Before launching Quick Edit, ZEFM now checks the disk signature against
+  the last known version. If another tool changed the file, the browser
+  launch is blocked and the external-change notice is refreshed, so
+  the user can decide whether to reload or keep the Tk buffer.
+- No silent reload or overwrite is performed. Normal browser and Tk
+  edit paths, shortcuts and ordinary Save behavior remain unchanged.
+- Added `tests.test_browser_quick_edit_safety_gui` covering a model
+  already synchronized to unsaved text, a stale disk file, and a
+  clean file that is allowed through to browser Quick Edit.
