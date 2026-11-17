@@ -1416,3 +1416,23 @@ listing's directory/page/sort/filter context.
   GUI tags preserving buffer text and modified state.
 - Scope: simple visual assistance, not a full LaTeX syntax validator
   or Java/Python language server. No external packages required.
+
+
+### v124 — LaTeX environment matching
+
+- Extended the v123 LaTeX delimiter highlighter to recognize
+  `\\begin{environment}` and `\\end{environment}` commands.
+  Moving the insertion cursor inside either command or just after it
+  highlights **both full commands** with the same green background.
+- Supports nested environments, including starred environment names
+  such as `align*`. A missing or mismatched environment name is
+  highlighted red; no text is altered automatically.
+- Commented-out commands and escaped backslashes are ignored using
+  the same lightweight LaTeX lexical scan as brace matching.
+  The original `{}`, `[]` and `()` delimiter highlighting remains
+  available, along with Python and Java colors.
+- This is structural source assistance, not a full TeX expansion engine;
+  verbatim-style environments and macro-defined syntax may still
+  require LaTeX compilation to diagnose accurately.
+- Expanded `tests.test_syntax_highlight` with nested, mismatched,
+  commented and escaped environment cases and GUI tag/undo assertions.
