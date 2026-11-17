@@ -1094,3 +1094,26 @@ listing's directory/page/sort/filter context.
 - Shortcut regression tests assert that the retired command and its
   accelerator are absent. Existing configured Run commands and output
   tabs remain available.
+
+
+### v109 — Linux Print discovery and manual browser fallback
+
+- Addressed user feedback that `Ctrl+P` sometimes showed no obvious browser
+  change under Linux. The previous path called `webbrowser.open()` and
+  relied on its return value; this can be an unreliable indication that
+  a visible browser tab actually appeared.
+- **File → Print (Ctrl+P)** now always creates a local HTML preview
+  from the current in-memory buffer and shows an explicit **Print Buffer**
+  dialog with a visible `file://` URL, **Open in Browser**, **Copy URL**,
+  and **Close** controls. No printer job is sent automatically.
+- **Open in Browser** requests a new browser tab. If the browser cannot
+  confirm opening it, ZEFM explains that the URL can be copied and
+  pasted into the browser address bar.
+- The preview stays available for the lifetime of that ZEFM editor
+  session, including while the dialog is closed. As before, it retains
+  UTF-8 text, does not save or modify the current document, and does
+  not reset Undo.
+- Updated `tests.test_print_buffer` to check explicit preview creation,
+  no silent browser launch, and unchanged document/undo contents.
+- Shell, QuickMail, and Get Mail are **retained** as possible useful
+  workflows pending a user-guided update; none is retired here.
