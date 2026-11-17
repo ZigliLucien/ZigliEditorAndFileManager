@@ -21,6 +21,29 @@ class ShortcutTests(unittest.TestCase):
     def test_duplicate_rejected(self):
         with self.assertRaises(ValueError):
             load_menus(self.config({'shortcuts': {'Find': 'Ctrl+R'}}))
+    def test_fixed_new_close_shortcuts_cannot_be_stolen(self):
+        for shortcut in ('Ctrl+N', 'Ctrl+Shift+W', 'Shift+Ctrl+W'):
+            with self.subTest(shortcut=shortcut):
+                with self.assertRaisesRegex(ValueError, 'Duplicate shortcut'):
+                    load_menus(self.config(
+                        {'shortcuts': {'Find': shortcut}}))
+
+    def test_malformed_shortcuts_are_rejected(self):
+        for shortcut in ('NotAKey', 'Ctrl+', 'Ctrl+Ctrl+G',
+                         'Shift+DeleteEverything', 'Q', 'Ctrl+Q+P',
+                         'Ctrl+Shift+Shift+G', ' Ctrl+G'):
+            with self.subTest(shortcut=shortcut):
+                with self.assertRaises(ValueError):
+                    load_menus(self.config(
+                        {'shortcuts': {'Find': shortcut}}))
+
+    def test_function_keys_and_disabled_mapping_remain_supported(self):
+        menu = load_menus(self.config({'shortcuts': {
+            'Find': 'F12', 'Replace': None}}))
+        edit = {c.label: c.shortcut for c in menu['Edit']}
+        self.assertEqual(edit['Find'], 'F12')
+        self.assertIsNone(edit['Replace'])
+
     def test_unknown_rejected(self):
         with self.assertRaises(ValueError):
             load_menus(self.config({'shortcuts': {'Nonexistent': 'Ctrl+G'}}))
