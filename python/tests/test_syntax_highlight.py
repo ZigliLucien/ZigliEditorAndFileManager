@@ -95,6 +95,76 @@ class SyntaxHighlightTests(unittest.TestCase):
         self.assertIsNone(latex_environment_match(
             r"\\begin{escaped}", len(r"\\begin{escaped}")))
 
+    def test_verbatim_region_ignores_fake_braces_comments_and_commands(self):
+        text = (r"\begin{verbatim}" "\n"
+                r"{ [( % \begin{fake} \end{fake}" "\n"
+                r"\end{verbatim}" "\n"
+                r"\frac{a}{b}")
+        fake = text.index("{ [(")
+        self.assertIsNone(latex_match(text, fake + 1))
+        self.assertIsNone(latex_environment_match(
+            text, text.index(r"\begin{fake}") + 4))
+        self.assertIsNone(latex_environment_match(
+            text, text.index(r"\end{fake}") + 4))
+        start = text.index(r"\begin{verbatim}")
+        close = text.index(r"\end{verbatim}")
+        self.assertEqual(
+            latex_environment_match(text, start + 4),
+            ((start, start + len(r"\begin{verbatim}")),
+             (close, close + len(r"\end{verbatim}"))))
+        marked = [(text[x:y], style) for x, y, style
+                  in syntax_spans(text, "latex")]
+        self.assertTrue(any(style == "verbatim" and r"\begin{fake}" in word
+                            for word, style in marked))
+        self.assertIn((r"\frac", "command"), marked)
+        self.assertNotIn(("% " + r"\begin{fake} \end{fake}", "comment"), marked)
+
+    def test_minted_and_lstlisting_do_not_confuse_outer_environment(self):
+        for name in ("minted", "lstlisting", "Verbatim", "verbatim*"):
+            with self.subTest(name=name):
+                opening = r"\begin{" + name + "}"
+                closing = r"\end{" + name + "}"
+                text = (r"\begin{equation}" "\n"
+                        + opening + "\n"
+                        + r"\end{equation} { % \begin{misleading}" + "\n"
+                        + closing + "\n"
+                        + r"\end{equation}")
+                outer_close = text.rindex(r"\end{equation}")
+                outer = latex_environment_match(text, 3)
+                self.assertEqual(outer, (
+                    (0, len(r"\begin{equation}")),
+                    (outer_close, len(text))))
+                inner_start = text.index(opening)
+                inner_end = text.index(closing)
+                self.assertEqual(
+                    latex_environment_match(text, inner_start + 4),
+                    ((inner_start, inner_start + len(opening)),
+                     (inner_end, inner_end + len(closing))))
+
+    def test_inline_verb_and_lstinline_do_not_create_delimiters(self):
+        for name in (r"\verb", r"\verb*", r"\lstinline"):
+            with self.subTest(name=name):
+                text = name + "|{ \\\\end{fake} % ( }|" + " " + r"\frac{x}{y}"
+                fake_brace = text.index("{")
+                self.assertIsNone(latex_match(text, fake_brace + 1))
+                self.assertIsNone(latex_environment_match(
+                    text, text.index(r"\end{fake}") + 3))
+                marked = [(text[x:y], style) for x, y, style
+                          in syntax_spans(text, "latex")]
+                self.assertIn((r"\frac", "command"), marked)
+                self.assertTrue(any(style == "verbatim" and name in word
+                                    for word, style in marked))
+
+    def test_unclosed_verbatim_does_not_color_remaining_commands(self):
+        text = r"\begin{verbatim}" + "\n" + r"{ % \end{equation}"
+        marked = [(text[a:b], style) for a, b, style
+                  in syntax_spans(text, "latex")]
+        self.assertEqual([word for word, style in marked
+                          if style == "command"], [r"\begin{verbatim}"])
+        self.assertIsNone(latex_match(text, text.index("{", 15) + 1))
+        self.assertEqual(latex_environment_match(text, 4),
+                         ((0, len(r"\begin{verbatim}")), None))
+
     def test_size_cap(self):
         text = "x" * (MAX_CHARS + 1)
         self.assertEqual(syntax_spans(text, "latex"), [])
@@ -155,6 +225,19 @@ class SyntaxHighlightGuiTests(unittest.TestCase):
         self.app._refresh_highlight(self.app.tabs.select())
         self.assertTrue(widget.tag_ranges("syntax_unmatched"))
         self.assertFalse(widget.tag_ranges("syntax_match"))
+
+    def test_verbatim_gui_tag_and_no_modified_flag(self):
+        source = (r"\begin{verbatim}" "\n"
+                  r"{ \begin{equation} % }\end{verbatim}" "\n"
+                  r"\frac{a}{b}")
+        self.app.new_buffer(path=str(self.root_path / "literal.tex"),
+                            text=source)
+        widget, _ = self.app.current()
+        widget.edit_modified(False)
+        self.app._refresh_highlight(self.app.tabs.select())
+        self.assertTrue(widget.tag_ranges("syntax_verbatim"))
+        self.assertEqual(widget.get("1.0", "end-1c"), source)
+        self.assertFalse(widget.edit_modified())
 
     def test_python_and_java_modes(self):
         for name, text, tag in (
