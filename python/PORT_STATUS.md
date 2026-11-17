@@ -1213,3 +1213,19 @@ listing's directory/page/sort/filter context.
   not revived, and the new read-only Maildir browser cannot itself
   fetch POP/IMAP mail. Integrating Get Mail with the user's existing
   getmail configuration remains a subsequent task.
+
+
+### v114 — retire QuickMail and Get Mail
+
+- By user request, removed **Run → QuickMail** and **Run → Get Mail**
+  and unassigned their historical `Ctrl+M` and `Ctrl+Shift+M`
+  shortcuts. They are intentionally retired, not pending porting work.
+- Removed the v113 QuickMail mailto-draft implementation, its UI, and
+  its dedicated tests; there is no need to keep an unused email sending
+  pathway or duplicate mail composition.
+- **File → Open Local Email Archive in Browser...** remains available
+  and unchanged. It displays existing Maildir mail but does not fetch
+  or transmit messages.
+- External getmail/DavMail workflows and the user's Emacs mail
+  composition workflow remain separate from ZEFM.
+- Expanded shortcut tests to verify both actions and shortcuts are absent.
