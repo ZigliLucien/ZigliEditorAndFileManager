@@ -17,6 +17,7 @@ COLORS = {
     "number": "#a45116",
     "command": "#165eaa",
     "brace": "#86449a",
+    "verbatim": "#52606b",
 }
 
 
@@ -70,8 +71,20 @@ def java_spans(text):
     return result
 
 
+_VERBATIM_ENVIRONMENTS = frozenset({
+    "verbatim", "verbatim*", "Verbatim", "Verbatim*",
+    "lstlisting", "minted", "comment",
+})
+_INLINE_VERBATIM = re.compile(r"\\(?:verb|lstinline)\*?")
+
+
 def latex_scan(text):
-    """Return syntax spans and structural delimiters outside comments/escapes."""
+    """Return syntax spans and structural delimiters outside literal regions.
+
+    Verbatim-like environments suppress all ordinary syntax inside them,
+    including fake \begin/\end commands, comments, braces and parentheses.
+    Inline \verb/\lstinline bodies are also treated as literal text.
+    """
     spans, brackets = [], []
     i, n = 0, len(text)
     while i < n:
@@ -82,6 +95,47 @@ def latex_scan(text):
             spans.append((i, end, "comment"))
             i = end
         elif c == "\\":
+            # A matching \begin{verbatim-like} initiates raw content.
+            # The first exact \end{name} closes it, regardless of any
+            # seemingly valid TeX commands within the raw content.
+            environment = _ENVIRONMENT.match(text, i)
+            if (environment is not None
+                    and environment.group(1) == "begin"
+                    and environment.group(2) in _VERBATIM_ENVIRONMENTS):
+                name = environment.group(2)
+                opening_end = environment.end()
+                marker = r"\end{" + name + "}"
+                closing_start = text.find(marker, opening_end)
+                closing_end = n if closing_start < 0 else closing_start
+                spans.append((i, opening_end, "command"))
+                if opening_end < closing_end:
+                    spans.append((opening_end, closing_end, "verbatim"))
+                if closing_start >= 0:
+                    spans.append((closing_start, closing_start + len(marker),
+                                  "command"))
+                    i = closing_start + len(marker)
+                else:
+                    i = n
+                continue
+
+            # \verb|{\end{fake} % }| and \lstinline!code! contain no
+            # structural TeX syntax. The delimiter is the next nonletter,
+            # nonwhitespace character; an unfinished body ends at newline.
+            inline = _INLINE_VERBATIM.match(text, i)
+            if inline is not None:
+                delimiter_at = inline.end()
+                if (delimiter_at < n
+                        and not text[delimiter_at].isspace()
+                        and not text[delimiter_at].isalpha()):
+                    delimiter = text[delimiter_at]
+                    newline = text.find("\n", delimiter_at + 1)
+                    boundary = n if newline < 0 else newline
+                    closing = text.find(delimiter, delimiter_at + 1, boundary)
+                    end = closing + 1 if closing >= 0 else boundary
+                    spans.append((i, end, "verbatim"))
+                    i = end
+                    continue
+
             end = i + 1
             if end < n and (text[end].isalpha() or text[end] == "@"):
                 while end < n and (text[end].isalpha() or text[end] == "@"):
@@ -100,7 +154,6 @@ def latex_scan(text):
         else:
             i += 1
     return spans, brackets
-
 
 _OPEN = {"{": "}", "[": "]", "(": ")"}
 _CLOSE = {value: key for key, value in _OPEN.items()}
