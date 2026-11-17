@@ -6,7 +6,7 @@ from unittest.mock import patch
 import unittest
 
 from zefm.editor.syntax_highlight import (
-    syntax_spans, latex_match, MAX_CHARS)
+    syntax_spans, latex_match, latex_environment_match, MAX_CHARS)
 from zefm.editor.gui.tk_editor import Window
 from zefm.editor.recent_files import RecentFiles
 
@@ -56,6 +56,45 @@ class SyntaxHighlightTests(unittest.TestCase):
         self.assertIsNone(latex_match(text, text.rindex("{") + 1))
         self.assertIsNone(latex_match("plain", 3))
 
+    def test_environment_pair_nested_and_starred(self):
+        text = (r"\begin{align*}" "\n"
+                r"  \begin{split} x=y \end{split}" "\n"
+                r"\end{align*}")
+        outer = (0, len(r"\begin{align*}"))
+        closing_start = text.index(r"\end{align*}")
+        outer_end = (closing_start, len(text))
+        self.assertEqual(latex_environment_match(text, 3),
+                         (outer, outer_end))
+        self.assertEqual(latex_environment_match(text, len(text)),
+                         (outer_end, outer))
+        inner_start = text.index(r"\begin{split}")
+        inner_end = text.index(r"\end{split}")
+        self.assertEqual(
+            latex_environment_match(text, inner_start + 6),
+            ((inner_start, inner_start + len(r"\begin{split}")),
+             (inner_end, inner_end + len(r"\end{split}"))))
+
+    def test_environment_mismatch_is_unmatched(self):
+        text = r"\begin{equation} x \end{align}"
+        self.assertEqual(latex_environment_match(text, 5),
+                         ((0, len(r"\begin{equation}")), None))
+        last = text.index(r"\end{align}")
+        self.assertEqual(latex_environment_match(text, last + 5),
+                         ((last, len(text)), None))
+
+    def test_environment_comments_and_escaped_commands_ignored(self):
+        text = (r"% \begin{fake}" "\n"
+                r"\begin{real} \end{real} % \end{fake}")
+        self.assertIsNone(latex_environment_match(text, 5))
+        start = text.index(r"\begin{real}")
+        end = text.index(r"\end{real}")
+        self.assertEqual(
+            latex_environment_match(text, start + 3),
+            ((start, start + len(r"\begin{real}")),
+             (end, end + len(r"\end{real}"))))
+        self.assertIsNone(latex_environment_match(
+            r"\\begin{escaped}", len(r"\\begin{escaped}")))
+
     def test_size_cap(self):
         text = "x" * (MAX_CHARS + 1)
         self.assertEqual(syntax_spans(text, "latex"), [])
@@ -94,6 +133,28 @@ class SyntaxHighlightGuiTests(unittest.TestCase):
         self.assertFalse(widget.edit_modified())
         self.assertTrue(widget.tag_ranges("syntax_command"))
         self.assertTrue(widget.tag_ranges("syntax_match"))
+
+    def test_environment_pair_tags_cover_complete_commands(self):
+        source = r"\begin{equation} x+y \end{equation}"
+        self.app.new_buffer(path=str(self.root_path / "env.tex"), text=source)
+        widget, _editor = self.app.current()
+        widget.mark_set("insert", "1.3")
+        widget.edit_modified(False)
+        self.app._refresh_highlight(self.app.tabs.select())
+        ranges = list(widget.tag_ranges("syntax_match"))
+        self.assertEqual(len(ranges), 4)
+        self.assertEqual(widget.get(ranges[0], ranges[1]), r"\begin{equation}")
+        self.assertEqual(widget.get(ranges[2], ranges[3]), r"\end{equation}")
+        self.assertFalse(widget.edit_modified())
+
+    def test_mismatched_environment_tag_is_red(self):
+        source = r"\begin{equation} x \end{align}"
+        self.app.new_buffer(path=str(self.root_path / "bad.tex"), text=source)
+        widget, _editor = self.app.current()
+        widget.mark_set("insert", "1.4")
+        self.app._refresh_highlight(self.app.tabs.select())
+        self.assertTrue(widget.tag_ranges("syntax_unmatched"))
+        self.assertFalse(widget.tag_ranges("syntax_match"))
 
     def test_python_and_java_modes(self):
         for name, text, tag in (
