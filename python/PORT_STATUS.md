@@ -1271,3 +1271,14 @@ listing's directory/page/sort/filter context.
   `tests.test_interface_fonts_gui` cover settings, tab/status styles,
   live resizing, and preservation of the editor's separate font size.
 - No change to buffer contents, keyboard assignments, or file formats.
+
+
+### v117 — modest bold interface typography
+
+- By user request, retained the v116 interface size and added a bold
+  font weight to the menu labels (where Tk permits), notebook tabs and
+  bottom status detail. The Save indicator was already bold and remains so.
+- Did not alter the editing area's separately configured document font,
+  interface spacing, or bottom border geometry.
+- Expanded `tests.test_interface_fonts_gui` to assert the intended
+  interface font weights.
