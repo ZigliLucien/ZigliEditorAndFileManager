@@ -20,6 +20,7 @@ from ..working_directory import WorkingDirectory
 from ..external_changes import disk_signature, changed_on_disk, ExternalChangeDismissals
 from ..recent_files import RecentFiles
 from ..startup_file import last_recent_buffer
+from ..cursor_positions import CursorPositions
 from ..latex_master import resolve_latex_master
 from ..latex_master_preferences import LatexMasterPreferences
 from ..latex_diagnostics import parse_latex_errors
@@ -114,6 +115,8 @@ class Window:
         self._browser_open_paths = frozenset()
         self.browser_poll_id = None
         self.recent_files = RecentFiles()
+        self.cursor_positions = CursorPositions()
+        self._last_active_tab = None
         self.recent_menu = None
         self.search_term = ""
         self.vim_normal = False
@@ -257,6 +260,30 @@ class Window:
         self.working_directory.used_file(previous.path)
         self.status.set(f"Restored recent file: {Path(previous.path).name}")
 
+    def _remember_cursor(self, tab):
+        """Persist the insertion position; do not reorder recent files."""
+        if tab not in self.views:
+            return
+        widget, editor = self.views[tab]
+        if editor.state.buffer.path:
+            self.cursor_positions.record(
+                editor.state.buffer.path, widget.index("insert"))
+
+    def _restore_cursor(self, widget, path):
+        """Clamp old positions when a document has become shorter."""
+        if not path:
+            return
+        index = self.cursor_positions.get(path)
+        if index is None:
+            return
+        widget.mark_set("insert", widget.index(index))
+        # The Text widget may not yet be mapped while constructing Window.
+        def reveal():
+            if widget.winfo_exists():
+                widget.see("insert")
+                self._status(widget)
+        self.root.after_idle(reveal)
+
     def new_buffer(self, path=None, text=""):
         frame=ttk.Frame(self.tabs)
         widget=tk.Text(frame, wrap="none", undo=True, maxundo=-1, font=self.editor_font)
@@ -287,6 +314,8 @@ class Window:
         self.buffer_keymaps[str(frame)] = None
         self.tabs.add(frame,text=path.rsplit("/",1)[-1] if path else "Untitled")
         self.tabs.select(frame);widget.focus_set()
+        self._last_active_tab = str(frame)
+        self._restore_cursor(widget, path)
         widget.bind("<<Modified>>",lambda event,w=widget,e=editor:(self._changed(w,e), self.root.after_idle(lambda: self._draw_line_numbers(w))))
         widget.bind("<KeyRelease>", lambda event,w=widget:(self._status(w), self._draw_line_numbers(w)))
         widget.bind("<KeyPress>", self._vim_key)
@@ -388,6 +417,11 @@ class Window:
             self.external_notice.pack(side="bottom", fill="x", before=self.tabs)
 
     def _tab_changed(self, event=None):
+        current_tab = self.tabs.select()
+        previous = self._last_active_tab
+        if previous and previous != current_tab:
+            self._remember_cursor(previous)
+        self._last_active_tab = current_tab
         widget, _editor = self.current()
         if widget is not None:
             self._status(widget)
@@ -2042,6 +2076,7 @@ class Window:
         if dirty and not messagebox.askyesno(
             "Unsaved changes","Close this buffer without saving?",parent=self.root):
             return
+        self._remember_cursor(tab)
         self.tabs.forget(tab)
         del self.views[tab]
         self.saved_messages.pop(tab,None)
@@ -2515,6 +2550,7 @@ class Window:
             self.working_directory.used_file(path)
             self._refresh_browser_open_paths()
             self.recent_files.record(path)
+            self._remember_cursor(current_tab)
             self.tabs.tab(self.tabs.select(),text=path.rsplit("/",1)[-1])
             widget.edit_modified(False)
             editor.state.buffer.modified=False
@@ -2733,6 +2769,9 @@ class Window:
         if dirty_tabs:
             if not messagebox.askyesno("Unsaved changes","Quit with unsaved buffers?",parent=self.root):
                 return
+        # Save all tab positions only after quit has been confirmed.
+        for tab in list(self.views):
+            self._remember_cursor(tab)
         if self._inverse_synctex_poll_id is not None:
             self.root.after_cancel(self._inverse_synctex_poll_id)
             self._inverse_synctex_poll_id = None
