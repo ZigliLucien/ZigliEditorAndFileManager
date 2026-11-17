@@ -1117,3 +1117,27 @@ listing's directory/page/sort/filter context.
   no silent browser launch, and unchanged document/undo contents.
 - Shell, QuickMail, and Get Mail are **retained** as possible useful
   workflows pending a user-guided update; none is retired here.
+
+
+### v110 — original Shell command restored as an argv-only one-off runner
+
+- Responding to user preference to retain Shell, QuickMail and Get Mail,
+  implemented **Run → Shell (Ctrl+Shift+Z)** as an immediate command prompt
+  rather than reviving the Java popup/output-window plumbing.
+- Parses a quoted command into an explicit argument list using `shlex`,
+  with punctuation-aware rejection of pipes, redirects, semicolons and
+  other shell operators. No `shell=True`, shell startup, or command
+  substitution. The executed program has normal local user permissions.
+- Executes from the current file's directory, or the configured ZEFM
+  working directory for an untitled buffer. Captures bounded stdout and
+  stderr, enforces the existing 30-second Run timeout, and returns the
+  result to a new editor output tab via Tk's main-thread queue.
+- Unlike the per-mode **Run Configured Command**, this one-off action
+  does not require a saved buffer, does not change file contents, and
+  does not persist the command.
+- Added `tests.test_shell_command` covering quoting, invalid operators,
+  Unicode output, menu dispatch, output-tab presentation, cancellation,
+  and original shortcut.
+- **QuickMail and Get Mail remain candidates for explicit implementation**
+  rather than automatic retirement. Close Shell Window stays retired
+  because output now lives in ordinary editor tabs.
