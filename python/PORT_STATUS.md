@@ -1082,3 +1082,15 @@ listing's directory/page/sort/filter context.
   actions. Java **QuickMail** and **Get Mail** are also distinct from
   the new browser-based local Maildir access. These older actions
   remain for explicit retirement or a focused later implementation.
+
+
+### v108 — retire Close Shell Window
+
+- Removed **Run → Close Shell Window** as an obsolete Java-specific UI
+  action. The old implementation disposed a separate Java output window;
+  Python's configured Run commands show output in editor tabs instead.
+- Released its original `Ctrl+W` accelerator without reassigning it.
+  The current **Ctrl+Shift+W** Close Buffer shortcut remains unchanged.
+- Shortcut regression tests assert that the retired command and its
+  accelerator are absent. Existing configured Run commands and output
+  tabs remain available.
