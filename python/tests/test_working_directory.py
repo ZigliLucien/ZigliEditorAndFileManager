@@ -41,6 +41,37 @@ class DirectoryTests(unittest.TestCase):
             state.write_text(json.dumps({'last_directory':str(root/'gone')}))
             self.assertEqual(WorkingDirectory(str(root),True,state).initial_directory(),str(root.resolve()))
 
+    def test_explicit_selection_stays_fixed_through_other_files_and_restart(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            fixed = root / 'fixed'; fixed.mkdir()
+            elsewhere = root / 'elsewhere'; elsewhere.mkdir()
+            state = root / 'settings' / 'session.json'
+            wd = WorkingDirectory(str(root), True, state)
+            wd.used_file(elsewhere / 'first.tex')
+            self.assertEqual(wd.initial_directory(), str(elsewhere.resolve()))
+            wd.set_directory(fixed)
+            wd.used_file(elsewhere / 'second.tex')
+            self.assertTrue(wd.pinned)
+            self.assertEqual(wd.initial_directory(), str(fixed.resolve()))
+            restored = WorkingDirectory(str(root), True, state)
+            self.assertTrue(restored.pinned)
+            restored.used_file(elsewhere / 'third.tex')
+            self.assertEqual(restored.initial_directory(), str(fixed.resolve()))
+            restored.use_last_file_directory()
+            restored.used_file(elsewhere / 'fourth.tex')
+            self.assertFalse(restored.pinned)
+            self.assertEqual(restored.initial_directory(), str(elsewhere.resolve()))
+
+    def test_old_session_state_remains_compatible(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d); sub = root / 'sub'; sub.mkdir()
+            state = root / 'session.json'
+            state.write_text(json.dumps({'last_directory': str(sub)}))
+            wd = WorkingDirectory(str(root), True, state)
+            self.assertEqual(wd.initial_directory(), str(sub.resolve()))
+            self.assertFalse(wd.pinned)
+
     def test_no_persistence_when_disabled(self):
         with tempfile.TemporaryDirectory() as d:
             root=Path(d); sub=root/'sub';sub.mkdir(); state=root/'session.json'
