@@ -1282,3 +1282,23 @@ listing's directory/page/sort/filter context.
   interface spacing, or bottom border geometry.
 - Expanded `tests.test_interface_fonts_gui` to assert the intended
   interface font weights.
+
+
+### v118 — shortcut registry safeguards
+
+- After the removal of obsolete Java menu actions, audited
+  `python/config/keyboard.json` and the Tk menu dispatcher.
+  The default keyboard file contains no overrides, so retired
+  QuickMail/Get Mail commands cannot be reintroduced from it.
+- Fixed a latent issue: configurable keyboard overrides could steal
+  **Ctrl+N** (New Buffer) or **Ctrl+Shift+W** (Close Buffer), whose
+  bindings are installed separately from the legacy registry.
+  The loader now rejects these reserved accelerator collisions.
+- Added validation for malformed key names, duplicate modifier names,
+  unsupported modifiers, and bare character keys that would intercept
+  ordinary text typing. Duplicate detection now recognizes equivalent
+  modifier orders. The valid F-key and Ctrl/Shift mappings, including
+  nullable disabled shortcuts, remain supported.
+- Extended `tests.test_shortcut_config` with reserved-key and invalid
+  override cases. Menu labels and keybinding dispatch continue to
+  originate from the same command registry.
