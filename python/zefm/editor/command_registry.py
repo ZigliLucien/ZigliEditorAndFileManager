@@ -16,8 +16,8 @@ MENUS = {
  ["Refresh Buffer","Clear","Redo","Undo","Line Numbers","Find","Replace","Continue Find or Replace","Toggle ClickPad","Copy","Paste","Cut"],
  ["F7","F8","F6","F5","Ctrl+F2","Ctrl+S","Ctrl+Shift+R","Ctrl+R","Ctrl+F","Ctrl+C","Ctrl+V","Ctrl+X"])],
  "Run": [Command(a,b) for a,b in zip(
- ["Shell","Compile","QuickMail","Get Mail","Trace"],
- ["Ctrl+Shift+Z","F4","Ctrl+M","Ctrl+Shift+M","Ctrl+O"])]
+ ["Shell","Compile","Trace"],
+ ["Ctrl+Shift+Z","F4","Ctrl+O"])]
 }
 class Registry:
     def __init__(self):
