@@ -158,6 +158,53 @@ def latex_match(text, cursor):
     return pos, None
 
 
+
+_ENVIRONMENT = re.compile(r"\\(begin|end)\{([A-Za-z][A-Za-z0-9*@._-]*)\}")
+
+
+def latex_environment_match(text, cursor):
+    """Match a complete \begin{name} or \end{name} at the caret.
+
+    Return ((start, end), (match_start, match_end)) for a matched pair,
+    or ((start, end), None) for an unmatched or misnested command.
+    Endpoints are exclusive. Comments and escaped commands are ignored.
+    This is a structural aid, not a full TeX macro expander.
+    """
+    if not isinstance(cursor, int) or not 0 <= cursor <= len(text):
+        return None
+    if len(text) > MAX_CHARS:
+        return None
+    spans, _brackets = latex_scan(text)
+    commands = {a for a, _b, style in spans if style == "command"}
+    tokens = []
+    for match in _ENVIRONMENT.finditer(text):
+        if match.start() not in commands:
+            continue
+        tokens.append((match.start(), match.end(),
+                       match.group(1), match.group(2)))
+    # Match only properly nested environments with identical names.
+    stack = []
+    partners = {}
+    for start, end, kind, name in tokens:
+        span = (start, end)
+        if kind == "begin":
+            stack.append((span, name))
+        elif stack and stack[-1][1] == name:
+            opening, _ = stack.pop()
+            partners[opening] = span
+            partners[span] = opening
+        else:
+            partners[span] = None
+    for opening, _name in stack:
+        partners[opening] = None
+    # Cursor on/inside the command or immediately after the closing brace.
+    for start, end, _kind, _name in tokens:
+        if start <= cursor <= end:
+            span = (start, end)
+            return span, partners.get(span)
+    return None
+
+
 def syntax_spans(text, mode):
     if len(text) > MAX_CHARS:
         return []
