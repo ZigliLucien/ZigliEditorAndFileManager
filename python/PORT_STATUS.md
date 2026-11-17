@@ -1436,3 +1436,25 @@ listing's directory/page/sort/filter context.
   require LaTeX compilation to diagnose accurately.
 - Expanded `tests.test_syntax_highlight` with nested, mismatched,
   commented and escaped environment cases and GUI tag/undo assertions.
+
+
+### v125 — verbatim-aware LaTeX syntax and delimiter matching
+
+- Extended the LaTeX scanner so literal blocks are not mistaken for
+  source structure. The environments `verbatim`, `verbatim*`,
+  `Verbatim`, `Verbatim*`, `lstlisting`, `minted`, and `comment`
+  suppress brace matching, `%` comments, and phantom
+  `\\begin{...}`/`\\end{...}` commands inside their bodies.
+  The actual opening and closing environment commands still match.
+- Inline `\\verb`, `\\verb*`, and simple delimiter-form
+  `\\lstinline` regions are treated literally as well. Unclosed
+  verbatim regions do not produce spurious subsequent syntax tags.
+- Verbatim bodies use a subdued, separate syntax color. No text,
+  Undo history or saved state is altered; the existing debounce and
+  250,000-character safety cutoff still apply.
+- Added pure syntax and Tk GUI tests for fake braces, percent comments,
+  fake nested environments, literal inline delimiters, unterminated
+  raw blocks, and unchanged editor modified state.
+- Deliberate limitation: this is not a complete TeX interpreter.
+  Custom verbatim environments, inline `lstinline` with options,
+  and other catcode-changing macros may require further support.
