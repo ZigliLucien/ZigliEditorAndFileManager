@@ -285,6 +285,8 @@ class Window:
         self.root.after_idle(reveal)
 
     def new_buffer(self, path=None, text=""):
+        if self._last_active_tab:
+            self._remember_cursor(self._last_active_tab)
         frame=ttk.Frame(self.tabs)
         widget=tk.Text(frame, wrap="none", undo=True, maxundo=-1, font=self.editor_font)
         gutter = tk.Canvas(frame, width=47, highlightthickness=0,
