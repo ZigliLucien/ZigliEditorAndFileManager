@@ -900,7 +900,7 @@ class Window:
             except Exception as exc:
                 result = {"ok": False, "returncode": None, "log": str(exc)}
             # Same queue as configured Run: one command at a time.
-            self._run_results.put((Path(argv[0]).name, result))
+            self._run_results.put((Path(argv[0]), result))
         Thread(target=worker, name="zefm-shell-command", daemon=True).start()
         self._run_poll_id = self.root.after(120, self._poll_run_command)
 
