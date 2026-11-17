@@ -21,7 +21,8 @@ from ..external_changes import disk_signature, changed_on_disk, ExternalChangeDi
 from ..recent_files import RecentFiles
 from ..startup_file import last_recent_buffer
 from ..cursor_positions import CursorPositions
-from ..syntax_highlight import COLORS, MAX_CHARS, syntax_spans, latex_match
+from ..syntax_highlight import (COLORS, MAX_CHARS, syntax_spans, latex_match,
+                                latex_environment_match)
 from ..latex_master import resolve_latex_master
 from ..latex_master_preferences import LatexMasterPreferences
 from ..latex_diagnostics import parse_latex_errors
@@ -328,15 +329,22 @@ class Window:
         if len(text) > MAX_CHARS:
             return
         cursor = len(widget.get("1.0", "insert"))
-        result = latex_match(text, cursor)
-        if result is None:
-            return
-        source, target = result
-        for offset in ((source, target) if target is not None else (source,)):
+        environment = latex_environment_match(text, cursor)
+        if environment is not None:
+            source, target = environment
             tag = "syntax_match" if target is not None else "syntax_unmatched"
-            widget.tag_add(tag,
-                           f"1.0 + {offset} chars",
-                           f"1.0 + {offset + 1} chars")
+            for start, end in (source, target) if target is not None else (source,):
+                widget.tag_add(tag, f"1.0 + {start} chars",
+                               f"1.0 + {end} chars")
+        else:
+            result = latex_match(text, cursor)
+            if result is None:
+                return
+            source, target = result
+            for offset in ((source, target) if target is not None else (source,)):
+                tag = "syntax_match" if target is not None else "syntax_unmatched"
+                widget.tag_add(tag, f"1.0 + {offset} chars",
+                               f"1.0 + {offset + 1} chars")
         # Keep normal text selection visible above delimiter emphasis.
         widget.tag_raise("syntax_match")
         widget.tag_raise("syntax_unmatched")
