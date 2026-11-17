@@ -123,8 +123,10 @@ class Window:
         self.status_bar.pack(side="bottom", fill="x")
         # Clear upper boundary: the previous thin bottom border effectively
         # disappeared on some Linux ttk themes.
-        self.status_divider = ttk.Separator(self.root, orient="horizontal")
+        self.status_divider = tk.Frame(
+            self.root, height=3, background="#64748b")
         self.status_divider.pack(side="bottom", fill="x")
+        self.status_divider.pack_propagate(False)
         # Reserve visible space for Save/RTL regardless of the length of the
         # cursor/mode/JSON status text. A long packed label previously hid both.
         self.status_bar.columnconfigure(0, weight=1)
