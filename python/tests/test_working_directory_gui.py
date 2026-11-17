@@ -6,6 +6,7 @@ import tkinter as tk
 import unittest
 
 from zefm.editor.gui.tk_editor import Window
+from zefm.editor.working_directory import WorkingDirectory
 
 
 class WorkingDirectoryGuiTests(unittest.TestCase):
@@ -19,6 +20,8 @@ class WorkingDirectoryGuiTests(unittest.TestCase):
         self.temp = TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root_dir = Path(self.temp.name)
+        self.app.working_directory = WorkingDirectory(
+            str(self.root_dir), True, self.root_dir / "session.json")
         self.fixed = self.root_dir / "fixed"
         self.fixed.mkdir()
         self.elsewhere = self.root_dir / "elsewhere"
