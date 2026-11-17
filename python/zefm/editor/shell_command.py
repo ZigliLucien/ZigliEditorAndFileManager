@@ -20,7 +20,10 @@ def parse_shell_command(line: str) -> list[str]:
     if "\x00" in line or "\n" in line or "\r" in line:
         raise ValueError("Command may not contain NUL or newline characters")
     try:
-        argv = shlex.split(line, posix=True)
+        lexer = shlex.shlex(line, posix=True, punctuation_chars="|&;<>")
+        lexer.whitespace_split = True
+        lexer.commenters = ""
+        argv = list(lexer)
     except ValueError as exc:
         raise ValueError(f"Invalid quoting: {exc}") from exc
     if not 1 <= len(argv) <= MAX_ARGV or any(not item or len(item) > 2048 for item in argv):
