@@ -872,8 +872,9 @@ class Window:
         if widget is None:
             return
         path = editor.state.buffer.path
-        cwd = (Path(path).expanduser().resolve().parent if path
-               else Path(self.working_directory.initial_directory()))
+        cwd = (Path(self.working_directory.initial_directory())
+               if self.working_directory.pinned or not path else
+               Path(path).expanduser().resolve().parent)
         try:
             open_terminal(cwd)
         except (OSError, ValueError) as exc:
@@ -901,8 +902,9 @@ class Window:
         try:
             argv = parse_shell_command(answer)
             filename = editor.state.buffer.path
-            cwd = (Path(filename).expanduser().resolve().parent if filename
-                   else Path(self.working_directory.initial_directory()))
+            cwd = (Path(self.working_directory.initial_directory())
+                   if self.working_directory.pinned or not filename else
+                   Path(filename).expanduser().resolve().parent)
             if not cwd.is_dir():
                 raise ValueError("Working directory does not exist")
         except (OSError, ValueError) as exc:
@@ -1818,6 +1820,8 @@ class Window:
                 menu.add_command(label="New Buffer",command=self.new_buffer,accelerator="Ctrl+N")
                 menu.add_command(label="Close Buffer",command=self.close_buffer,accelerator="Ctrl+Shift+W")
                 menu.add_command(label="Set Working Directory...",command=self.set_working_directory)
+                menu.add_command(label="Follow Last File Directory",
+                                 command=self.reset_working_directory)
                 menu.add_command(label="Open Local File Manager in Browser...",command=self.open_local_file_manager)
                 menu.add_command(label="Quick Edit Current File in Browser...",command=self.edit_current_file_in_browser)
                 menu.add_command(label="Edit Current File RTL in Browser...",command=self.edit_current_file_rtl)
@@ -2297,7 +2301,15 @@ class Window:
         if path:
             try:self.working_directory.set_directory(path)
             except ValueError as exc:messagebox.showerror("Working Directory",str(exc),parent=self.root);return
-            self.status.set(f"Working directory: {self.working_directory.initial_directory()}")
+            self.status.set(
+                f"Working directory fixed: {self.working_directory.initial_directory()}")
+
+    def reset_working_directory(self):
+        """Return file dialogs and Shell to automatic last-file directory."""
+        self.working_directory.use_last_file_directory()
+        self.status.set(
+            "Working directory now follows opened and saved files: "
+            + self.working_directory.initial_directory())
 
     def _populate_recent_files(self):
         """Populate the File → Recent Files submenu using the shared builder."""
