@@ -1193,3 +1193,23 @@ listing's directory/page/sort/filter context.
   following and legacy compatibility; new
   `tests.test_working_directory_gui` for Set Working Directory, Open,
   Save and Shell integration.
+
+
+### v113 — QuickMail draft handoff without Java SMTP dependencies
+
+- Ported the original **Run → QuickMail (Ctrl+M)** menu action as a
+  simple compose dialog. Enter an email recipient and optional subject.
+  The **live buffer**, including unsaved changes, becomes the draft body.
+- **Open in Mail App** passes a `mailto:` draft to the system's configured
+  email application. **Copy Draft Link** provides a manual fallback if
+  no mail application is configured. ZEFM does not transmit or save
+  mail by itself, manage credentials, or replace editor contents.
+- Recipient validation prevents multiple recipients and header-newline
+  injection. UTF-8 text is URL-encoded; extremely long buffers are
+  rejected rather than silently truncated in a mailto link.
+- Tests: `tests.test_quickmail` for Unicode draft construction, invalid
+  input, dialog behavior, text preservation, and existing Ctrl+M shortcut.
+- **Get Mail** is deliberately separate: the old Java MailRun backend is
+  not revived, and the new read-only Maildir browser cannot itself
+  fetch POP/IMAP mail. Integrating Get Mail with the user's existing
+  getmail configuration remains a subsequent task.
