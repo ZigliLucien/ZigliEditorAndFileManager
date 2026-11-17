@@ -2583,12 +2583,34 @@ class Window:
                 label, "Save the file before editing it in the browser.",
                 parent=self.root)
             return
-        if (editor.state.buffer.modified
-                or widget.get("1.0", "end-1c") != editor.state.buffer.text):
+        # The model text follows edits via <<Modified>>, so it is not a
+        # trustworthy saved version. Compare to the last disk-saved snapshot.
+        tab = self.tabs.select()
+        live_text = widget.get("1.0", "end-1c")
+        if live_text != self.saved_snapshots.get(tab, ""):
+            editor.state.buffer.modified = True
+            self._update_title(widget, editor)
+            self._status(widget)
             messagebox.showwarning(
                 "Unsaved changes",
                 "Please save this buffer before editing it in the browser. "
                 "ZEFM will not discard unsaved changes.", parent=self.root)
+            return
+        # Even a clean Tk buffer may be stale if an external editor has
+        # modified the disk file before the next periodic poll.
+        try:
+            stale = changed_on_disk(path, self.disk_signatures.get(tab))
+        except OSError as exc:
+            messagebox.showerror(label, f"Cannot verify disk file: {exc}",
+                                 parent=self.root)
+            return
+        if stale:
+            self._check_external_changes()
+            messagebox.showwarning(
+                "File changed on disk",
+                "The disk file differs from this buffer. Review the external "
+                "change notice or reload before opening Browser Quick Edit.",
+                parent=self.root)
             return
         try:
             from ...server.http import BrowserServer
