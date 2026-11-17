@@ -1166,3 +1166,30 @@ listing's directory/page/sort/filter context.
   distinct Run menu workflows.
 - Requires `xterm` on Linux; no bundled emulator. Existing
   **QuickMail** and **Get Mail** remain available for later porting.
+
+
+### v112 — reliable Set Working Directory with explicit pinning
+
+- Following Linux user feedback, found that **File → Set Working
+  Directory...** was undone by the very next Open or Save elsewhere:
+  `WorkingDirectory.used_file()` silently replaced the selected
+  directory when `remember_last_directory` was enabled.
+- An explicitly selected directory is now **pinned**. It is the initial
+  directory for Open and Save As and the starting directory for Shell
+  and one-off commands. Opening/saving a file in another directory no
+  longer silently changes it.
+- When no directory has been explicitly pinned, the old automatic
+  behavior continues: file dialogs follow the location of the most
+  recently opened/saved file. The new **File → Follow Last File
+  Directory** command clears pinning to restore this behavior.
+- Pinned mode is stored alongside `last_directory` in the session
+  JSON when remember-last-directory is enabled. Legacy session files
+  remain compatible and default to automatic following. Persistence is
+  now atomic with a private temporary file.
+- Neither mode changes the Python process working directory or the
+  location of an already-open file. The browser file manager continues
+  to use the selected initial directory for default navigation.
+- Tests: `tests.test_working_directory` for pinning, restarts, automatic
+  following and legacy compatibility; new
+  `tests.test_working_directory_gui` for Set Working Directory, Open,
+  Save and Shell integration.
