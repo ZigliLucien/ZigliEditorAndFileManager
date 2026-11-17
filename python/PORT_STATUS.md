@@ -1250,3 +1250,24 @@ listing's directory/page/sort/filter context.
 - New `tests.test_buffer_safety_gui` exercises both external reload
   routes, live dirty edits on Close/Quit, and prompt-free handling of
   clean buffers. No change to file formats, Undo history or shortcuts.
+
+
+### v116 — more legible editor chrome, especially the bottom status edge
+
+- Responding to user feedback that editor menu and tab fonts were small and
+  the **lower border/status bar was difficult to see**. Added a separate
+  interface-type size preference, default 13 points, stored in
+  `~/.config/zefm/interface.json`. This is independent of
+  `~/.config/zefm/font.json`, which still controls actual document text.
+- **Fonts → Interface Font Size...** supports 10–24 points and immediately
+  resizes the menu's Tk font (where supported by the platform), notebook
+  tab labels, and status text. macOS native application menus may follow
+  the OS font policy rather than TkMenuFont.
+- Notebook tabs now have more generous padding. The bottom status region
+  has a contrasting blue-grey background, darker text, a bold Save
+  indicator, padding, and a visible **3-pixel separator** to distinguish
+  it from the editor body even on light Linux themes.
+- Persistence is validated and atomic. Regression tests:
+  `tests.test_interface_fonts_gui` cover settings, tab/status styles,
+  live resizing, and preservation of the editor's separate font size.
+- No change to buffer contents, keyboard assignments, or file formats.
