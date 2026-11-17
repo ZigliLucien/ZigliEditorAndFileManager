@@ -329,7 +329,7 @@ class Window:
 
     def _reload_external(self):
         """Revert with the existing unsaved-edits confirmation."""
-        self.revert_file()
+        self.revert_buffer()
         self._check_external_changes()
 
     def _changed(self, widget, editor):
@@ -1954,7 +1954,12 @@ class Window:
         tab=self.tabs.select()
         if not tab:return
         widget,editor=self.views[tab]
-        if editor.state.buffer.modified and not messagebox.askyesno(
+        # Query live Text contents: <<Modified>> may not have run yet,
+        # and Undo after Save can make a formerly clean buffer dirty.
+        dirty = (widget.get("1.0", "end-1c")
+                 != self.saved_snapshots.get(tab, ""))
+        editor.state.buffer.modified = dirty
+        if dirty and not messagebox.askyesno(
             "Unsaved changes","Close this buffer without saving?",parent=self.root):
             return
         self.tabs.forget(tab)
@@ -2369,7 +2374,7 @@ class Window:
                     elif messagebox.askyesno("File changed on disk",
                             f"{resolved.name} changed outside ZEFM. Reload it from disk?",
                             parent=self.root):
-                        self.revert_file()
+                        self.revert_buffer()
                 self._status(widget)
                 self.recent_files.record(resolved)
                 return
@@ -2616,10 +2621,14 @@ class Window:
             messagebox.showerror("Local email archive", str(exc), parent=self.root)
 
     def quit(self):
-        for widget,editor in self.views.values():
-            if widget.get("1.0","end-1c") != editor.state.buffer.text:
-                editor.state.buffer.modified=True
-        if any(e.state.buffer.modified for _,e in self.views.values()):
+        # The model text may already equal unsaved Tk content after a
+        # <<Modified>> callback. Compare to each tab's last saved snapshot.
+        dirty_tabs = [
+            tab for tab, (widget, _editor) in self.views.items()
+            if widget.get("1.0", "end-1c")
+               != self.saved_snapshots.get(tab, "")
+        ]
+        if dirty_tabs:
             if not messagebox.askyesno("Unsaved changes","Quit with unsaved buffers?",parent=self.root):
                 return
         if self._inverse_synctex_poll_id is not None:
