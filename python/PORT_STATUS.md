@@ -1349,3 +1349,25 @@ listing's directory/page/sort/filter context.
 - Added `tests.test_browser_quick_edit_safety_gui` covering a model
   already synchronized to unsaved text, a stale disk file, and a
   clean file that is allowed through to browser Quick Edit.
+
+
+### v121 — reopen last recent document on editor startup
+
+- On request, startup no longer unconditionally creates an untitled
+  blank editor buffer. It consults the existing persistent Recent Files
+  history (`~/.config/zefm/recent_files.json`) and restores the
+  **most recently accessed readable UTF-8 file** in a single tab.
+  The same list is updated by opening and saving files.
+- Missing, inaccessible, nonregular or non-UTF-8 recent entries are
+  skipped without a blocking startup dialog. The first valid older
+  file is used, or a single Untitled buffer is created if there is
+  no usable recent document. Unavailable entries are not removed
+  automatically (a removable volume may return).
+- Restored files are loaded from their current saved disk contents;
+  unsaved work from a previous session is not reconstructed. Starting
+  a new Untitled buffer remains available through File → New Buffer.
+- Reopening the last recent file also respects the working-directory
+  pinning policy: explicitly pinned working directories stay fixed,
+  while automatic mode follows the restored file.
+- Added `tests.test_startup_recent_file` for Unicode restoration,
+  stale entries, empty fallback, single-tab startup, and explicit New.
