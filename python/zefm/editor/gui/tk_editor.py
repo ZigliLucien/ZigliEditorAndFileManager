@@ -19,6 +19,7 @@ from ...config import load as load_config
 from ..working_directory import WorkingDirectory
 from ..external_changes import disk_signature, changed_on_disk, ExternalChangeDismissals
 from ..recent_files import RecentFiles
+from ..startup_file import last_recent_buffer
 from ..latex_master import resolve_latex_master
 from ..latex_master_preferences import LatexMasterPreferences
 from ..latex_diagnostics import parse_latex_errors
@@ -184,7 +185,9 @@ class Window:
         self.clickpad_buttons.pack(side="left", fill="x", expand=True)
         self._render_clickpad()
         self.tabs.pack(fill="both", expand=True)
-        self.new_buffer()
+        # Startup restores the latest readable document rather than adding
+        # an unused Untitled tab. Keep a blank buffer as the safe fallback.
+        self._restore_startup_file()
         self.tabs.bind("<<NotebookTabChanged>>", self._tab_changed)
         self.disk_poll_id = self.root.after(3000, self._disk_monitor_tick)
         self.root.geometry("920x680")
@@ -242,6 +245,17 @@ class Window:
         # Reconfigure fonts and style; existing tabs and labels update.
         self._configure_interface_fonts()
         self.status.set(f"Interface font set to {size} pt")
+
+    def _restore_startup_file(self):
+        """Open the latest readable recent file without startup popups."""
+        previous = last_recent_buffer(self.recent_files)
+        if previous is None:
+            self.new_buffer()
+            return
+        self.new_buffer(path=previous.path, text=previous.text)
+        self.recent_files.record(previous.path)
+        self.working_directory.used_file(previous.path)
+        self.status.set(f"Restored recent file: {Path(previous.path).name}")
 
     def new_buffer(self, path=None, text=""):
         frame=ttk.Frame(self.tabs)
