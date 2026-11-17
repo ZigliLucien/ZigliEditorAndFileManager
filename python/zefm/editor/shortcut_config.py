@@ -4,7 +4,6 @@ Fixed New/Close Buffer keys live outside the legacy menu registry.
 Reject collisions and malformed keyboard sequences before Tk installs them.
 """
 import json
-import re
 from pathlib import Path
 from .command_registry import MENUS, Command
 
@@ -51,7 +50,12 @@ def load_menus(path=None):
     unknown = set(overrides) - labels
     if unknown:
         raise ValueError(f'Unknown editor command(s): {sorted(unknown)}')
-    used = dict(RESERVED_SHORTCUTS)
+    def signature(shortcut):
+        parts = shortcut.split("+")
+        return (frozenset(parts[:-1]), parts[-1].upper())
+
+    used = {signature(key): label
+            for key, label in RESERVED_SHORTCUTS.items()}
     output = {}
     for group, commands in defaults.items():
         output[group] = []
@@ -59,14 +63,11 @@ def load_menus(path=None):
             shortcut = validate_shortcut(
                 overrides.get(command.label, command.shortcut))
             if shortcut:
-                # Normalize modifier order/case for collision checking,
-                # while retaining the user-facing key sequence.
-                canonical = shortcut.upper()
-                if canonical in (key.upper() for key in used):
-                    other = next(v for k, v in used.items()
-                                 if k.upper() == canonical)
+                # Modifier order does not affect actual Tk event dispatch.
+                key = signature(shortcut)
+                if key in used:
                     raise ValueError(
-                        f'Duplicate shortcut {shortcut}: {other} and {command.label}')
-                used[shortcut] = command.label
+                        f'Duplicate shortcut {shortcut}: {used[key]} and {command.label}')
+                used[key] = command.label
             output[group].append(Command(command.label, shortcut))
     return output
