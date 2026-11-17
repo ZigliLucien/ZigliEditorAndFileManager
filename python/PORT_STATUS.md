@@ -1229,3 +1229,24 @@ listing's directory/page/sort/filter context.
 - External getmail/DavMail workflows and the user's Emacs mail
   composition workflow remain separate from ZEFM.
 - Expanded shortcut tests to verify both actions and shortcuts are absent.
+
+
+### v115 — external reload repair and unsaved-buffer safeguards
+
+- Audited remaining editor command implementations after retiring obsolete
+  Java Run/mail items. Found two stale calls to the removed `revert_file()`
+  method: the **Reload from disk...** external-change notification and
+  reopen-an-already-open-file path. Both now call **`revert_buffer()`**,
+  preserving its confirmation and undo-reset behavior.
+- **Close Buffer (Ctrl+Shift+W)** now compares actual Tk Text contents
+  with the tab's last saved snapshot before discarding anything. The
+  cached modification flag can lag behind a keystroke or reflect
+  out-of-date state after Undo.
+- **Quit (Ctrl+Q)** now checks all open tabs against their saved
+  snapshots instead of comparing live text with the in-memory model.
+  That model is updated on text changes and therefore does not reliably
+  indicate whether a file has been saved. This fixes the risk of an
+  unnoticed unsaved buffer when closing ZEFM.
+- New `tests.test_buffer_safety_gui` exercises both external reload
+  routes, live dirty edits on Close/Quit, and prompt-free handling of
+  clean buffers. No change to file formats, Undo history or shortcuts.
