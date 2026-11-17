@@ -28,6 +28,7 @@ from ..inverse_synctex import InverseSynctexServer
 from ..run_commands import RunCommands, execute_command
 from ..shell_command import parse_shell_command, run_shell_command
 from ..terminal_launcher import open_terminal
+from ..quickmail import quickmail_url
 from ..latex_engine_preferences import LatexEnginePreference, ENGINES
 from ..print_preview import write_print_preview
 from ..clickpad import PALETTES, palette_for
@@ -866,6 +867,79 @@ class Window:
         else:
             self.status.set(f"LaTeX failed (exit {result.get('returncode', '?')}); see build log")
 
+    def quick_mail(self):
+        """Build a mail draft from this buffer, but never transmit it."""
+        widget, editor = self.current()
+        if widget is None:
+            return
+        dialog = tk.Toplevel(self.root)
+        dialog.title("QuickMail — Compose from Buffer")
+        dialog.transient(self.root)
+        dialog.geometry("690x270")
+        ttk.Label(dialog, text=(
+            "Prepare an email with the current buffer as its body. "
+            "ZEFM will not send it; your mail application opens the draft."),
+            wraplength=650, padding=10).pack(fill="x")
+        fields = ttk.Frame(dialog, padding=(10, 3))
+        fields.pack(fill="x")
+        recipient = tk.StringVar()
+        subject = tk.StringVar(value=(
+            Path(editor.state.buffer.path).name
+            if editor.state.buffer.path else "ZEFM buffer"))
+        ttk.Label(fields, text="To:").grid(row=0, column=0, sticky="w")
+        ttk.Entry(fields, textvariable=recipient).grid(
+            row=0, column=1, sticky="ew", padx=8, pady=4)
+        ttk.Label(fields, text="Subject:").grid(row=1, column=0, sticky="w")
+        ttk.Entry(fields, textvariable=subject).grid(
+            row=1, column=1, sticky="ew", padx=8, pady=4)
+        fields.columnconfigure(1, weight=1)
+        ttk.Label(dialog, text=(
+            "The entire current buffer will be included, even unsaved edits. "
+            "Large buffers cannot be passed reliably via mailto URLs."),
+            wraplength=650, padding=(10, 5)).pack(fill="x")
+        actions = ttk.Frame(dialog, padding=10)
+        actions.pack(fill="x")
+        def prepare():
+            try:
+                return quickmail_url(
+                    recipient.get(), subject.get(), widget.get("1.0", "end-1c"))
+            except ValueError as exc:
+                messagebox.showerror("QuickMail", str(exc), parent=dialog)
+                return None
+        def copy_link():
+            url = prepare()
+            if url is None:
+                return
+            self.root.clipboard_clear()
+            self.root.clipboard_append(url)
+            self.status.set("QuickMail draft URL copied; no email was sent")
+        def open_draft():
+            url = prepare()
+            if url is None:
+                return
+            try:
+                launched = webbrowser.open(url)
+            except (OSError, ValueError, webbrowser.Error):
+                launched = False
+            if not launched:
+                messagebox.showwarning(
+                    "QuickMail",
+                    "No mail application confirmed opening. Choose Copy Draft "
+                    "Link and paste it into a configured mail application, "
+                    "or copy the buffer text into your usual mail editor.",
+                    parent=dialog)
+                return
+            self.status.set("QuickMail draft handed to mail app; no email sent")
+            dialog.destroy()
+        ttk.Button(actions, text="Open in Mail App", command=open_draft).pack(
+            side="left", padx=(0, 6))
+        ttk.Button(actions, text="Copy Draft Link", command=copy_link).pack(
+            side="left")
+        ttk.Button(actions, text="Cancel", command=dialog.destroy).pack(
+            side="right")
+        dialog.lift()
+        dialog.focus_set()
+
     def open_shell_terminal(self):
         """Open an interactive xterm / Terminal.app at the active directory."""
         widget, editor = self.current()
@@ -1283,6 +1357,7 @@ class Window:
         elif name=="Debug Python":self.debug_python()
         elif name=="Compile":self.compile_latex()
         elif name=="Shell":self.open_shell_terminal()
+        elif name=="QuickMail":self.quick_mail()
         elif name=="Revert Buffer":self.revert_buffer()
         elif name=="Refresh Buffer":self.refresh_buffer()
         elif name=="Print":self.print_buffer()
