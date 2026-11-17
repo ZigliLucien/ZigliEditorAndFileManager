@@ -33,6 +33,8 @@ class ShortcutTests(unittest.TestCase):
         self.assertNotIn('Shift+F2', shortcuts)
         self.assertNotIn('Shift+F3', shortcuts)
         self.assertNotIn('DBClear', labels)
+        self.assertNotIn('Close Shell Window', labels)
+        self.assertNotIn('Ctrl+W', shortcuts)
         self.assertNotIn('Shift+F1', shortcuts)
         self.assertNotIn('Revert File', labels)
         self.assertIn('Revert Buffer', labels)
