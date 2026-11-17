@@ -26,6 +26,7 @@ from ..synctex_forward import synctex_page, pdf_page_uri
 from ..pdf_viewer import PdfViewerPreference, launch_okular
 from ..inverse_synctex import InverseSynctexServer
 from ..run_commands import RunCommands, execute_command
+from ..shell_command import parse_shell_command, run_shell_command
 from ..latex_engine_preferences import LatexEnginePreference, ENGINES
 from ..print_preview import write_print_preview
 from ..clickpad import PALETTES, palette_for
@@ -864,6 +865,45 @@ class Window:
         else:
             self.status.set(f"LaTeX failed (exit {result.get('returncode', '?')}); see build log")
 
+    def run_shell_once(self):
+        """Legacy Shell menu: run one explicit argv command without a shell."""
+        from threading import Thread
+        if self._run_busy:
+            self.status.set("An external command is already executing")
+            return
+        widget, editor = self.current()
+        if widget is None:
+            return
+        answer = simpledialog.askstring(
+            "Run Shell Command",
+            "Enter a command and arguments, e.g. ls -lah or python3 --version.\n"
+            "Quoted arguments are supported. Pipes and redirection are not.\n"
+            "Commands run with your user permissions; timeout: 30 seconds.",
+            parent=self.root)
+        if answer is None:
+            return
+        try:
+            argv = parse_shell_command(answer)
+            filename = editor.state.buffer.path
+            cwd = (Path(filename).expanduser().resolve().parent if filename
+                   else Path(self.working_directory.initial_directory()))
+            if not cwd.is_dir():
+                raise ValueError("Working directory does not exist")
+        except (OSError, ValueError) as exc:
+            messagebox.showerror("Shell command", str(exc), parent=self.root)
+            return
+        self._run_busy = True
+        self.status.set(f"Running: {argv[0]}")
+        def worker():
+            try:
+                result = run_shell_command(argv, cwd)
+            except Exception as exc:
+                result = {"ok": False, "returncode": None, "log": str(exc)}
+            # Same queue as configured Run: one command at a time.
+            self._run_results.put((Path(argv[0]).name, result))
+        Thread(target=worker, name="zefm-shell-command", daemon=True).start()
+        self._run_poll_id = self.root.after(120, self._poll_run_command)
+
     def configure_run_command(self):
         """Configure an argv array for this buffer mode, never a shell line."""
         import json
@@ -1224,6 +1264,7 @@ class Window:
         elif name=="Quit":self.quit()
         elif name=="Debug Python":self.debug_python()
         elif name=="Compile":self.compile_latex()
+        elif name=="Shell":self.run_shell_once()
         elif name=="Revert Buffer":self.revert_buffer()
         elif name=="Refresh Buffer":self.refresh_buffer()
         elif name=="Print":self.print_buffer()
