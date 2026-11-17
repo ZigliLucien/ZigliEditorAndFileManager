@@ -32,6 +32,7 @@ from ..latex_engine_preferences import LatexEnginePreference, ENGINES
 from ..print_preview import write_print_preview
 from ..clickpad import PALETTES, palette_for
 from ..font_settings import read_font, write_font
+from ..interface_settings import read_interface, write_interface, DEFAULT_INTERFACE
 from ..language_tools import LANGUAGES, language_dictionary, expand_suffix
 from ..legacy_keymaps import read_keymap,translation
 from ..keymap_view import mapping_rows, mapping_text
@@ -51,7 +52,11 @@ class Window:
     def __init__(self, root=None):
         self.root = root or tk.Tk()
         self.root.title("ZEFM Python editor (preview)")
-        self.tabs = ttk.Notebook(self.root)
+        self.interface_settings_path = (
+            Path.home() / ".config" / "zefm" / "interface.json")
+        self.interface_size = read_interface(self.interface_settings_path)["size"]
+        self._configure_interface_fonts()
+        self.tabs = ttk.Notebook(self.root, style="Zefm.TNotebook")
         # Pack the notebook after bottom controls so resizing cannot unmap the
         # Save/status row when the Text widget requests a large minimum size.
         self.font_settings_path=Path.home()/".config"/"zefm"/"font.json"
@@ -113,18 +118,24 @@ class Window:
         self.vim_normal = False
         self.vim_direction = 1
         self.status = tk.StringVar(value="Ready")
-        self.status_bar = ttk.Frame(self.root)
+        self.status_bar = ttk.Frame(
+            self.root, style="Zefm.Status.TFrame", padding=(7, 6))
         self.status_bar.pack(side="bottom", fill="x")
+        # Clear upper boundary: the previous thin bottom border effectively
+        # disappeared on some Linux ttk themes.
+        self.status_divider = ttk.Separator(self.root, orient="horizontal")
+        self.status_divider.pack(side="bottom", fill="x")
         # Reserve visible space for Save/RTL regardless of the length of the
         # cursor/mode/JSON status text. A long packed label previously hid both.
         self.status_bar.columnconfigure(0, weight=1)
         self.status_detail_label = ttk.Label(
-            self.status_bar, textvariable=self.status, anchor="w", width=1)
+            self.status_bar, textvariable=self.status, anchor="w",
+            width=1, style="Zefm.Status.TLabel")
         self.status_detail_label.grid(row=0, column=0, sticky="ew", padx=(5, 4))
         self.save_indicator = tk.StringVar(value="")
         self.save_indicator_label = ttk.Label(
             self.status_bar, textvariable=self.save_indicator,
-            anchor="e", width=26)
+            anchor="e", width=26, style="Zefm.Save.TLabel")
         self.save_indicator_label.grid(row=0, column=1, sticky="e", padx=(4, 6))
         # Keep the existing RTL browser shortcut at the bottom-right.
         ttk.Button(self.status_bar, text="RTL Browser",
@@ -179,6 +190,48 @@ class Window:
         # browser-only editor sessions do not need a background server.
         if self.pdf_viewer.viewer == "okular":
             self._start_inverse_synctex()
+
+    def _configure_interface_fonts(self):
+        """Make menus, tabs and status legible without changing editor text."""
+        size = self.interface_size
+        self.interface_font = tkfont.Font(
+            root=self.root, family="TkDefaultFont", size=size)
+        self.interface_emphasis_font = tkfont.Font(
+            root=self.root, family="TkDefaultFont", size=size, weight="bold")
+        # Tk's native menu font is a separate named font on X11; on
+        # macOS the native menu bar may use the system's own font policy.
+        try:
+            tkfont.nametofont("TkMenuFont", root=self.root).configure(size=size)
+        except tk.TclError:
+            pass
+        style = ttk.Style(self.root)
+        style.configure("Zefm.TNotebook.Tab",
+                        font=self.interface_font, padding=(14, 7))
+        style.configure("Zefm.Status.TFrame", background="#dce6f2")
+        style.configure("Zefm.Status.TLabel", font=self.interface_font,
+                        background="#dce6f2", foreground="#15263a")
+        style.configure("Zefm.Save.TLabel", font=self.interface_emphasis_font,
+                        background="#dce6f2", foreground="#15263a")
+        style.configure("Zefm.TNotebook", tabmargins=(3, 4, 3, 0))
+
+    def choose_interface_font_size(self):
+        """Accessible menu/tab/status size, stored separately from document font."""
+        size = simpledialog.askinteger(
+            "Interface Font Size",
+            "Size for menus, tabs, and bottom status bar (10–24 points):",
+            parent=self.root, initialvalue=self.interface_size,
+            minvalue=10, maxvalue=24)
+        if size is None:
+            return
+        try:
+            write_interface(self.interface_settings_path, {"size": size})
+        except OSError as exc:
+            messagebox.showerror("Interface Font Size", str(exc), parent=self.root)
+            return
+        self.interface_size = size
+        # Reconfigure fonts and style; existing tabs and labels update.
+        self._configure_interface_fonts()
+        self.status.set(f"Interface font set to {size} pt")
 
     def new_buffer(self, path=None, text=""):
         frame=ttk.Frame(self.tabs)
@@ -1929,6 +1982,9 @@ class Window:
         fonts=tk.Menu(bar,tearoff=False)
         fonts.add_command(label="Choose Font Family...",command=self.choose_font_family)
         fonts.add_command(label="Choose Font Size...",command=self.choose_font_size)
+        fonts.add_separator()
+        fonts.add_command(label="Interface Font Size...",
+                          command=self.choose_interface_font_size)
         fonts.add_command(label="Toggle Bold",command=lambda:self._set_font_style(weight="normal" if self.editor_font.actual("weight")=="bold" else "bold"))
         fonts.add_command(label="Toggle Italic",command=lambda:self._set_font_style(slant="roman" if self.editor_font.actual("slant")=="italic" else "italic"))
         bar.add_cascade(label="Fonts",menu=fonts)
