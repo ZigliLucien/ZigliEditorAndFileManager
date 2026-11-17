@@ -22,12 +22,14 @@ def save_buffer(buffer, path=None):
     if destination is None:
         raise ValueError("A destination path is required")
     p = Path(destination).expanduser()
+    # Resolve a symlink to write its target, rather than replacing the link.
+    target = p.resolve() if p.is_symlink() else p
     temporary = None
     try:
-        original_mode = stat.S_IMODE(p.stat().st_mode) if p.exists() else None
+        original_mode = stat.S_IMODE(target.stat().st_mode) if target.exists() else None
         with tempfile.NamedTemporaryFile(
                 mode="w", encoding="utf-8", newline="",
-                dir=p.parent, prefix=".zefm-save-", suffix=".tmp",
+                dir=target.parent, prefix=".zefm-save-", suffix=".tmp",
                 delete=False) as output:
             temporary = Path(output.name)
             if os.name == "posix":
@@ -36,7 +38,7 @@ def save_buffer(buffer, path=None):
             output.write(buffer.text)
             output.flush()
             os.fsync(output.fileno())
-        os.replace(temporary, p)
+        os.replace(temporary, target)
         temporary = None
     finally:
         if temporary is not None:
