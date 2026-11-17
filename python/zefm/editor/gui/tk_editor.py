@@ -194,10 +194,18 @@ class Window:
     def _configure_interface_fonts(self):
         """Make menus, tabs and status legible without changing editor text."""
         size = self.interface_size
-        self.interface_font = tkfont.Font(
-            root=self.root, family="TkDefaultFont", size=size)
-        self.interface_emphasis_font = tkfont.Font(
-            root=self.root, family="TkDefaultFont", size=size, weight="bold")
+        default_family = tkfont.nametofont(
+            "TkDefaultFont", root=self.root).actual("family")
+        # Reuse the same Font objects on live resizing so ttk widgets do
+        # not hold references to repeatedly allocated fonts.
+        if not hasattr(self, "interface_font"):
+            self.interface_font = tkfont.Font(
+                root=self.root, family=default_family, size=size)
+            self.interface_emphasis_font = tkfont.Font(
+                root=self.root, family=default_family, size=size, weight="bold")
+        else:
+            self.interface_font.configure(size=size)
+            self.interface_emphasis_font.configure(size=size)
         # Tk's native menu font is a separate named font on X11; on
         # macOS the native menu bar may use the system's own font policy.
         try:
