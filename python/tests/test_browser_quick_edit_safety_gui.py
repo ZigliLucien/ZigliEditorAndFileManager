@@ -32,7 +32,7 @@ class BrowserQuickEditSafetyTests(unittest.TestCase):
         editor.state.buffer.text = widget.get("1.0", "end-1c")
         editor.state.buffer.modified = False
         with patch("zefm.editor.gui.tk_editor.messagebox.showwarning") as warning, \
-             patch("zefm.editor.gui.tk_editor.webbrowser.open") as launch:
+             patch("zefm.editor.gui.tk_editor.open_browser") as launch:
             self.app.edit_current_file_in_browser()
         warning.assert_called_once()
         launch.assert_not_called()
@@ -42,7 +42,7 @@ class BrowserQuickEditSafetyTests(unittest.TestCase):
     def test_stale_disk_content_blocks_browser_quick_edit(self):
         self.file.write_text("changed externally", encoding="utf-8")
         with patch("zefm.editor.gui.tk_editor.messagebox.showwarning") as warning, \
-             patch("zefm.editor.gui.tk_editor.webbrowser.open") as launch:
+             patch("zefm.editor.gui.tk_editor.open_browser") as launch:
             self.app.edit_current_file_in_browser()
         warning.assert_called_once()
         launch.assert_not_called()
@@ -53,7 +53,7 @@ class BrowserQuickEditSafetyTests(unittest.TestCase):
         browser.files = LocalFiles(Path(self.temp.name))
         browser.start.return_value = "http://127.0.0.1:1234/"
         with patch("zefm.server.http.BrowserServer", return_value=browser), \
-             patch("zefm.editor.gui.tk_editor.webbrowser.open") as launch, \
+             patch("zefm.editor.gui.tk_editor.open_browser") as launch, \
              patch("zefm.editor.gui.tk_editor.messagebox.showwarning") as warning:
             self.app.edit_current_file_in_browser()
         launch.assert_called_once()
