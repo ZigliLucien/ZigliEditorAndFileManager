@@ -6,7 +6,6 @@ handles typed input; controller handles the three explicit clipboard commands.
 """
 import sys
 import re
-import webbrowser
 import tempfile
 from uuid import uuid4
 from queue import Queue, Empty
@@ -21,6 +20,7 @@ from ..external_changes import disk_signature, changed_on_disk, ExternalChangeDi
 from ..recent_files import RecentFiles
 from ..startup_file import last_recent_buffer
 from ..cursor_positions import CursorPositions
+from ..browser_launcher import open_browser
 from ..syntax_highlight import (COLORS, MAX_CHARS, syntax_spans, latex_match,
                                 latex_environment_match)
 from ..latex_master import resolve_latex_master
@@ -874,7 +874,11 @@ class Window:
             self.status.set(f"SyncTeX: {error}")
             messagebox.showerror("Forward SyncTeX", error, parent=self.root)
             return
-        webbrowser.open(pdf_page_uri(preview, page))
+        try:
+            open_browser(pdf_page_uri(preview, page))
+        except ValueError as exc:
+            messagebox.showerror("Forward SyncTeX", str(exc), parent=self.root)
+            return
         self.status.set(f"SyncTeX: PDF page {page}")
 
     def _start_inverse_synctex(self):
@@ -1060,9 +1064,15 @@ class Window:
                     launch_okular(pdf)
                 except ValueError as exc:
                     self.status.set(f"Okular unavailable: {exc}; opening browser")
-                    webbrowser.open(pdf.as_uri())
+                    try:
+                        open_browser(pdf.as_uri())
+                    except ValueError as browser_exc:
+                        messagebox.showerror("PDF Browser", str(browser_exc), parent=self.root)
             else:
-                webbrowser.open(pdf.as_uri())
+                try:
+                    open_browser(pdf.as_uri())
+                except ValueError as exc:
+                    messagebox.showerror("PDF Browser", str(exc), parent=self.root)
         else:
             self.status.set(f"LaTeX failed (exit {result.get('returncode', '?')}); see build log")
 
@@ -1375,7 +1385,7 @@ class Window:
         except (OSError, ValueError) as exc:
             messagebox.showerror("Print Buffer", str(exc), parent=self.root)
             return
-        # Never silently assume that webbrowser.open() succeeded. On some
+        # Never silently assume that open_browser() succeeded. On some
         # Linux desktops it reports success but opens no visible tab.
         self._show_print_preview_dialog(preview_path, title)
 
@@ -1397,8 +1407,8 @@ class Window:
         address.select_range(0, "end")
         def open_preview():
             try:
-                opened = webbrowser.open_new_tab(url)
-            except (OSError, ValueError, webbrowser.Error) as exc:
+                opened = open_browser(url)
+            except (OSError, ValueError) as exc:
                 opened = False
                 self.status.set(f"Browser launch failed: {exc}")
             if not opened:
@@ -2781,7 +2791,7 @@ class Window:
             if self.browser_poll_id is None:
                 self.browser_poll_id = self.root.after(150, self._drain_browser_requests)
             relative = self.local_browser.files.relative(resolved)
-            webbrowser.open(url + "edit?" + urlencode({"path": relative, "dir": direction}))
+            open_browser(url + "edit?" + urlencode({"path": relative, "dir": direction}))
             self.status.set("Browser Quick Edit opened; Save there, then review the disk-change notice in TPEditor.")
         except (OSError, UnicodeError, ValueError) as exc:
             messagebox.showerror(label, str(exc), parent=self.root)
@@ -2821,7 +2831,7 @@ class Window:
                 self.browser_poll_id = self.root.after(150, self._drain_browser_requests)
             listing_url = url + "listing?" + urlencode({"path": start})
             if open_browser:
-                webbrowser.open(listing_url)
+                open_browser(listing_url)
             self.status.set(f"ZEFM file listing: {listing_url} (root: {root})")
             return url
         except (OSError, ValueError) as exc:
@@ -2848,7 +2858,7 @@ class Window:
                     self.mail_browser.close()
                 self.mail_browser = MailBrowser(accounts)
             url = self.mail_browser.start()
-            webbrowser.open(url)
+            open_browser(url)
             self.status.set(f"Local Maildir browser: {url} ({', '.join(accounts)})")
         except (OSError, ValueError) as exc:
             messagebox.showerror("Local email archive", str(exc), parent=self.root)
