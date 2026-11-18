@@ -64,7 +64,7 @@ class PrintBufferGuiTests(unittest.TestCase):
         self.assertFalse(directory.exists())
 
     def test_print_shows_visible_dialog_without_silent_browser_launch(self):
-        with patch("zefm.editor.gui.tk_editor.webbrowser.open_new_tab") as browser:
+        with patch("zefm.editor.gui.tk_editor.open_browser") as browser:
             self.app.action("Print")
         browser.assert_not_called()
         dialogs = [x for x in self.root.winfo_children()
