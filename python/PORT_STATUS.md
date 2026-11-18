@@ -1458,3 +1458,24 @@ listing's directory/page/sort/filter context.
 - Deliberate limitation: this is not a complete TeX interpreter.
   Custom verbatim environments, inline `lstinline` with options,
   and other catcode-changing macros may require further support.
+
+
+### v126 — browser commands should not launch Emacs
+
+- Audited Tk's browser actions. The file manager, Quick Edit, RTL
+  editor, Maildir archive, LaTeX PDF, SyncTeX and Print Preview paths
+  all used Python's default `webbrowser` dispatch, which may obey
+  `BROWSER=emacs` or a desktop file association mapped to Emacs.
+- Added `zefm.editor.browser_launcher`: on Linux, invoke an installed
+  graphical browser directly (Firefox, qutebrowser, Chromium and other
+  common browsers) via argument-list `subprocess.Popen` rather than
+  shell strings or `xdg-open`. On macOS explicitly open URLs in Safari.
+  A user can select their preferred executable by setting
+  `ZEFM_BROWSER=firefox` or `ZEFM_BROWSER=qutebrowser` before launch.
+- Replaced Tk `webbrowser.open` calls with the explicit launcher.
+  Missing browsers and launch failures produce understandable errors,
+  rather than silently activating an unrelated text editor.
+- Added `tests.test_browser_launcher` and updated the existing
+  browser Quick Edit and Print GUI tests to mock the new launcher.
+- Browser servers remain loopback-only. URLs are passed as a single
+  argv parameter and browser launching does not affect the edited file.
