@@ -1546,3 +1546,27 @@ listing's directory/page/sort/filter context.
   require compilation for accurate validation.
 - Extended `tests.test_syntax_highlight` with matching/unmatched
   math cases, escaped/commented/literal exemptions and GUI tags.
+
+
+### v130 — jump directly between matching LaTeX delimiters
+
+- Added **Go to Matching LaTeX Delimiter** in both **Edit** and
+  **Mode** menus, with **Ctrl+Shift+M** (Cmd+Shift+M on macOS).
+  The keybinding and displayed shortcut use the existing common
+  command registry, not separate hard-coded event definitions.
+- With the caret on or immediately after a LaTeX brace, a
+  `\\begin{...}`/`\\end{...}` command, or a math delimiter
+  (`$`, `$$`, `\\(`/`\\)`, `\\[`/`\\]`),
+  the command jumps to just after its matching partner. Repeating
+  the action from that position navigates back to the opener.
+- Cursor and viewport navigation is non-destructive. The operation
+  doesn't touch source text, saved snapshots, disk, or Undo history.
+  If there is no delimiter or the delimiter is unmatched, the
+  cursor stays in place and the status line explains why.
+- The matcher reuses existing lexical exclusions for escaped braces,
+  TeX comments, and verbatim content, and retains the 250,000-character
+  safety limit for interactive syntax processing.
+- Added `tests.test_latex_matching_jump` covering round trips for
+  grouping braces, nested environments and four math forms;
+  invalid/unmatched positions, literal exclusions, shortcut registry
+  and Tk cursor/modified-state safety.
