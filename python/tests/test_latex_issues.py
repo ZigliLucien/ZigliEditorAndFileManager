@@ -19,7 +19,7 @@ class LatexIssueScanTests(unittest.TestCase):
 
     def test_unmatched_braces_and_environment_names(self):
         text = (r"\begin{equation}" "\n" r"\frac{x}{y" "\n"
-                r"\end{align}" "\n" "}")
+                r"\end{align}" "\n" "}}")
         issues = latex_issues(text)
         self.assertEqual(len(issues), 3)
         descriptions = [message for _, _, message in issues]
