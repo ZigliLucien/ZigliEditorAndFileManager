@@ -106,21 +106,25 @@ class LatexIssueGuiTests(unittest.TestCase):
                    if isinstance(w, tk.Toplevel)]
         self.assertTrue(dialogs)
         dialog = dialogs[-1]
-        listing = next(w for w in dialog.winfo_children()
-                       if isinstance(w, tk.Frame) for w in w.winfo_children()
-                       if isinstance(w, tk.Listbox))
+        listing = next(child for frame in dialog.winfo_children()
+                       for child in frame.winfo_children()
+                       if isinstance(child, tk.Listbox))
         self.assertEqual(listing.size(), len(latex_issues(source)))
         listing.selection_clear(0, "end")
         listing.selection_set(1)
         listing.event_generate("<Return>")
-        self.assertEqual(widget.index("insert"),
-                         widget.index("1.0 + 1 chars"))
+        self.root.update()
+        second = latex_issues(source)[1]
+        self.assertEqual(
+            widget.index("insert"),
+            widget.index(f"1.0 + {second[0] + (second[1] == 1)} chars"))
         widget.insert("end", "}")
         original_index = widget.index("insert")
         listing.selection_clear(0, "end")
         listing.selection_set(0)
         with patch("zefm.editor.gui.tk_editor.messagebox.showinfo") as notice:
             listing.event_generate("<Return>")
+            self.root.update()
         notice.assert_called_once()
         self.assertEqual(widget.index("insert"), original_index)
         dialog.destroy()
