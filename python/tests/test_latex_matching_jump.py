@@ -63,7 +63,8 @@ class MatchingDelimiterTests(unittest.TestCase):
                   r"{ \end{wrong} $ \[ " "\n"
                   r"\end{verbatim}" "\n" r"\[x\]")
         fake_comment = source.index("{", source.index("%"))
-        fake_literal = source.index("{", source.index(r"\begin{verbatim}"))
+        fake_literal = source.index("{", source.index(r"\begin{verbatim}")
+                                    + len(r"\begin{verbatim}"))
         self.assertIsNone(latex_matching_delimiter(source, fake_comment+1))
         self.assertIsNone(latex_matching_delimiter(source, fake_literal+1))
         self.assertIsNone(latex_matching_delimiter(source, 2))
@@ -117,7 +118,14 @@ class MatchingDelimiterGuiTests(unittest.TestCase):
                 jumped = widget.index("insert")
                 self.assertNotEqual(jumped, starting)
                 self.assertTrue(self.app.go_to_matching_latex_delimiter())
-                self.assertEqual(widget.index("insert"), starting)
+                # A jump lands after the complete partner. Returning to the
+                # opener therefore lands after its delimiter, even when the
+                # first jump began at the start of a multi-character command.
+                offset = text.index("{") + 1 if name == "brace.tex" else (
+                    len(r"\\begin{equation}") if name == "env.tex" else 2)
+                self.assertEqual(
+                    widget.index("insert"),
+                    widget.index(f"1.0 + {offset} chars"))
                 self.assertEqual(widget.get("1.0", "end-1c"), text)
                 self.assertFalse(widget.edit_modified())
                 self.assertFalse(editor.state.buffer.modified)
