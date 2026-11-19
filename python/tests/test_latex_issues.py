@@ -68,7 +68,8 @@ class LatexIssueGuiTests(unittest.TestCase):
         widget.edit_modified(False)
         widget.mark_set("insert", "1.0")
         issues = latex_issues(before)
-        positions = [f"1.0 + {issue[0]} chars" for issue in issues]
+        positions = [f"1.0 + {issue[0] + (1 if issue[1] == 1 else 0)} chars"
+                     for issue in issues]
         self.assertGreaterEqual(len(issues), 2)
         for expected in positions[1:] + positions[:1]:
             self.app.next_latex_issue()
