@@ -13,8 +13,8 @@ MENUS = {
  ["Open","Save","Save As","Revert Buffer","Print","Quit"],
  ["F9","F1","F3","Ctrl+F9","Ctrl+P","Ctrl+Q"])],
  "Edit": [Command(a,b) for a,b in zip(
- ["Refresh Buffer","Clear","Redo","Undo","Line Numbers","Find","Replace","Continue Find or Replace","Toggle ClickPad","Copy","Paste","Cut"],
- ["F7","F8","F6","F5","Ctrl+F2","Ctrl+S","Ctrl+Shift+R","Ctrl+R","Ctrl+F","Ctrl+C","Ctrl+V","Ctrl+X"])],
+ ["Refresh Buffer","Clear","Redo","Undo","Line Numbers","Find","Replace","Continue Find or Replace","Toggle ClickPad","Copy","Paste","Cut","Go to Matching LaTeX Delimiter"],
+ ["F7","F8","F6","F5","Ctrl+F2","Ctrl+S","Ctrl+Shift+R","Ctrl+R","Ctrl+F","Ctrl+C","Ctrl+V","Ctrl+X","Ctrl+Shift+M"])],
  "Run": [Command(a,b) for a,b in zip(
  ["Shell","Compile","Trace"],
  ["Ctrl+Shift+Z","F4","Ctrl+O"])]
