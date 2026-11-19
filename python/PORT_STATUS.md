@@ -1523,3 +1523,26 @@ listing's directory/page/sort/filter context.
   save documents.
 - Expanded `tests.test_latex_issues` with reverse traversal,
   wraparound, list selection, and stale-list protection.
+
+
+### v129 — mathematical delimiter highlighting and diagnostics
+
+- LaTeX syntax highlighting now recognizes and pairs inline `$...$`,
+  display `$$...$$`, `\\(...\\)`, and `\\[...\\]` math
+  delimiters. Place the insertion cursor on or immediately after a
+  delimiter to highlight both endpoints in green, or show a lone
+  delimiter in red when it has no matching partner.
+- The existing **Next/Previous LaTeX Delimiter Issue** commands and
+  **List LaTeX Delimiter Issues...** also report unmatched math
+  delimiters with source line/column information. Brace and
+  `\\begin`/`\\end` diagnosis is unchanged.
+- Uses the v125 lexical scan to ignore escaped `\\$`, TeX
+  comments, literal `\\verb`/`\\lstinline` contents, and
+  verbatim-like environments. A distinct warm syntax color makes
+  math delimiters visible without changing file text, saved state
+  or Undo history.
+- This is deliberately a lexical check, not a TeX expansion engine.
+  Custom macros that alter catcodes or generate math boundaries may
+  require compilation for accurate validation.
+- Extended `tests.test_syntax_highlight` with matching/unmatched
+  math cases, escaped/commented/literal exemptions and GUI tags.
