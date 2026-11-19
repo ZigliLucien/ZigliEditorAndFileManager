@@ -18,6 +18,7 @@ COLORS = {
     "command": "#165eaa",
     "brace": "#86449a",
     "verbatim": "#52606b",
+    "math": "#a25216",
 }
 
 
@@ -259,6 +260,94 @@ def latex_environment_match(text, cursor):
 
 
 
+
+_MATH_PAIRS = {"\\(": "\\)", "\\[": "\\]", "$": "$", "$": "$"}
+_MATH_OPEN = frozenset(("\\(", "\\[", "$", "$"))
+_MATH_CLOSE = frozenset(("\\)", "\\]"))
+
+
+def latex_math_tokens(text, spans=None):
+    """Yield (start, end, marker) for genuine math delimiters.
+
+    TeX comments, verbatim content and escaped dollars are excluded by the
+    existing scanner. The command forms must be complete two-character TeX
+    commands; a second backslash must not introduce a false math delimiter.
+    """
+    if len(text) > MAX_CHARS:
+        return []
+    if spans is None:
+        spans, _delimiters = latex_scan(text)
+    suppressed = [(a, b) for a, b, style in spans
+                  if style in ("comment", "verbatim")]
+    commands = {a: (b, text[a:b]) for a, b, style in spans
+                if style == "command"}
+    tokens = []
+    i, k, n = 0, 0, len(text)
+    while i < n:
+        while k < len(suppressed) and suppressed[k][1] <= i:
+            k += 1
+        if k < len(suppressed) and suppressed[k][0] <= i < suppressed[k][1]:
+            i = suppressed[k][1]
+            continue
+        command = commands.get(i)
+        if command is not None:
+            end, name = command
+            if name in (r"\(", r"\)", r"\[", r"\]"):
+                tokens.append((i, end, name))
+            i = end
+            continue
+        if text[i] == "$":
+            end = i + (2 if text.startswith("$", i) else 1)
+            tokens.append((i, end, text[i:end]))
+            i = end
+            continue
+        i += 1
+    return tokens
+
+
+def latex_math_pairs(text, spans=None):
+    """Return tokens paired with their mate, or None for a bad delimiter."""
+    tokens = latex_math_tokens(text, spans)
+    partner = {}
+    stack = []
+    for start, end, marker in tokens:
+        key = (start, end)
+        if marker in _MATH_CLOSE:
+            opening = next((op for op, pair in _MATH_PAIRS.items()
+                            if pair == marker and op != pair), None)
+            if stack and stack[-1][2] == opening:
+                previous = stack.pop()
+                other = previous[:2]
+                partner[key] = other
+                partner[other] = key
+            else:
+                partner[key] = None
+        elif stack and stack[-1][2] == marker and marker in ("$", "$"):
+            previous = stack.pop()
+            other = previous[:2]
+            partner[key] = other
+            partner[other] = key
+        else:
+            stack.append((start, end, marker))
+    for start, end, _marker in stack:
+        partner[(start, end)] = None
+    return tokens, partner
+
+
+def latex_math_match(text, cursor):
+    """Return (source_span, partner_span or None) near the insertion point."""
+    if not isinstance(cursor, int) or not 0 <= cursor <= len(text):
+        return None
+    if len(text) > MAX_CHARS:
+        return None
+    tokens, partners = latex_math_pairs(text)
+    for start, end, _marker in tokens:
+        if start <= cursor <= end:
+            span = (start, end)
+            return span, partners.get(span)
+    return None
+
+
 def latex_issues(text):
     """Find unmatched TeX grouping braces and environment commands.
 
@@ -300,6 +389,12 @@ def latex_issues(text):
     for pos, end, name in environments:
         issues.append((pos, end - pos,
                        "Unclosed \\\\begin{" + name + "}"))
+    math_tokens, math_partners = latex_math_pairs(text, spans)
+    for start, end, marker in math_tokens:
+        if math_partners[(start, end)] is None:
+            label = "Unexpected" if marker in _MATH_CLOSE else "Unmatched"
+            issues.append((start, end - start,
+                           f"{label} math delimiter {marker}"))
     return sorted(issues, key=lambda entry: entry[0])
 
 
@@ -307,7 +402,10 @@ def syntax_spans(text, mode):
     if len(text) > MAX_CHARS:
         return []
     if mode == "latex":
-        return latex_scan(text)[0]
+        spans, _delimiters = latex_scan(text)
+        spans.extend((a, b, "math")
+                     for a, b, _marker in latex_math_tokens(text, spans))
+        return spans
     if mode == "python":
         return python_spans(text)
     if mode == "java":
