@@ -1502,3 +1502,24 @@ listing's directory/page/sort/filter context.
 - Added `tests.test_latex_issues` for nested environments,
   unbalanced structure, ignored literal regions, cycling,
   status messages, and unchanged document/modified state.
+
+
+### v128 — LaTeX issue index and backward navigation
+
+- Added **Mode → Previous LaTeX Delimiter Issue**, reversing the v127
+  navigation and wrapping to the final issue when moving backward
+  from the start. Forward navigation remains available unchanged.
+- Added **Mode → List LaTeX Delimiter Issues...**: a nonmodal,
+  scrollable list with issue descriptions and line/column positions.
+  Double-click an issue or select it and use **Go To** to jump to
+  its source location. The current buffer text is never changed.
+- The list belongs to the original source tab; it selects that tab
+  when jumping. If the buffer was edited after the list was opened,
+  navigation refuses the stale list and asks for a fresh one instead.
+  It also handles a source tab being closed while the dialog is open.
+- The list and navigation share the v127 verbatim-aware scanner:
+  unbalanced braces and begin/end environment commands, ignoring
+  comments and literal TeX examples. They do not add Undo records or
+  save documents.
+- Expanded `tests.test_latex_issues` with reverse traversal,
+  wraparound, list selection, and stale-list protection.
