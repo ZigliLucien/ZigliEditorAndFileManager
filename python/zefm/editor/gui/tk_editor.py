@@ -1269,40 +1269,121 @@ class Window:
         self.new_buffer(text=result.stdout)
         self.status.set("jq output opened in new buffer (source unchanged)")
 
-    def next_latex_issue(self):
-        """Jump to the next unmatched LaTeX brace/environment without edits."""
+    def _current_latex_issues(self):
+        """Return (widget, issues), or None if a scan is inappropriate."""
         widget, _editor = self.current()
         if widget is None:
-            return
+            return None
         if self.buffer_modes[self.tabs.select()].name != "latex":
             self.status.set("LaTeX delimiter check applies to LaTeX buffers")
-            return
+            return None
         contents = widget.get("1.0", "end-1c")
         if len(contents) > MAX_CHARS:
             self.status.set("LaTeX delimiter check: buffer exceeds size limit")
-            return
-        problems = latex_issues(contents)
-        if not problems:
-            self.status.set("LaTeX delimiter check: no unmatched braces or environments")
-            return
-        cursor = len(widget.get("1.0", "insert"))
-        # Include the first issue when starting at the top, but advance
-        # when the cursor is already on an issue so repeated calls cycle.
-        selected = next((item for item in problems if item[0] > cursor),
-                        problems[0])
-        offset, length, description = selected
-        # For a single brace, put the caret just after it so the existing
-        # matcher displays its red unmatched tag immediately.
+            return None
+        return widget, latex_issues(contents)
+
+    def _jump_latex_issue(self, widget, problems, index):
+        """Move only the caret and viewport, preserving Undo and file data."""
+        offset, length, description = problems[index]
+        # Single unmatched braces highlight red when the caret follows them.
         target = f"1.0 + {offset + (1 if length == 1 else 0)} chars"
         widget.mark_set("insert", target)
         widget.see(target)
         widget.focus_set()
         self._cursor_highlight(widget)
-        location = widget.index(target)
-        line, column = location.split(".")
+        line, column = widget.index(f"1.0 + {offset} chars").split(".")
         self.status.set(
-            f"LaTeX issue {problems.index(selected)+1}/{len(problems)} "
-            f"at line {line}, column {int(column)+1}: {description}")
+            f"LaTeX issue {index + 1}/{len(problems)} "
+            f"at line {line}, column {int(column) + 1}: {description}")
+
+    def _navigate_latex_issue(self, direction):
+        current = self._current_latex_issues()
+        if current is None:
+            return
+        widget, problems = current
+        if not problems:
+            self.status.set(
+                "LaTeX delimiter check: no unmatched braces or environments")
+            return
+        cursor = len(widget.get("1.0", "insert"))
+        # Include the location of an issue whose brace ends at the cursor:
+        # repeat navigation should move on to the next/previous problem.
+        if direction > 0:
+            selected = next((i for i, (pos, length, _reason) in enumerate(problems)
+                             if pos + (length == 1) > cursor), 0)
+        else:
+            selected = next(
+                (i for i in range(len(problems) - 1, -1, -1)
+                 if problems[i][0] + (problems[i][1] == 1) < cursor),
+                len(problems) - 1)
+        self._jump_latex_issue(widget, problems, selected)
+
+    def next_latex_issue(self):
+        """Move to the next structural LaTeX issue, wrapping at EOF."""
+        self._navigate_latex_issue(1)
+
+    def previous_latex_issue(self):
+        """Move to the previous structural LaTeX issue, wrapping at BOF."""
+        self._navigate_latex_issue(-1)
+
+    def list_latex_issues(self):
+        """Show a navigable issue index for the current live LaTeX buffer."""
+        current = self._current_latex_issues()
+        if current is None:
+            return
+        widget, problems = current
+        if not problems:
+            self.status.set(
+                "LaTeX delimiter check: no unmatched braces or environments")
+            return
+        source_tab = self.tabs.select()
+        dialog = tk.Toplevel(self.root)
+        dialog.title(f"LaTeX Delimiter Issues ({len(problems)})")
+        dialog.transient(self.root)
+        dialog.geometry("720x380")
+        ttk.Label(
+            dialog, text="Double-click an issue or select it and choose Go To.",
+            padding=(10, 8)).pack(anchor="w")
+        frame = ttk.Frame(dialog, padding=(10, 0, 10, 0))
+        frame.pack(fill="both", expand=True)
+        listing = tk.Listbox(frame, exportselection=False)
+        scrollbar = ttk.Scrollbar(frame, orient="vertical", command=listing.yview)
+        listing.configure(yscrollcommand=scrollbar.set)
+        listing.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+        for pos, _length, description in problems:
+            line, column = widget.index(f"1.0 + {pos} chars").split(".")
+            listing.insert("end", f"{int(line):5d}:{int(column) + 1:<4d}  {description}")
+        listing.selection_set(0)
+
+        def go_to(event=None):
+            # The tab may have been closed while the nonmodal list is open.
+            if source_tab not in self.views:
+                dialog.destroy()
+                return
+            selected = listing.curselection()
+            if not selected:
+                return
+            # Recompute from live text to avoid jumping to a stale position
+            # after an edit. Do not act on an index that changed meaning.
+            current_text = widget.get("1.0", "end-1c")
+            if latex_issues(current_text) != problems:
+                messagebox.showinfo(
+                    "LaTeX Delimiter Issues",
+                    "The buffer changed. Reopen the list for updated positions.",
+                    parent=dialog)
+                return
+            self.tabs.select(source_tab)
+            self._jump_latex_issue(widget, problems, selected[0])
+
+        listing.bind("<Double-Button-1>", go_to)
+        listing.bind("<Return>", go_to)
+        controls = ttk.Frame(dialog, padding=10)
+        controls.pack(fill="x")
+        ttk.Button(controls, text="Go To", command=go_to).pack(side="left")
+        ttk.Button(controls, text="Close", command=dialog.destroy).pack(side="right")
+        listing.focus_set()
 
     def select_buffer_mode(self):
         widget,_=self.current()
@@ -2124,6 +2205,10 @@ class Window:
         mode_menu.add_command(label="Select Buffer Mode...",command=self.select_buffer_mode)
         mode_menu.add_command(label="Next LaTeX Delimiter Issue",
                               command=self.next_latex_issue)
+        mode_menu.add_command(label="Previous LaTeX Delimiter Issue",
+                              command=self.previous_latex_issue)
+        mode_menu.add_command(label="List LaTeX Delimiter Issues...",
+                              command=self.list_latex_issues)
         mode_menu.add_separator()
         mode_menu.add_command(label="Validate JSON",command=self.validate_buffer)
         mode_menu.add_command(label="Show jq Path at Cursor",command=self._json_path)
