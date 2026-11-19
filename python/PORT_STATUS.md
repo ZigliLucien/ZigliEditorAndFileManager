@@ -1479,3 +1479,26 @@ listing's directory/page/sort/filter context.
   browser Quick Edit and Print GUI tests to mock the new launcher.
 - Browser servers remain loopback-only. URLs are passed as a single
   argv parameter and browser launching does not affect the edited file.
+
+
+### v127 — jump to the next LaTeX structural issue
+
+- Added **Mode → Next LaTeX Delimiter Issue**, a lightweight
+  non-destructive navigation action for LaTeX buffers. It scans the
+  current live Tk text and moves the cursor to the next suspect
+  location, wrapping back to the first issue after reaching the end.
+- Recognizes unclosed `{` braces, unexpected `}` braces,
+  unmatched `\\begin{name}`, and unexpected or mismatched
+  `\\end{name}` commands. The status line reports the issue
+  number, total count, line, column, and reason.
+- Uses the same verbatim-aware tokenizer as v125, so commented-out
+  source, escaped braces, and literal regions are not diagnosed as
+  TeX structure. Normal mathematical `()` and `[]` are excluded
+  from this *whole-document scan* because they often occur as
+  ordinary mathematics; cursor-based matching still supports them.
+- Navigation changes only the insertion point and viewport; it
+  neither changes the document nor adds Undo steps. It is a visual
+  aid, not a substitute for a full LaTeX compile.
+- Added `tests.test_latex_issues` for nested environments,
+  unbalanced structure, ignored literal regions, cycling,
+  status messages, and unchanged document/modified state.
