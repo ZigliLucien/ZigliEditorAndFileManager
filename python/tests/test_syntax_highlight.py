@@ -6,7 +6,8 @@ from unittest.mock import patch
 import unittest
 
 from zefm.editor.syntax_highlight import (
-    syntax_spans, latex_match, latex_environment_match, MAX_CHARS)
+    syntax_spans, latex_match, latex_environment_match,
+    latex_math_match, MAX_CHARS)
 from zefm.editor.gui.tk_editor import Window
 from zefm.editor.recent_files import RecentFiles
 
@@ -165,6 +166,55 @@ class SyntaxHighlightTests(unittest.TestCase):
         self.assertEqual(latex_environment_match(text, 4),
                          ((0, len(r"\begin{verbatim}")), None))
 
+    def test_math_delimiter_pairs(self):
+        for text, opening, closing in (
+                ("$x+y$", "$", "$"),
+                ("$x+y$", "$", "$"),
+                (r"\(x+y\)", r"\(", r"\)"),
+                (r"\[x+y\]", r"\[", r"\]")):
+            with self.subTest(text=text):
+                start = (0, len(opening))
+                end = (len(text) - len(closing), len(text))
+                self.assertEqual(latex_math_match(text, 0), (start, end))
+                self.assertEqual(latex_math_match(text, len(text)), (end, start))
+                self.assertEqual(
+                    [reason for _, _, reason in latex_issues(text)], [])
+                colored = [(text[a:b], style) for a, b, style
+                           in syntax_spans(text, "latex")]
+                self.assertIn((opening, "math"), colored)
+                self.assertIn((closing, "math"), colored)
+
+    def test_math_issues_include_unclosed_and_wrong_closers(self):
+        cases = {
+            "$x": "Unmatched math delimiter $",
+            "$x": "Unmatched math delimiter $",
+            r"\(x": r"Unmatched math delimiter \(",
+            r"\[x\)": r"Unexpected math delimiter \)",
+            r"x\]": r"Unexpected math delimiter \]",
+        }
+        for text, expected in cases.items():
+            with self.subTest(text=text):
+                reasons = [description for _, _, description
+                           in latex_issues(text)]
+                self.assertIn(expected, reasons)
+
+    def test_math_ignores_escaped_comments_verbatim(self):
+        text = (r"\$ price % $ comment \(" "\n"
+                r"\begin{verbatim}" "\n"
+                r"$ \[ \) $" "\n"
+                r"\end{verbatim}" "\n"
+                r"\verb|$ \(|" "\n"
+                r"\(x+\$1\)")
+        self.assertEqual(latex_issues(text), [])
+        self.assertIsNone(latex_math_match(text, text.index(r"\$") + 1))
+        self.assertIsNone(latex_math_match(text, text.index("comment") + 5))
+        self.assertIsNone(latex_math_match(text, text.index(r"$ \[ \)") + 1))
+        last_open = text.rindex(r"\(")
+        last_close = text.rindex(r"\)")
+        self.assertEqual(latex_math_match(text, last_open + 1),
+                         ((last_open, last_open + 2),
+                          (last_close, last_close + 2)))
+
     def test_size_cap(self):
         text = "x" * (MAX_CHARS + 1)
         self.assertEqual(syntax_spans(text, "latex"), [])
@@ -238,6 +288,20 @@ class SyntaxHighlightGuiTests(unittest.TestCase):
         self.assertTrue(widget.tag_ranges("syntax_verbatim"))
         self.assertEqual(widget.get("1.0", "end-1c"), source)
         self.assertFalse(widget.edit_modified())
+
+    def test_math_delimiters_highlight_without_editing(self):
+        for source in ("$x$", "$x$", r"\(x\)", r"\[x\]"):
+            with self.subTest(source=source):
+                self.app.new_buffer(path=str(self.root_path / "math.tex"),
+                                    text=source)
+                widget, editor = self.app.current()
+                widget.mark_set("insert", "1.0")
+                widget.edit_modified(False)
+                self.app._refresh_highlight(self.app.tabs.select())
+                self.assertEqual(len(widget.tag_ranges("syntax_match")), 4)
+                self.assertEqual(widget.get("1.0", "end-1c"), source)
+                self.assertFalse(widget.edit_modified())
+                self.assertFalse(editor.state.buffer.modified)
 
     def test_python_and_java_modes(self):
         for name, text, tag in (
