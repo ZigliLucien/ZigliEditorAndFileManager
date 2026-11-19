@@ -348,6 +348,34 @@ def latex_math_match(text, cursor):
     return None
 
 
+
+def latex_matching_delimiter(text, cursor):
+    """Find the matched structure at the cursor without editing the source.
+
+    Return (source_span, partner_span or None) with half-open character
+    offsets, or None if the cursor is not on a supported delimiter.
+    Environments take precedence over their argument braces; math
+    delimiters take precedence over ordinary grouping delimiters.
+    """
+    if not isinstance(cursor, int) or not 0 <= cursor <= len(text):
+        return None
+    if len(text) > MAX_CHARS:
+        return None
+
+    environment = latex_environment_match(text, cursor)
+    if environment is not None:
+        return environment
+    math = latex_math_match(text, cursor)
+    if math is not None:
+        return math
+    brace = latex_match(text, cursor)
+    if brace is None:
+        return None
+    position, partner = brace
+    return ((position, position + 1),
+            (partner, partner + 1) if partner is not None else None)
+
+
 def latex_issues(text):
     """Find unmatched TeX grouping braces and environment commands.
 
