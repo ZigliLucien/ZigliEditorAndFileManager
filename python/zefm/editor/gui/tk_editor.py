@@ -1291,7 +1291,9 @@ class Window:
         selected = next((item for item in problems if item[0] > cursor),
                         problems[0])
         offset, length, description = selected
-        target = f"1.0 + {offset} chars"
+        # For a single brace, put the caret just after it so the existing
+        # matcher displays its red unmatched tag immediately.
+        target = f"1.0 + {offset + (1 if length == 1 else 0)} chars"
         widget.mark_set("insert", target)
         widget.see(target)
         widget.focus_set()
