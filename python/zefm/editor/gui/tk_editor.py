@@ -22,7 +22,7 @@ from ..startup_file import last_recent_buffer
 from ..cursor_positions import CursorPositions
 from ..browser_launcher import open_browser
 from ..syntax_highlight import (COLORS, MAX_CHARS, syntax_spans, latex_match,
-                                latex_environment_match)
+                                latex_environment_match, latex_issues)
 from ..latex_master import resolve_latex_master
 from ..latex_master_preferences import LatexMasterPreferences
 from ..latex_diagnostics import parse_latex_errors
@@ -1269,6 +1269,39 @@ class Window:
         self.new_buffer(text=result.stdout)
         self.status.set("jq output opened in new buffer (source unchanged)")
 
+    def next_latex_issue(self):
+        """Jump to the next unmatched LaTeX brace/environment without edits."""
+        widget, _editor = self.current()
+        if widget is None:
+            return
+        if self.buffer_modes[self.tabs.select()].name != "latex":
+            self.status.set("LaTeX delimiter check applies to LaTeX buffers")
+            return
+        contents = widget.get("1.0", "end-1c")
+        if len(contents) > MAX_CHARS:
+            self.status.set("LaTeX delimiter check: buffer exceeds size limit")
+            return
+        problems = latex_issues(contents)
+        if not problems:
+            self.status.set("LaTeX delimiter check: no unmatched braces or environments")
+            return
+        cursor = len(widget.get("1.0", "insert"))
+        # Include the first issue when starting at the top, but advance
+        # when the cursor is already on an issue so repeated calls cycle.
+        selected = next((item for item in problems if item[0] > cursor),
+                        problems[0])
+        offset, length, description = selected
+        target = f"1.0 + {offset} chars"
+        widget.mark_set("insert", target)
+        widget.see(target)
+        widget.focus_set()
+        self._cursor_highlight(widget)
+        location = widget.index(target)
+        line, column = location.split(".")
+        self.status.set(
+            f"LaTeX issue {problems.index(selected)+1}/{len(problems)} "
+            f"at line {line}, column {int(column)+1}: {description}")
+
     def select_buffer_mode(self):
         widget,_=self.current()
         if not widget:return
@@ -2087,6 +2120,8 @@ class Window:
             bar.add_cascade(label=group,menu=menu)
         mode_menu=tk.Menu(bar,tearoff=False)
         mode_menu.add_command(label="Select Buffer Mode...",command=self.select_buffer_mode)
+        mode_menu.add_command(label="Next LaTeX Delimiter Issue",
+                              command=self.next_latex_issue)
         mode_menu.add_separator()
         mode_menu.add_command(label="Validate JSON",command=self.validate_buffer)
         mode_menu.add_command(label="Show jq Path at Cursor",command=self._json_path)
