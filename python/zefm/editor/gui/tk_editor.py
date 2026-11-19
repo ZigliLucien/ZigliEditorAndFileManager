@@ -23,7 +23,7 @@ from ..cursor_positions import CursorPositions
 from ..browser_launcher import open_browser
 from ..syntax_highlight import (COLORS, MAX_CHARS, syntax_spans, latex_match,
                                 latex_environment_match, latex_math_match,
-                                latex_issues)
+                                latex_issues, latex_matching_delimiter)
 from ..latex_master import resolve_latex_master
 from ..latex_master_preferences import LatexMasterPreferences
 from ..latex_diagnostics import parse_latex_errors
@@ -1278,6 +1278,42 @@ class Window:
         self.new_buffer(text=result.stdout)
         self.status.set("jq output opened in new buffer (source unchanged)")
 
+    def go_to_matching_latex_delimiter(self):
+        """Jump to a paired TeX delimiter without editing or saving the buffer."""
+        widget, _editor = self.current()
+        if widget is None:
+            return False
+        if self.buffer_modes[self.tabs.select()].name != "latex":
+            self.status.set("Go to matching delimiter is for LaTeX buffers")
+            return False
+        source_text = widget.get("1.0", "end-1c")
+        if len(source_text) > MAX_CHARS:
+            self.status.set("LaTeX matching: buffer exceeds size limit")
+            return False
+        cursor = len(widget.get("1.0", "insert"))
+        matched = latex_matching_delimiter(source_text, cursor)
+        if matched is None:
+            self.status.set("LaTeX matching: place the cursor on or after a delimiter")
+            return False
+        source, partner = matched
+        if partner is None:
+            self._cursor_highlight(widget)
+            at = widget.index(f"1.0 + {source[0]} chars")
+            self.status.set(f"LaTeX matching: unmatched delimiter at {at}")
+            return False
+        # Leave the cursor immediately after the counterpart, so invoking
+        # the command again navigates back to the original partner.
+        target = f"1.0 + {partner[1]} chars"
+        widget.mark_set("insert", target)
+        widget.see(target)
+        widget.focus_set()
+        self._cursor_highlight(widget)
+        line, column = widget.index(
+            f"1.0 + {partner[0]} chars").split(".")
+        self.status.set(
+            f"LaTeX matching: line {line}, column {int(column)+1}")
+        return True
+
     def _current_latex_issues(self):
         """Return (widget, issues), or None if a scan is inappropriate."""
         widget, _editor = self.current()
@@ -1625,6 +1661,7 @@ class Window:
         elif name=="Print":self.print_buffer()
         elif name=="Toggle ClickPad":self.toggle_clickpad()
         elif name=="Line Numbers":self.toggle_line_numbers()
+        elif name=="Go to Matching LaTeX Delimiter":self.go_to_matching_latex_delimiter()
         elif name=="Clear":
             if messagebox.askyesno("Clear buffer","Delete all text in this buffer?",parent=self.root):
                 widget.delete("1.0","end")
@@ -2212,6 +2249,17 @@ class Window:
             bar.add_cascade(label=group,menu=menu)
         mode_menu=tk.Menu(bar,tearoff=False)
         mode_menu.add_command(label="Select Buffer Mode...",command=self.select_buffer_mode)
+        # Both the Edit and Mode entries use the same registry command.
+        match_label = "Go to Matching LaTeX Delimiter"
+        match_shortcut = next(
+            (cmd.shortcut for cmd in self.menus.get("Edit", ())
+             if cmd.label == match_label), None)
+        shown = (match_shortcut.replace("Ctrl", "Cmd")
+                 if sys.platform == "darwin" and match_shortcut
+                 else match_shortcut)
+        mode_menu.add_command(
+            label=match_label, accelerator=shown or "",
+            command=lambda: self.action(match_label))
         mode_menu.add_command(label="Next LaTeX Delimiter Issue",
                               command=self.next_latex_issue)
         mode_menu.add_command(label="Previous LaTeX Delimiter Issue",
