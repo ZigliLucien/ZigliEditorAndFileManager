@@ -22,7 +22,8 @@ from ..startup_file import last_recent_buffer
 from ..cursor_positions import CursorPositions
 from ..browser_launcher import open_browser
 from ..syntax_highlight import (COLORS, MAX_CHARS, syntax_spans, latex_match,
-                                latex_environment_match, latex_issues)
+                                latex_environment_match, latex_math_match,
+                                latex_issues)
 from ..latex_master import resolve_latex_master
 from ..latex_master_preferences import LatexMasterPreferences
 from ..latex_diagnostics import parse_latex_errors
@@ -337,14 +338,22 @@ class Window:
                 widget.tag_add(tag, f"1.0 + {start} chars",
                                f"1.0 + {end} chars")
         else:
-            result = latex_match(text, cursor)
-            if result is None:
-                return
-            source, target = result
-            for offset in ((source, target) if target is not None else (source,)):
+            math = latex_math_match(text, cursor)
+            if math is not None:
+                source, target = math
                 tag = "syntax_match" if target is not None else "syntax_unmatched"
-                widget.tag_add(tag, f"1.0 + {offset} chars",
-                               f"1.0 + {offset + 1} chars")
+                for start, end in (source, target) if target is not None else (source,):
+                    widget.tag_add(tag, f"1.0 + {start} chars",
+                                   f"1.0 + {end} chars")
+            else:
+                result = latex_match(text, cursor)
+                if result is None:
+                    return
+                source, target = result
+                for offset in ((source, target) if target is not None else (source,)):
+                    tag = "syntax_match" if target is not None else "syntax_unmatched"
+                    widget.tag_add(tag, f"1.0 + {offset} chars",
+                                   f"1.0 + {offset + 1} chars")
         # Keep normal text selection visible above delimiter emphasis.
         widget.tag_raise("syntax_match")
         widget.tag_raise("syntax_unmatched")
@@ -1304,7 +1313,7 @@ class Window:
         widget, problems = current
         if not problems:
             self.status.set(
-                "LaTeX delimiter check: no unmatched braces or environments")
+                "LaTeX delimiter check: no unmatched braces, environments or math delimiters")
             return
         cursor = len(widget.get("1.0", "insert"))
         # Include the location of an issue whose brace ends at the cursor:
@@ -1335,7 +1344,7 @@ class Window:
         widget, problems = current
         if not problems:
             self.status.set(
-                "LaTeX delimiter check: no unmatched braces or environments")
+                "LaTeX delimiter check: no unmatched braces, environments or math delimiters")
             return
         source_tab = self.tabs.select()
         dialog = tk.Toplevel(self.root)
