@@ -79,6 +79,52 @@ class LatexIssueGuiTests(unittest.TestCase):
         self.assertFalse(editor.state.buffer.modified)
         self.assertIn("LaTeX issue", self.app.status.get())
 
+    def test_previous_navigation_cycles_backwards(self):
+        source = (r"\begin{equation}" "\n"
+                  "{x" "\n"
+                  r"\end{align}" "\n"
+                  "}")
+        self.app.new_buffer(path=str(self.directory / "back.tex"), text=source)
+        widget, editor = self.app.current()
+        problems = latex_issues(source)
+        self.assertGreaterEqual(len(problems), 3)
+        widget.mark_set("insert", "1.0")
+        for issue in reversed(problems):
+            self.app.previous_latex_issue()
+            expected = issue[0] + (1 if issue[1] == 1 else 0)
+            self.assertEqual(widget.index("insert"),
+                             widget.index(f"1.0 + {expected} chars"))
+        self.assertEqual(widget.get("1.0", "end-1c"), source)
+        self.assertFalse(editor.state.buffer.modified)
+
+    def test_issue_list_navigation_and_stale_guard(self):
+        source = r"\begin{equation}" + "\n" + "{ x"
+        self.app.new_buffer(path=str(self.directory / "list.tex"), text=source)
+        widget, editor = self.app.current()
+        self.app.list_latex_issues()
+        dialogs = [w for w in self.root.winfo_children()
+                   if isinstance(w, tk.Toplevel)]
+        self.assertTrue(dialogs)
+        dialog = dialogs[-1]
+        listing = next(w for w in dialog.winfo_children()
+                       if isinstance(w, tk.Frame) for w in w.winfo_children()
+                       if isinstance(w, tk.Listbox))
+        self.assertEqual(listing.size(), len(latex_issues(source)))
+        listing.selection_clear(0, "end")
+        listing.selection_set(1)
+        listing.event_generate("<Return>")
+        self.assertEqual(widget.index("insert"),
+                         widget.index("1.0 + 1 chars"))
+        widget.insert("end", "}")
+        original_index = widget.index("insert")
+        listing.selection_clear(0, "end")
+        listing.selection_set(0)
+        with patch("zefm.editor.gui.tk_editor.messagebox.showinfo") as notice:
+            listing.event_generate("<Return>")
+        notice.assert_called_once()
+        self.assertEqual(widget.index("insert"), original_index)
+        dialog.destroy()
+
     def test_no_issues_and_non_latex_buffers(self):
         self.app.new_buffer(path=str(self.directory / "a.tex"),
                             text=r"\frac{a}{b}")
