@@ -258,6 +258,51 @@ def latex_environment_match(text, cursor):
     return None
 
 
+
+def latex_issues(text):
+    """Find unmatched TeX grouping braces and environment commands.
+
+    Returns sorted (offset, length, description) tuples.  This deliberately
+    checks only curly braces, not ordinary mathematical parentheses/brackets.
+    It ignores comments, escaped braces and verbatim-style contents using
+    the same scanner as the cursor-based matching feature.
+    """
+    if len(text) > MAX_CHARS:
+        return []
+    spans, delimiters = latex_scan(text)
+    issues = []
+    braces = []
+    for pos, char in delimiters:
+        if char == "{":
+            braces.append(pos)
+        elif char == "}":
+            if braces:
+                braces.pop()
+            else:
+                issues.append((pos, 1, "Unexpected closing brace }"))
+    issues.extend((pos, 1, "Unclosed opening brace {") for pos in braces)
+
+    command_starts = {start for start, _end, style in spans
+                      if style == "command"}
+    environments = []
+    for match in _ENVIRONMENT.finditer(text):
+        if match.start() not in command_starts:
+            continue
+        pos, end = match.span()
+        kind, name = match.group(1), match.group(2)
+        if kind == "begin":
+            environments.append((pos, end, name))
+        elif environments and environments[-1][2] == name:
+            environments.pop()
+        else:
+            issues.append((pos, end - pos,
+                           "Unmatched \\\\end{" + name + "}"))
+    for pos, end, name in environments:
+        issues.append((pos, end - pos,
+                       "Unclosed \\\\begin{" + name + "}"))
+    return sorted(issues, key=lambda entry: entry[0])
+
+
 def syntax_spans(text, mode):
     if len(text) > MAX_CHARS:
         return []
