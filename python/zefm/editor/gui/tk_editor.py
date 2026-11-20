@@ -20,6 +20,7 @@ from ..external_changes import disk_signature, changed_on_disk, ExternalChangeDi
 from ..recent_files import RecentFiles
 from ..startup_file import last_recent_buffer
 from ..cursor_positions import CursorPositions
+from ..latex_outline import latex_outline
 from ..browser_launcher import open_browser
 from ..syntax_highlight import (COLORS, MAX_CHARS, syntax_spans, latex_match,
                                 latex_environment_match, latex_math_match,
@@ -1314,6 +1315,125 @@ class Window:
             f"LaTeX matching: line {line}, column {int(column)+1}")
         return True
 
+    def show_latex_outline(self):
+        """Navigate the live LaTeX document by structural headings."""
+        widget, _editor = self.current()
+        if widget is None:
+            return
+        source_tab = self.tabs.select()
+        if self.buffer_modes[source_tab].name != "latex":
+            self.status.set("LaTeX Document Outline requires a LaTeX buffer")
+            return
+        if len(widget.get("1.0", "end-1c")) > MAX_CHARS:
+            self.status.set("LaTeX Document Outline: buffer exceeds size limit")
+            return
+
+        dialog = tk.Toplevel(self.root)
+        dialog.title("LaTeX Document Outline")
+        dialog.transient(self.root)
+        dialog.geometry("780x470")
+        ttk.Label(
+            dialog,
+            text="Chapters and sections in this buffer. Filter by title; "
+                 "double-click to jump. Refresh after editing.",
+            padding=(10, 8), wraplength=740).pack(anchor="w", fill="x")
+        filter_row = ttk.Frame(dialog, padding=(10, 0, 10, 6))
+        filter_row.pack(fill="x")
+        ttk.Label(filter_row, text="Filter:").pack(side="left", padx=(0, 6))
+        filter_value = tk.StringVar()
+        filter_entry = ttk.Entry(filter_row, textvariable=filter_value)
+        filter_entry.pack(side="left", fill="x", expand=True)
+
+        frame = ttk.Frame(dialog, padding=(10, 0, 10, 0))
+        frame.pack(fill="both", expand=True)
+        listing = tk.Listbox(frame, exportselection=False)
+        scrollbar = ttk.Scrollbar(frame, orient="vertical",
+                                  command=listing.yview)
+        listing.configure(yscrollcommand=scrollbar.set)
+        listing.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+        counter = tk.StringVar(value="")
+        ttk.Label(dialog, textvariable=counter,
+                  padding=(10, 4)).pack(anchor="w")
+
+        snapshot = ""
+        headings = []
+        visible = []
+
+        def update_listing(*_unused):
+            visible.clear()
+            listing.delete(0, "end")
+            query = filter_value.get().strip().casefold()
+            indent_base = min((item.level for item in headings), default=0)
+            for item in headings:
+                if query and query not in (
+                        item.kind + " " + item.title).casefold():
+                    continue
+                visible.append(item)
+                line = widget.index(f"1.0 + {item.offset} chars").split(".")[0]
+                indented = "  " * (item.level - indent_base)
+                star = "*" if item.starred else ""
+                title = item.title if len(item.title) < 160 else item.title[:157] + "..."
+                listing.insert(
+                    "end", f"{int(line):>5}  {indented}{item.kind}{star}: {title}")
+            counter.set(f"{len(visible)} of {len(headings)} headings")
+            if visible:
+                listing.selection_set(0)
+                listing.activate(0)
+
+        def refresh():
+            nonlocal snapshot, headings
+            if source_tab not in self.views:
+                dialog.destroy()
+                return
+            snapshot = widget.get("1.0", "end-1c")
+            if len(snapshot) > MAX_CHARS:
+                self.status.set("LaTeX Document Outline: buffer exceeds size limit")
+                dialog.destroy()
+                return
+            headings = latex_outline(snapshot)
+            update_listing()
+
+        def go_to(event=None):
+            if source_tab not in self.views:
+                dialog.destroy()
+                return
+            selected = listing.curselection()
+            if not selected:
+                return
+            # An outline position must never be applied to text that changed
+            # after the listing was built, even if the headings look the same.
+            if widget.get("1.0", "end-1c") != snapshot:
+                messagebox.showinfo(
+                    "LaTeX Document Outline",
+                    "The buffer changed. Choose Refresh to update the outline.",
+                    parent=dialog)
+                return
+            item = visible[selected[0]]
+            self.tabs.select(source_tab)
+            target = f"1.0 + {item.offset} chars"
+            widget.mark_set("insert", target)
+            widget.see(target)
+            widget.focus_set()
+            line, column = widget.index(target).split(".")
+            self._cursor_highlight(widget)
+            self.status.set(
+                f"LaTeX outline: {item.kind} at line {line}, "
+                f"column {int(column)+1} — {item.title}")
+
+        filter_value.trace_add("write", update_listing)
+        listing.bind("<Double-Button-1>", go_to)
+        listing.bind("<Return>", go_to)
+        controls = ttk.Frame(dialog, padding=10)
+        controls.pack(fill="x")
+        ttk.Button(controls, text="Go To", command=go_to).pack(side="left")
+        ttk.Button(controls, text="Refresh", command=refresh).pack(
+            side="left", padx=(8, 0))
+        ttk.Button(controls, text="Close",
+                   command=dialog.destroy).pack(side="right")
+        refresh()
+        filter_entry.focus_set()
+
     def _current_latex_issues(self):
         """Return (widget, issues), or None if a scan is inappropriate."""
         widget, _editor = self.current()
@@ -1662,6 +1782,7 @@ class Window:
         elif name=="Toggle ClickPad":self.toggle_clickpad()
         elif name=="Line Numbers":self.toggle_line_numbers()
         elif name=="Go to Matching LaTeX Delimiter":self.go_to_matching_latex_delimiter()
+        elif name=="LaTeX Document Outline":self.show_latex_outline()
         elif name=="Clear":
             if messagebox.askyesno("Clear buffer","Delete all text in this buffer?",parent=self.root):
                 widget.delete("1.0","end")
@@ -2249,6 +2370,16 @@ class Window:
             bar.add_cascade(label=group,menu=menu)
         mode_menu=tk.Menu(bar,tearoff=False)
         mode_menu.add_command(label="Select Buffer Mode...",command=self.select_buffer_mode)
+        outline_label = "LaTeX Document Outline"
+        outline_shortcut = next(
+            (cmd.shortcut for cmd in self.menus.get("Edit", ())
+             if cmd.label == outline_label), None)
+        outline_shown = (outline_shortcut.replace("Ctrl", "Cmd")
+                         if sys.platform == "darwin" and outline_shortcut
+                         else outline_shortcut)
+        mode_menu.add_command(
+            label="LaTeX Document Outline...", accelerator=outline_shown or "",
+            command=lambda: self.action(outline_label))
         # Both the Edit and Mode entries use the same registry command.
         match_label = "Go to Matching LaTeX Delimiter"
         match_shortcut = next(
