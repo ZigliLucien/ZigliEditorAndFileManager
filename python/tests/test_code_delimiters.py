@@ -135,6 +135,26 @@ class CodeDelimiterGuiTests(unittest.TestCase):
                 self.assertFalse(widget.edit_modified())
                 self.assertFalse(editor.state.buffer.modified)
 
+    def test_validate_json_jumps_to_unquoted_key_and_value(self):
+        for source, marker in (
+                ('{name: "value"}', "name"),
+                ('{"name": missing}', "missing")):
+            with self.subTest(source=source):
+                self.app.new_buffer(
+                    path=str(self.directory / "validation.json"), text=source)
+                widget, editor = self.app.current()
+                widget.mark_set("insert", "1.0")
+                widget.edit_modified(False)
+                self.app.validate_buffer()
+                expected = source.index(marker)
+                self.assertEqual(
+                    widget.index("insert"),
+                    widget.index(f"1.0 + {expected} chars"))
+                self.assertEqual(widget.get("1.0", "end-1c"), source)
+                self.assertIn("double quotes", self.app.status.get())
+                self.assertFalse(widget.edit_modified())
+                self.assertFalse(editor.state.buffer.modified)
+
     def test_json_pair_quotes_and_unfinished_quote(self):
         self.app.new_buffer(path=str(self.directory / "bad.json"),
                             text='{"a": "text"}')
