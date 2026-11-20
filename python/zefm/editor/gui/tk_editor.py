@@ -2855,7 +2855,7 @@ class Window:
                 self.status.set("Search highlighting cleared")
             elif value.strip().isdigit():
                 self.go_to_line(int(value.strip()))
-            elif re.fullmatch(r"r\\s+[0-9]+", value.strip()):
+            elif re.fullmatch(r"r\s+[0-9]+", value.strip()):
                 self.go_to_record(int(value.strip().split()[1]))
             else:
                 self._vim_substitute(value)
