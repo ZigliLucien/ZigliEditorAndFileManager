@@ -31,8 +31,7 @@ def record_index(bounds, cursor):
     """Zero-based active record, or None before the first record."""
     if not bounds or cursor < bounds[0][0]:
         return None
-    starts = [start for start, _end in bounds]
-    return bisect_right(starts, cursor) - 1
+    return bisect_right(bounds, (cursor, float("inf"))) - 1
 
 
 def adjacent_record(bounds, cursor, direction):
