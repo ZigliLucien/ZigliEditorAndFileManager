@@ -49,6 +49,7 @@ from ..tp_editor import TPEditor
 from ..shortcut_config import load_menus
 from ..modes import ModeRegistry
 from ..json_path import paths_at, navigate, locate_path, jq_path, record_at
+from ..json_stream import json_values
 from ..json_tools import parse_simple_path, value_at_path, format_json
 from ..mode_tools import validate_json, validate_json_details, indentation
 from .tk_clipboard import TkClipboard
@@ -127,6 +128,7 @@ class Window:
         self.search_term = ""
         self.vim_normal = False
         self.vim_direction = 1
+        self._vim_pending = ""
         self.status = tk.StringVar(value="Ready")
         self.status_bar = ttk.Frame(
             self.root, style="Zefm.Status.TFrame", padding=(7, 6))
@@ -630,6 +632,60 @@ class Window:
                 "jq Path at Cursor",
                 f"{context}{path}\n\nThe jq path is relative to this record.",
                 parent=self.root)
+
+
+    def go_to_line(self, number=None):
+        """Move to a 1-based line, retaining the current column when possible."""
+        widget, _editor = self.current()
+        if widget is None:
+            return
+        if number is None:
+            number = simpledialog.askinteger(
+                "Go to Line", "Line number:", parent=self.root,
+                minvalue=1, initialvalue=int(widget.index("insert").split(".")[0]))
+        if number is None:
+            return
+        last = int(widget.index("end-1c").split(".")[0])
+        number = min(max(1, int(number)), last)
+        column = int(widget.index("insert").split(".")[1])
+        widget.mark_set("insert", f"{number}.{column}")
+        widget.see("insert")
+        widget.focus_set()
+        self._cursor_highlight(widget)
+        self.status.set(f"Line {number} of {last}")
+
+    def go_to_record(self, number=None):
+        """Jump to the beginning of one top-level JSON or JSONL record."""
+        widget, _editor = self.current()
+        if widget is None:
+            return
+        if self.buffer_modes[self.tabs.select()].name != "json":
+            self.status.set("Record navigation requires JSON or JSONL mode")
+            return
+        source = widget.get("1.0", "end-1c")
+        try:
+            records = json_values(source)
+        except ValueError as exc:
+            self.status.set(f"Cannot index JSON records: {exc}")
+            return
+        if number is None:
+            position = len(widget.get("1.0", "insert"))
+            active = record_at(source, position)
+            number = simpledialog.askinteger(
+                "Go to JSON Record", f"Record number (1–{len(records)}):",
+                parent=self.root, minvalue=1, maxvalue=len(records),
+                initialvalue=active[0] + 1 if active else 1)
+        if number is None:
+            return
+        if not 1 <= int(number) <= len(records):
+            self.status.set(f"Record must be between 1 and {len(records)}")
+            return
+        offset = records[int(number) - 1][0]
+        widget.mark_set("insert", f"1.0 + {offset} chars")
+        widget.see("insert")
+        widget.focus_set()
+        self._cursor_highlight(widget)
+        self.status.set(f"JSON record {number}/{len(records)}")
 
     def navigate_json(self,direction):
         widget,_=self.current()
@@ -1865,6 +1921,10 @@ class Window:
         elif name=="Print":self.print_buffer()
         elif name=="Toggle ClickPad":self.toggle_clickpad()
         elif name=="Line Numbers":self.toggle_line_numbers()
+        elif name=="Go to Line":self.go_to_line()
+        elif name=="Go to Record":self.go_to_record()
+        elif name=="Next Record":self.navigate_json("next_record")
+        elif name=="Previous Record":self.navigate_json("previous_record")
         elif name=="Go to Matching LaTeX Delimiter":self.go_to_matching_delimiter()
         elif name=="LaTeX Document Outline":self.show_latex_outline()
         elif name=="Clear":
@@ -2495,8 +2555,9 @@ class Window:
         mode_menu.add_command(label="Jump to JSON Path...",command=self.jump_json_path)
         mode_menu.add_command(label="JSON Next Sibling",command=lambda:self.navigate_json('next'))
         mode_menu.add_command(label="JSON Previous Sibling",command=lambda:self.navigate_json('previous'))
-        mode_menu.add_command(label="JSON Next Record",command=lambda:self.navigate_json('next_record'))
-        mode_menu.add_command(label="JSON Previous Record",command=lambda:self.navigate_json('previous_record'))
+        mode_menu.add_command(label="JSON Next Record",command=lambda:self.action("Next Record"))
+        mode_menu.add_command(label="JSON Previous Record",command=lambda:self.action("Previous Record"))
+        mode_menu.add_command(label="Go to JSON Record...",command=lambda:self.action("Go to Record"))
         mode_menu.add_command(label="Get JSON Value at Path...",command=self.json_value_at_path)
         mode_menu.add_command(label="Format JSON",command=self.format_json_buffer)
         mode_menu.add_command(label="Run jq on Buffer... (external)",command=self.run_jq)
@@ -2670,6 +2731,7 @@ class Window:
     def _vim_key(self,event):
         if event.keysym=="Escape":
             self.vim_normal=not self.vim_normal
+            self._vim_pending = ""
             widget,_=self.current()
             if widget:self._status(widget)
             return "break"
@@ -2683,6 +2745,25 @@ class Window:
         # Returning "break" here would swallow them before bind_all runs.
         if event.keysym.startswith("F") and event.keysym[1:].isdigit():
             return
+        if event.char.isdigit() and (
+                self._vim_pending.isdigit() or not self._vim_pending):
+            self._vim_pending += event.char
+            return "break"
+        pending = self._vim_pending
+        self._vim_pending = ""
+        if event.char == "G":
+            self.go_to_line(int(pending) if pending.isdigit() else
+                            int(self.current()[0].index("end-1c").split(".")[0]))
+            return "break"
+        if pending == "g" and event.char == "g":
+            self.go_to_line(1)
+            return "break"
+        if pending in ("]", "[") and event.char == "r":
+            self.action("Next Record" if pending == "]" else "Previous Record")
+            return "break"
+        if event.char in ("g", "]", "["):
+            self._vim_pending = event.char
+            return "break"
         if event.char=="i":
             self.vim_normal=False
             widget,_=self.current()
@@ -2729,6 +2810,10 @@ class Window:
                     widget.tag_remove("sel","1.0","end")
                     widget.tag_remove("query_match","1.0","end")
                 self.status.set("Search highlighting cleared")
+            elif value.strip().isdigit():
+                self.go_to_line(int(value.strip()))
+            elif re.fullmatch(r"r\\s+[0-9]+", value.strip()):
+                self.go_to_record(int(value.strip().split()[1]))
             else:
                 self._vim_substitute(value)
         return "break"
