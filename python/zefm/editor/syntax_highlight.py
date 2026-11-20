@@ -9,6 +9,8 @@ import re
 import token
 import tokenize
 
+from .code_delimiters import json_spans
+
 MAX_CHARS = 250_000
 COLORS = {
     "comment": "#667381",
@@ -436,6 +438,8 @@ def syntax_spans(text, mode):
         return spans
     if mode == "python":
         return python_spans(text)
+    if mode == "json":
+        return json_spans(text)
     if mode == "java":
         return java_spans(text)
     return []
