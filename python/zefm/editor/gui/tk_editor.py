@@ -21,6 +21,7 @@ from ..recent_files import RecentFiles
 from ..startup_file import last_recent_buffer
 from ..cursor_positions import CursorPositions
 from ..latex_outline import latex_outline
+from ..code_delimiters import code_bracket_match
 from ..browser_launcher import open_browser
 from ..syntax_highlight import (COLORS, MAX_CHARS, syntax_spans, latex_match,
                                 latex_environment_match, latex_math_match,
@@ -311,7 +312,7 @@ class Window:
             widget.tag_remove("syntax_" + style, "1.0", "end")
         widget.tag_remove("syntax_match", "1.0", "end")
         widget.tag_remove("syntax_unmatched", "1.0", "end")
-        if len(text) > MAX_CHARS or mode not in ("latex", "python", "java"):
+        if len(text) > MAX_CHARS or mode not in ("latex", "python", "java", "json"):
             return
         for a, b, style in syntax_spans(text, mode):
             widget.tag_add("syntax_" + style,
@@ -319,43 +320,48 @@ class Window:
         self._update_delimiter_match(tab, text)
 
     def _update_delimiter_match(self, tab, text=None):
+        """Show a syntax-aware pair or unmatched delimiter beside the caret."""
         if tab not in self.views:
             return
         widget, _editor = self.views[tab]
         widget.tag_remove("syntax_match", "1.0", "end")
         widget.tag_remove("syntax_unmatched", "1.0", "end")
-        if self.buffer_modes[tab].name != "latex":
+        mode = self.buffer_modes[tab].name
+        if mode not in ("latex", "python", "json"):
             return
         if text is None:
             text = widget.get("1.0", "end-1c")
         if len(text) > MAX_CHARS:
             return
         cursor = len(widget.get("1.0", "insert"))
-        environment = latex_environment_match(text, cursor)
-        if environment is not None:
-            source, target = environment
-            tag = "syntax_match" if target is not None else "syntax_unmatched"
-            for start, end in (source, target) if target is not None else (source,):
-                widget.tag_add(tag, f"1.0 + {start} chars",
-                               f"1.0 + {end} chars")
-        else:
-            math = latex_math_match(text, cursor)
-            if math is not None:
-                source, target = math
-                tag = "syntax_match" if target is not None else "syntax_unmatched"
-                for start, end in (source, target) if target is not None else (source,):
-                    widget.tag_add(tag, f"1.0 + {start} chars",
-                                   f"1.0 + {end} chars")
-            else:
+        if mode == "latex":
+            pair = (latex_environment_match(text, cursor)
+                    or latex_math_match(text, cursor))
+            if pair is None:
                 result = latex_match(text, cursor)
-                if result is None:
-                    return
-                source, target = result
-                for offset in ((source, target) if target is not None else (source,)):
-                    tag = "syntax_match" if target is not None else "syntax_unmatched"
-                    widget.tag_add(tag, f"1.0 + {offset} chars",
-                                   f"1.0 + {offset + 1} chars")
-        # Keep normal text selection visible above delimiter emphasis.
+                if result is not None:
+                    source, partner = result
+                    pair = ((source, source + 1),
+                            (partner, partner + 1) if partner is not None
+                            else None)
+        else:
+            result = code_bracket_match(text, cursor, mode)
+            if result is None:
+                pair = None
+            else:
+                source, partner = result
+                pair = ((source, source + 1),
+                        (partner, partner + 1) if partner is not None else None)
+        if pair is None:
+            return
+        source_span, partner_span = pair
+        tag = ("syntax_match" if partner_span is not None
+               else "syntax_unmatched")
+        for start, stop in ((source_span, partner_span)
+                            if partner_span is not None else (source_span,)):
+            widget.tag_add(tag, f"1.0 + {start} chars",
+                           f"1.0 + {stop} chars")
+        # Retain ordinary Tk selection above the matching overlay.
         widget.tag_raise("syntax_match")
         widget.tag_raise("syntax_unmatched")
         widget.tag_raise("sel")
