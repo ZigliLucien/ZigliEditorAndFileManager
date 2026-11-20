@@ -52,7 +52,7 @@ class JsonPathPureTests(unittest.TestCase):
             '{"id": ' + str(i) + '}' for i in range(400)) + ']}'
         with patch("zefm.editor.json_path.source_spans",
                    wraps=source_spans) as scan:
-            pos, path = navigate(source, source.index("[") + 1, "child")
+            pos, path = navigate(source, source.index("["), "child")
         self.assertEqual(path, ".rows[0]")
         self.assertEqual(paths_at(source, pos), path)
         self.assertEqual(scan.call_count, 1)
