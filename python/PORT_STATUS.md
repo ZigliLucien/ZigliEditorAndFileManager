@@ -1608,3 +1608,30 @@ listing's directory/page/sort/filter context.
 - Extended `tests.test_file_chooser` with extension-group and
   case-insensitivity assertions, visible folders, changing and retaining
   a GUI filter, manual filename entry, and unfiltered Save As.
+
+
+### v133 — Python and JSON structural matching, JSON quote assistance
+
+- Extended cursor-following matching highlight to **Python** `{}`,
+  `[]`, and `()`, using the Python standard `tokenize` lexer to
+  ignore brackets inside comments and normal quoted strings.
+- Added matching for **JSON** `{}`, `[]`, and double-quote
+  string delimiters. Escaped `\\\"` inside strings do not
+  terminate them. Unclosed JSON strings highlight their opening
+  quote red, while correctly paired quotes and brackets show green.
+  Unlike Python, JSON brackets do not include bare `()`.
+- JSON syntax coloring now distinguishes strings, numeric literals,
+  `true`/`false`/`null`, and object/array punctuation. Delimiter
+  matching rejects crossed bracket types instead of displaying an
+  incorrect green pair.
+- **Mode → Validate JSON** now takes the insertion point to the
+  reported parse-error offset without changing text or Undo; an
+  unquoted text value prompts an explicit double-quote hint, while
+  unquoted object keys retain the parser's native double-quote message.
+  Unquoted numbers, booleans, null, arrays and objects remain legal JSON.
+- These features retain the 250,000-character presentation safety
+  limit and do not change disk state or saved snapshots.
+- Added `tests.test_code_delimiters` for Python strings, comments
+  and nesting; JSON escaped and unclosed quotes, crossed brackets,
+  coloring and Tk highlight safety. Extended `tests.test_mode_tools`
+  to cover JSON error positions and quotation guidance.
