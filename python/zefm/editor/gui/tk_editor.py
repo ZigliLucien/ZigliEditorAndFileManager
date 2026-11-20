@@ -648,7 +648,12 @@ class Window:
         widget.see("insert")
         widget.focus_set()
         self._cursor_highlight(widget)
-        self.status.set(f"JSON {direction}: {path}")
+        record=record_at(text,offset)
+        if direction in ("next_record", "previous_record") and record:
+            self.status.set(
+                f"JSON record {record[0]+1}/{record[1]} — root path {path}")
+        else:
+            self.status.set(f"JSON {direction}: {path}")
 
     def jump_json_path(self):
         widget,_=self.current()
