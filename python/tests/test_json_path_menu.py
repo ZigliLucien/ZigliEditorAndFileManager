@@ -47,6 +47,18 @@ class JsonPathPureTests(unittest.TestCase):
         self.assertEqual(path, ".people[0]")
         self.assertEqual(paths_at(DATA, pos), path)
 
+    def test_path_at_closing_quote_bracket_and_end_of_document(self):
+        start = DATA.index("Paris")
+        # Go to Matching Delimiter ends just after the closing quote.
+        after_quote = start + len("Paris") + 1
+        self.assertEqual(paths_at(DATA, after_quote),
+                         ".people[1].address.city")
+        after_array = DATA.index("]", DATA.index('"people"')) + 1
+        self.assertEqual(paths_at(DATA, after_array), ".people")
+        source = DATA + "\n\n  "
+        self.assertEqual(paths_at(source, len(source)), ".")
+        self.assertEqual(paths_at(source, len(source)-1), ".")
+
     def test_child_scans_large_array_just_once(self):
         source = '{"rows": [' + ",".join(
             '{"id": ' + str(i) + '}' for i in range(400)) + ']}'
