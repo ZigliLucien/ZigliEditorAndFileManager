@@ -21,7 +21,7 @@ from ..recent_files import RecentFiles
 from ..startup_file import last_recent_buffer
 from ..cursor_positions import CursorPositions
 from ..latex_outline import latex_outline
-from ..code_delimiters import code_bracket_match
+from ..code_delimiters import code_bracket_match, json_quote_match
 from ..browser_launcher import open_browser
 from ..syntax_highlight import (COLORS, MAX_CHARS, syntax_spans, latex_match,
                                 latex_environment_match, latex_math_match,
@@ -345,7 +345,12 @@ class Window:
                             (partner, partner + 1) if partner is not None
                             else None)
         else:
-            result = code_bracket_match(text, cursor, mode)
+            # JSON quotes take precedence when the cursor is adjacent to
+            # one; bracket matching works outside JSON strings.
+            result = (json_quote_match(text, cursor)
+                      if mode == "json" else None)
+            if result is None:
+                result = code_bracket_match(text, cursor, mode)
             if result is None:
                 pair = None
             else:
