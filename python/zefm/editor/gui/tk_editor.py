@@ -50,7 +50,7 @@ from ..shortcut_config import load_menus
 from ..modes import ModeRegistry
 from ..json_path import paths_at, navigate, locate_path, jq_path
 from ..json_tools import parse_simple_path, value_at_path, format_json
-from ..mode_tools import validate_json, indentation
+from ..mode_tools import validate_json, validate_json_details, indentation
 from .tk_clipboard import TkClipboard
 from .file_chooser import choose_file
 from .keyboard_policy import install_editor_shortcut
@@ -655,7 +655,14 @@ class Window:
         if not widget:return
         if self.buffer_modes[self.tabs.select()].name!="json":
             self.status.set("Validation currently supports JSON mode");return
-        _,diagnostic=validate_json(widget.get("1.0","end-1c"))
+        valid, diagnostic, error_offset = validate_json_details(
+            widget.get("1.0", "end-1c"))
+        if not valid and error_offset is not None:
+            target = f"1.0 + {error_offset} chars"
+            widget.mark_set("insert", target)
+            widget.see(target)
+            widget.focus_set()
+            self._cursor_highlight(widget)
         self.status.set(diagnostic)
 
     def json_value_at_path(self):
