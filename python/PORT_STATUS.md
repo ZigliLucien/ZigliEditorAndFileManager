@@ -1767,3 +1767,37 @@ listing's directory/page/sort/filter context.
   and Tk tests for search/change/reset, hidden files, extension
   interactions, empty-result behavior, Change Folder, keyboard
   focus and Enter-to-open actions.
+
+
+### v139 — jq-compatible JSON text streams (multiple top-level objects)
+
+- Addressed user report: a source file comprising several consecutive
+  `{...}` objects without commas is accepted by command-line `jq`
+  but was rejected by ZEFM with Python's `Extra data` diagnostic.
+  This is a **JSON text stream**, not a single JSON document.
+- Added `json_stream.json_values`: repeated `json.JSONDecoder.raw_decode`
+  calls extract each complete JSON value, recording absolute source
+  start/end offsets. Invalid content anywhere in the stream still
+  reports its real line/column position; no text or commas are inserted.
+- **Validate JSON** accepts an individual JSON value as before or
+  reports `Valid JSON stream (N top-level values)` for multiple
+  values. **Run jq on Buffer... (external)** uses the same validation,
+  allowing jq to process every record as it normally does.
+- Source-aware jq path extraction, **Show/Copy jq Path**, and
+  **Parent/Child/Sibling** commands work inside each independent
+  record. The same path (e.g. `.section.name`) can occur in
+  several records without confusing navigation. **Jump to JSON Path**
+  and **Get JSON Value at Path** apply to the record containing the
+  insertion cursor, rather than always the first record; path strings
+  themselves remain ordinary jq expressions relative to the record.
+- Added **JSON Next Record** and **JSON Previous Record** commands to
+  the Mode menu. The status line and Show jq Path dialog identify the
+  record number (e.g. 2/3) for a multi-record buffer.
+- **Format JSON** preserves distinct top-level values and formats
+  each independently, separated by blank lines. It does **not**
+  wrap the stream in a single array or change its structure.
+- Added `tests.test_json_stream`: consecutive and adjacent records,
+  repeated keys, record-local lookups and jumps, next/previous record,
+  invalid later records, value extraction and formatter behavior,
+  plus read-only Tk menu behavior. Run locally with
+  `python3 -m unittest tests.test_json_stream -v`.
