@@ -49,7 +49,7 @@ from ..tp_editor import TPEditor
 from ..shortcut_config import load_menus
 from ..modes import ModeRegistry
 from ..json_path import paths_at, navigate, locate_path, jq_path, record_at
-from ..json_stream import json_values
+from ..json_records import record_bounds, record_index, adjacent_record
 from ..json_tools import parse_simple_path, value_at_path, format_json
 from ..mode_tools import validate_json, validate_json_details, indentation
 from .tk_clipboard import TkClipboard
@@ -129,6 +129,7 @@ class Window:
         self.vim_normal = False
         self.vim_direction = 1
         self._vim_pending = ""
+        self._json_record_cache = {}
         self.status = tk.StringVar(value="Ready")
         self.status_bar = ttk.Frame(
             self.root, style="Zefm.Status.TFrame", padding=(7, 6))
@@ -456,12 +457,23 @@ class Window:
             if mode and mode.name=='json':
                 source=widget.get('1.0','end-1c')
                 cursor=len(widget.get('1.0','insert'))
-                path=paths_at(source,cursor)
-                record=record_at(source,cursor)
-                if path is not None:
-                    context=(f"  record {record[0]+1}/{record[1]}"
-                             if record and record[1]>1 else "")
-                    label+=f"  jq: {path}{context}"
+                # Avoid reparsing every nested path on large JSON streams
+                # merely because the insertion cursor moved.
+                if len(source) > 250_000:
+                    try:
+                        records = self._record_bounds(widget, source)
+                        current_record = record_index(records, cursor)
+                        if current_record is not None:
+                            label += f"  record {current_record+1}/{len(records)}"
+                    except ValueError:
+                        label += "  [invalid JSON stream]"
+                else:
+                    path=paths_at(source,cursor)
+                    record=record_at(source,cursor)
+                    if path is not None:
+                        context=(f"  record {record[0]+1}/{record[1]}"
+                                 if record and record[1]>1 else "")
+                        label+=f"  jq: {path}{context}"
             label += "  |  Lang: " + LANGUAGES[self.buffer_languages.get(self.tabs.select(), "system")]
             active_keymap=self.buffer_keymaps.get(self.tabs.select())
             label += "  |  Keys: " + (active_keymap + " (Alt)" if active_keymap else "System")
@@ -654,6 +666,18 @@ class Window:
         self._cursor_highlight(widget)
         self.status.set(f"Line {number} of {last}")
 
+    def _record_bounds(self, widget, source=None):
+        """Cache offsets until Text content changes; keep only the active version."""
+        if source is None:
+            source = widget.get("1.0", "end-1c")
+        key = str(widget)
+        previous = self._json_record_cache.get(key)
+        if previous is not None and previous[0] == source:
+            return previous[1]
+        bounds = record_bounds(source)
+        self._json_record_cache[key] = (source, bounds)
+        return bounds
+
     def go_to_record(self, number=None):
         """Jump to the beginning of one top-level JSON or JSONL record."""
         widget, _editor = self.current()
@@ -664,17 +688,17 @@ class Window:
             return
         source = widget.get("1.0", "end-1c")
         try:
-            records = json_values(source)
+            records = self._record_bounds(widget, source)
         except ValueError as exc:
             self.status.set(f"Cannot index JSON records: {exc}")
             return
         if number is None:
             position = len(widget.get("1.0", "insert"))
-            active = record_at(source, position)
+            active_index = record_index(records, position)
             number = simpledialog.askinteger(
                 "Go to JSON Record", f"Record number (1–{len(records)}):",
                 parent=self.root, minvalue=1, maxvalue=len(records),
-                initialvalue=active[0] + 1 if active else 1)
+                initialvalue=active_index + 1 if active_index is not None else 1)
         if number is None:
             return
         if not 1 <= int(number) <= len(records):
@@ -692,6 +716,24 @@ class Window:
         if not widget or self.buffer_modes[self.tabs.select()].name!='json':
             self.status.set('JSON navigation requires JSON mode');return
         text=widget.get('1.0','end-1c')
+        if direction in ("next_record", "previous_record"):
+            try:
+                records = self._record_bounds(widget, text)
+            except ValueError as exc:
+                self.status.set(f"Cannot index JSON records: {exc}")
+                return
+            cursor = len(widget.get("1.0", "insert"))
+            target = adjacent_record(
+                records, cursor, 1 if direction == "next_record" else -1)
+            if target is None:
+                self.status.set("No further JSON record in this direction")
+                return
+            widget.mark_set("insert", f"1.0 + {target} chars")
+            widget.see("insert")
+            widget.focus_set()
+            self.status.set(
+                f"JSON record {record_index(records, target) + 1}/{len(records)}")
+            return
         result=navigate(text,len(widget.get('1.0','insert')),direction)
         if result is None:
             valid, diagnostic, _offset = validate_json_details(text)
@@ -2644,6 +2686,7 @@ class Window:
         if job is not None:
             self.root.after_cancel(job)
         self.tabs.forget(tab)
+        self._json_record_cache.pop(str(widget), None)
         del self.views[tab]
         self.saved_messages.pop(tab,None)
         self.saved_snapshots.pop(tab,None)
