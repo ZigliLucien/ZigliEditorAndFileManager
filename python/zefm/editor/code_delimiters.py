@@ -166,3 +166,22 @@ def code_bracket_match(text, cursor, mode):
     if pos not in at:
         return None
     return pos, _partners(tokens)[pos]
+
+
+def code_matching_delimiter(text, cursor, mode):
+    """Return half-open spans for matching Python/JSON syntax near cursor.
+
+    Mirrors latex_matching_delimiter: (source_span, partner_span or None).
+    In JSON, an actual quote boundary is considered before a bracket.
+    Brackets in Python strings/comments and JSON quoted values are excluded.
+    """
+    if mode not in ("python", "json"):
+        return None
+    result = json_quote_match(text, cursor) if mode == "json" else None
+    if result is None:
+        result = code_bracket_match(text, cursor, mode)
+    if result is None:
+        return None
+    source, partner = result
+    return ((source, source + 1),
+            (partner, partner + 1) if partner is not None else None)
