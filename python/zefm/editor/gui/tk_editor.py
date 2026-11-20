@@ -599,9 +599,23 @@ class Window:
         text=widget.get("1.0","end-1c")
         offset=len(widget.get("1.0","insert"))
         path=paths_at(text,offset)
-        if path is None:self.status.set("No path (check JSON validity/cursor position)")
-        else:self.status.set(f"jq path: {path}")
+        if path is None:
+            valid, diagnostic, _offset = validate_json_details(text)
+            self.status.set(
+                "Cannot determine jq path: " + diagnostic if not valid
+                else "No jq path at cursor; position it inside a JSON key or value")
+        else:
+            self.status.set(f"jq path: {path}")
         return path
+
+    def show_json_path(self):
+        """Display an explicit, copyable path even when the status bar is busy."""
+        path = self._json_path()
+        if path is not None:
+            messagebox.showinfo(
+                "jq Path at Cursor",
+                f"{path}\n\nUse Mode → Copy jq Path to copy it.",
+                parent=self.root)
 
     def navigate_json(self,direction):
         widget,_=self.current()
@@ -610,10 +624,17 @@ class Window:
         text=widget.get('1.0','end-1c')
         result=navigate(text,len(widget.get('1.0','insert')),direction)
         if result is None:
-            self.status.set('No destination (boundary or invalid JSON)');return
-        offset,path=result
-        widget.mark_set('insert',f'1.0 + {offset} chars')
-        widget.see('insert');widget.focus_set();self._status(widget)
+            valid, diagnostic, _offset = validate_json_details(text)
+            self.status.set(
+                "JSON navigation: " + diagnostic if not valid
+                else "JSON navigation: no destination in this direction")
+            return
+        offset, path = result
+        widget.mark_set("insert", f"1.0 + {offset} chars")
+        widget.see("insert")
+        widget.focus_set()
+        self._cursor_highlight(widget)
+        self.status.set(f"JSON {direction}: {path}")
 
     def jump_json_path(self):
         widget,_=self.current()
@@ -628,9 +649,17 @@ class Window:
         except ValueError as exc:
             messagebox.showerror('JSON path',str(exc),parent=self.root);return
         if offset is None:
-            self.status.set('JSON path not found or buffer invalid');return
-        widget.mark_set('insert',f'1.0 + {offset} chars')
-        widget.see('insert');widget.focus_set();self._status(widget)
+            valid, diagnostic, _offset = validate_json_details(
+                widget.get("1.0", "end-1c"))
+            self.status.set(
+                "Jump to JSON path: " + diagnostic if not valid
+                else f"JSON path not found: {expression}")
+            return
+        widget.mark_set("insert", f"1.0 + {offset} chars")
+        widget.see("insert")
+        widget.focus_set()
+        self._cursor_highlight(widget)
+        self.status.set(f"JSON path: {expression}")
 
     def copy_json_path(self):
         path=self._json_path()
@@ -657,6 +686,11 @@ class Window:
     def json_value_at_path(self):
         widget,_=self.current()
         if not widget or self.buffer_modes[self.tabs.select()].name!="json":return
+        source = widget.get("1.0", "end-1c")
+        valid, diagnostic, _offset = validate_json_details(source)
+        if not valid:
+            self.status.set("JSON value at path: " + diagnostic)
+            return
         expression=simpledialog.askstring("JSON value","Simple path:",
                             initialvalue=self._json_path() or ".",parent=self.root)
         if expression is None:return
@@ -666,7 +700,7 @@ class Window:
             output=json.dumps(value,ensure_ascii=False,indent=2)
         except (ValueError,KeyError,IndexError,TypeError) as exc:
             messagebox.showerror("JSON path",str(exc),parent=self.root);return
-        self.new_buffer(text=output+"\\n")
+        self.new_buffer(text=output+"\n")
 
     def format_json_buffer(self):
         widget,_=self.current()
@@ -2422,7 +2456,7 @@ class Window:
                               command=self.list_latex_issues)
         mode_menu.add_separator()
         mode_menu.add_command(label="Validate JSON",command=self.validate_buffer)
-        mode_menu.add_command(label="Show jq Path at Cursor",command=self._json_path)
+        mode_menu.add_command(label="Show jq Path at Cursor",command=self.show_json_path)
         mode_menu.add_command(label="Copy jq Path",command=self.copy_json_path)
         mode_menu.add_command(label="JSON Parent",command=lambda:self.navigate_json('parent'))
         mode_menu.add_command(label="JSON First Child",command=lambda:self.navigate_json('child'))
