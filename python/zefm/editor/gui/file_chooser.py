@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, filedialog
 
 
 def wheel_steps(event):
@@ -49,17 +49,17 @@ OPEN_FILTERS = {
 
 
 def directory_entries(folder, extensions=None, *, show_hidden=False):
-    """Directories first, then files matching the chosen extension.
+    """List only files matching a selected extension; otherwise show all.
 
-    The filter never hides ordinary folders required for navigation. Dotfiles
-    and dot-directories are hidden by default in Open, but can be shown
-    explicitly. Save As continues to list everything as before.
+    With a file-type filter selected, folders are not mixed into the file
+    list. Folder navigation remains available through Up, Change Folder,
+    and explicit paths entered in the filename field. Save As is unfiltered.
     """
     entries = [p for p in Path(folder).iterdir()
                if not p.is_symlink()
                and (show_hidden or not p.name.startswith("."))
-               and (p.is_dir() or extensions is None
-                    or p.suffix.lower() in extensions)]
+               and ((p.is_dir() or p.is_file()) if extensions is None
+                    else (p.is_file() and p.suffix.lower() in extensions))]
     return sorted(entries, key=lambda p: (not p.is_dir(), p.name.casefold(), p.name))
 
 
@@ -86,6 +86,9 @@ class FileChooser(tk.Toplevel):
         header = ttk.Frame(self, padding=(10, 8))
         header.pack(fill="x")
         ttk.Button(header, text="Up", command=self.go_up).pack(side="left")
+        if not save:
+            ttk.Button(header, text="Change Folder...",
+                       command=self.change_folder).pack(side="left", padx=(8, 0))
         self.location = tk.StringVar()
         ttk.Label(header, textvariable=self.location, anchor="w").pack(
             side="left", fill="x", expand=True, padx=(10, 0))
@@ -213,6 +216,16 @@ class FileChooser(tk.Toplevel):
     def go_up(self):
         if self.folder.parent != self.folder:
             self.folder = self.folder.parent
+            self.name.set("")
+            self.populate()
+
+    def change_folder(self):
+        """Choose a directory separately from the extension-filtered file list."""
+        selected = filedialog.askdirectory(
+            parent=self, title="Choose folder", initialdir=str(self.folder),
+            mustexist=True)
+        if selected:
+            self.folder = Path(selected).expanduser().resolve()
             self.name.set("")
             self.populate()
 
