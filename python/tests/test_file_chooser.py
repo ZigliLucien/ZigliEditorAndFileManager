@@ -46,7 +46,8 @@ class ExtensionFilterTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.folder = Path(self.temp.name)
         for name in ("A.TEX", "b.tex", "program.py", "data.JSON",
-                     "notes.md", "readme.markdown", "image.png", "plain.txt"):
+                     "notes.md", "readme.markdown", "image.png", "plain.txt",
+                      "records.jsonl", "events.NDJSON"):
             (self.folder / name).write_text(name, encoding="utf-8")
         (self.folder / "subfolder").mkdir()
         (self.folder / "subfolder" / "nested.tex").write_text("nested")
@@ -109,7 +110,8 @@ class ExtensionFilterTests(unittest.TestCase):
         self.assertEqual(
             list(OPEN_FILTERS),
             ["All files", "LaTeX (*.tex)", "Python (*.py)",
-             "JSON (*.json)", "Markdown (*.md, *.markdown)",
+             "JSON (*.json)", "JSONL (*.jsonl, *.ndjson)",
+              "Markdown (*.md, *.markdown)",
              "All four types"])
 
     def test_filters_show_only_matching_files_and_match_case_insensitively(self):
@@ -117,10 +119,12 @@ class ExtensionFilterTests(unittest.TestCase):
                 ("LaTeX (*.tex)", ["A.TEX", "b.tex"]),
                 ("Python (*.py)", ["program.py"]),
                 ("JSON (*.json)", ["data.JSON"]),
+                ("JSONL (*.jsonl, *.ndjson)", ["events.NDJSON", "records.jsonl"]),
                 ("Markdown (*.md, *.markdown)", ["notes.md", "readme.markdown"]),
                 ("All four types", [
                     "A.TEX", "b.tex", "program.py", "data.JSON",
-                    "notes.md", "readme.markdown"])):
+                    "notes.md", "readme.markdown", "records.jsonl",
+                     "events.NDJSON"])):
             with self.subTest(filter=label):
                 names = self.names(OPEN_FILTERS[label])
                 self.assertEqual(set(names), set(expected))
