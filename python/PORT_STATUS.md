@@ -1716,3 +1716,25 @@ listing's directory/page/sort/filter context.
   Explicitly typed filenames, including hidden ones, remain valid.
 - Expanded `tests.test_file_chooser` to cover the default JSON
   view, hidden-file toggle, hidden directories, and Save As.
+
+
+### v137 — strict extension filtering in Open File chooser
+
+- When a specific extension type is selected in **Open File** (LaTeX,
+  Python, JSON, Markdown or All four types), the listing now contains
+  **only files with the selected extension(s)**. No ordinary or hidden
+  subdirectories appear mixed with matching files. For example,
+  **JSON (*.json)** shows `.json`/`.JSON` files in the current
+  directory and nothing else.
+- **All files** retains the original folder-and-file listing. The
+  **Show hidden files** checkbox still controls dotfiles, but it
+  never causes directories to appear in an extension-filtered view.
+- Added **Change Folder...** alongside the existing **Up** control.
+  Choosing a different directory does not change the selected
+  extension filter. Typing an explicit folder path in the filename
+  entry also remains available when a filtered listing is active.
+- **Save As** remains unfiltered; all directories and file types
+  continue to be visible there.
+- Updated `tests.test_file_chooser` to check file-only views,
+  hidden-file inclusion without hidden folders, changing folders,
+  typed folder navigation, and Save As behavior.
