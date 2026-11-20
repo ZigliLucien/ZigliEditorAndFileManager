@@ -87,6 +87,24 @@ class ExtensionFilterTests(unittest.TestCase):
         self.assertIn(".bashrc", with_hidden)
         self.assertIn(".zefm", with_hidden)
 
+    def test_filename_search_combines_with_extension_and_hidden_filters(self):
+        def names(extensions, query, hidden=False):
+            return [p.name for p in directory_entries(
+                self.folder, extensions, show_hidden=hidden,
+                name_query=query)]
+        tex = OPEN_FILTERS["LaTeX (*.tex)"]
+        json_ext = OPEN_FILTERS["JSON (*.json)"]
+        self.assertEqual(names(tex, "TEX"), ["A.TEX", "b.tex"])
+        self.assertEqual(names(json_ext, "DaTa"), ["data.JSON"])
+        self.assertEqual(names(json_ext, "private"), [])
+        self.assertEqual(names(json_ext, "private", True), [".private.json"])
+        self.assertEqual(names(json_ext, "not-present"), [])
+        # A search filters *filenames* even when All files is active;
+        # directories do not clutter a searched result.
+        self.assertEqual(names(None, "subfolder"), [])
+        self.assertEqual(names(None, "program"), ["program.py"])
+        self.assertEqual(names(tex, " "), ["A.TEX", "b.tex"])
+
     def test_extension_choices_are_present(self):
         self.assertEqual(
             list(OPEN_FILTERS),
@@ -176,6 +194,49 @@ class ExtensionFilterGuiTests(unittest.TestCase):
         another.accept()
         self.assertEqual(another.result, str((self.folder / "program.py").resolve()))
 
+    def test_live_filename_search_works_with_extension_and_clear(self):
+        dialog = self.chooser()
+        dialog.filter_combo.set("JSON (*.json)")
+        dialog.filter_changed()
+        self.assertEqual(self.visible(dialog), {"data.json"})
+        self.assertEqual(dialog.match_count.get(), "1 file")
+        dialog.filename_query.set("DATA")
+        self.assertEqual(self.visible(dialog), {"data.json"})
+        dialog.filename_query.set("missing")
+        self.assertEqual(self.visible(dialog), set())
+        self.assertEqual(dialog.match_count.get(), "0 files")
+        self.assertEqual(dialog.name.get(), "")
+        dialog.filename_query.set("")
+        self.assertEqual(self.visible(dialog), {"data.json"})
+
+        dialog.filename_query.set("data")
+        dialog.filter_combo.set("LaTeX (*.tex)")
+        dialog.filter_changed()
+        self.assertEqual(self.visible(dialog), set())
+        dialog.filename_query.set("draft")
+        self.assertEqual(self.visible(dialog), {"draft.tex"})
+        self.assertEqual(dialog.match_count.get(), "1 file")
+        dialog.focus_search()
+        self.assertEqual(self.root.focus_get(), dialog.search_entry)
+
+    def test_name_search_respects_hidden_and_new_folder(self):
+        dialog = self.chooser()
+        dialog.filter_combo.set("JSON (*.json)")
+        dialog.filter_changed()
+        dialog.filename_query.set("secret")
+        self.assertEqual(self.visible(dialog), set())
+        dialog.show_hidden.set(True)
+        dialog.filter_changed()
+        self.assertEqual(self.visible(dialog), {".secret.json"})
+        # Changing the folder leaves both filters intact.
+        with patch("zefm.editor.gui.file_chooser.filedialog.askdirectory",
+                   return_value=str(self.folder / "subfolder")):
+            dialog.change_folder()
+        self.assertEqual(dialog.filename_query.get(), "secret")
+        self.assertEqual(self.visible(dialog), set())
+        dialog.go_up()
+        self.assertEqual(self.visible(dialog), {".secret.json"})
+
     def test_json_filter_hides_hidden_entries_until_opted_in(self):
         dialog = self.chooser()
         self.assertFalse(dialog.show_hidden.get())
@@ -217,6 +278,7 @@ class ExtensionFilterGuiTests(unittest.TestCase):
         FileChooser.last_open_filter = "JSON (*.json)"
         dialog = self.chooser(save=True)
         self.assertFalse(hasattr(dialog, "file_filter"))
+        self.assertFalse(hasattr(dialog, "filename_query"))
         self.assertEqual(self.visible(dialog),
                          {"draft.tex", "program.py", "data.json", "notes.md",
                           "subfolder", ".git", ".config", ".secret.json",
