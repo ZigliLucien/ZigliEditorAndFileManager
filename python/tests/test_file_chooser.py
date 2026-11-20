@@ -217,7 +217,26 @@ class ExtensionFilterGuiTests(unittest.TestCase):
         self.assertEqual(self.visible(dialog), {"draft.tex"})
         self.assertEqual(dialog.match_count.get(), "1 file")
         dialog.focus_search()
+        self.root.update()
         self.assertEqual(self.root.focus_get(), dialog.search_entry)
+
+    def test_search_enter_opens_file_and_empty_result_does_not_close(self):
+        dialog = self.chooser()
+        dialog.filter_combo.set("JSON (*.json)")
+        dialog.filter_changed()
+        dialog.filename_query.set("not-here")
+        self.root.update()
+        dialog.search_entry.event_generate("<Return>")
+        self.root.update()
+        self.assertIsNone(dialog.result)
+        self.assertTrue(dialog.winfo_exists())
+
+        dialog.filename_query.set("DATA")
+        self.root.update()
+        dialog.search_entry.event_generate("<Return>")
+        self.root.update()
+        self.assertEqual(
+            dialog.result, str((self.folder / "data.json").resolve()))
 
     def test_name_search_respects_hidden_and_new_folder(self):
         dialog = self.chooser()
