@@ -1,6 +1,7 @@
 """Source-position-aware JSON paths. Offsets are Python string character offsets."""
 import json
 import re
+from functools import lru_cache
 from json.decoder import scanstring
 
 _NUMBER = re.compile(r'-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?')
@@ -17,7 +18,7 @@ def jq_path(parts):
             out += "[" + json.dumps(part, ensure_ascii=False) + "]"
     return out
 
-def source_spans(text):
+def _parse_source_spans(text):
     """Return deepest JSON path covering offset; None for invalid JSON/outside."""
     spans = []
     n = len(text)
@@ -83,6 +84,25 @@ def source_spans(text):
     except (ValueError, json.JSONDecodeError, IndexError):
         return None
     return spans
+
+
+@lru_cache(maxsize=3)
+def _cached_source_spans(text):
+    """Reuse a stable buffer's paths while the user moves the cursor."""
+    return _parse_source_spans(text)
+
+
+def source_spans(text):
+    """Return source-aware paths with bounded caching for interactive edits.
+
+    Tk reports many cursor moves without modifying text. Previously each
+    movement reparsed the entire JSON buffer. A three-entry cache handles
+    cursor movement and Undo without retaining unbounded large documents.
+    """
+    if len(text) <= 250_000:
+        return _cached_source_spans(text)
+    return _parse_source_spans(text)
+
 
 def _parts_from_spans(text, spans, offset):
     """Find the deepest path beside the insertion point.
