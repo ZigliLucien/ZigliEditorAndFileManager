@@ -48,21 +48,26 @@ def _json_scan(text):
     unfinished string consumes the rest of the buffer, avoiding false
     bracket matches during typing.
     """
-    found, spans = [], []
+    found, spans, quote_partners = [], [], {}
     i, n = 0, len(text)
     while i < n:
         char = text[i]
         if char == '"':
             start = i
             i += 1
+            closing = None
             while i < n:
                 if text[i] == "\\":
                     i = min(i + 2, n)
                 elif text[i] == '"':
+                    closing = i
                     i += 1
                     break
                 else:
                     i += 1
+            quote_partners[start] = closing
+            if closing is not None:
+                quote_partners[closing] = start
             spans.append((start, i, "string"))
         elif char in "{}[]":
             found.append((i, char))
@@ -84,12 +89,30 @@ def _json_scan(text):
                 i += 1
         else:
             i += 1
-    return found, spans
+    return found, spans, quote_partners
 
 
 def json_brackets(text):
     """Return JSON object/array delimiter locations outside quoted strings."""
     return _json_scan(text)[0]
+
+
+def json_quote_match(text, cursor):
+    """Match unescaped double quotes, or flag an unfinished string.
+
+    Only the quote itself and its counterpart are highlighted, not the
+    entire string. An unclosed string has an opening quote with no partner.
+    """
+    if (not isinstance(text, str) or not isinstance(cursor, int)
+            or not 0 <= cursor <= len(text) or len(text) > MAX_CHARS):
+        return None
+    partners = _json_scan(text)[2]
+    # Prefer the character immediately before the caret, as for brackets.
+    source = (cursor - 1 if cursor > 0 and cursor - 1 in partners
+              else cursor)
+    if source not in partners:
+        return None
+    return source, partners[source]
 
 
 def json_spans(text):
@@ -111,7 +134,12 @@ def _partners(tokens):
             result[position] = opening
             result[opening] = position
         elif char in _CLOSE:
+            # Reject crossed nesting, e.g. ([)] must not appear paired.
+            # The invalid closer and the now-invalid top opener are red.
             result[position] = None
+            if stack:
+                opening, _kind = stack.pop()
+                result[opening] = None
     for position, _char in stack:
         result[position] = None
     return result
