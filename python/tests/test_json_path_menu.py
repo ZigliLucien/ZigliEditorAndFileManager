@@ -82,7 +82,7 @@ class JsonPathPureTests(unittest.TestCase):
             self.assertEqual(paths_at(source, source.index("Alice")),
                              ".people[0].name")
             self.assertEqual(scan.call_count, 1)
-            self.assertEqual(paths_at(source + "\\n", source.index("Paris")),
+            self.assertEqual(paths_at(source + "\n", source.index("Paris")),
                              ".people[1].address.city")
             self.assertEqual(scan.call_count, 2)
         json_path._cached_source_spans.cache_clear()
