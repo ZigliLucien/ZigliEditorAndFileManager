@@ -12,6 +12,8 @@
     ".xsl": "xml",
     ".xslt": "xml",
     ".json": "json",
+    ".jsonl": "json",
+    ".ndjson": "json",
     ".csv": "csv",
     ".txt": "text",
     ".properties": "properties"
