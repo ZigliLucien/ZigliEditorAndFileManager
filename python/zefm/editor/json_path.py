@@ -3,6 +3,7 @@ import json
 import re
 from functools import lru_cache
 from json.decoder import scanstring
+from .json_stream import json_values
 
 _NUMBER = re.compile(r'-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?')
 _IDENT = re.compile(r'^[A-Za-z_][A-Za-z_0-9]*$')
@@ -77,11 +78,13 @@ def _parse_source_spans(text):
         spans.append((start, i, path))
         return i
     try:
-        end = ws(parse(0, ()))
-        if end != n: return None
-        # Check syntax strictly, including duplicate handling consistent with stdlib.
-        json.loads(text)
-    except (ValueError, json.JSONDecodeError, IndexError):
+        # Each top-level JSON text has its own root path (). The source
+        # offsets remain absolute; jq likewise evaluates .key separately
+        # against each top-level value in its input stream.
+        for start, end, _value in json_values(text):
+            if parse(start, ()) != end:
+                return None
+    except (ValueError, json.JSONDecodeError, IndexError, RecursionError):
         return None
     return spans
 
@@ -132,6 +135,40 @@ def _parts_from_spans(text, spans, offset):
     return None
 
 
+def _root_spans(spans):
+    """Top-level JSON text extents in source order."""
+    return [(start, end) for start, end, path in spans if path == ()]
+
+
+def _active_root(spans, offset):
+    """Return (record index, start, end) for a cursor inside a record.
+
+    Immediately after a closing delimiter still belongs to that record,
+    unless the next top-level value starts at that exact position.
+    """
+    roots = _root_spans(spans)
+    for index, (start, end) in enumerate(roots):
+        if start <= offset < end:
+            return index, start, end
+    for index, (start, end) in enumerate(roots):
+        if offset == end:
+            return index, start, end
+    # Trailing whitespace after the final JSON value belongs to the
+    # final record for path and navigation convenience.
+    if roots and roots[-1][1] < offset:
+        return len(roots) - 1, *roots[-1]
+    return None
+
+
+def record_at(text, offset):
+    """Return (zero-based record index, total records), or None."""
+    spans = source_spans(text)
+    if spans is None:
+        return None
+    root = _active_root(spans, offset)
+    return (root[0], len(_root_spans(spans))) if root else None
+
+
 def path_parts_at(text, offset):
     spans = source_spans(text)
     return _parts_from_spans(text, spans, offset) if spans is not None else None
@@ -152,16 +189,23 @@ def navigate(text, offset, direction):
     spans = source_spans(text)
     if spans is None:
         return None
-    current = _parts_from_spans(text, spans, offset)
+    active = _active_root(spans, offset)
+    if active is None:
+        return None
+    _record_index, root_start, root_end = active
+    current = _parts_from_spans(
+        text, [span for span in spans
+               if root_start <= span[0] and span[1] <= root_end], offset)
     if current is None:
         return None
 
-    # Each path may have several spans (key token, colon, value). Its first
-    # appearance is the navigation target, preserving the document's order.
+    # Navigation is scoped to the record beneath the cursor; keys repeated
+    # in other top-level JSON objects must not become false siblings.
     earliest = {}
-    for start, _end, path in spans:
-        if path not in earliest or start < earliest[path]:
-            earliest[path] = start
+    for start, end, path in spans:
+        if root_start <= start and end <= root_end:
+            if path not in earliest or start < earliest[path]:
+                earliest[path] = start
 
     if direction == "parent":
         target = current[:-1] if current else None
@@ -189,9 +233,23 @@ def navigate(text, offset, direction):
     return start, jq_path(target)
 
 
-def locate_path(text, parts):
-    """Return source offset for exact structural path, or None."""
-    spans=source_spans(text)
-    if spans is None:return None
-    starts=[start for start,end,path in spans if path==tuple(parts)]
+def locate_path(text, parts, cursor=None):
+    """Return source offset for a path in the current JSON stream record.
+
+    With cursor=None the first top-level record is chosen for compatibility.
+    With a cursor inside a later record, paths resolve there instead.
+    """
+    spans = source_spans(text)
+    if spans is None:
+        return None
+    roots = _root_spans(spans)
+    if not roots:
+        return None
+    active = (_active_root(spans, cursor) if cursor is not None
+              else (0, *roots[0]))
+    if active is None:
+        return None
+    _record_index, lo, hi = active
+    starts = [start for start, end, path in spans
+              if lo <= start and end <= hi and path == tuple(parts)]
     return min(starts) if starts else None
