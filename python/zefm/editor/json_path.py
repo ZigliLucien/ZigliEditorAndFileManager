@@ -84,13 +84,37 @@ def source_spans(text):
         return None
     return spans
 
+def _parts_from_spans(text, spans, offset):
+    """Find the deepest path beside the insertion point.
+
+    Positions immediately AFTER a JSON token (closing quote/bracket/brace or
+    a primitive value) still refer to that token when it is deeper than the
+    surrounding object/array. This is important after bracket matching has
+    positioned Tk's insertion cursor just after the matched delimiter.
+    """
+    if not isinstance(offset, int) or not 0 <= offset <= len(text):
+        return None
+    candidates = [entry for entry in spans
+                  if entry[0] <= offset < entry[1]]
+    endings = [entry for entry in spans
+               if entry[0] < offset and entry[1] == offset]
+    best = max(candidates, key=lambda entry: len(entry[2]), default=None)
+    boundary = max(endings, key=lambda entry: len(entry[2]), default=None)
+    if boundary is not None and (
+            best is None or len(boundary[2]) > len(best[2])):
+        return boundary[2]
+    if best is not None:
+        return best[2]
+    # The caret may be after the last newline in a pretty-printed file.
+    # That position denotes the document root rather than an invalid path.
+    if offset >= len(text.rstrip(" \\t\\r\\n")):
+        return ()
+    return None
+
+
 def path_parts_at(text, offset):
     spans = source_spans(text)
-    if spans is None:return None
-    candidates = [x for x in spans if x[0] <= offset < x[1]]
-    if not candidates and offset == len(text):
-        candidates = [x for x in spans if x[0] <= offset <= x[1]]
-    return max(candidates, key=lambda x:len(x[2]))[2] if candidates else None
+    return _parts_from_spans(text, spans, offset) if spans is not None else None
 
 def paths_at(text, offset):
     parts = path_parts_at(text, offset)
@@ -108,14 +132,9 @@ def navigate(text, offset, direction):
     spans = source_spans(text)
     if spans is None:
         return None
-    candidates = [entry for entry in spans
-                  if entry[0] <= offset < entry[1]]
-    if not candidates and offset == len(text):
-        candidates = [entry for entry in spans
-                      if entry[0] <= offset <= entry[1]]
-    if not candidates:
+    current = _parts_from_spans(text, spans, offset)
+    if current is None:
         return None
-    current = max(candidates, key=lambda entry: len(entry[2]))[2]
 
     # Each path may have several spans (key token, colon, value). Its first
     # appearance is the navigation target, preserving the document's order.
