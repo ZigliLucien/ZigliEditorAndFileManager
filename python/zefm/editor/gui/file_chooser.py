@@ -48,14 +48,16 @@ OPEN_FILTERS = {
 }
 
 
-def directory_entries(folder, extensions=None):
-    """Directories first; filter only files by case-insensitive suffix.
+def directory_entries(folder, extensions=None, *, show_hidden=False):
+    """Directories first, then files matching the chosen extension.
 
-    Directory navigation must continue to work under every extension filter.
-    Existing symlink avoidance and case-insensitive ordering are retained.
+    The filter never hides ordinary folders required for navigation. Dotfiles
+    and dot-directories are hidden by default in Open, but can be shown
+    explicitly. Save As continues to list everything as before.
     """
     entries = [p for p in Path(folder).iterdir()
                if not p.is_symlink()
+               and (show_hidden or not p.name.startswith("."))
                and (p.is_dir() or extensions is None
                     or p.suffix.lower() in extensions)]
     return sorted(entries, key=lambda p: (not p.is_dir(), p.name.casefold(), p.name))
@@ -98,6 +100,11 @@ class FileChooser(tk.Toplevel):
                 textvariable=self.file_filter, values=tuple(OPEN_FILTERS))
             self.filter_combo.pack(side="left")
             self.filter_combo.bind("<<ComboboxSelected>>", self.filter_changed)
+            self.show_hidden = tk.BooleanVar(value=False)
+            ttk.Checkbutton(
+                filters, text="Show hidden files",
+                variable=self.show_hidden, command=self.filter_changed,
+            ).pack(side="left", padx=(16, 0))
         area = ttk.Frame(self, padding=(10, 0))
         area.pack(fill="both", expand=True)
         self.tree = ttk.Treeview(area, columns=("size", "type"), show="tree headings",
@@ -154,7 +161,9 @@ class FileChooser(tk.Toplevel):
         try:
             extensions = (None if self.save_mode else
                           OPEN_FILTERS.get(self.file_filter.get()))
-            entries = directory_entries(self.folder, extensions=extensions)
+            entries = directory_entries(
+                self.folder, extensions=extensions,
+                show_hidden=self.save_mode or self.show_hidden.get())
         except OSError as exc:
             messagebox.showerror("Cannot list directory", str(exc), parent=self)
             entries = []
