@@ -43,8 +43,9 @@ OPEN_FILTERS = {
     "LaTeX (*.tex)": frozenset({".tex"}),
     "Python (*.py)": frozenset({".py"}),
     "JSON (*.json)": frozenset({".json"}),
+    "JSONL (*.jsonl, *.ndjson)": frozenset({".jsonl", ".ndjson"}),
     "Markdown (*.md, *.markdown)": frozenset({".md", ".markdown"}),
-    "All four types": frozenset({".tex", ".py", ".json", ".md", ".markdown"}),
+    "All four types": frozenset({".tex", ".py", ".json", ".jsonl", ".ndjson", ".md", ".markdown"}),
 }
 
 
