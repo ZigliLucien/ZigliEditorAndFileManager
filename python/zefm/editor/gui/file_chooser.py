@@ -120,6 +120,9 @@ class FileChooser(tk.Toplevel):
             self.search_entry = ttk.Entry(
                 search_row, textvariable=self.filename_query)
             self.search_entry.pack(side="left", fill="x", expand=True)
+            # Enter opens the highlighted matching file; no match is a no-op.
+            self.search_entry.bind(
+                "<Return>", lambda event: self.accept() or "break")
             ttk.Button(
                 search_row, text="Clear",
                 command=lambda: self.filename_query.set("")).pack(
