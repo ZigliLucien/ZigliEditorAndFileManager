@@ -1661,3 +1661,38 @@ listing's directory/page/sort/filter context.
   JSON quote/escaped-quote boundaries, round trips, unsupported
   modes, and unchanged buffer state. Corrected an older shortcut test
   that still incorrectly asserted Ctrl+Shift+M was unused.
+
+
+### v135 — JSON jq-path menu commands and cursor navigation repair
+
+- Rechecked **Mode → Show jq Path at Cursor**, **Copy jq Path**,
+  **JSON Parent/First Child/Next Sibling/Previous Sibling**,
+  **Jump to JSON Path**, and **Get JSON Value at Path**.
+  The editor menu handlers are correctly wired to the pure JSON
+  path tools. The user reports that their actual file is accepted
+  by the standalone `jq` command; the repair concentrates on
+  the editor's path lookup and visible feedback.
+- **Show jq Path at Cursor** now opens an explicit dialog with
+  the calculated path; a transient status message is no longer
+  the only visible result. Path/navigation failures distinguish
+  invalid JSON from cursor positions with no destination or a
+  missing requested path, and successful navigation reports the
+  chosen jq path.
+- Corrected **Get JSON Value at Path** appending the two literal
+  characters `\\n` rather than an actual newline. Extracted
+  values now open in a **JSON-mode buffer**, so the path tools
+  still operate on the result. The original buffer stays untouched.
+- Added source-position fallback immediately after JSON closing
+  quotes, arrays and object values, useful when the v134 matching
+  shortcut places the caret after a closing token; end-of-file
+  trailing whitespace also maps to the document root `.`.
+- Navigation no longer reparses the whole JSON text for every
+  possible sibling/child; a bounded three-entry source-scan cache
+  additionally avoids unnecessary reparsing on repeated cursor
+  movements with unchanged text. The cache key is the entire live
+  text, so edits invalidate cached results.
+- Added `tests.test_json_path_menu` with nested Unicode and
+  punctuation-containing keys, cursor navigation and copied paths,
+  extracted values, source boundary conditions, invalid JSON
+  feedback, and cached-path behavior. The test suite has been
+  committed but requires GUI execution in the user's environment.
