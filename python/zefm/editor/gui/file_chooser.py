@@ -48,18 +48,22 @@ OPEN_FILTERS = {
 }
 
 
-def directory_entries(folder, extensions=None, *, show_hidden=False):
-    """List only files matching a selected extension; otherwise show all.
+def directory_entries(folder, extensions=None, *,
+                      show_hidden=False, name_query=""):
+    """Return sorted entries for extension and filename filters.
 
-    With a file-type filter selected, folders are not mixed into the file
-    list. Folder navigation remains available through Up, Change Folder,
-    and explicit paths entered in the filename field. Save As is unfiltered.
+    When an extension or a filename search is active, show only matching
+    files, never directories. The name query is a case-insensitive substring
+    search, not a glob or regular expression. All files with no search keeps
+    the historical folder-and-file listing.
     """
+    query = name_query.strip().casefold()
     entries = [p for p in Path(folder).iterdir()
                if not p.is_symlink()
                and (show_hidden or not p.name.startswith("."))
                and ((p.is_dir() or p.is_file()) if extensions is None
-                    else (p.is_file() and p.suffix.lower() in extensions))]
+                    else (p.is_file() and p.suffix.lower() in extensions))
+               and (not query or (p.is_file() and query in p.name.casefold()))]
     return sorted(entries, key=lambda p: (not p.is_dir(), p.name.casefold(), p.name))
 
 
@@ -108,6 +112,23 @@ class FileChooser(tk.Toplevel):
                 filters, text="Show hidden files",
                 variable=self.show_hidden, command=self.filter_changed,
             ).pack(side="left", padx=(16, 0))
+            search_row = ttk.Frame(self, padding=(10, 0, 10, 8))
+            search_row.pack(fill="x")
+            ttk.Label(search_row, text="Find filename:").pack(
+                side="left", padx=(0, 8))
+            self.filename_query = tk.StringVar()
+            self.search_entry = ttk.Entry(
+                search_row, textvariable=self.filename_query)
+            self.search_entry.pack(side="left", fill="x", expand=True)
+            ttk.Button(
+                search_row, text="Clear",
+                command=lambda: self.filename_query.set("")).pack(
+                side="left", padx=(8, 0))
+            self.match_count = tk.StringVar()
+            ttk.Label(search_row, textvariable=self.match_count,
+                      width=12, anchor="e").pack(side="right", padx=(8, 0))
+            self.filename_query.trace_add("write", self.search_changed)
+            self.bind("<Control-f>", self.focus_search)
         area = ttk.Frame(self, padding=(10, 0))
         area.pack(fill="both", expand=True)
         self.tree = ttk.Treeview(area, columns=("size", "type"), show="tree headings",
@@ -158,6 +179,22 @@ class FileChooser(tk.Toplevel):
         self.name.set("")
         self.populate()
 
+    def focus_search(self, event=None):
+        """Focus the chooser's filename search with Ctrl+F."""
+        if self.save_mode:
+            return
+        self.search_entry.focus_set()
+        self.search_entry.selection_range(0, "end")
+        return "break"
+
+    def search_changed(self, *_unused):
+        """Live search is distinct from the exact path/filename field."""
+        if self.save_mode:
+            return
+        # Never leave a stale selected filename when the view is narrowed.
+        self.name.set("")
+        self.populate()
+
     def populate(self):
         self.location.set(str(self.folder))
         self.tree.delete(*self.tree.get_children())
@@ -166,7 +203,8 @@ class FileChooser(tk.Toplevel):
                           OPEN_FILTERS.get(self.file_filter.get()))
             entries = directory_entries(
                 self.folder, extensions=extensions,
-                show_hidden=self.save_mode or self.show_hidden.get())
+                show_hidden=self.save_mode or self.show_hidden.get(),
+                name_query="" if self.save_mode else self.filename_query.get())
         except OSError as exc:
             messagebox.showerror("Cannot list directory", str(exc), parent=self)
             entries = []
@@ -182,6 +220,9 @@ class FileChooser(tk.Toplevel):
             self.tree.insert("", "end", iid=item, text=path.name,
                              values=(size, "Folder" if is_dir else "File"))
         children = self.tree.get_children()
+        if not self.save_mode:
+            count = sum(path.is_file() for path in self.paths.values())
+            self.match_count.set(f"{count} file{'s' if count != 1 else ''}")
         if children:
             self.tree.selection_set(children[0])
             self.tree.focus(children[0])
