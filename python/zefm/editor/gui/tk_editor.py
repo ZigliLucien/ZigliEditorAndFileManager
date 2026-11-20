@@ -701,6 +701,12 @@ class Window:
         except (ValueError,KeyError,IndexError,TypeError) as exc:
             messagebox.showerror("JSON path",str(exc),parent=self.root);return
         self.new_buffer(text=output+"\n")
+        # The extracted value is valid JSON, even though the new tab
+        # has no filename from which to infer a mode.
+        output_tab = self.tabs.select()
+        self.buffer_modes[output_tab] = self.mode_registry.modes["json"]
+        self._schedule_highlight(output_tab, delay=1)
+        self.status.set(f"JSON value at {expression} opened in new JSON buffer")
 
     def format_json_buffer(self):
         widget,_=self.current()
