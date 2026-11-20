@@ -48,7 +48,7 @@ from ...storage.word_notes import WordNotes, word_at
 from ..tp_editor import TPEditor
 from ..shortcut_config import load_menus
 from ..modes import ModeRegistry
-from ..json_path import paths_at, navigate, locate_path, jq_path
+from ..json_path import paths_at, navigate, locate_path, jq_path, record_at
 from ..json_tools import parse_simple_path, value_at_path, format_json
 from ..mode_tools import validate_json, validate_json_details, indentation
 from .tk_clipboard import TkClipboard
@@ -452,8 +452,14 @@ class Window:
             mode=self.buffer_modes.get(self.tabs.select())
             label=f"Line {line}, column {int(col)+1}  [{mode.name if mode else 'text'}]"
             if mode and mode.name=='json':
-                path=paths_at(widget.get('1.0','end-1c'),len(widget.get('1.0','insert')))
-                if path is not None:label+=f"  jq: {path}"
+                source=widget.get('1.0','end-1c')
+                cursor=len(widget.get('1.0','insert'))
+                path=paths_at(source,cursor)
+                record=record_at(source,cursor)
+                if path is not None:
+                    context=(f"  record {record[0]+1}/{record[1]}"
+                             if record and record[1]>1 else "")
+                    label+=f"  jq: {path}{context}"
             label += "  |  Lang: " + LANGUAGES[self.buffer_languages.get(self.tabs.select(), "system")]
             active_keymap=self.buffer_keymaps.get(self.tabs.select())
             label += "  |  Keys: " + (active_keymap + " (Alt)" if active_keymap else "System")
@@ -605,16 +611,24 @@ class Window:
                 "Cannot determine jq path: " + diagnostic if not valid
                 else "No jq path at cursor; position it inside a JSON key or value")
         else:
-            self.status.set(f"jq path: {path}")
+            record=record_at(text,offset)
+            context=(f" (record {record[0]+1}/{record[1]})"
+                     if record and record[1]>1 else "")
+            self.status.set(f"jq path: {path}{context}")
         return path
 
     def show_json_path(self):
         """Display an explicit, copyable path even when the status bar is busy."""
         path = self._json_path()
         if path is not None:
+            widget, _editor = self.current()
+            source=widget.get("1.0","end-1c")
+            record=record_at(source,len(widget.get("1.0","insert")))
+            context=(f"Record {record[0]+1} of {record[1]}\n"
+                     if record and record[1]>1 else "")
             messagebox.showinfo(
                 "jq Path at Cursor",
-                f"{path}\n\nUse Mode → Copy jq Path to copy it.",
+                f"{context}{path}\n\nThe jq path is relative to this record.",
                 parent=self.root)
 
     def navigate_json(self,direction):
@@ -645,7 +659,9 @@ class Window:
         if expression is None:return
         try:
             parts=parse_simple_path(expression)
-            offset=locate_path(widget.get('1.0','end-1c'),parts)
+            source=widget.get('1.0','end-1c')
+            cursor=len(widget.get('1.0','insert'))
+            offset=locate_path(source,parts,cursor=cursor)
         except ValueError as exc:
             messagebox.showerror('JSON path',str(exc),parent=self.root);return
         if offset is None:
@@ -695,7 +711,12 @@ class Window:
                             initialvalue=self._json_path() or ".",parent=self.root)
         if expression is None:return
         try:
-            value=value_at_path(widget.get("1.0","end-1c"),parse_simple_path(expression))
+            record=record_at(source,len(widget.get("1.0","insert")))
+            if record is None:
+                self.status.set("JSON value: put the cursor inside a record")
+                return
+            value=value_at_path(source,parse_simple_path(expression),
+                                record_index=record[0])
             import json
             output=json.dumps(value,ensure_ascii=False,indent=2)
         except (ValueError,KeyError,IndexError,TypeError) as exc:
