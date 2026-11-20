@@ -59,7 +59,7 @@ class ExtensionFilterTests(unittest.TestCase):
 
     def test_dotfiles_hidden_by_default_under_json_filter(self):
         json_files = self.names(OPEN_FILTERS["JSON (*.json)"])
-        self.assertEqual(json_files, ["subfolder", "data.JSON"])
+        self.assertEqual(json_files, ["data.JSON"])
         self.assertNotIn(".private.json", json_files)
         self.assertNotIn(".config", json_files)
         self.assertNotIn(".zefm", json_files)
@@ -68,9 +68,10 @@ class ExtensionFilterTests(unittest.TestCase):
             p.name for p in directory_entries(
                 self.folder, OPEN_FILTERS["JSON (*.json)"],
                 show_hidden=True)]
-        self.assertEqual(set(with_hidden),
-                         {".config", ".zefm", ".private.json",
-                          "data.JSON", "subfolder"})
+        self.assertEqual(set(with_hidden), {".private.json", "data.JSON"})
+        self.assertNotIn(".config", with_hidden)
+        self.assertNotIn(".zefm", with_hidden)
+        self.assertNotIn("subfolder", with_hidden)
         # Even with hidden entries visible, nonmatching hidden files
         # must not slip past a JSON extension filter.
         self.assertNotIn(".bashrc", with_hidden)
@@ -92,7 +93,7 @@ class ExtensionFilterTests(unittest.TestCase):
              "JSON (*.json)", "Markdown (*.md, *.markdown)",
              "All four types"])
 
-    def test_filters_keep_directories_and_match_case_insensitively(self):
+    def test_filters_show_only_matching_files_and_match_case_insensitively(self):
         for label, expected in (
                 ("LaTeX (*.tex)", ["A.TEX", "b.tex"]),
                 ("Python (*.py)", ["program.py"]),
@@ -103,9 +104,10 @@ class ExtensionFilterTests(unittest.TestCase):
                     "notes.md", "readme.markdown"])):
             with self.subTest(filter=label):
                 names = self.names(OPEN_FILTERS[label])
-                self.assertIn("subfolder", names)
-                self.assertEqual(set(names) - {"subfolder"}, set(expected))
+                self.assertEqual(set(names), set(expected))
+                self.assertNotIn("subfolder", names)
         self.assertIn("image.png", self.names(OPEN_FILTERS["All files"]))
+        self.assertIn("subfolder", self.names(OPEN_FILTERS["All files"]))
         self.assertEqual(self.names(OPEN_FILTERS["All files"]),
                          self.names(None))
 
@@ -150,21 +152,23 @@ class ExtensionFilterGuiTests(unittest.TestCase):
                           "subfolder"})
         dialog.filter_combo.set("LaTeX (*.tex)")
         dialog.filter_changed()
-        self.assertEqual(self.visible(dialog), {"draft.tex", "subfolder"})
+        self.assertEqual(self.visible(dialog), {"draft.tex"})
         self.assertEqual(FileChooser.last_open_filter, "LaTeX (*.tex)")
-        # Navigate into an otherwise empty directory with the filter active.
-        folder_iid = next(key for key, path in dialog.paths.items()
-                          if path.name == "subfolder")
-        dialog.tree.selection_set(folder_iid)
-        dialog.activate()
+        # Navigate independently of the file listing using Change Folder.
+        with unittest.mock.patch(
+                "zefm.editor.gui.file_chooser.filedialog.askdirectory",
+                return_value=str(self.folder / "subfolder")) as directory:
+            dialog.change_folder()
+        directory.assert_called_once()
         self.assertEqual(dialog.folder, (self.folder / "subfolder").resolve())
+        self.assertEqual(self.visible(dialog), set())
         dialog.go_up()
-        self.assertEqual(self.visible(dialog), {"draft.tex", "subfolder"})
+        self.assertEqual(self.visible(dialog), {"draft.tex"})
         # The chosen filter persists across the next Open dialog.
         dialog.cancel()
         another = self.chooser()
         self.assertEqual(another.file_filter.get(), "LaTeX (*.tex)")
-        self.assertEqual(self.visible(another), {"draft.tex", "subfolder"})
+        self.assertEqual(self.visible(another), {"draft.tex"})
         # Manual filename entry continues to allow an existing file even if
         # the current view is filtered to a different extension.
         another.name.set("program.py")
@@ -179,19 +183,34 @@ class ExtensionFilterGuiTests(unittest.TestCase):
         self.assertNotIn(".secret.json", self.visible(dialog))
         dialog.filter_combo.set("JSON (*.json)")
         dialog.filter_changed()
-        self.assertEqual(self.visible(dialog), {"data.json", "subfolder"})
+        self.assertEqual(self.visible(dialog), {"data.json"})
 
         dialog.show_hidden.set(True)
         dialog.filter_changed()
         self.assertEqual(
             self.visible(dialog),
-            {"data.json", "subfolder", ".git", ".config",
-             ".secret.json"})
+            {"data.json", ".secret.json"})
+        # Hidden folders remain excluded even when explicitly visible.
+        self.assertNotIn(".git", self.visible(dialog))
+        self.assertNotIn(".config", self.visible(dialog))
+        self.assertNotIn("subfolder", self.visible(dialog))
         self.assertNotIn(".bashrc", self.visible(dialog))
 
         dialog.show_hidden.set(False)
         dialog.filter_changed()
-        self.assertEqual(self.visible(dialog), {"data.json", "subfolder"})
+        self.assertEqual(self.visible(dialog), {"data.json"})
+
+    def test_typed_directory_path_remains_available_when_filtered(self):
+        dialog = self.chooser()
+        dialog.filter_combo.set("JSON (*.json)")
+        dialog.filter_changed()
+        dialog.name.set("subfolder")
+        dialog.accept()
+        self.assertEqual(dialog.folder, (self.folder / "subfolder").resolve())
+        self.assertEqual(self.visible(dialog), set())
+        self.assertIsNone(dialog.result)
+        dialog.go_up()
+        self.assertEqual(self.visible(dialog), {"data.json"})
 
     def test_save_as_is_never_filtered(self):
         FileChooser.last_open_filter = "JSON (*.json)"
