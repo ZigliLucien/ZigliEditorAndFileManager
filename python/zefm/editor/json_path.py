@@ -97,37 +97,57 @@ def paths_at(text, offset):
     return jq_path(parts) if parts is not None else None
 
 def navigate(text, offset, direction):
-    """Return (target source offset, jq path), or None at boundaries/invalid JSON.
+    """Navigate one JSON structure from a cursor position.
 
-    Navigation targets the key token of object members and value of array members.
+    Parse the buffer only once. In particular, large arrays/objects must not
+    trigger a complete JSON reparse for every possible child/sibling.
+    Returns (source offset, jq path) or None at boundaries/invalid JSON.
     """
-    spans=source_spans(text)
-    if spans is None:return None
-    current=path_parts_at(text,offset)
-    if current is None:return None
-    if direction == 'parent':
-        target=current[:-1] if current else None
-    elif direction == 'child':
-        children={path for start,end,path in spans
-                  if len(path)==len(current)+1 and path[:-1]==current}
-        target=min(children,key=lambda p:locate_path(text,p)) if children else None
-    elif direction in ('next','previous'):
-        if not current:return None
-        siblings=[]
-        for start,end,path in spans:
-            if len(path)==len(current) and path[:-1]==current[:-1] and path not in siblings:
-                siblings.append(path)
-        # Order by first source occurrence; spans include object keys.
-        siblings.sort(key=lambda path:min(start for start,end,p in spans if p==path))
-        pos=siblings.index(current)
-        dest=pos+(1 if direction=='next' else -1)
-        if not 0<=dest<len(siblings):return None
-        target=siblings[dest]
-    else:raise ValueError('Unknown navigation direction')
-    if target is None:return None
-    starts=[start for start,end,path in spans if path==target]
-    if not starts:return None
-    return min(starts),jq_path(target)
+    if direction not in ("parent", "child", "next", "previous"):
+        raise ValueError("Unknown navigation direction")
+    spans = source_spans(text)
+    if spans is None:
+        return None
+    candidates = [entry for entry in spans
+                  if entry[0] <= offset < entry[1]]
+    if not candidates and offset == len(text):
+        candidates = [entry for entry in spans
+                      if entry[0] <= offset <= entry[1]]
+    if not candidates:
+        return None
+    current = max(candidates, key=lambda entry: len(entry[2]))[2]
+
+    # Each path may have several spans (key token, colon, value). Its first
+    # appearance is the navigation target, preserving the document's order.
+    earliest = {}
+    for start, _end, path in spans:
+        if path not in earliest or start < earliest[path]:
+            earliest[path] = start
+
+    if direction == "parent":
+        target = current[:-1] if current else None
+    elif direction == "child":
+        children = [path for path in earliest
+                    if len(path) == len(current) + 1
+                    and path[:-1] == current]
+        target = min(children, key=earliest.get) if children else None
+    else:
+        if not current:
+            return None
+        siblings = [path for path in earliest
+                    if len(path) == len(current)
+                    and path[:-1] == current[:-1]]
+        siblings.sort(key=earliest.get)
+        index = siblings.index(current)
+        index += 1 if direction == "next" else -1
+        target = siblings[index] if 0 <= index < len(siblings) else None
+
+    if target is None:
+        return None
+    start = earliest.get(target)
+    if start is None:
+        return None
+    return start, jq_path(target)
 
 
 def locate_path(text, parts):
