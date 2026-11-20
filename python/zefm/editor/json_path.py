@@ -107,7 +107,7 @@ def _parts_from_spans(text, spans, offset):
         return best[2]
     # The caret may be after the last newline in a pretty-printed file.
     # That position denotes the document root rather than an invalid path.
-    if offset >= len(text.rstrip(" \\t\\r\\n")):
+    if offset >= len(text.rstrip(" \t\r\n")):
         return ()
     return None
 
