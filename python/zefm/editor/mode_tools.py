@@ -1,5 +1,6 @@
 """Pure mode operations, independent of Tk and external programs."""
 import json
+from .json_stream import json_values
 
 def indentation(mode):
     """Return the characters inserted by Tab in this mode."""
@@ -8,13 +9,15 @@ def indentation(mode):
 def validate_json_details(text):
     """Return (valid, diagnostic, error offset) for the live JSON buffer."""
     try:
-        json.loads(text)
+        values = json_values(text)
     except json.JSONDecodeError as exc:
         diagnostic = f"JSON: {exc.msg} (line {exc.lineno}, column {exc.colno})"
         if exc.msg == "Expecting value" and exc.pos < len(text) and text[exc.pos].isalpha():
             diagnostic += " — string values need double quotes"
         return False, diagnostic, exc.pos
-    return True, "Valid JSON", None
+    if len(values) == 1:
+        return True, "Valid JSON", None
+    return True, f"Valid JSON stream ({len(values)} top-level values)", None
 
 
 def validate_json(text):
