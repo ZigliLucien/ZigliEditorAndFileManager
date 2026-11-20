@@ -19,7 +19,7 @@ class CodeDelimiterTests(unittest.TestCase):
             with self.subTest(pair=opener+closer):
                 opening = text.index(opener)
                 if opener == "(":
-                    closing = text.index(")", text.index("2"))
+                    closing = text.index(")", text.index(")", text.index("2")) + 1)
                 elif opener == "[":
                     closing = text.rindex("]")
                 else:
