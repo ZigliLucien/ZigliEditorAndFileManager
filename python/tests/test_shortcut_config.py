@@ -60,7 +60,13 @@ class ShortcutTests(unittest.TestCase):
         self.assertNotIn('QuickMail', labels)
         self.assertNotIn('Get Mail', labels)
         self.assertNotIn('Ctrl+M', shortcuts)
-        self.assertNotIn('Ctrl+Shift+M', shortcuts)
+        # Ctrl+Shift+M was repurposed in v130 for matching LaTeX
+        # delimiters and extended in v134 to Python and JSON.
+        self.assertIn('Ctrl+Shift+M', shortcuts)
+        self.assertEqual(
+            next(cmd.shortcut for group in menus.values() for cmd in group
+                 if cmd.label == 'Go to Matching LaTeX Delimiter'),
+            'Ctrl+Shift+M')
         self.assertNotIn('Ctrl+W', shortcuts)
         self.assertNotIn('Shift+F1', shortcuts)
         self.assertNotIn('Revert File', labels)
