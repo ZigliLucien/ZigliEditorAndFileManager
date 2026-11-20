@@ -1696,3 +1696,23 @@ listing's directory/page/sort/filter context.
   extracted values, source boundary conditions, invalid JSON
   feedback, and cached-path behavior. The test suite has been
   committed but requires GUI execution in the user's environment.
+
+
+### v136 — Open chooser: hide dotfiles with extension filters
+
+- When the Open File dialog is filtered to `JSON (*.json)`,
+  `LaTeX (*.tex)`, `Python (*.py)` or Markdown, ordinary directories
+  remain visible for navigation, but names starting with `.`
+  (hidden files and hidden directories such as `.git`, `.config`)
+  are now hidden by default. Nonmatching files are still omitted.
+- Added a **Show hidden files** checkbox alongside the extension
+  drop-down. When selected, hidden folders appear for navigation
+  and hidden regular files must still match the current extension
+  filter. Case-insensitive extensions such as `CONFIG.JSON`
+  continue to match JSON. Unchecking immediately restores the
+  clean listing.
+- **Save As** intentionally retains its existing unfiltered listing;
+  the Open chooser's hidden-file preference does not affect it.
+  Explicitly typed filenames, including hidden ones, remain valid.
+- Expanded `tests.test_file_chooser` to cover the default JSON
+  view, hidden-file toggle, hidden directories, and Save As.
