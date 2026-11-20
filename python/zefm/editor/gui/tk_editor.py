@@ -2490,6 +2490,8 @@ class Window:
         mode_menu.add_command(label="Jump to JSON Path...",command=self.jump_json_path)
         mode_menu.add_command(label="JSON Next Sibling",command=lambda:self.navigate_json('next'))
         mode_menu.add_command(label="JSON Previous Sibling",command=lambda:self.navigate_json('previous'))
+        mode_menu.add_command(label="JSON Next Record",command=lambda:self.navigate_json('next_record'))
+        mode_menu.add_command(label="JSON Previous Record",command=lambda:self.navigate_json('previous_record'))
         mode_menu.add_command(label="Get JSON Value at Path...",command=self.json_value_at_path)
         mode_menu.add_command(label="Format JSON",command=self.format_json_buffer)
         mode_menu.add_command(label="Run jq on Buffer... (external)",command=self.run_jq)
