@@ -55,6 +55,19 @@ class LineRecordNavigationTests(unittest.TestCase):
         self.app._vim_submit()
         self.assertEqual(self.widget.index("insert"), "2.0")
 
+    def test_repeated_colon_record_commands_after_invalid_number(self):
+        self.app.vim_normal = True
+        for command, expected in (("r 3", "3.0"),
+                                  ("r 12", "3.0"),
+                                  ("r 1", "1.0"),
+                                  ("r 2", "2.0")):
+            self.app._vim_prompt(":")
+            self.app.command_value.set(command)
+            self.assertEqual(self.app._vim_submit(), "break")
+            self.assertEqual(self.widget.index("insert"), expected)
+            self.assertFalse(self.app.command_bar.winfo_manager())
+        self.assertTrue(self.app.vim_normal)
+
     def test_jsonl_mode_detection(self):
         detected = self.app.mode_registry.detect("sample.jsonl", "")
         self.assertEqual(detected.name, "json")
