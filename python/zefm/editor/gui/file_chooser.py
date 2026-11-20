@@ -36,13 +36,36 @@ def next_row(items, selected, step):
     return items[max(0, min(len(items) - 1, items.index(current) + step))]
 
 
-def directory_entries(folder):
-    """Directories first, then files, sorted case-insensitively."""
-    entries = [p for p in Path(folder).iterdir() if not p.is_symlink()]
+# File filters affect only the Open dialog, never Save As. The complete set
+# remains available even after selecting a particular extension.
+OPEN_FILTERS = {
+    "All files": None,
+    "LaTeX (*.tex)": frozenset({".tex"}),
+    "Python (*.py)": frozenset({".py"}),
+    "JSON (*.json)": frozenset({".json"}),
+    "Markdown (*.md, *.markdown)": frozenset({".md", ".markdown"}),
+    "All four types": frozenset({".tex", ".py", ".json", ".md", ".markdown"}),
+}
+
+
+def directory_entries(folder, extensions=None):
+    """Directories first; filter only files by case-insensitive suffix.
+
+    Directory navigation must continue to work under every extension filter.
+    Existing symlink avoidance and case-insensitive ordering are retained.
+    """
+    entries = [p for p in Path(folder).iterdir()
+               if not p.is_symlink()
+               and (p.is_dir() or extensions is None
+                    or p.suffix.lower() in extensions)]
     return sorted(entries, key=lambda p: (not p.is_dir(), p.name.casefold(), p.name))
 
 
 class FileChooser(tk.Toplevel):
+    # Preserve the chosen Open filter when opening another file during this
+    # editor session. Save As always lists every file.
+    last_open_filter = "All files"
+
     def __init__(self, parent, initialdir, *, save=False, initialfile=""):
         super().__init__(parent)
         self.withdraw()
@@ -64,6 +87,17 @@ class FileChooser(tk.Toplevel):
         self.location = tk.StringVar()
         ttk.Label(header, textvariable=self.location, anchor="w").pack(
             side="left", fill="x", expand=True, padx=(10, 0))
+        if not save:
+            filters = ttk.Frame(self, padding=(10, 0, 10, 8))
+            filters.pack(fill="x")
+            ttk.Label(filters, text="Show files:").pack(
+                side="left", padx=(0, 8))
+            self.file_filter = tk.StringVar(value=FileChooser.last_open_filter)
+            self.filter_combo = ttk.Combobox(
+                filters, state="readonly", width=30,
+                textvariable=self.file_filter, values=tuple(OPEN_FILTERS))
+            self.filter_combo.pack(side="left")
+            self.filter_combo.bind("<<ComboboxSelected>>", self.filter_changed)
         area = ttk.Frame(self, padding=(10, 0))
         area.pack(fill="both", expand=True)
         self.tree = ttk.Treeview(area, columns=("size", "type"), show="tree headings",
@@ -106,11 +140,21 @@ class FileChooser(tk.Toplevel):
         self.grab_set()
         self.tree.focus_set()
 
+    def filter_changed(self, event=None):
+        """Refresh the file listing without changing the working directory."""
+        if self.save_mode:
+            return
+        FileChooser.last_open_filter = self.file_filter.get()
+        self.name.set("")
+        self.populate()
+
     def populate(self):
         self.location.set(str(self.folder))
         self.tree.delete(*self.tree.get_children())
         try:
-            entries = directory_entries(self.folder)
+            extensions = (None if self.save_mode else
+                          OPEN_FILTERS.get(self.file_filter.get()))
+            entries = directory_entries(self.folder, extensions=extensions)
         except OSError as exc:
             messagebox.showerror("Cannot list directory", str(exc), parent=self)
             entries = []
