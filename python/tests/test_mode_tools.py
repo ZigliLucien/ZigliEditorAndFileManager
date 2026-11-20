@@ -1,5 +1,5 @@
 import unittest
-from zefm.editor.mode_tools import indentation,validate_json
+from zefm.editor.mode_tools import indentation,validate_json,validate_json_details
 from zefm.editor.modes import ModeSpec
 class ModeToolTests(unittest.TestCase):
  def test_indentation(self):
@@ -10,3 +10,14 @@ class ModeToolTests(unittest.TestCase):
   ok,why=validate_json('{"a":}')
   self.assertFalse(ok)
   self.assertIn("line 1, column 6",why)
+ def test_json_quotes_and_error_offsets(self):
+  valid,detail,pos=validate_json_details('{"name": text}')
+  self.assertFalse(valid)
+  self.assertEqual(pos, len('{"name": '))
+  self.assertIn("double quotes",detail)
+  valid,detail,pos=validate_json_details('{name: "text"}')
+  self.assertFalse(valid)
+  self.assertEqual(pos, 1)
+  self.assertIn("double quotes",detail)
+  self.assertEqual(validate_json_details('{"name": true}'),
+                   (True,"Valid JSON",None))
