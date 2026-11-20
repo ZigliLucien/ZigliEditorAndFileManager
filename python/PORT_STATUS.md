@@ -1570,3 +1570,41 @@ listing's directory/page/sort/filter context.
   grouping braces, nested environments and four math forms;
   invalid/unmatched positions, literal exclusions, shortcut registry
   and Tk cursor/modified-state safety.
+
+
+### v131 — LaTeX document outline
+
+- Added **LaTeX Document Outline** to the common Edit command registry,
+  with `Ctrl+Shift+L` (Command+Shift+L on macOS), and a corresponding
+  entry in the Mode menu. It lists parts, chapters, sections,
+  subsections, subsubsections, paragraphs and subparagraphs from the
+  current live buffer, including starred headings and nested title braces.
+- An independent `latex_outline` scanner reuses the verbatim-aware
+  lexical scan; comments, escaped commands and literal TeX examples do
+  not produce false headings. A filter field narrows entries by title or
+  heading type, with source line numbers and hierarchical indentation.
+- The outline is nonmodal. Select a heading and press Go To or double
+  click to jump, or Refresh after edits. It never edits the buffer.
+  If the underlying text changed after the outline was generated,
+  navigation is blocked until Refresh to prevent stale source offsets.
+- Added `tests.test_latex_outline` for extraction and safe GUI navigation.
+  User confirmed the outline works.
+
+### v132 — extension filters in the Open File chooser
+
+- Added a **Show files** drop-down to the Tk Open File dialog with:
+  **All files**, **LaTeX (*.tex)**, **Python (*.py)**, **JSON (*.json)**,
+  **Markdown (*.md, *.markdown)** and **All four types**.
+  Extension comparison is case-insensitive, so `DRAFT.TEX` is visible
+  when choosing LaTeX.
+- Filtering affects only file visibility. Subdirectories remain visible
+  for navigation under every filter; existing mouse-wheel selection,
+  Up navigation, and working-directory behavior are unchanged. A user
+  can still type the exact path to an existing file regardless of
+  the selected display filter.
+- The last selected **Open** filter is remembered for the duration
+  of the editor process. **Save As** deliberately lists all files
+  and does not modify the Open filter.
+- Extended `tests.test_file_chooser` with extension-group and
+  case-insensitivity assertions, visible folders, changing and retaining
+  a GUI filter, manual filename entry, and unfiltered Save As.
