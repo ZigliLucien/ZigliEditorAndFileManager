@@ -21,7 +21,7 @@ from ..recent_files import RecentFiles
 from ..startup_file import last_recent_buffer
 from ..cursor_positions import CursorPositions
 from ..latex_outline import latex_outline
-from ..code_delimiters import code_bracket_match, json_quote_match
+from ..code_delimiters import code_matching_delimiter
 from ..browser_launcher import open_browser
 from ..syntax_highlight import (COLORS, MAX_CHARS, syntax_spans, latex_match,
                                 latex_environment_match, latex_math_match,
@@ -345,18 +345,7 @@ class Window:
                             (partner, partner + 1) if partner is not None
                             else None)
         else:
-            # JSON quotes take precedence when the cursor is adjacent to
-            # one; bracket matching works outside JSON strings.
-            result = (json_quote_match(text, cursor)
-                      if mode == "json" else None)
-            if result is None:
-                result = code_bracket_match(text, cursor, mode)
-            if result is None:
-                pair = None
-            else:
-                source, partner = result
-                pair = ((source, source + 1),
-                        (partner, partner + 1) if partner is not None else None)
+            pair = code_matching_delimiter(text, cursor, mode)
         if pair is None:
             return
         source_span, partner_span = pair
@@ -1297,31 +1286,35 @@ class Window:
         self.new_buffer(text=result.stdout)
         self.status.set("jq output opened in new buffer (source unchanged)")
 
-    def go_to_matching_latex_delimiter(self):
-        """Jump to a paired TeX delimiter without editing or saving the buffer."""
+    def go_to_matching_delimiter(self):
+        """Jump to a paired delimiter in LaTeX, Python or JSON without edits."""
         widget, _editor = self.current()
         if widget is None:
             return False
-        if self.buffer_modes[self.tabs.select()].name != "latex":
-            self.status.set("Go to matching delimiter is for LaTeX buffers")
+        mode = self.buffer_modes[self.tabs.select()].name
+        if mode not in ("latex", "python", "json"):
+            self.status.set("Go to matching delimiter supports LaTeX, Python and JSON")
             return False
         source_text = widget.get("1.0", "end-1c")
         if len(source_text) > MAX_CHARS:
-            self.status.set("LaTeX matching: buffer exceeds size limit")
+            self.status.set("Matching delimiter: buffer exceeds size limit")
             return False
         cursor = len(widget.get("1.0", "insert"))
-        matched = latex_matching_delimiter(source_text, cursor)
+        matched = (latex_matching_delimiter(source_text, cursor)
+                   if mode == "latex"
+                   else code_matching_delimiter(source_text, cursor, mode))
         if matched is None:
-            self.status.set("LaTeX matching: place the cursor on or after a delimiter")
+            self.status.set("Matching delimiter: place the cursor on or after a delimiter")
             return False
         source, partner = matched
         if partner is None:
             self._cursor_highlight(widget)
             at = widget.index(f"1.0 + {source[0]} chars")
-            self.status.set(f"LaTeX matching: unmatched delimiter at {at}")
+            self.status.set(f"Matching delimiter: unmatched delimiter at {at}")
             return False
-        # Leave the cursor immediately after the counterpart, so invoking
-        # the command again navigates back to the original partner.
+        # Land immediately after the matching token, allowing the same
+        # action to jump back. Quotes and simple brackets are one char;
+        # multi-character TeX commands continue to work unchanged.
         target = f"1.0 + {partner[1]} chars"
         widget.mark_set("insert", target)
         widget.see(target)
@@ -1330,8 +1323,15 @@ class Window:
         line, column = widget.index(
             f"1.0 + {partner[0]} chars").split(".")
         self.status.set(
-            f"LaTeX matching: line {line}, column {int(column)+1}")
+            f"{mode.upper()} matching delimiter: line {line}, column {int(column)+1}")
         return True
+
+    def go_to_matching_latex_delimiter(self):
+        """Compatibility entry point for the original LaTeX-only command."""
+        if self.buffer_modes[self.tabs.select()].name != "latex":
+            self.status.set("Go to matching delimiter is for LaTeX buffers")
+            return False
+        return self.go_to_matching_delimiter()
 
     def show_latex_outline(self):
         """Navigate the live LaTeX document by structural headings."""
@@ -1799,7 +1799,7 @@ class Window:
         elif name=="Print":self.print_buffer()
         elif name=="Toggle ClickPad":self.toggle_clickpad()
         elif name=="Line Numbers":self.toggle_line_numbers()
-        elif name=="Go to Matching LaTeX Delimiter":self.go_to_matching_latex_delimiter()
+        elif name=="Go to Matching LaTeX Delimiter":self.go_to_matching_delimiter()
         elif name=="LaTeX Document Outline":self.show_latex_outline()
         elif name=="Clear":
             if messagebox.askyesno("Clear buffer","Delete all text in this buffer?",parent=self.root):
@@ -2347,7 +2347,12 @@ class Window:
                 shown=shortcut.replace("Ctrl","Cmd") if sys.platform=="darwin" and shortcut else shortcut
                 if sys.platform=="darwin" and item.label=="Compile":
                     shown = "F4 / Cmd+Shift+B"
-                menu.add_command(label=item.label,accelerator=shown or "",
+                # Keep the legacy registry key/configuration stable while
+                # advertising the expanded Python/JSON behavior in menus.
+                visible_label = ("Go to Matching Delimiter"
+                                 if item.label == "Go to Matching LaTeX Delimiter"
+                                 else item.label)
+                menu.add_command(label=visible_label,accelerator=shown or "",
                                  command=lambda name=item.label:self.action(name))
                 if shortcut and install_editor_shortcut(item.label,sys.platform):
                     parts=shortcut.split("+")
@@ -2407,7 +2412,7 @@ class Window:
                  if sys.platform == "darwin" and match_shortcut
                  else match_shortcut)
         mode_menu.add_command(
-            label=match_label, accelerator=shown or "",
+            label="Go to Matching Delimiter", accelerator=shown or "",
             command=lambda: self.action(match_label))
         mode_menu.add_command(label="Next LaTeX Delimiter Issue",
                               command=self.next_latex_issue)
