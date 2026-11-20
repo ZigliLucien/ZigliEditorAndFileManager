@@ -184,7 +184,9 @@ def navigate(text, offset, direction):
     trigger a complete JSON reparse for every possible child/sibling.
     Returns (source offset, jq path) or None at boundaries/invalid JSON.
     """
-    if direction not in ("parent", "child", "next", "previous"):
+    if direction not in (
+            "parent", "child", "next", "previous",
+            "next_record", "previous_record"):
         raise ValueError("Unknown navigation direction")
     spans = source_spans(text)
     if spans is None:
@@ -192,7 +194,15 @@ def navigate(text, offset, direction):
     active = _active_root(spans, offset)
     if active is None:
         return None
-    _record_index, root_start, root_end = active
+    record_index, root_start, root_end = active
+    if direction in ("next_record", "previous_record"):
+        roots = _root_spans(spans)
+        target_index = (record_index + 1 if direction == "next_record"
+                        else record_index - 1)
+        if 0 <= target_index < len(roots):
+            return roots[target_index][0], "."
+        return None
+
     current = _parts_from_spans(
         text, [span for span in spans
                if root_start <= span[0] and span[1] <= root_end], offset)
