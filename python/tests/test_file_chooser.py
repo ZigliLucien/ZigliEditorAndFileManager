@@ -4,6 +4,7 @@ import tkinter as tk
 from tempfile import TemporaryDirectory
 from types import SimpleNamespace
 import unittest
+from unittest.mock import patch
 
 from zefm.editor.gui.file_chooser import (
     wheel_steps, directory_entries, OPEN_FILTERS, FileChooser)
@@ -155,7 +156,7 @@ class ExtensionFilterGuiTests(unittest.TestCase):
         self.assertEqual(self.visible(dialog), {"draft.tex"})
         self.assertEqual(FileChooser.last_open_filter, "LaTeX (*.tex)")
         # Navigate independently of the file listing using Change Folder.
-        with unittest.mock.patch(
+        with patch(
                 "zefm.editor.gui.file_chooser.filedialog.askdirectory",
                 return_value=str(self.folder / "subfolder")) as directory:
             dialog.change_folder()
