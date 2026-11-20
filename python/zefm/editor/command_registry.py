@@ -24,7 +24,8 @@ class Registry:
         self.commands = {c.label:c for menu in MENUS.values() for c in menu}
         self.keys = {c.shortcut:c.label for c in self.commands.values() if c.shortcut}
         self.handlers = {}
-        if len(self.keys) != len(self.commands):
+        shortcut_count = sum(bool(c.shortcut) for c in self.commands.values())
+        if len(self.keys) != shortcut_count:
             raise ValueError("Duplicate accelerator")
     def bind(self, label, handler):
         if label not in self.commands: raise KeyError(label)
