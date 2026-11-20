@@ -1,14 +1,21 @@
 """Pure Python JSON utilities; no jq executable required for path extraction."""
 import json
 from .json_path import paths_at, jq_path
+from .json_stream import json_values
 
 def format_json(source, indent=2):
-    return json.dumps(json.loads(source), ensure_ascii=False, indent=indent) + "\n"
+    """Format each top-level JSON value without merging stream records."""
+    values = json_values(source)
+    return "\n\n".join(json.dumps(value, ensure_ascii=False, indent=indent)
+                      for _start, _end, value in values) + "\n"
 
-def value_at_path(source, parts):
-    value=json.loads(source)
+
+def value_at_path(source, parts, record_index=0):
+    """Resolve a simple jq path in a selected top-level JSON record."""
+    values = json_values(source)
+    value = values[record_index][2]
     for part in parts:
-        value=value[part]
+        value = value[part]
     return value
 
 def parse_simple_path(expression):
