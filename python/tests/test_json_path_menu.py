@@ -69,6 +69,24 @@ class JsonPathPureTests(unittest.TestCase):
         self.assertEqual(paths_at(source, pos), path)
         self.assertEqual(scan.call_count, 1)
 
+    def test_cached_path_scan_reused_for_cursor_movement(self):
+        source = DATA
+        from zefm.editor import json_path
+        json_path._cached_source_spans.cache_clear()
+        with patch("zefm.editor.json_path._parse_source_spans",
+                   wraps=json_path._parse_source_spans) as scan:
+            self.assertEqual(paths_at(source, source.index("Bob")),
+                             ".people[1].name")
+            self.assertEqual(paths_at(source, source.index("Paris")),
+                             ".people[1].address.city")
+            self.assertEqual(paths_at(source, source.index("Alice")),
+                             ".people[0].name")
+            self.assertEqual(scan.call_count, 1)
+            self.assertEqual(paths_at(source + "\\n", source.index("Paris")),
+                             ".people[1].address.city")
+            self.assertEqual(scan.call_count, 2)
+        json_path._cached_source_spans.cache_clear()
+
     def test_invalid_buffer_never_claims_a_valid_path(self):
         self.assertIsNone(paths_at('{"name": unquoted}', 3))
         self.assertIsNone(navigate('{"name": unquoted}', 1, "child"))
@@ -134,6 +152,11 @@ class JsonPathGuiTests(unittest.TestCase):
         result = value_widget.get("1.0", "end-1c")
         self.assertEqual(result, '"Paris"\n')
         self.assertNotIn("\\n", result)
+        self.assertEqual(
+            self.app.buffer_modes[self.app.tabs.select()].name, "json")
+        # The new JSON result still supports Show/Copy jq Path.
+        value_widget.mark_set("insert", "1.1")
+        self.assertEqual(self.app._json_path(), ".")
         self.assertEqual(self.widget.get("1.0", "end-1c"), before)
 
     def test_invalid_json_reports_error_instead_of_silent_failure(self):
