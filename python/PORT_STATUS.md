@@ -1635,3 +1635,29 @@ listing's directory/page/sort/filter context.
   and nesting; JSON escaped and unclosed quotes, crossed brackets,
   coloring and Tk highlight safety. Extended `tests.test_mode_tools`
   to cover JSON error positions and quotation guidance.
+
+
+### v134 — matching-delimiter navigation for Python and JSON
+
+- Extended the existing **Ctrl+Shift+M** (Cmd+Shift+M on macOS)
+  "Go to Matching Delimiter" action from LaTeX to **Python** and
+  **JSON**. The Edit and Mode menu entries now display the generic
+  name, while the original command-registry key is retained for
+  existing keyboard configurations.
+- In Python, the command moves between matching `{}`, `[]` and
+  `()` outside strings and comments using the standard tokenizer.
+  In JSON, it moves between matching object `{}`, array `[]`,
+  or opening/closing double quotes, excluding escaped quotes.
+  The destination is just after its mate so invoking the command
+  again returns to the original delimiter.
+- If the delimiter is unpaired or the cursor is not beside a supported
+  delimiter, the cursor stays in place and a status message explains
+  the outcome. Matching remains purely navigational and does not
+  mutate text, saved state, or the undo stack.
+- Refactored the editor's JSON/Python highlight handling to reuse
+  `code_matching_delimiter` so a highlighted pair and a navigable
+  pair use identical lexical rules. LaTeX behavior is unchanged.
+- Added `tests.test_code_matching_jump` for Python/JSON delimiters,
+  JSON quote/escaped-quote boundaries, round trips, unsupported
+  modes, and unchanged buffer state. Corrected an older shortcut test
+  that still incorrectly asserted Ctrl+Shift+M was unused.
