@@ -49,9 +49,41 @@ class ExtensionFilterTests(unittest.TestCase):
             (self.folder / name).write_text(name, encoding="utf-8")
         (self.folder / "subfolder").mkdir()
         (self.folder / "subfolder" / "nested.tex").write_text("nested")
+        (self.folder / ".zefm").mkdir()
+        (self.folder / ".config").mkdir()
+        (self.folder / ".private.json").write_text('{"secret": 1}')
+        (self.folder / ".bashrc").write_text("config")
 
     def names(self, extensions):
         return [path.name for path in directory_entries(self.folder, extensions)]
+
+    def test_dotfiles_hidden_by_default_under_json_filter(self):
+        json_files = self.names(OPEN_FILTERS["JSON (*.json)"])
+        self.assertEqual(json_files, ["subfolder", "data.JSON"])
+        self.assertNotIn(".private.json", json_files)
+        self.assertNotIn(".config", json_files)
+        self.assertNotIn(".zefm", json_files)
+
+        with_hidden = [
+            p.name for p in directory_entries(
+                self.folder, OPEN_FILTERS["JSON (*.json)"],
+                show_hidden=True)]
+        self.assertEqual(set(with_hidden),
+                         {".config", ".zefm", ".private.json",
+                          "data.JSON", "subfolder"})
+        # Even with hidden entries visible, nonmatching hidden files
+        # must not slip past a JSON extension filter.
+        self.assertNotIn(".bashrc", with_hidden)
+
+    def test_all_files_may_show_hidden_when_requested(self):
+        default = self.names(None)
+        self.assertNotIn(".bashrc", default)
+        self.assertNotIn(".zefm", default)
+        with_hidden = [
+            p.name for p in directory_entries(
+                self.folder, show_hidden=True)]
+        self.assertIn(".bashrc", with_hidden)
+        self.assertIn(".zefm", with_hidden)
 
     def test_extension_choices_are_present(self):
         self.assertEqual(
@@ -86,6 +118,10 @@ class ExtensionFilterGuiTests(unittest.TestCase):
         for name in ("draft.tex", "program.py", "data.json", "notes.md"):
             (self.folder / name).write_text(name)
         (self.folder / "subfolder").mkdir()
+        (self.folder / ".git").mkdir()
+        (self.folder / ".config").mkdir()
+        (self.folder / ".secret.json").write_text('{"v": 1}')
+        (self.folder / ".bashrc").write_text("hidden")
         self.previous_filter = FileChooser.last_open_filter
         FileChooser.last_open_filter = "All files"
         self.addCleanup(
@@ -135,13 +171,36 @@ class ExtensionFilterGuiTests(unittest.TestCase):
         another.accept()
         self.assertEqual(another.result, str((self.folder / "program.py").resolve()))
 
+    def test_json_filter_hides_hidden_entries_until_opted_in(self):
+        dialog = self.chooser()
+        self.assertFalse(dialog.show_hidden.get())
+        self.assertNotIn(".git", self.visible(dialog))
+        self.assertNotIn(".config", self.visible(dialog))
+        self.assertNotIn(".secret.json", self.visible(dialog))
+        dialog.filter_combo.set("JSON (*.json)")
+        dialog.filter_changed()
+        self.assertEqual(self.visible(dialog), {"data.json", "subfolder"})
+
+        dialog.show_hidden.set(True)
+        dialog.filter_changed()
+        self.assertEqual(
+            self.visible(dialog),
+            {"data.json", "subfolder", ".git", ".config",
+             ".secret.json"})
+        self.assertNotIn(".bashrc", self.visible(dialog))
+
+        dialog.show_hidden.set(False)
+        dialog.filter_changed()
+        self.assertEqual(self.visible(dialog), {"data.json", "subfolder"})
+
     def test_save_as_is_never_filtered(self):
         FileChooser.last_open_filter = "JSON (*.json)"
         dialog = self.chooser(save=True)
         self.assertFalse(hasattr(dialog, "file_filter"))
         self.assertEqual(self.visible(dialog),
                          {"draft.tex", "program.py", "data.json", "notes.md",
-                          "subfolder"})
+                          "subfolder", ".git", ".config", ".secret.json",
+                          ".bashrc"})
         self.assertEqual(FileChooser.last_open_filter, "JSON (*.json)")
 
 
