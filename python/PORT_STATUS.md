@@ -1738,3 +1738,32 @@ listing's directory/page/sort/filter context.
 - Updated `tests.test_file_chooser` to check file-only views,
   hidden-file inclusion without hidden folders, changing folders,
   typed folder navigation, and Save As behavior.
+
+
+### v138 — filename search within Open File chooser
+
+- Added a **Find filename** search field to the Tk **Open File**
+  dialog, just below the extension selector, with a **Clear** control
+  and a live count of matching files. Search is an immediate,
+  case-insensitive substring match: for example, searching for
+  `report` in the LaTeX filter shows matching `.tex` documents
+  without listing unrelated files or folders.
+- The query composes with the existing extension selection and
+  **Show hidden files** checkbox. A nonempty query displays
+  matching files only, including in **All files** mode; directories
+  remain accessible through **Up**, **Change Folder**, or an
+  explicitly typed directory path.
+- The search is independent of the exact **File name** entry and
+  clears any previously selected filename when the result list is
+  narrowed. **Ctrl+F** focuses/selects the search field; pressing
+  **Enter** there opens the currently selected match. No match
+  leaves the chooser open. Changing the folder or extension retains
+  the visible search text until cleared; opening a new chooser
+  starts with a fresh empty search.
+- **Save As** remains unchanged (no search row and no extension
+  filtering), and an exact filename typed manually can still open
+  a file even if the search/exension filter excludes it.
+- Extended `tests.test_file_chooser` with pure filtering tests
+  and Tk tests for search/change/reset, hidden files, extension
+  interactions, empty-result behavior, Change Folder, keyboard
+  focus and Enter-to-open actions.
