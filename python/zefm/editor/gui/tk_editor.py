@@ -49,7 +49,7 @@ from ..tp_editor import TPEditor
 from ..shortcut_config import load_menus
 from ..modes import ModeRegistry
 from ..json_path import paths_at, navigate, locate_path, jq_path, record_at
-from ..json_records import record_bounds, record_index, adjacent_record
+from ..json_records import record_bounds, record_index, adjacent_record, outline_rows
 from ..json_tools import parse_simple_path, value_at_path, format_json
 from ..mode_tools import validate_json, validate_json_details, indentation
 from .tk_clipboard import TkClipboard
@@ -677,6 +677,106 @@ class Window:
         bounds = record_bounds(source)
         self._json_record_cache[key] = (source, bounds)
         return bounds
+
+
+    def show_json_record_outline(self):
+        """Browse top-level JSON/JSONL records without expanding nested paths."""
+        widget, _editor = self.current()
+        if widget is None:
+            return
+        source_tab = self.tabs.select()
+        if self.buffer_modes[source_tab].name != "json":
+            self.status.set("JSON Record Outline requires a JSON or JSONL buffer")
+            return
+
+        dialog = tk.Toplevel(self.root)
+        dialog.title("JSON Record Outline")
+        dialog.transient(self.root)
+        dialog.geometry("800x480")
+        ttk.Label(dialog, text=(
+            "Top-level records in this buffer. Filter by record number, line, "
+            "or preview; double-click to jump. Refresh after editing."),
+            padding=(10, 8), wraplength=760).pack(fill="x")
+        top = ttk.Frame(dialog, padding=(10, 0, 10, 6))
+        top.pack(fill="x")
+        ttk.Label(top, text="Filter:").pack(side="left", padx=(0, 6))
+        query = tk.StringVar()
+        entry = ttk.Entry(top, textvariable=query)
+        entry.pack(side="left", fill="x", expand=True)
+        frame = ttk.Frame(dialog, padding=(10, 0, 10, 0))
+        frame.pack(fill="both", expand=True)
+        listing = tk.Listbox(frame, exportselection=False, font=self.editor_font)
+        scroll = ttk.Scrollbar(frame, orient="vertical", command=listing.yview)
+        listing.configure(yscrollcommand=scroll.set)
+        listing.pack(side="left", fill="both", expand=True)
+        scroll.pack(side="right", fill="y")
+        counter = tk.StringVar()
+        ttk.Label(dialog, textvariable=counter, padding=(10, 4)).pack(anchor="w")
+
+        snapshot = ""
+        rows = []
+        visible = []
+
+        def filtered(*_unused):
+            visible.clear()
+            listing.delete(0, "end")
+            wanted = query.get().strip().casefold()
+            for number, line, preview, offset in rows:
+                label = f"{number:>7}  line {line:>7}  {preview}"
+                if wanted and wanted not in label.casefold():
+                    continue
+                visible.append((number, line, preview, offset))
+                listing.insert("end", label)
+            counter.set(f"{len(visible)} of {len(rows)} records")
+            if visible:
+                listing.selection_set(0)
+                listing.activate(0)
+
+        def refresh():
+            nonlocal snapshot, rows
+            if source_tab not in self.views:
+                dialog.destroy()
+                return
+            snapshot = widget.get("1.0", "end-1c")
+            try:
+                rows = outline_rows(snapshot, self._record_bounds(widget, snapshot))
+            except ValueError as exc:
+                rows = []
+                self.status.set(f"JSON Record Outline: {exc}")
+                messagebox.showerror("JSON Record Outline", str(exc), parent=dialog)
+            filtered()
+
+        def jump(event=None):
+            if source_tab not in self.views:
+                dialog.destroy()
+                return
+            selected = listing.curselection()
+            if not selected:
+                return
+            if widget.get("1.0", "end-1c") != snapshot:
+                messagebox.showinfo(
+                    "JSON Record Outline",
+                    "The buffer changed. Choose Refresh to update record positions.",
+                    parent=dialog)
+                return
+            number, line, _preview, offset = visible[selected[0]]
+            self.tabs.select(source_tab)
+            widget.mark_set("insert", f"1.0 + {offset} chars")
+            widget.see("insert")
+            widget.focus_set()
+            self._cursor_highlight(widget)
+            self.status.set(f"JSON record {number}/{len(rows)} at line {line}")
+
+        query.trace_add("write", filtered)
+        listing.bind("<Double-Button-1>", jump)
+        listing.bind("<Return>", jump)
+        controls = ttk.Frame(dialog, padding=10)
+        controls.pack(fill="x")
+        ttk.Button(controls, text="Go To", command=jump).pack(side="left")
+        ttk.Button(controls, text="Refresh", command=refresh).pack(side="left", padx=(8, 0))
+        ttk.Button(controls, text="Close", command=dialog.destroy).pack(side="right")
+        refresh()
+        entry.focus_set()
 
     def go_to_record(self, number=None):
         """Jump to the beginning of one top-level JSON or JSONL record."""
@@ -2600,6 +2700,7 @@ class Window:
         mode_menu.add_command(label="JSON Next Record",command=lambda:self.action("Next Record"))
         mode_menu.add_command(label="JSON Previous Record",command=lambda:self.action("Previous Record"))
         mode_menu.add_command(label="Go to JSON Record...",command=lambda:self.action("Go to Record"))
+        mode_menu.add_command(label="JSON Record Outline...",command=self.show_json_record_outline)
         mode_menu.add_command(label="Get JSON Value at Path...",command=self.json_value_at_path)
         mode_menu.add_command(label="Format JSON",command=self.format_json_buffer)
         mode_menu.add_command(label="Run jq on Buffer... (external)",command=self.run_jq)
@@ -3127,6 +3228,7 @@ class Window:
             command("Next Record (]r)", lambda: self.action("Next Record"))
             command("Previous Record ([r)", lambda: self.action("Previous Record"))
             command("Go to Record...", lambda: self.action("Go to Record"))
+            command("Record Outline...", self.show_json_record_outline)
             command("Run jq on Buffer...", self.run_jq)
             command("Format JSON", self.format_json_buffer)
             command("Go to Matching Delimiter",
