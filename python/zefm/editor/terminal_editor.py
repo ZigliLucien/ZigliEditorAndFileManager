@@ -186,13 +186,13 @@ def edit_screen(screen, path, document):
                 message = "Saved " + str(path)
             except (OSError, UnicodeError, ValueError) as exc:
                 message = "Save failed: " + str(exc)
-        elif key in (curses.KEY_UP,):
+        elif key in (curses.KEY_UP, "\x10"):  # Up / Ctrl-P
             document.move(row_delta=-1)
-        elif key in (curses.KEY_DOWN,):
+        elif key in (curses.KEY_DOWN, "\x0e"):  # Down / Ctrl-N
             document.move(row_delta=1)
-        elif key in (curses.KEY_LEFT,):
+        elif key in (curses.KEY_LEFT, "\x02"):  # Left / Ctrl-B
             document.move(col_delta=-1)
-        elif key in (curses.KEY_RIGHT,):
+        elif key in (curses.KEY_RIGHT, "\x06"):  # Right / Ctrl-F
             document.move(col_delta=1)
         elif key in (curses.KEY_HOME, "\x01"):
             document.col = 0
