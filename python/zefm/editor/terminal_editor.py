@@ -164,7 +164,7 @@ def edit_screen(screen, path, document):
                 pass
         status = (f" {path.name}{' *' if document.dirty else ''}"
                   f"  {document.row + 1}:{document.col + 1}"
-                  f"  C-S Save  C-Q Quit  C-X C-S/C-C")
+                  f"  C-S Save  C-Q Quit  C-_ Undo  C-R Redo")
         if message:
             status = " " + message
         try:
@@ -200,9 +200,17 @@ def edit_screen(screen, path, document):
                 continue
             return
         confirm_quit = False
+        if key in ("\x1f", "\x1a"):  # Ctrl-_ or Ctrl-Z: Undo
+            message = "Undo" if document.undo() else "Nothing to undo"
+            continue
+        if key == "\x12":  # Ctrl-R: Redo
+            message = "Redo" if document.redo() else "Nothing to redo"
+            continue
+        before = (document.text, document.row, document.col)
         if key == "\x13":  # Ctrl-S / Ctrl-X Ctrl-S
             try:
                 save_buffer(Buffer(text=document.text, path=str(path)), str(path))
+                document.saved_text = document.text
                 document.dirty = False
                 message = "Saved " + str(path)
             except (OSError, UnicodeError, ValueError) as exc:
@@ -237,6 +245,12 @@ def edit_screen(screen, path, document):
             document.insert("    ")
         elif isinstance(key, str) and key.isprintable():
             document.insert(key)
+        if document.text != before[0]:
+            document.history.append(before)
+            if len(document.history) > 100:
+                document.history.pop(0)
+            document.future.clear()
+            document.dirty = document.text != document.saved_text
 
 
 def run_terminal_editor(filename):
