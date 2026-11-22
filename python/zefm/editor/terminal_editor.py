@@ -18,6 +18,7 @@ class TextDocument:
     row: int = 0
     col: int = 0
     dirty: bool = False
+    kill_buffer: str = ""
 
     @classmethod
     def from_text(cls, text):
@@ -64,6 +65,30 @@ class TextDocument:
             self.lines[self.row] += self.lines.pop(self.row + 1)
             self.dirty = True
 
+    def kill_line(self):
+        """Emacs Ctrl-K: kill to line end, or the newline when at end."""
+        current = self.lines[self.row]
+        if self.col < len(current):
+            self.kill_buffer = current[self.col:]
+            self.lines[self.row] = current[:self.col]
+        elif self.row + 1 < len(self.lines):
+            self.kill_buffer = "\n"
+            self.lines[self.row] += self.lines.pop(self.row + 1)
+        else:
+            self.kill_buffer = ""
+            return
+        self.dirty = True
+
+    def yank(self):
+        """Insert the most recently killed text (Ctrl-Y)."""
+        if not self.kill_buffer:
+            return
+        for part_number, part in enumerate(self.kill_buffer.split("\n")):
+            if part_number:
+                self.newline()
+            if part:
+                self.insert(part)
+
     def move(self, row_delta=0, col_delta=0):
         if col_delta < 0 and self.col == 0 and self.row > 0:
             self.row -= 1
@@ -85,6 +110,7 @@ def edit_screen(screen, path, document):
     left = 0
     message = ""
     confirm_quit = False
+    ctrl_x_pending = False
     while True:
         height, width = screen.getmaxyx()
         if height < 3 or width < 12:
@@ -115,7 +141,7 @@ def edit_screen(screen, path, document):
                 pass
         status = (f" {path.name}{' *' if document.dirty else ''}"
                   f"  {document.row + 1}:{document.col + 1}"
-                  f"  Ctrl-S Save  Ctrl-Q Quit")
+                  f"  C-S Save  C-Q Quit  C-X C-S/C-C")
         if message:
             status = " " + message
         try:
@@ -131,14 +157,27 @@ def edit_screen(screen, path, document):
         except curses.error:
             continue
         message = ""
-        if key in ("\x11",):  # Ctrl-Q
+        if ctrl_x_pending:
+            ctrl_x_pending = False
+            if key == "\x13":  # Ctrl-X Ctrl-S
+                key = "\x13"
+            elif key == "\x03":  # Ctrl-X Ctrl-C
+                key = "\x11"
+            else:
+                message = "Unknown Ctrl-X command"
+                continue
+        elif key == "\x18":  # Ctrl-X prefix
+            ctrl_x_pending = True
+            message = "Ctrl-X: Ctrl-S save, Ctrl-C quit"
+            continue
+        if key == "\x11":  # Ctrl-Q / Ctrl-X Ctrl-C
             if document.dirty and not confirm_quit:
-                message = "Unsaved changes. Ctrl-Q again to discard; Ctrl-S to save."
+                message = "Unsaved changes. Quit again to discard; Ctrl-S to save."
                 confirm_quit = True
                 continue
             return
         confirm_quit = False
-        if key == "\x13":  # Ctrl-S
+        if key == "\x13":  # Ctrl-S / Ctrl-X Ctrl-S
             try:
                 save_buffer(Buffer(text=document.text, path=str(path)), str(path))
                 document.dirty = False
@@ -163,8 +202,12 @@ def edit_screen(screen, path, document):
             document.move(row_delta=content_height)
         elif key in (curses.KEY_BACKSPACE, "\x7f", "\b"):
             document.backspace()
-        elif key == curses.KEY_DC:
+        elif key in (curses.KEY_DC, "\x04"):  # Delete / Ctrl-D
             document.delete()
+        elif key == "\x0b":  # Ctrl-K
+            document.kill_line()
+        elif key == "\x19":  # Ctrl-Y
+            document.yank()
         elif key in ("\n", "\r", curses.KEY_ENTER):
             document.newline()
         elif key == "\t":
