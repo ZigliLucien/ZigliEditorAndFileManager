@@ -58,7 +58,7 @@ from .file_chooser import choose_file
 from .keyboard_policy import install_editor_shortcut
 
 class Window:
-    def __init__(self, root=None):
+    def __init__(self, root=None, startup_files=None):
         self.root = root or tk.Tk()
         self.root.title("ZEFM Python editor (preview)")
         self.interface_settings_path = (
@@ -200,7 +200,10 @@ class Window:
         self.tabs.pack(fill="both", expand=True)
         # Startup restores the latest readable document rather than adding
         # an unused Untitled tab. Keep a blank buffer as the safe fallback.
-        self._restore_startup_file()
+        if startup_files:
+            self._open_startup_files(startup_files)
+        else:
+            self._restore_startup_file()
         self.tabs.bind("<<NotebookTabChanged>>", self._tab_changed)
         self.disk_poll_id = self.root.after(3000, self._disk_monitor_tick)
         self.root.geometry("920x680")
@@ -258,6 +261,35 @@ class Window:
         # Reconfigure fonts and style; existing tabs and labels update.
         self._configure_interface_fonts()
         self.status.set(f"Interface font set to {size} pt")
+
+    def _open_startup_files(self, filenames):
+        """CLI file arguments override the remembered startup document.
+
+        Missing files open as empty named buffers and are created only on Save.
+        Inaccessible files are reported without silently replacing their content.
+        """
+        opened = 0
+        for filename in filenames:
+            path = Path(filename).expanduser().resolve()
+            try:
+                if path.is_file():
+                    from ..files import open_buffer
+                    loaded = open_buffer(str(path))
+                    self.new_buffer(path=loaded.path, text=loaded.text)
+                elif path.exists():
+                    raise OSError(f"Not a regular file: {path}")
+                elif not path.parent.is_dir():
+                    raise OSError(f"Parent directory does not exist: {path.parent}")
+                else:
+                    self.new_buffer(path=str(path), text="")
+                self.working_directory.used_file(str(path))
+                if path.is_file():
+                    self.recent_files.record(str(path))
+                opened += 1
+            except (OSError, UnicodeError) as exc:
+                messagebox.showerror("Open failed", str(exc), parent=self.root)
+        if not opened:
+            self.new_buffer()
 
     def _restore_startup_file(self):
         """Open the latest readable recent file without startup popups."""
