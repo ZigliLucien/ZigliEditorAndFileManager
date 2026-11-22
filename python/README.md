@@ -1,5 +1,48 @@
 # ZEFM Python port — v6 desktop preview
 
+## Command-line editor and Midnight Commander integration
+
+The editor accepts filenames, including new files:
+
+```sh
+python3 -m zefm hello.tex
+python3 -m zefm first.py second.json
+```
+
+CLI filenames take precedence over the remembered startup file. Relative filenames
+are resolved against the current shell directory. Existing files are opened;
+a nonexistent file opens an empty, named buffer, but is **not created until Save**.
+With no filename, the normal last-edited-file restore behavior remains. The process
+runs Tk's main loop until the window exits, so callers such as Midnight Commander
+can wait for editing to finish. File names are allowed in editor or both mode,
+not in files-only mode.
+
+For the `zefm` command, in your local checkout:
+
+```sh
+chmod +x python/bin/zefm
+sudo ln -s "$(pwd)/python/bin/zefm" /usr/local/bin/zefm
+zefm hello.tex
+```
+
+If a symlink already exists, review it before replacing it. The wrapper resolves
+its own symlink and imports the corresponding local ZEFM Python source directory.
+It requires an installed Python 3 and Tkinter; X11/desktop environment must be
+available when called from a terminal file manager.
+
+To use as an external editor in Bash or Zsh:
+
+```sh
+export EDITOR=zefm
+export VISUAL=zefm
+```
+
+Put these exports in your shell startup file to make them permanent. In Midnight
+Commander, disable its internal editor if necessary so F4 invokes the external
+`EDITOR`. ZEFM stays running until its editor window closes; closing the window
+returns control to Midnight Commander.
+
+
 On Alpine: `apk add python3 python3-tkinter unzip`
 
 From the extracted directory: `python3 -m zefm.editor.gui.tk_editor`
