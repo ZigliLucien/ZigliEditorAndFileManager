@@ -13,6 +13,8 @@ zefm -t hello.tex
 This is intentionally a small, single-file `curses` editor, **not a vi
 replacement**. It provides typing, Enter, Backspace/Delete, arrow keys,
 Home/End, Page Up/Down, Ctrl-A (start of line), Ctrl-E (end of line),
+Ctrl-B (backward), Ctrl-F (forward), Ctrl-P (previous line),
+Ctrl-N (next line),
 Ctrl-D (delete forward), Ctrl-K (kill to end of line or remove newline),
 Ctrl-Y (yank killed text), Ctrl-S (save), and Ctrl-Q (quit; press again to
 discard unsaved edits). Ctrl-X is a prefix: Ctrl-X Ctrl-S saves and
