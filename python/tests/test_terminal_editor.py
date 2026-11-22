@@ -73,6 +73,34 @@ class TerminalEditingTests(unittest.TestCase):
         self.assertFalse(doc.dirty)
         self.assertEqual(screen.get_wch.call_count, 5)
 
+    def test_undo_redo_key_sequence_and_savepoint(self):
+        doc = TextDocument.from_text("abc")
+        doc.col = 3
+        screen = Mock()
+        screen.getmaxyx.return_value = (24, 80)
+        screen.get_wch.side_effect = [
+            "d", "\x1f", "\x12", "\x1a", "\x11",
+        ]
+        with patch("zefm.editor.terminal_editor.curses.raw"), \
+             patch("zefm.editor.terminal_editor.curses.noecho"):
+            edit_screen(screen, Path("sample.txt"), doc)
+        self.assertEqual(doc.text, "abc")
+        self.assertFalse(doc.dirty)
+
+    def test_undo_kill_and_yank(self):
+        doc = TextDocument.from_text("abc def")
+        doc.col = 4
+        screen = Mock()
+        screen.getmaxyx.return_value = (24, 80)
+        screen.get_wch.side_effect = [
+            "\x0b", "\x19", "\x1f", "\x11", "\x11",
+        ]
+        with patch("zefm.editor.terminal_editor.curses.raw"), \
+             patch("zefm.editor.terminal_editor.curses.noecho"):
+            edit_screen(screen, Path("sample.txt"), doc)
+        self.assertEqual(doc.text, "abc ")
+        self.assertTrue(doc.dirty)
+
     def test_terminal_dispatch(self):
         self.assertTrue(build_parser().parse_args(["-t", "file.txt"]).terminal)
         with patch("zefm.editor.terminal_editor.run_terminal_editor") as run:
