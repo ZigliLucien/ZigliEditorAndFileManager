@@ -105,7 +105,9 @@ def edit_screen(screen, path, document):
     """Edit one document, blocking until the user quits."""
     screen.keypad(True)
     curses.noecho()
-    curses.cbreak()
+    # Raw input delivers Ctrl-S and Ctrl-C to the editor instead of the TTY.
+    # curses.wrapper restores the original terminal mode when we exit.
+    curses.raw()
     top = 0
     left = 0
     message = ""
