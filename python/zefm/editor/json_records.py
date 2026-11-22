@@ -43,3 +43,21 @@ def adjacent_record(bounds, cursor, direction):
         return bounds[0][0] if bounds and direction == 1 else None
     target = active + direction
     return bounds[target][0] if 0 <= target < len(bounds) else None
+
+def outline_rows(source, bounds, preview_width=90):
+    """Return (record number, line number, preview, start offset) for an outline.
+
+    Count intervening newlines incrementally to avoid quadratic work on
+    large streams. Preview only a small slice of each record.
+    """
+    rows = []
+    previous = 0
+    line = 1
+    for number, (start, end) in enumerate(bounds, 1):
+        line += source.count("\n", previous, start)
+        preview = " ".join(source[start:min(end, start + preview_width * 3)].split())
+        if len(preview) > preview_width:
+            preview = preview[:preview_width - 3] + "..."
+        rows.append((number, line, preview, start))
+        previous = start
+    return rows
