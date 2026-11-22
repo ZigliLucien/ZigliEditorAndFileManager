@@ -19,6 +19,9 @@ def build_parser():
         prog="python3 -m zefm",
         description="Launch the ZEFM editor, browser file manager, or both.")
     parser.add_argument(
+        "filenames", nargs="*", metavar="FILE",
+        help="file(s) to open in the editor, including new filenames")
+    parser.add_argument(
         "--mode", "-m", choices=("editor", "files", "both"), default="editor",
         help="editor only (default), browser file manager only, or both")
     parser.add_argument(
@@ -34,11 +37,11 @@ def build_parser():
     return parser
 
 
-def launch_editor(*, root=None, port=0, with_files=False, open_browser=True):
+def launch_editor(*, root=None, port=0, with_files=False, open_browser=True,\n                  filenames=None):
     """Tk owns the main thread; HTTP workers communicate through its queue."""
     from .editor.gui.tk_editor import Window
 
-    window = Window()
+    window = Window(startup_files=filenames)
     window.root.protocol("WM_DELETE_WINDOW", window.quit)
     if with_files:
         window.open_local_file_manager(directory=root, port=port,
@@ -69,17 +72,20 @@ def main(argv=None):
     args = build_parser().parse_args(argv)
     if not 0 <= args.port <= 65535:
         build_parser().error("--port must be between 0 and 65535")
+    if args.filenames and args.mode == "files":
+        build_parser().error("filenames require --mode editor or both")
     if args.mode == "editor":
         if args.root is not None or args.port != 0 or args.no_browser:
             build_parser().error(
                 "--root, --port and --no-browser apply only to files/both modes")
-        launch_editor()
+        launch_editor(filenames=args.filenames or None)
     elif args.mode == "files":
         launch_files(root=args.root, port=args.port,
                      open_browser=not args.no_browser)
     else:
         launch_editor(root=args.root, port=args.port, with_files=True,
-                      open_browser=not args.no_browser)
+                      open_browser=not args.no_browser,
+                      filenames=args.filenames or None)
 
 
 if __name__ == "__main__":
