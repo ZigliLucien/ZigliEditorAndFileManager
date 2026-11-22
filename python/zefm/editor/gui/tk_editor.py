@@ -3662,7 +3662,8 @@ class Window:
                 self.browser_poll_id = self.root.after(150, self._drain_browser_requests)
             listing_url = url + "listing?" + urlencode({"path": start})
             if open_browser:
-                open_browser(listing_url)
+                from ..browser_launcher import open_browser as launch_browser
+                launch_browser(listing_url)
             self.status.set(f"ZEFM file listing: {listing_url} (root: {root})")
             return url
         except (OSError, ValueError) as exc:
