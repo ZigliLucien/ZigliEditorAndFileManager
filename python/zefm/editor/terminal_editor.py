@@ -6,7 +6,7 @@ independent. Ctrl-S saves; Ctrl-Q quits (twice to discard unsaved changes).
 from __future__ import annotations
 
 import curses
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from .files import save_buffer
 from .model import Buffer
@@ -19,14 +19,35 @@ class TextDocument:
     col: int = 0
     dirty: bool = False
     kill_buffer: str = ""
+    history: list = field(default_factory=list, repr=False)
+    future: list = field(default_factory=list, repr=False)
+    saved_text: str | None = field(default=None, repr=False)
 
     @classmethod
     def from_text(cls, text):
-        return cls(text.split("\n"))
+        return cls(text.split("\n"), saved_text=text)
 
     @property
     def text(self):
         return "\n".join(self.lines)
+
+    def undo(self):
+        if not self.history:
+            return False
+        self.future.append((self.text, self.row, self.col))
+        text, self.row, self.col = self.history.pop()
+        self.lines = text.split("\n")
+        self.dirty = self.text != self.saved_text
+        return True
+
+    def redo(self):
+        if not self.future:
+            return False
+        self.history.append((self.text, self.row, self.col))
+        text, self.row, self.col = self.future.pop()
+        self.lines = text.split("\n")
+        self.dirty = self.text != self.saved_text
+        return True
 
     def insert(self, text):
         if "\n" in text:
