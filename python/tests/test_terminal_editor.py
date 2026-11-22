@@ -79,7 +79,7 @@ class TerminalEditingTests(unittest.TestCase):
         screen = Mock()
         screen.getmaxyx.return_value = (24, 80)
         screen.get_wch.side_effect = [
-            "d", "\x1f", "\x12", "\x1a", "\x11",
+            "d", "\x1f", "\x18", "\x12", "\x1a", "\x11",
         ]
         with patch("zefm.editor.terminal_editor.curses.raw"), \
              patch("zefm.editor.terminal_editor.curses.noecho"):
@@ -100,6 +100,41 @@ class TerminalEditingTests(unittest.TestCase):
             edit_screen(screen, Path("sample.txt"), doc)
         self.assertEqual(doc.text, "abc ")
         self.assertTrue(doc.dirty)
+
+    def test_go_to_line_and_search_wrap(self):
+        doc = TextDocument.from_text("zero\nfirst alpha\nsecond\nthird alpha")
+        doc.goto_line(3)
+        self.assertEqual((doc.row, doc.col), (2, 0))
+        doc.goto_line(900)
+        self.assertEqual((doc.row, doc.col), (3, 0))
+        self.assertTrue(doc.search("alpha", direction=-1))
+        self.assertEqual((doc.row, doc.col), (1, 6))
+        self.assertTrue(doc.search("alpha", direction=-1, repeat=True))
+        self.assertEqual((doc.row, doc.col), (3, 6))
+        self.assertTrue(doc.search("alpha", direction=1, repeat=True))
+        self.assertEqual((doc.row, doc.col), (1, 6))
+        before = (doc.row, doc.col)
+        self.assertFalse(doc.search("not-present"))
+        self.assertEqual((doc.row, doc.col), before)
+        self.assertFalse(doc.dirty)
+
+    def test_goto_search_cancel_and_repeat_keys(self):
+        doc = TextDocument.from_text("first\nbanana\nthird banana")
+        screen = Mock()
+        screen.getmaxyx.return_value = (24, 80)
+        screen.get_wch.side_effect = [
+            "\x07", "2", "\n",     # Ctrl-G 2
+            "\x12", "b", "a", "n", "a", "n", "a", "\n",
+            "\x12", "\n",        # Ctrl-R Enter repeats last search
+            "\x18", "\x06", "\n",  # Ctrl-X Ctrl-F forward repeat
+            "\x07", "\x1b",     # Cancel goto line
+            "\x11",
+        ]
+        with patch("zefm.editor.terminal_editor.curses.raw"), \
+             patch("zefm.editor.terminal_editor.curses.noecho"):
+            edit_screen(screen, Path("sample.txt"), doc)
+        self.assertEqual((doc.row, doc.col), (1, 0))
+        self.assertFalse(doc.dirty)
 
     def test_terminal_dispatch(self):
         self.assertTrue(build_parser().parse_args(["-t", "file.txt"]).terminal)
