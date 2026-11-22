@@ -22,6 +22,9 @@ def build_parser():
         "filenames", nargs="*", metavar="FILE",
         help="file(s) to open in the editor, including new filenames")
     parser.add_argument(
+        "--terminal", "-t", action="store_true",
+        help="edit one file inside the current terminal, without Tk or menus")
+    parser.add_argument(
         "--mode", "-m", choices=("editor", "files", "both"), default="editor",
         help="editor only (default), browser file manager only, or both")
     parser.add_argument(
@@ -73,6 +76,14 @@ def main(argv=None):
     args = build_parser().parse_args(argv)
     if not 0 <= args.port <= 65535:
         build_parser().error("--port must be between 0 and 65535")
+    if args.terminal:
+        if args.mode != "editor" or len(args.filenames) != 1:
+            build_parser().error("--terminal requires exactly one filename in editor mode")
+        if args.root is not None or args.port != 0 or args.no_browser:
+            build_parser().error("--terminal cannot be combined with browser options")
+        from .editor.terminal_editor import run_terminal_editor
+        run_terminal_editor(args.filenames[0])
+        return
     if args.filenames and args.mode == "files":
         build_parser().error("filenames require --mode editor or both")
     if args.mode == "editor":
