@@ -22,6 +22,7 @@ class TextDocument:
     history: list = field(default_factory=list, repr=False)
     future: list = field(default_factory=list, repr=False)
     saved_text: str | None = field(default=None, repr=False)
+    last_search: str = ""
 
     @classmethod
     def from_text(cls, text):
@@ -110,6 +111,34 @@ class TextDocument:
             if part:
                 self.insert(part)
 
+    def goto_line(self, number):
+        self.row = max(0, min(len(self.lines) - 1, int(number) - 1))
+        self.col = 0
+
+    def search(self, query, direction=-1, repeat=False, origin=None):
+        if not query:
+            return False
+        contents = self.text
+        row, col = origin if origin is not None else (self.row, self.col)
+        offset = sum(len(line) + 1 for line in self.lines[:row]) + col
+        if direction < 0:
+            cutoff = offset if repeat else offset + 1
+            at = contents.rfind(query, 0, cutoff)
+            if at < 0:
+                at = contents.rfind(query, cutoff)
+        else:
+            start = offset + (1 if repeat else 0)
+            at = contents.find(query, start)
+            if at < 0:
+                at = contents.find(query, 0, start)
+        if at < 0:
+            return False
+        preceding = contents[:at]
+        self.row = preceding.count("\n")
+        self.col = len(preceding.rsplit("\n", 1)[-1])
+        self.last_search = query
+        return True
+
     def move(self, row_delta=0, col_delta=0):
         if col_delta < 0 and self.col == 0 and self.row > 0:
             self.row -= 1
@@ -120,6 +149,39 @@ class TextDocument:
         else:
             self.row = max(0, min(len(self.lines) - 1, self.row + row_delta))
             self.col = max(0, min(len(self.lines[self.row]), self.col + col_delta))
+
+
+def prompt_input(screen, label, on_change=None):
+    """Status-line prompt; Escape or Ctrl-G cancels."""
+    entered = ""
+    while True:
+        height, width = screen.getmaxyx()
+        if height < 2:
+            return None
+        display = (label + entered)[-max(1, width - 1):]
+        try:
+            screen.addnstr(height - 1, 0, display.ljust(width - 1),
+                           max(0, width - 1), curses.A_REVERSE)
+            screen.move(height - 1, min(len(label + entered), width - 2))
+        except curses.error:
+            pass
+        screen.refresh()
+        try:
+            key = screen.get_wch()
+        except curses.error:
+            continue
+        if key in ("\x1b", "\x07"):
+            return None
+        if key in ("\n", "\r", curses.KEY_ENTER):
+            return entered
+        if key in ("\x7f", "\b", curses.KEY_BACKSPACE):
+            entered = entered[:-1]
+        elif isinstance(key, str) and key.isprintable():
+            entered += key
+        else:
+            continue
+        if on_change is not None:
+            on_change(entered)
 
 
 def edit_screen(screen, path, document):
