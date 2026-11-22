@@ -1,5 +1,32 @@
 # ZEFM Python port — v6 desktop preview
 
+## Minimal terminal editor (experimental)
+
+For quick editing in a console or over SSH, without Tk, X11 or menus:
+
+```sh
+zefm --terminal hello.tex
+# equivalent:
+zefm -t hello.tex
+```
+
+This is intentionally a small, single-file `curses` editor, **not a vi
+replacement**. It provides typing, Enter, Backspace/Delete, arrow keys,
+Home/End, Page Up/Down, Ctrl-S (save) and Ctrl-Q (quit; press again to
+discard unsaved edits). No Vim modes, menus, highlighting, or advanced
+search. Files are written using the existing atomic UTF-8 save helper;
+an absent filename is created only on Save. The terminal session blocks
+until quit, and the screen is restored by `curses.wrapper`.
+
+To make this mode the external editor for terminal programs:
+
+```sh
+export EDITOR='zefm --terminal'
+export VISUAL='zefm --terminal'
+```
+
+`zefm hello.tex` still launches the full Tk editor as before.
+
 ## Command-line editor and Midnight Commander integration
 
 The editor accepts filenames, including new files:
