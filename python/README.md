@@ -12,8 +12,11 @@ zefm -t hello.tex
 
 This is intentionally a small, single-file `curses` editor, **not a vi
 replacement**. It provides typing, Enter, Backspace/Delete, arrow keys,
-Home/End, Page Up/Down, Ctrl-S (save) and Ctrl-Q (quit; press again to
-discard unsaved edits). No Vim modes, menus, highlighting, or advanced
+Home/End, Page Up/Down, Ctrl-A (start of line), Ctrl-E (end of line),
+Ctrl-D (delete forward), Ctrl-K (kill to end of line or remove newline),
+Ctrl-Y (yank killed text), Ctrl-S (save), and Ctrl-Q (quit; press again to
+discard unsaved edits). Ctrl-X is a prefix: Ctrl-X Ctrl-S saves and
+Ctrl-X Ctrl-C quits. No Vim modes, menus, highlighting, or advanced
 search. Files are written using the existing atomic UTF-8 save helper;
 an absent filename is created only on Save. The terminal session blocks
 until quit, and the screen is restored by `curses.wrapper`.
