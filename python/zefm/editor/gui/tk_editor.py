@@ -1679,7 +1679,11 @@ class Window:
                 return
             item = visible[selection[0]]
             self.tabs.select(source_tab)
-            target = f"{item.line}.{item.column}"
+            # Python AST columns count UTF-8 bytes; Tk Text counts characters.
+            line_text = widget.get(f"{item.line}.0", f"{item.line}.end")
+            column = len(line_text.encode("utf-8")[:item.column].decode(
+                "utf-8", errors="ignore"))
+            target = f"{item.line}.{column}"
             widget.mark_set("insert", target)
             widget.see(target)
             widget.focus_set()
