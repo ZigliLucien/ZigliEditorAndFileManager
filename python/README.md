@@ -18,7 +18,9 @@ Ctrl-N (next line),
 Ctrl-D (delete forward), Ctrl-K (kill to end of line or remove newline),
 Ctrl-Y (yank killed text), Ctrl-S (save), and Ctrl-Q (quit; press again to
 discard unsaved edits). Ctrl-X is a prefix: Ctrl-X Ctrl-S saves and
-Ctrl-X Ctrl-C quits. No Vim modes, menus, highlighting, or advanced
+Ctrl-X Ctrl-C quits. Ctrl-_ (or Ctrl-Z) undoes the last edit, and
+Ctrl-R redoes it. Undo retains up to 100 editing operations.
+No Vim modes, menus, highlighting, or advanced
 search. Files are written using the existing atomic UTF-8 save helper;
 an absent filename is created only on Save. The terminal session blocks
 until quit, and the screen is restored by `curses.wrapper`.
