@@ -226,7 +226,7 @@ def edit_screen(screen, path, document):
                 pass
         status = (f" {path.name}{' *' if document.dirty else ''}"
                   f"  {document.row + 1}:{document.col + 1}"
-                  f"  C-S Save  C-Q Quit  C-_ Undo  C-R Redo")
+                  f"  C-S Save  C-Q Quit  C-G Line  C-R Search")
         if message:
             status = " " + message
         try:
@@ -248,12 +248,16 @@ def edit_screen(screen, path, document):
                 key = "\x13"
             elif key == "\x03":  # Ctrl-X Ctrl-C
                 key = "\x11"
+            elif key == "\x12":  # Ctrl-X Ctrl-R
+                key = "REDO"
+            elif key == "\x06":  # Ctrl-X Ctrl-F
+                key = "SEARCH_FORWARD"
             else:
                 message = "Unknown Ctrl-X command"
                 continue
         elif key == "\x18":  # Ctrl-X prefix
             ctrl_x_pending = True
-            message = "Ctrl-X: Ctrl-S save, Ctrl-C quit"
+            message = "Ctrl-X: Ctrl-S save, Ctrl-C quit, Ctrl-F search, Ctrl-R redo"
             continue
         if key == "\x11":  # Ctrl-Q / Ctrl-X Ctrl-C
             if document.dirty and not confirm_quit:
@@ -265,8 +269,39 @@ def edit_screen(screen, path, document):
         if key in ("\x1f", "\x1a"):  # Ctrl-_ or Ctrl-Z: Undo
             message = "Undo" if document.undo() else "Nothing to undo"
             continue
-        if key == "\x12":  # Ctrl-R: Redo
+        if key == "REDO":  # Ctrl-X Ctrl-R: Redo
             message = "Redo" if document.redo() else "Nothing to redo"
+            continue
+        if key == "\x07":  # Ctrl-G: Go to Line
+            response = prompt_input(screen, "Go to line: ")
+            if response is not None:
+                if response.strip().isdigit() and int(response) >= 1:
+                    document.goto_line(int(response))
+                    message = f"Line {document.row + 1}"
+                else:
+                    message = "Enter a positive line number"
+            continue
+        if key in ("\x12", "SEARCH_FORWARD"):  # backward / forward search
+            direction = -1 if key == "\x12" else 1
+            origin = (document.row, document.col)
+            def preview(query):
+                document.row, document.col = origin
+                if query:
+                    document.search(query, direction=direction, origin=origin)
+            response = prompt_input(
+                screen, "Search backward: " if direction < 0 else "Search forward: ",
+                on_change=preview)
+            if response is None:
+                document.row, document.col = origin
+                message = "Search cancelled"
+            else:
+                query = response or document.last_search
+                document.row, document.col = origin
+                if not query or not document.search(
+                        query, direction=direction, repeat=not response):
+                    message = "Not found" if query else "No previous search"
+                else:
+                    message = f"Found: {query}"
             continue
         before = (document.text, document.row, document.col)
         if key == "\x13":  # Ctrl-S / Ctrl-X Ctrl-S
