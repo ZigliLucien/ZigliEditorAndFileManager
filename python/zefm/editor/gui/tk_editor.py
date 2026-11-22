@@ -3085,9 +3085,70 @@ class Window:
                          command=self._clear_recent_files,
                          state="normal" if self.recent_files.entries else "disabled")
 
+    def _populate_mode_context_menu(self):
+        """Append contextual tools without displacing the Recent Files menu.
+
+        Reuse existing editor actions rather than duplicate their behavior.
+        The selected tab determines which tools appear; opening the menu
+        leaves the insertion cursor exactly where it was.
+        """
+        tab = self.tabs.select()
+        mode = self.buffer_modes.get(tab)
+        name = mode.name if mode else "text"
+        popup = self.recent_popup
+        tools = tk.Menu(popup, tearoff=False)
+
+        def command(label, callback):
+            tools.add_command(label=label, command=callback)
+
+        if name == "python":
+            command("Debug Python (pdb)", lambda: self.action("Debug Python"))
+            command("Run Configured Command", self.run_configured_command)
+            command("Configure Run Command...", self.configure_run_command)
+            tools.add_separator()
+            command("Go to Matching Delimiter",
+                    lambda: self.action("Go to Matching LaTeX Delimiter"))
+        elif name == "latex":
+            command("Compile LaTeX (F4)", lambda: self.action("Compile"))
+            command("LaTeX Document Outline...",
+                    lambda: self.action("LaTeX Document Outline"))
+            command("Next LaTeX Error", self.next_latex_error)
+            command("Set LaTeX Master...", self.set_latex_master)
+            tools.add_separator()
+            command("Go to Matching Delimiter",
+                    lambda: self.action("Go to Matching LaTeX Delimiter"))
+        elif name == "json":
+            command("Validate JSON", self.validate_buffer)
+            command("Show jq Path at Cursor", self.show_json_path)
+            command("Copy jq Path", self.copy_json_path)
+            command("Jump to JSON Path...", self.jump_json_path)
+            command("Get JSON Value at Path...", self.json_value_at_path)
+            tools.add_separator()
+            command("Next Record (]r)", lambda: self.action("Next Record"))
+            command("Previous Record ([r)", lambda: self.action("Previous Record"))
+            command("Go to Record...", lambda: self.action("Go to Record"))
+            command("Run jq on Buffer...", self.run_jq)
+            command("Format JSON", self.format_json_buffer)
+            command("Go to Matching Delimiter",
+                    lambda: self.action("Go to Matching LaTeX Delimiter"))
+
+        if name in ("python", "latex", "json"):
+            popup.add_separator()
+            popup.add_cascade(
+                label={"python": "Python Tools", "latex": "LaTeX Tools",
+                       "json": "JSON / jq Tools"}[name],
+                menu=tools)
+        else:
+            tools.destroy()
+        popup.add_separator()
+        popup.add_command(
+            label="Go to Line... (Ctrl+G)",
+            command=lambda: self.action("Go to Line"))
+
     def _show_recent_files_popup(self, event):
-        """Right-click in a Tk editor buffer to reach the recent-file list."""
+        """Right-click: mode-specific tools and the existing recent-file list."""
         self._fill_recent_files_menu(self.recent_popup)
+        self._populate_mode_context_menu()
         try:
             self.recent_popup.tk_popup(event.x_root, event.y_root)
         finally:
