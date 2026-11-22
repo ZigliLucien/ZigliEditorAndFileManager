@@ -55,7 +55,7 @@ class TerminalEditingTests(unittest.TestCase):
         self.assertEqual(doc.text, "end")
 
     def test_ctrl_b_f_p_n_bindings(self):
-        doc = TextDocument.from_text("abcd\\nxy")
+        doc = TextDocument.from_text("abcd\nxy")
         doc.row, doc.col = 1, 1
         screen = Mock()
         screen.getmaxyx.return_value = (24, 80)
