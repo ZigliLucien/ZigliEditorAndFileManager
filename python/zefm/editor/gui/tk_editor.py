@@ -21,6 +21,7 @@ from ..recent_files import RecentFiles
 from ..startup_file import last_recent_buffer
 from ..cursor_positions import CursorPositions
 from ..latex_outline import latex_outline
+from ..python_outline import python_outline
 from ..code_delimiters import code_matching_delimiter
 from ..browser_launcher import open_browser
 from ..syntax_highlight import (COLORS, MAX_CHARS, syntax_spans, latex_match,
@@ -1597,6 +1598,106 @@ class Window:
             return False
         return self.go_to_matching_delimiter()
 
+
+    def show_python_outline(self):
+        """Searchable Python structure, reusing LaTeX outline navigation conventions."""
+        widget, _editor = self.current()
+        if widget is None:
+            return
+        source_tab = self.tabs.select()
+        if self.buffer_modes[source_tab].name != "python":
+            self.status.set("Python Outline requires a Python buffer")
+            return
+        dialog = tk.Toplevel(self.root)
+        dialog.title("Python Outline")
+        dialog.transient(self.root)
+        dialog.geometry("780x470")
+        ttk.Label(dialog,
+                  text="Functions, methods and classes. Filter by name; "
+                       "double-click to jump. Refresh after editing.",
+                  padding=(10, 8), wraplength=740).pack(fill="x")
+        filter_row = ttk.Frame(dialog, padding=(10, 0, 10, 6))
+        filter_row.pack(fill="x")
+        ttk.Label(filter_row, text="Filter:").pack(side="left")
+        query = tk.StringVar()
+        field = ttk.Entry(filter_row, textvariable=query)
+        field.pack(side="left", fill="x", expand=True, padx=6)
+        container = ttk.Frame(dialog, padding=(10, 0, 10, 0))
+        container.pack(fill="both", expand=True)
+        listing = tk.Listbox(container, exportselection=False)
+        scroll = ttk.Scrollbar(container, command=listing.yview)
+        listing.configure(yscrollcommand=scroll.set)
+        listing.pack(side="left", fill="both", expand=True)
+        scroll.pack(side="right", fill="y")
+        count = tk.StringVar()
+        ttk.Label(dialog, textvariable=count, padding=(10, 4)).pack(anchor="w")
+        snapshot = ""
+        headings = []
+        visible = []
+
+        def update(*_):
+            visible.clear()
+            listing.delete(0, "end")
+            term = query.get().strip().casefold()
+            for item in headings:
+                label = (f"{item.line:>5}  " + "  " * item.level
+                         + f"{item.kind} {item.title}")
+                if term and term not in label.casefold():
+                    continue
+                visible.append(item)
+                listing.insert("end", label)
+            count.set(f"{len(visible)} of {len(headings)} definitions")
+            if visible:
+                listing.selection_set(0)
+                listing.activate(0)
+
+        def refresh():
+            nonlocal snapshot, headings
+            if source_tab not in self.views:
+                dialog.destroy()
+                return
+            snapshot = widget.get("1.0", "end-1c")
+            try:
+                headings = python_outline(snapshot)
+            except (SyntaxError, ValueError, RecursionError) as exc:
+                headings = []
+                self.status.set(f"Python Outline parse error: {exc}")
+                messagebox.showwarning("Python Outline", str(exc), parent=dialog)
+            update()
+
+        def jump(event=None):
+            if source_tab not in self.views:
+                dialog.destroy()
+                return
+            selection = listing.curselection()
+            if not selection:
+                return
+            if widget.get("1.0", "end-1c") != snapshot:
+                messagebox.showinfo(
+                    "Python Outline", "Buffer changed. Choose Refresh first.",
+                    parent=dialog)
+                return
+            item = visible[selection[0]]
+            self.tabs.select(source_tab)
+            target = f"{item.line}.{item.column}"
+            widget.mark_set("insert", target)
+            widget.see(target)
+            widget.focus_set()
+            self._cursor_highlight(widget)
+            self.status.set(f"Python Outline: {item.kind} {item.title} at line {item.line}")
+
+        query.trace_add("write", update)
+        listing.bind("<Double-Button-1>", jump)
+        listing.bind("<Return>", jump)
+        controls = ttk.Frame(dialog, padding=10)
+        controls.pack(fill="x")
+        ttk.Button(controls, text="Go To", command=jump).pack(side="left")
+        ttk.Button(controls, text="Refresh", command=refresh).pack(
+            side="left", padx=(8, 0))
+        ttk.Button(controls, text="Close", command=dialog.destroy).pack(side="right")
+        refresh()
+        field.focus_set()
+
     def show_latex_outline(self):
         """Navigate the live LaTeX document by structural headings."""
         widget, _editor = self.current()
@@ -2701,6 +2802,7 @@ class Window:
         mode_menu.add_command(label="JSON Previous Record",command=lambda:self.action("Previous Record"))
         mode_menu.add_command(label="Go to JSON Record...",command=lambda:self.action("Go to Record"))
         mode_menu.add_command(label="JSON Record Outline...",command=self.show_json_record_outline)
+        mode_menu.add_command(label="Python Outline...", command=self.show_python_outline)
         mode_menu.add_command(label="Get JSON Value at Path...",command=self.json_value_at_path)
         mode_menu.add_command(label="Format JSON",command=self.format_json_buffer)
         mode_menu.add_command(label="Run jq on Buffer... (external)",command=self.run_jq)
@@ -3203,6 +3305,7 @@ class Window:
             tools.add_command(label=label, command=callback)
 
         if name == "python":
+            command("Python Outline...", self.show_python_outline)
             command("Debug Python (pdb)", lambda: self.action("Debug Python"))
             command("Run Configured Command", self.run_configured_command)
             command("Configure Run Command...", self.configure_run_command)
