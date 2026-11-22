@@ -37,7 +37,8 @@ def build_parser():
     return parser
 
 
-def launch_editor(*, root=None, port=0, with_files=False, open_browser=True,\n                  filenames=None):
+def launch_editor(*, root=None, port=0, with_files=False, open_browser=True,
+                  filenames=None):
     """Tk owns the main thread; HTTP workers communicate through its queue."""
     from .editor.gui.tk_editor import Window
 
