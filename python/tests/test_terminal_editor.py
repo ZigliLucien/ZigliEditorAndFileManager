@@ -136,6 +136,40 @@ class TerminalEditingTests(unittest.TestCase):
         self.assertEqual((doc.row, doc.col), (1, 0))
         self.assertFalse(doc.dirty)
 
+    def test_incremental_search_preview_and_cancel(self):
+        doc = TextDocument.from_text("alpha\nsecond\nthird alpha")
+        doc.goto_line(2)
+        origin = (doc.row, doc.col)
+        screen = Mock()
+        screen.getmaxyx.return_value = (10, 40)
+        screen.get_wch.side_effect = [
+            "\x12", "a", "l", "p", "h", "a", "\x1b", "\x11",
+        ]
+        with patch("zefm.editor.terminal_editor.curses.raw"), \
+             patch("zefm.editor.terminal_editor.curses.noecho"):
+            edit_screen(screen, Path("sample.txt"), doc)
+        self.assertEqual((doc.row, doc.col), origin)
+        self.assertEqual(doc.last_search, "")
+        self.assertFalse(doc.dirty)
+        # The document is redrawn for each incremental search input.
+        self.assertGreaterEqual(screen.erase.call_count, 7)
+
+    def test_failed_incremental_search_preserves_last_search(self):
+        doc = TextDocument.from_text("alpha\nbeta alpha")
+        self.assertTrue(doc.search("alpha", direction=1))
+        saved = doc.last_search
+        screen = Mock()
+        screen.getmaxyx.return_value = (10, 40)
+        screen.get_wch.side_effect = [
+            "\x12", "z", "z", "z", "\n", "\x11",
+        ]
+        origin = (doc.row, doc.col)
+        with patch("zefm.editor.terminal_editor.curses.raw"), \
+             patch("zefm.editor.terminal_editor.curses.noecho"):
+            edit_screen(screen, Path("sample.txt"), doc)
+        self.assertEqual(doc.last_search, saved)
+        self.assertEqual((doc.row, doc.col), origin)
+
     def test_terminal_dispatch(self):
         self.assertTrue(build_parser().parse_args(["-t", "file.txt"]).terminal)
         with patch("zefm.editor.terminal_editor.run_terminal_editor") as run:
