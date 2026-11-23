@@ -14,13 +14,13 @@ def _url(route, **params):
 def _month_offset(year, month, step):
     number = year * 12 + month - 1 + step
     target_year, target_month = divmod(number, 12)
-    if target_year < 1 or target_year > 9999:
+    if target_year < 2 or target_year > 9998:
         return None
     return target_year, target_month + 1
 
 
 def month_page(store, year, month):
-    if not 1 <= year <= 9999 or not 1 <= month <= 12:
+    if not 2 <= year <= 9998 or not 1 <= month <= 12:
         raise ValueError("Invalid calendar month")
     month_events = {}
     for entry in store.in_month(year, month):
@@ -44,15 +44,14 @@ def month_page(store, year, month):
             events = month_events.get(key, [])
             label = str(day.day)
             href = escape(_url("diary", date=key), quote=True)
-            muted = ' style="opacity:.5"' if day.month != month else ''
+            style = 'height:90px;opacity:.5' if day.month != month else 'height:90px'
             shown = ''.join('<div><small>' + escape(item["text"][:70])
                             + ('…' if len(item["text"]) > 70 else '') + '</small></div>'
                             for item in events[:2])
             if len(events) > 2:
                 shown += '<small>+' + str(len(events) - 2) + ' more</small>'
-            table.append('<td valign="top"' + muted + ' style="height:90px"'
-                         if not muted else '<td valign="top"' + muted)
-            table.append('><a href="' + href + '">' + label + '</a>' + shown + '</td>')
+            table.append('<td valign="top" style="' + style + '">'
+                         + '<a href="' + href + '">' + label + '</a>' + shown + '</td>')
         table.append('</tr>')
     table.append('</tbody></table>')
     return ('<h1>Calendar — ' + escape(calendar.month_name[month]) + ' ' + str(year)
