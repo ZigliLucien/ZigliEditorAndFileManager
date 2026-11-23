@@ -96,6 +96,7 @@ def listing_shell(hostname: str, token: str, desktop_editor: bool) -> bytes:
             '<ul class="utility-links">'
             '<li><a id="new-file" href="/new-file?path=.">New File</a></li>'
             '<li><a href="/search-text?path=." id="search-string">Search String</a></li>'
+            '<li><a href="/calendar" id="calendar-link">Calendar / Diary</a></li>'
             '<li><button type="button" id="find-file">Find File</button></li>'
             '<li><button type="button" disabled title="Database search is not ported">Text Search</button></li>'
             '<li><a href="/trash" id="trash-link">Trash</a></li>'
