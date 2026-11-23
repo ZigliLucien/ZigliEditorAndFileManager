@@ -940,3 +940,37 @@ separate, explicitly confirmed Extract operation.
 
 The legacy `archive_listing` helper remains read-only by default.
 Test coverage: `tests.test_archive_member_view`.
+
+
+## CSV / pandas and Calendar / Diary transition
+
+The Python browser does not use the historic MySQL database or CLSV-through-XML
+routes. The original archives and text files are retained; no destructive
+migration or automatic deletion is performed.
+
+CSV and TSV now offer an optional read-only pandas DataFrame preview with
+literal text filtering and stable column sorting. Install pandas into the
+Python interpreter used to run ZEFM, for example with
+`python3 -m pip install pandas`. Pandas is not required for ordinary browsing.
+Columns are treated as text to preserve identifiers such as 00123.
+
+For explicit legacy table conversion, from the repository root run:
+
+    PYTHONPATH=python python3 -m zefm.storage.convert_clsv old.clsv new.csv
+
+This preserves the old CLSV file and refuses to overwrite an existing CSV
+unless --force is specified. CLSV has no robust quoting for colons: the
+converter places extra colons into the final data field. Verify the results.
+
+The Calendar / Diary link in the browser listing opens a traditional month
+grid with previous/next navigation. A date opens entries and an Add Entry
+form for diary notes or appointments. New data is stored as UTF-8 CSV at
+`~/.local/share/zefm/calendar.csv`, or `$XDG_DATA_HOME/zefm/calendar.csv`.
+Fields are `date,kind,text` with ISO-format dates; writes are atomic and
+private. Calendar functions do not require pandas.
+
+This first increment supports viewing and adding entries. Editing and
+deleting entries are not yet available. Legacy `diary-USER.txt` files are
+left untouched and not silently imported because their entries typically
+omit the year. An explicit migration can be added after choosing a year
+policy for historical diary entries.
