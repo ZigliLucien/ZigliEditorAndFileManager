@@ -9,7 +9,6 @@ import csv
 from datetime import date
 import os
 from pathlib import Path
-import stat
 import tempfile
 import threading
 
@@ -51,10 +50,14 @@ class CalendarDiary:
                 if reader.fieldnames != list(HEADERS):
                     raise ValueError("Calendar CSV columns must be date,kind,text")
                 rows = []
-                for row in reader:
+                try:
+                    source_rows = iter(reader)
+                except csv.Error as exc:
+                    raise ValueError("Malformed calendar CSV") from exc
+                for row in source_rows:
                     if len(rows) >= MAX_ROWS:
                         raise ValueError("Calendar CSV exceeds row limit")
-                    if None in row:
+                    if None in row or any(value is None for value in row.values()):
                         raise ValueError("Invalid calendar CSV row")
                     valid_date(row["date"])
                     if row["kind"] not in KINDS:
