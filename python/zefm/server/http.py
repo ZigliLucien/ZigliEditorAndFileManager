@@ -8,6 +8,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+from datetime import date
 from html import escape
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import secrets
@@ -258,7 +259,7 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                 elif parsed.path == "/calendar":
                     if set(args) - {"year", "month"}:
                         raise BrowserError("Unexpected calendar parameters")
-                    today = __import__("datetime").date.today()
+                    today = date.today()
                     try:
                         year = int(args.get("year", today.year))
                         month = int(args.get("month", today.month))
@@ -818,7 +819,7 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                         diary.add(args["date"], args["text"], args["kind"])
                     except ValueError as exc:
                         raise BrowserError(str(exc)) from exc
-                    self._send(303, b"", extra={"Location": link("/diary", args["date"])})
+                    self._send(303, b"", extra={"Location": "/diary?" + urlencode({"date": args["date"]})})
                 elif route=="/build":
                     if set(args) != {"csrf", "path"}:
                         raise BrowserError("Unexpected build parameters")
