@@ -21,7 +21,9 @@ discard unsaved edits). Ctrl-X is a prefix: Ctrl-X Ctrl-S saves and
 Ctrl-X Ctrl-C quits. Ctrl-_ (or Ctrl-Z) undoes the last edit, and
 Ctrl-X Ctrl-R redoes it. Ctrl-G prompts for a one-based line number;
 Ctrl-R searches backward, while Ctrl-X Ctrl-F searches forward.
-Enter with an empty search repeats the last search; Escape cancels.
+Matches are displayed incrementally as the search text changes.
+Enter with an empty search repeats the last search; Escape cancels and
+restores the original cursor location.
 Undo retains up to 100 editing operations.
 No Vim modes, menus, highlighting, or advanced
 search. Files are written using the existing atomic UTF-8 save helper;
