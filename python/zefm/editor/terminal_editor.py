@@ -115,7 +115,7 @@ class TextDocument:
         self.row = max(0, min(len(self.lines) - 1, int(number) - 1))
         self.col = 0
 
-    def search(self, query, direction=-1, repeat=False, origin=None):
+    def search(self, query, direction=-1, repeat=False, origin=None, remember=True):
         if not query:
             return False
         contents = self.text
@@ -136,7 +136,8 @@ class TextDocument:
         preceding = contents[:at]
         self.row = preceding.count("\n")
         self.col = len(preceding.rsplit("\n", 1)[-1])
-        self.last_search = query
+        if remember:
+            self.last_search = query
         return True
 
     def move(self, row_delta=0, col_delta=0):
@@ -151,13 +152,51 @@ class TextDocument:
             self.col = max(0, min(len(self.lines[self.row]), self.col + col_delta))
 
 
-def prompt_input(screen, label, on_change=None):
-    """Status-line prompt; Escape or Ctrl-G cancels."""
+def render_document(screen, path, document, top=0, left=0, message=""):
+    """Draw the visible text and status, returning the updated scroll offsets."""
+    height, width = screen.getmaxyx()
+    content_height = max(1, height - 1)
+    top = min(top, document.row)
+    if document.row >= top + content_height:
+        top = document.row - content_height + 1
+    left = min(left, document.col)
+    if document.col >= left + width - 1:
+        left = document.col - width + 2
+    screen.erase()
+    for y in range(content_height):
+        index = top + y
+        if index >= len(document.lines):
+            break
+        line = "".join(c if c.isprintable() else " " for c in document.lines[index])
+        try:
+            screen.addnstr(y, 0, line[left:], max(0, width - 1))
+        except curses.error:
+            pass
+    status = (f" {path.name}{' *' if document.dirty else ''}"
+              f"  {document.row + 1}:{document.col + 1}"
+              f"  C-S Save  C-Q Quit  C-G Line  C-R Search")
+    if message:
+        status = " " + message
+    try:
+        screen.addnstr(height - 1, 0, status.ljust(width - 1),
+                       width - 1, curses.A_REVERSE)
+        screen.move(min(document.row - top, content_height - 1),
+                    min(max(document.col - left, 0), width - 2))
+    except curses.error:
+        pass
+    screen.refresh()
+    return top, left
+
+
+def prompt_input(screen, label, on_change=None, redraw=None):
+    """Editable status-line prompt; redraw document during incremental search."""
     entered = ""
     while True:
         height, width = screen.getmaxyx()
         if height < 2:
             return None
+        if redraw is not None:
+            redraw()
         display = (label + entered)[-max(1, width - 1):]
         try:
             screen.addnstr(height - 1, 0, display.ljust(width - 1),
@@ -205,38 +244,7 @@ def edit_screen(screen, path, document):
             screen.get_wch()
             continue
         content_height = height - 1
-        if document.row < top:
-            top = document.row
-        if document.row >= top + content_height:
-            top = document.row - content_height + 1
-        if document.col < left:
-            left = document.col
-        if document.col >= left + width - 1:
-            left = document.col - width + 2
-        screen.erase()
-        for y in range(content_height):
-            index = top + y
-            if index >= len(document.lines):
-                break
-            # Avoid control characters that could distort terminal rendering.
-            line = "".join(c if c.isprintable() else " " for c in document.lines[index])
-            try:
-                screen.addnstr(y, 0, line[left:], max(0, width - 1))
-            except curses.error:
-                pass
-        status = (f" {path.name}{' *' if document.dirty else ''}"
-                  f"  {document.row + 1}:{document.col + 1}"
-                  f"  C-S Save  C-Q Quit  C-G Line  C-R Search")
-        if message:
-            status = " " + message
-        try:
-            screen.addnstr(height - 1, 0, status.ljust(width - 1),
-                           width - 1, curses.A_REVERSE)
-            screen.move(min(document.row - top, content_height - 1),
-                        min(max(document.col - left, 0), width - 2))
-        except curses.error:
-            pass
-        screen.refresh()
+        top, left = render_document(screen, path, document, top, left, message)
         try:
             key = screen.get_wch()
         except curses.error:
@@ -287,10 +295,12 @@ def edit_screen(screen, path, document):
             def preview(query):
                 document.row, document.col = origin
                 if query:
-                    document.search(query, direction=direction, origin=origin)
+                    document.search(query, direction=direction,
+                                    origin=origin, remember=False)
             response = prompt_input(
                 screen, "Search backward: " if direction < 0 else "Search forward: ",
-                on_change=preview)
+                on_change=preview,
+                redraw=lambda: render_document(screen, path, document))
             if response is None:
                 document.row, document.col = origin
                 message = "Search cancelled"
