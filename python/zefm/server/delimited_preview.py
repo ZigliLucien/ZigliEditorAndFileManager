@@ -61,8 +61,10 @@ def csv_preview(files, relative, format="html"):
         table.append("<tr>" + cells + "</tr>")
     markdown_url = "/view?" + urlencode({"path": relative, "format": "markdown"})
     html_url = "/view?" + urlencode({"path": relative, "format": "html"})
+    pandas_url = "/view?" + urlencode({"path": relative, "format": "pandas"})
     nav = ('<p><a href="' + escape(markdown_url, quote=True) + '">Markdown table</a> · '
-           '<a href="' + escape(html_url, quote=True) + '">HTML table</a></p>')
+           '<a href="' + escape(html_url, quote=True) + '">HTML table</a> · '
+           '<a href="' + escape(pandas_url, quote=True) + '">pandas DataFrame</a></p>')
     return ('<h2>' + escape(path.name) + '</h2>' + nav +
             '<div style="overflow-x:auto"><table border="1" cellspacing="0" cellpadding="4">' +
             "".join(table) + '</table></div>' +
