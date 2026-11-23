@@ -51,20 +51,19 @@ class CalendarDiary:
                     raise ValueError("Calendar CSV columns must be date,kind,text")
                 rows = []
                 try:
-                    source_rows = iter(reader)
+                    for row in reader:
+                        if len(rows) >= MAX_ROWS:
+                            raise ValueError("Calendar CSV exceeds row limit")
+                        if None in row or any(value is None for value in row.values()):
+                            raise ValueError("Invalid calendar CSV row")
+                        valid_date(row["date"])
+                        if row["kind"] not in KINDS:
+                            raise ValueError("Invalid calendar entry type")
+                        if not row["text"] or len(row["text"]) > MAX_TEXT:
+                            raise ValueError("Invalid calendar entry text")
+                        rows.append(row)
                 except csv.Error as exc:
                     raise ValueError("Malformed calendar CSV") from exc
-                for row in source_rows:
-                    if len(rows) >= MAX_ROWS:
-                        raise ValueError("Calendar CSV exceeds row limit")
-                    if None in row or any(value is None for value in row.values()):
-                        raise ValueError("Invalid calendar CSV row")
-                    valid_date(row["date"])
-                    if row["kind"] not in KINDS:
-                        raise ValueError("Invalid calendar entry type")
-                    if not row["text"] or len(row["text"]) > MAX_TEXT:
-                        raise ValueError("Invalid calendar entry text")
-                    rows.append(row)
                 return rows
 
     def add(self, day, text, kind="diary"):
