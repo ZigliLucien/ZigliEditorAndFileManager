@@ -19,6 +19,8 @@ from urllib.parse import parse_qs, quote, urlencode, urlsplit
 from .file_manager import BrowserError, LocalFiles, MAX_EDIT_BYTES, MAX_COPY_BYTES
 from .routes import permitted
 from ..storage.word_notes import WordNotes
+from ..storage.calendar_diary import CalendarDiary, valid_date
+from .calendar_pages import month_page, day_page
 from .rtl_keymap import RTL_KEYMAP_JS, yiddish_keymap_json
 from .listing_view import listing_data, listing_shell
 from .listing_paging import paged_listing
@@ -65,8 +67,9 @@ def note_version(record) -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
-def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, open_in_editor=None, file_in_use=None, file_saved=None):
+def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, open_in_editor=None, file_in_use=None, file_saved=None, calendar_path=None):
     note_lock=threading.RLock()
+    diary = CalendarDiary(calendar_path)
     rename_manager = RenameManager(files, notes_path, file_in_use)
     trash_manager = TrashManager(files, rename_manager)
     class BrowserHandler(BaseHTTPRequestHandler):
@@ -252,6 +255,26 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                                if html_document else None)
                 elif parsed.path in ("/", "/browse"):
                     self._send(200, self._render_listing(rel))
+                elif parsed.path == "/calendar":
+                    if set(args) - {"year", "month"}:
+                        raise BrowserError("Unexpected calendar parameters")
+                    today = __import__("datetime").date.today()
+                    try:
+                        year = int(args.get("year", today.year))
+                        month = int(args.get("month", today.month))
+                        if not 2 <= year <= 9998 or not 1 <= month <= 12:
+                            raise ValueError
+                    except ValueError as exc:
+                        raise BrowserError("Invalid calendar month") from exc
+                    self._send(200, page("Calendar", month_page(diary, year, month)))
+                elif parsed.path == "/diary":
+                    if set(args) != {"date"}:
+                        raise BrowserError("Expected diary date")
+                    try:
+                        day = valid_date(args["date"])
+                    except ValueError as exc:
+                        raise BrowserError(str(exc)) from exc
+                    self._send(200, page("Diary", day_page(diary, day, token)))
                 elif parsed.path == "/new-file":
                     if set(args) - {"path", "back"}:
                         raise BrowserError("Unexpected new-file parameters")
@@ -788,7 +811,15 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                 return_to = args.get("back")
                 if return_to:
                     safe_listing_return(files, return_to)
-                if route=="/build":
+                if route=="/diary":
+                    if set(args) != {"csrf", "date", "kind", "text"}:
+                        raise BrowserError("Unexpected diary entry parameters")
+                    try:
+                        diary.add(args["date"], args["text"], args["kind"])
+                    except ValueError as exc:
+                        raise BrowserError(str(exc)) from exc
+                    self._send(303, b"", extra={"Location": link("/diary", args["date"])})
+                elif route=="/build":
                     if set(args) != {"csrf", "path"}:
                         raise BrowserError("Unexpected build parameters")
                     try:
@@ -980,11 +1011,11 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
 
 
 class BrowserServer:
-    def __init__(self, root: str, port: int = 0, notes_path=None, open_in_editor=None, file_in_use=None, file_saved=None):
+    def __init__(self, root: str, port: int = 0, notes_path=None, open_in_editor=None, file_in_use=None, file_saved=None, calendar_path=None):
         self.files = LocalFiles(root)
         self.token = secrets.token_urlsafe(32)
         server = ThreadingHTTPServer(("127.0.0.1", port), make_handler(self.files, self.token,
-                                                  lambda: server.server_address[1], notes_path, open_in_editor, file_in_use, file_saved))
+                                                  lambda: server.server_address[1], notes_path, open_in_editor, file_in_use, file_saved, calendar_path))
         server.daemon_threads = True
         self.server = server
         self.thread = None
