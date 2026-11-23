@@ -35,6 +35,7 @@ from .postscript_preview import postscript_pdf
 from .image_preview import image_preview
 from .text_preview import preview_text
 from .delimited_preview import csv_preview
+from .pandas_table import dataframe_preview
 from .content_search import search_text
 from .structured_preview import transformed_document
 from .document_build import markdown_html, checked_source, build_pdf
@@ -569,12 +570,24 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                     )
                     self._send(200, page("Extract archive member", content))
                 elif parsed.path == "/view":
-                    if set(args) - {"path", "back", "chapter", "page", "format"}:
+                    if set(args) - {"path", "back", "chapter", "page", "format", "sort", "desc", "filter"}:
                         raise BrowserError("Unexpected view parameters")
                     descriptor = handler_for(rel)
                     kind = descriptor["view"]
                     if kind == "delimited":
-                        self._send(200, page(rel, csv_preview(files, rel, args.get("format", "html"))))
+                        table_format = args.get("format", "html")
+                        if table_format == "pandas":
+                            if args.get("desc", "0") not in ("0", "1"):
+                                raise BrowserError("Invalid descending sort flag")
+                            content = dataframe_preview(
+                                files, rel, sort=args.get("sort", ""),
+                                descending=args.get("desc") == "1",
+                                contains=args.get("filter", ""))
+                        else:
+                            if set(args) & {"sort", "desc", "filter"}:
+                                raise BrowserError("DataFrame options require pandas format")
+                            content = csv_preview(files, rel, table_format)
+                        self._send(200, page(rel, content))
                         return
                     if kind == "structured":
                         content = transformed_document(files, rel)
