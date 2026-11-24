@@ -969,8 +969,23 @@ form for diary notes or appointments. New data is stored as UTF-8 CSV at
 Fields are `date,kind,text` with ISO-format dates; writes are atomic and
 private. Calendar functions do not require pandas.
 
-This first increment supports viewing and adding entries. Editing and
-deleting entries are not yet available. Legacy `diary-USER.txt` files are
-left untouched and not silently imported because their entries typically
-omit the year. An explicit migration can be added after choosing a year
-policy for historical diary entries.
+Day pages now provide **Edit** and **Delete…** links for individual entries.
+Editing can change the date, type and text. Deleting requires a separate
+confirmation page. The edit/delete forms capture a SHA-256 revision of the
+complete CSV and reject stale submissions with HTTP 409; both require the
+local-browser CSRF token. The old file is never modified on a failed write.
+
+To import old `diary-USER.txt` entries explicitly, supply the historical
+year (the old format recorded month and day but normally omitted the year):
+
+    PYTHONPATH=python python3 -m zefm.storage.import_legacy_diary diary-USER.txt --year 2024 --dry-run
+    PYTHONPATH=python python3 -m zefm.storage.import_legacy_diary diary-USER.txt --year 2024
+
+`--output /path/calendar.csv` selects another destination. The importer
+validates all rows before changing anything, uses atomic CSV writes, does
+not change the source, and skips exact duplicate entries on repeat import.
+Original `All ... | ...` recurring entries cannot be assigned an unambiguous
+calendar date, so the importer refuses them; such lines require separate
+review rather than silently inventing dates or year ranges.
+
+CSV calendar and diary remain independent of the optional pandas package.
