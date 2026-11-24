@@ -62,11 +62,18 @@ def month_page(store, year, month):
 def day_page(store, day, csrf):
     from ..storage.calendar_diary import valid_date
     valid_date(day)
-    items = store.on_day(day)
+    items = [(index, entry) for index, entry in enumerate(store.read())
+             if entry["date"] == day]
     month_url = _url("calendar", year=int(day[:4]), month=int(day[5:7]))
-    rows = ''.join('<li><strong>' + escape(entry["kind"].title()) + '</strong>: '
-                   + escape(entry["text"]).replace("\n", "<br>") + '</li>'
-                   for entry in items)
+    rows = []
+    for index, entry in items:
+        edit_url = escape(_url("diary-edit", date=day, row=index), quote=True)
+        delete_url = escape(_url("diary-delete", date=day, row=index), quote=True)
+        rows.append(
+            '<li><strong>' + escape(entry["kind"].title()) + '</strong>: '
+            + escape(entry["text"]).replace("\n", "<br>") + ' '
+            + '<small><a href="' + edit_url + '">Edit</a> · '
+            + '<a href="' + delete_url + '">Delete…</a></small></li>')
     form = ('<form method="post" action="/diary" accept-charset="utf-8">'
             '<input type="hidden" name="csrf" value="' + escape(csrf, quote=True) + '">'
             '<input type="hidden" name="date" value="' + escape(day, quote=True) + '">'
@@ -78,5 +85,54 @@ def day_page(store, day, csrf):
             '<button type="submit">Add Entry</button></form>')
     return ('<p><a href="' + escape(month_url, quote=True) + '">← Calendar</a></p>'
             '<h1>' + escape(day) + '</h1><h2>Diary and appointments</h2>'
-            + ('<ul>' + rows + '</ul>' if items else '<p>No entries yet.</p>')
+            + ('<ul>' + ''.join(rows) + '</ul>' if items else '<p>No entries yet.</p>')
             + form)
+
+
+def entry_edit_page(store, day, index, csrf):
+    """Render an explicit, revision-protected edit form for one CSV row."""
+    entry = store.record(index, expected_day=day)
+    revision = store.revision()
+    back = escape(_url("diary", date=day), quote=True)
+    kind_select = ('<select name="kind">'
+                   + ''.join('<option value="' + escape(kind) + '"'
+                             + (' selected' if entry["kind"] == kind else '') + '>'
+                             + escape(kind.title()) + '</option>'
+                             for kind in ("diary", "appointment"))
+                   + '</select>')
+    return (
+        '<p><a href="' + back + '">← Back to diary</a></p>'
+        '<h1>Edit calendar entry</h1>'
+        '<form method="post" action="/diary-edit" accept-charset="utf-8">'
+        '<input type="hidden" name="csrf" value="' + escape(csrf, quote=True) + '">'
+        '<input type="hidden" name="date" value="' + escape(day, quote=True) + '">'
+        '<input type="hidden" name="row" value="' + str(index) + '">'
+        '<input type="hidden" name="revision" value="' + escape(revision, quote=True) + '">'
+        '<p><label>Date <input type="date" name="new_date" required value="'
+        + escape(entry["date"], quote=True) + '"></label></p>'
+        '<p><label>Entry type ' + kind_select + '</label></p>'
+        '<p><label>Text<br><textarea name="text" required maxlength="4000" '
+        'style="min-height:110px">' + escape(entry["text"]) + '</textarea></label></p>'
+        '<button type="submit">Save Changes</button></form>'
+        '<p>Changes made elsewhere since opening this form prevent saving.</p>'
+    )
+
+
+def entry_delete_page(store, day, index, csrf):
+    """A GET displays confirmation; deletion only happens on an explicit POST."""
+    entry = store.record(index, expected_day=day)
+    revision = store.revision()
+    back = escape(_url("diary", date=day), quote=True)
+    return (
+        '<p><a href="' + back + '">← Cancel and return</a></p>'
+        '<h1>Delete calendar entry?</h1>'
+        '<p><strong>' + escape(entry["kind"].title()) + '</strong> — '
+        + escape(day) + '</p>'
+        '<blockquote>' + escape(entry["text"]).replace("\n", "<br>") + '</blockquote>'
+        '<form method="post" action="/diary-delete" accept-charset="utf-8">'
+        '<input type="hidden" name="csrf" value="' + escape(csrf, quote=True) + '">'
+        '<input type="hidden" name="date" value="' + escape(day, quote=True) + '">'
+        '<input type="hidden" name="row" value="' + str(index) + '">'
+        '<input type="hidden" name="revision" value="' + escape(revision, quote=True) + '">'
+        '<button type="submit">Confirm Delete</button></form>'
+    )
