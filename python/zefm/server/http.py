@@ -20,8 +20,8 @@ from urllib.parse import parse_qs, quote, urlencode, urlsplit
 from .file_manager import BrowserError, LocalFiles, MAX_EDIT_BYTES, MAX_COPY_BYTES
 from .routes import permitted
 from ..storage.word_notes import WordNotes
-from ..storage.calendar_diary import CalendarDiary, valid_date
-from .calendar_pages import month_page, day_page
+from ..storage.calendar_diary import CalendarDiary, valid_date, CalendarConflictError, CalendarEntryNotFound
+from .calendar_pages import month_page, day_page, entry_edit_page, entry_delete_page
 from .rtl_keymap import RTL_KEYMAP_JS, yiddish_keymap_json
 from .listing_view import listing_data, listing_shell
 from .listing_paging import paged_listing
@@ -49,6 +49,15 @@ _STYLE = """<style>body{max-width:1000px;margin:2rem auto;padding:0 1rem;font:16
 a{color:#155d91}table{border-collapse:collapse;width:100%}td{padding:.3rem .7rem;border-bottom:1px solid #ddd}
 textarea{width:100%;box-sizing:border-box;font:14px/1.4 monospace;min-height:65vh}pre{white-space:pre-wrap;overflow-wrap:anywhere}
 .actions a{margin-right:1rem}button{padding:.4rem 1rem}small{color:#555}</style>"""
+
+
+def _diary_row(value):
+    """Reject ambiguous or oversized row identifiers at the HTTP boundary."""
+    if (not isinstance(value, str) or not value.isascii()
+            or not value.isdecimal() or len(value) > 5
+            or int(value) >= 10000):
+        raise BrowserError("Invalid diary row number")
+    return int(value)
 
 
 def link(path: str, relative: str = ".") -> str:
@@ -276,6 +285,20 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                     except ValueError as exc:
                         raise BrowserError(str(exc)) from exc
                     self._send(200, page("Diary", day_page(diary, day, token)))
+                elif parsed.path in ("/diary-edit", "/diary-delete"):
+                    if set(args) != {"date", "row"}:
+                        raise BrowserError("Expected diary date and row number")
+                    try:
+                        day = valid_date(args["date"])
+                    except ValueError as exc:
+                        raise BrowserError(str(exc)) from exc
+                    index = _diary_row(args["row"])
+                    if parsed.path == "/diary-edit":
+                        content = entry_edit_page(diary, day, index, token)
+                        self._send(200, page("Edit diary entry", content))
+                    else:
+                        content = entry_delete_page(diary, day, index, token)
+                        self._send(200, page("Delete diary entry", content))
                 elif parsed.path == "/new-file":
                     if set(args) - {"path", "back"}:
                         raise BrowserError("Unexpected new-file parameters")
@@ -785,6 +808,8 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                     filename = quote(p.name)
                     self._send(200, data, "application/octet-stream",
                                {"Content-Disposition": "attachment; filename*=UTF-8''" + filename})
+            except CalendarEntryNotFound as exc:
+                self._send(404, page("File manager error", f"<h2>{escape(str(exc))}</h2>"))
             except BrowserError as exc:
                 self._send(exc.status, page("File manager error", f"<h2>{escape(str(exc))}</h2>"))
             except (OSError, ValueError) as exc:
@@ -820,6 +845,31 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                     except ValueError as exc:
                         raise BrowserError(str(exc)) from exc
                     self._send(303, b"", extra={"Location": "/diary?" + urlencode({"date": args["date"]})})
+                elif route=="/diary-edit":
+                    if set(args) != {"csrf", "date", "row", "new_date", "kind", "text", "revision"}:
+                        raise BrowserError("Unexpected diary edit parameters")
+                    try:
+                        diary.update(_diary_row(args["row"]), args["new_date"],
+                                     args["text"], args["kind"],
+                                     args["revision"], expected_day=args["date"])
+                    except CalendarConflictError as exc:
+                        raise BrowserError(str(exc), 409) from exc
+                    except CalendarEntryNotFound as exc:
+                        raise BrowserError(str(exc), 404) from exc
+                    self._send(303, b"", extra={"Location":
+                        "/diary?" + urlencode({"date": args["new_date"]})})
+                elif route=="/diary-delete":
+                    if set(args) != {"csrf", "date", "row", "revision"}:
+                        raise BrowserError("Unexpected diary delete parameters")
+                    try:
+                        diary.delete(_diary_row(args["row"]),
+                                     args["revision"], expected_day=args["date"])
+                    except CalendarConflictError as exc:
+                        raise BrowserError(str(exc), 409) from exc
+                    except CalendarEntryNotFound as exc:
+                        raise BrowserError(str(exc), 404) from exc
+                    self._send(303, b"", extra={"Location":
+                        "/diary?" + urlencode({"date": args["date"]})})
                 elif route=="/build":
                     if set(args) != {"csrf", "path"}:
                         raise BrowserError("Unexpected build parameters")
