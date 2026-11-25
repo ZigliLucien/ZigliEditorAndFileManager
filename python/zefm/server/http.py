@@ -22,6 +22,7 @@ from .routes import permitted
 from ..storage.word_notes import WordNotes
 from ..storage.calendar_diary import CalendarDiary, valid_date, CalendarConflictError, CalendarEntryNotFound
 from .calendar_pages import month_page, day_page, entry_edit_page, entry_delete_page
+from .diary_preview import preview_page
 from .rtl_keymap import RTL_KEYMAP_JS, yiddish_keymap_json
 from .listing_view import listing_data, listing_shell
 from .listing_paging import paged_listing
@@ -837,7 +838,16 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                 return_to = args.get("back")
                 if return_to:
                     safe_listing_return(files, return_to)
-                if route=="/diary":
+                if route=="/diary-preview":
+                    # Preview uses the same CSRF check as writes but never persists data.
+                    if "row" in args:
+                        _diary_row(args["row"])
+                    try:
+                        content = preview_page(args, token)
+                    except ValueError as exc:
+                        raise BrowserError(str(exc)) from exc
+                    self._send(200, page("Diary Preview", content))
+                elif route=="/diary":
                     if set(args) != {"csrf", "date", "kind", "text"}:
                         raise BrowserError("Unexpected diary entry parameters")
                     try:
