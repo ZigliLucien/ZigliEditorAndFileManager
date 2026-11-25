@@ -29,7 +29,8 @@ def month_page(store, year, month):
     today = date.today()
     nav = ['<p><a href="/listing?path=.">← Files</a> · '
            '<a href="/diary-search">Search Diary</a> · '
-           '<a href="/diary-agenda">Agenda</a> · ',
+           '<a href="/diary-agenda">Agenda</a> · '
+           '<a href="/calendar-export?kind=appointment">Export appointments (.ics)</a> · ',
            '<a href="' + escape(_url("calendar", year=today.year, month=today.month), quote=True) + '">Today</a>']
     for title, offset in (("Previous month", -1), ("Next month", 1)):
         shifted = _month_offset(year, month, offset)
