@@ -24,6 +24,7 @@ from ..storage.calendar_diary import CalendarDiary, valid_date, CalendarConflict
 from .calendar_pages import month_page, day_page, entry_edit_page, entry_delete_page
 from .diary_preview import preview_page
 from .diary_search import search_page as diary_search_page
+from .diary_agenda import agenda_page
 from .rtl_keymap import RTL_KEYMAP_JS, yiddish_keymap_json
 from .listing_view import listing_data, listing_shell
 from .listing_paging import paged_listing
@@ -279,6 +280,18 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                     except ValueError as exc:
                         raise BrowserError("Invalid calendar month") from exc
                     self._send(200, page("Calendar", month_page(diary, year, month)))
+                elif parsed.path == "/diary-agenda":
+                    if set(args) - {"days", "kind"}:
+                        raise BrowserError("Unexpected agenda parameters")
+                    raw_days = args.get("days", "30")
+                    if raw_days not in {"7", "30", "90"}:
+                        raise BrowserError("Invalid agenda period")
+                    try:
+                        content = agenda_page(
+                            diary, days=int(raw_days), kind=args.get("kind", "all"))
+                    except ValueError as exc:
+                        raise BrowserError(str(exc)) from exc
+                    self._send(200, page("Calendar Agenda", content))
                 elif parsed.path == "/diary-search":
                     if set(args) - {"q", "from", "to", "kind"}:
                         raise BrowserError("Unexpected diary search parameters")
