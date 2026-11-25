@@ -23,6 +23,7 @@ from ..storage.word_notes import WordNotes
 from ..storage.calendar_diary import CalendarDiary, valid_date, CalendarConflictError, CalendarEntryNotFound
 from .calendar_pages import month_page, day_page, entry_edit_page, entry_delete_page
 from .diary_preview import preview_page
+from .diary_search import search_page as diary_search_page
 from .rtl_keymap import RTL_KEYMAP_JS, yiddish_keymap_json
 from .listing_view import listing_data, listing_shell
 from .listing_paging import paged_listing
@@ -278,6 +279,17 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                     except ValueError as exc:
                         raise BrowserError("Invalid calendar month") from exc
                     self._send(200, page("Calendar", month_page(diary, year, month)))
+                elif parsed.path == "/diary-search":
+                    if set(args) - {"q", "from", "to", "kind"}:
+                        raise BrowserError("Unexpected diary search parameters")
+                    try:
+                        content = diary_search_page(
+                            diary, query=args.get("q", ""),
+                            start=args.get("from", ""), end=args.get("to", ""),
+                            kind=args.get("kind", "all"))
+                    except ValueError as exc:
+                        raise BrowserError(str(exc)) from exc
+                    self._send(200, page("Search Diary", content))
                 elif parsed.path == "/diary":
                     if set(args) != {"date"}:
                         raise BrowserError("Expected diary date")
