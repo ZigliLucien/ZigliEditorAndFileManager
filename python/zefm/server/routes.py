@@ -1,6 +1,6 @@
 """Explicit, deliberately small local file-manager route registry."""
 GET_ROUTES = frozenset({
-    "/", "/browse", "/calendar", "/diary", "/diary-edit", "/diary-delete", "/new-file", "/view", "/edit", "/raw", "/notes", "/note-edit",
+    "/", "/browse", "/calendar", "/diary", "/diary-search", "/diary-edit", "/diary-delete", "/new-file", "/view", "/edit", "/raw", "/notes", "/note-edit",
     "/rtl-keymap.js", "/copy", "/rename", "/move", "/delete", "/trash", "/extract-entry", "/view-entry", "/listing", "/listing.css", "/listing.js", "/math.css", "/mathjax-config.js",
     "/api/files", "/api/listing-page", "/search-text", "/pdf", "/djvu-page", "/site/", "/build", "/build.js",
 })
