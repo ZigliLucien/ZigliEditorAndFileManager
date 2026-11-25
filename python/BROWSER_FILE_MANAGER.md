@@ -1053,3 +1053,16 @@ the total count shown. Search is read-only and uses the same sanitized
 Markdown/HTML rendering as the diary page. It requires neither the legacy
 database nor pandas.
 
+
+
+## Upcoming Calendar Agenda
+
+The Calendar and individual Diary pages now link to **Agenda**, a read-only
+list of entries from today forward. Select 7, 30 or 90 days, and choose
+All Entries, Appointments or Diary. Entries appear earliest first, grouped
+by date, with the same sanitized Markdown/HTML used in the monthly calendar.
+Each item links to its diary date and Edit form. Dates are inclusive and
+appointment times are not inferred from the date-only CSV schema. Agenda
+shows at most 100 entries and indicates when additional matches exist.
+The feature requires neither pandas nor the historical database.
+
