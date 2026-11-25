@@ -984,8 +984,17 @@ year (the old format recorded month and day but normally omitted the year):
 `--output /path/calendar.csv` selects another destination. The importer
 validates all rows before changing anything, uses atomic CSV writes, does
 not change the source, and skips exact duplicate entries on repeat import.
-Original `All ... | ...` recurring entries cannot be assigned an unambiguous
-calendar date, so the importer refuses them; such lines require separate
-review rather than silently inventing dates or year ranges.
+The historic `All 5 | text` notation was a **monthly recurrence**: the
+same event on day 5 of every month. It is now supported on explicit request:
+
+    PYTHONPATH=python python3 -m zefm.storage.import_legacy_diary diary-USER.txt --year 2024 --through-year 2025 --expand-all --dry-run
+    PYTHONPATH=python python3 -m zefm.storage.import_legacy_diary diary-USER.txt --year 2024 --through-year 2025 --expand-all
+
+`--year` is the start year; `--through-year` is inclusive. Omitting the
+latter expands only within the start year. Dates absent in a given month
+(such as February 30 or the 31st of April) are skipped. Expansion is
+limited to 101 years and uses ordinary CSV entries, rather than a separate
+recurrence engine. Without `--expand-all`, the importer refuses All lines.
+Historical diary files remain unchanged.
 
 CSV calendar and diary remain independent of the optional pandas package.
