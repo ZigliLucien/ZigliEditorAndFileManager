@@ -1015,3 +1015,17 @@ event handlers are suppressed. This browser is not intended for executing
 arbitrary HTML. A larger Markdown syntax subset is available when the optional
 `markdown` Python package is installed; basic formatting works without it.
 
+
+
+## Diary Preview before Save
+
+The browser Diary and Edit forms now offer **Preview** alongside Save.
+Preview submits the Markdown/HTML source to a local POST endpoint and renders
+it with the same sanitizer as the published diary. It does **not** write to
+CSV, change an entry revision, or commit any edits. The response shows both
+the formatted entry and an editable source textarea with **Refresh Preview**
+and **Add Entry / Save Changes** buttons. You can therefore inspect Markdown
+formatting and revise the entry before saving. The original source and,
+for existing entries, the CSV revision token are carried through unchanged.
+Preview submissions require the same CSRF token as ordinary diary writes.
+
