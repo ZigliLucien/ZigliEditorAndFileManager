@@ -54,9 +54,14 @@ def month_page(store, year, month):
             today_marker = (' <strong style="color:#703400">● Today</strong>'
                             if is_today else '')
             current_attr = ' aria-current="date"' if is_today else ''
-            shown = ''.join('<div><small>' + escape(item["text"][:70])
-                            + ('…' if len(item["text"]) > 70 else '') + '</small></div>'
-                            for item in events[:2])
+            # Render complete source before clipping the visual preview: cutting
+            # raw Markdown/HTML would expose syntax and can break formatting.
+            shown = ''.join(
+                '<div class="calendar-entry" style="font-size:.78em;'
+                'line-height:1.25;max-height:7em;overflow:auto;'
+                'overflow-wrap:anywhere;margin:.2em 0">'
+                + render_diary(item["text"]) + '</div>'
+                for item in events[:2])
             if len(events) > 2:
                 shown += '<small>+' + str(len(events) - 2) + ' more</small>'
             table.append('<td valign="top" style="' + style + '">'
