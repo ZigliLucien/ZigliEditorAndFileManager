@@ -27,7 +27,8 @@ def month_page(store, year, month):
     for entry in store.in_month(year, month):
         month_events.setdefault(entry["date"], []).append(entry)
     today = date.today()
-    nav = ['<p><a href="/listing?path=.">← Files</a> · ',
+    nav = ['<p><a href="/listing?path=.">← Files</a> · '
+           '<a href="/diary-search">Search Diary</a> · ',
            '<a href="' + escape(_url("calendar", year=today.year, month=today.month), quote=True) + '">Today</a>']
     for title, offset in (("Previous month", -1), ("Next month", 1)):
         shifted = _month_offset(year, month, offset)
@@ -100,7 +101,8 @@ def day_page(store, day, csrf):
             '<p><label>Entry<br><textarea name="text" required maxlength="4000" '
             'style="min-height:110px"></textarea></label></p>'
             '<button type="submit" formaction="/diary-preview">Preview</button> <button type="submit">Add Entry</button></form>')
-    return ('<p><a href="' + escape(month_url, quote=True) + '">← Calendar</a></p>'
+    return ('<p><a href="' + escape(month_url, quote=True) + '">← Calendar</a>'
+            ' · <a href="/diary-search">Search Diary</a></p>'
             '<h1>' + escape(day) + '</h1><h2>Diary and appointments</h2>'
             + ('<ul>' + ''.join(rows) + '</ul>' if items else '<p>No entries yet.</p>')
             + form)
