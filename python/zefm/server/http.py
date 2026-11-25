@@ -25,6 +25,7 @@ from .calendar_pages import month_page, day_page, entry_edit_page, entry_delete_
 from .diary_preview import preview_page
 from .diary_search import search_page as diary_search_page
 from .diary_agenda import agenda_page
+from .ical_export import export_ical
 from .rtl_keymap import RTL_KEYMAP_JS, yiddish_keymap_json
 from .listing_view import listing_data, listing_shell
 from .listing_paging import paged_listing
@@ -268,6 +269,19 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                                if html_document else None)
                 elif parsed.path in ("/", "/browse"):
                     self._send(200, self._render_listing(rel))
+                elif parsed.path == "/calendar-export":
+                    if set(args) - {"kind"}:
+                        raise BrowserError("Unexpected calendar export parameters")
+                    export_kind = args.get("kind", "appointment")
+                    if export_kind not in {"appointment", "diary", "all"}:
+                        raise BrowserError("Invalid calendar export type")
+                    try:
+                        data = export_ical(diary, export_kind)
+                    except ValueError as exc:
+                        raise BrowserError(str(exc)) from exc
+                    self._send(200, data, "text/calendar; charset=utf-8",
+                               {"Content-Disposition":
+                                'attachment; filename="zefm-calendar.ics"'})
                 elif parsed.path == "/calendar":
                     if set(args) - {"year", "month"}:
                         raise BrowserError("Unexpected calendar parameters")
