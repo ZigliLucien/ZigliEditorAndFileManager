@@ -1040,3 +1040,16 @@ small scrollable previews; remaining entries are counted. The CSV source
 remains unchanged and fully editable. Rendering is performed before any
 visual clipping, so Markdown or HTML tags are not truncated mid-expression.
 
+
+
+## Search Calendar / Diary
+
+Use **Search Diary** from the monthly calendar or an individual diary date.
+The search page filters entries by case-insensitive literal text in the stored
+Markdown/HTML source, optional inclusive start/end dates and entry type
+(Diary or Appointment). Results are newest-first and link to the diary date
+and the entry's Edit form. Only the first 100 matches are displayed, with
+the total count shown. Search is read-only and uses the same sanitized
+Markdown/HTML rendering as the diary page. It requires neither the legacy
+database nor pandas.
+
