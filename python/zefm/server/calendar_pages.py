@@ -44,14 +44,24 @@ def month_page(store, year, month):
             events = month_events.get(key, [])
             label = str(day.day)
             href = escape(_url("diary", date=key), quote=True)
-            style = 'height:90px;opacity:.5' if day.month != month else 'height:90px'
+            is_today = day == today
+            style = ('height:90px;background:#ffca55;color:#332000;'
+                     'border:3px solid #d66a00;font-weight:700'
+                     if is_today else
+                     ('height:90px;opacity:.5' if day.month != month
+                      else 'height:90px'))
+            today_marker = (' <strong style="color:#703400">● Today</strong>'
+                            if is_today else '')
+            current_attr = ' aria-current="date"' if is_today else ''
             shown = ''.join('<div><small>' + escape(item["text"][:70])
                             + ('…' if len(item["text"]) > 70 else '') + '</small></div>'
                             for item in events[:2])
             if len(events) > 2:
                 shown += '<small>+' + str(len(events) - 2) + ' more</small>'
             table.append('<td valign="top" style="' + style + '">'
-                         + '<a href="' + href + '">' + label + '</a>' + shown + '</td>')
+                         + '<a href="' + href + '"' + current_attr
+                         + ' style="' + ('color:#332000' if is_today else '')
+                         + '">' + label + '</a>' + today_marker + shown + '</td>')
         table.append('</tr>')
     table.append('</tbody></table>')
     return ('<h1>Calendar — ' + escape(calendar.month_name[month]) + ' ' + str(year)
