@@ -1029,3 +1029,14 @@ formatting and revise the entry before saving. The original source and,
 for existing entries, the CSV revision token are carried through unchanged.
 Preview submissions require the same CSRF token as ordinary diary writes.
 
+
+
+## Formatted diary entries in month view
+
+The monthly calendar grid now renders each entry with the same sanitized
+Markdown/HTML renderer as the full diary page, rather than showing raw
+Markdown source. The first two entries in each cell are displayed inside
+small scrollable previews; remaining entries are counted. The CSV source
+remains unchanged and fully editable. Rendering is performed before any
+visual clipping, so Markdown or HTML tags are not truncated mid-expression.
+
