@@ -1066,3 +1066,23 @@ appointment times are not inferred from the date-only CSV schema. Agenda
 shows at most 100 entries and indicates when additional matches exist.
 The feature requires neither pandas nor the historical database.
 
+
+## Calendar export to iCalendar (.ics)
+
+The monthly calendar now offers **Export appointments (.ics)**. This returns
+a UTF-8 iCalendar 2.0 attachment for calendar applications such as Apple
+Calendar, Thunderbird or other programs that import .ics files. The default
+export contains only entries marked **Appointment**, avoiding accidental
+export of private diary notes. For a complete snapshot (including diary
+entries), open `/calendar-export?kind=all` on the local ZEFM browser; use
+`kind=diary` for diary-only export.
+
+The CSV schema stores dates but not times. Each exported event is therefore
+an **all-day entry** with DTSTART;VALUE=DATE; no time of day, alarm, recurrence,
+or end time is invented. The export preserves the original Markdown/HTML
+source as iCalendar TEXT in DESCRIPTION, escaped and UTF-8 line-folded per
+RFC 5545, but does not execute HTML. Duplicate entries receive distinct
+stable IDs within a snapshot. Editing a record changes its ID. Export does
+not change CSV files or create synchronization with another calendar: it is
+a one-way snapshot, not a live calendar feed.
+
