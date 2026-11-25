@@ -998,3 +998,20 @@ recurrence engine. Without `--expand-all`, the importer refuses All lines.
 Historical diary files remain unchanged.
 
 CSV calendar and diary remain independent of the optional pandas package.
+
+
+## Diary formatting and today's calendar highlight
+
+Today's date is highlighted with an amber-yellow background and a bold
+**Today** label, without an extra orange border. Other days are unchanged.
+
+Diary entries accept Markdown syntax (headings, emphasis, lists, code and
+ordinary hyperlinks) and a **safe subset of HTML**, such as `<p>`, `<b>`,
+`<em>`, `<u>`, headings, lists and ordinary links. The original Markdown/HTML
+text is stored unchanged in calendar.csv so editing remains straightforward.
+The browser escapes output and permits only safe HTML tags and attributes;
+scripts, embedded frames, JavaScript URLs, inline styles, embedded media and
+event handlers are suppressed. This browser is not intended for executing
+arbitrary HTML. A larger Markdown syntax subset is available when the optional
+`markdown` Python package is installed; basic formatting works without it.
+
