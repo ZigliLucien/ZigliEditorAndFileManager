@@ -94,7 +94,7 @@ def day_page(store, day, csrf):
             '<option value="appointment">Appointment</option></select></label> '
             '<p><label>Entry<br><textarea name="text" required maxlength="4000" '
             'style="min-height:110px"></textarea></label></p>'
-            '<button type="submit">Add Entry</button></form>')
+            '<button type="submit" formaction="/diary-preview">Preview</button> <button type="submit">Add Entry</button></form>')
     return ('<p><a href="' + escape(month_url, quote=True) + '">← Calendar</a></p>'
             '<h1>' + escape(day) + '</h1><h2>Diary and appointments</h2>'
             + ('<ul>' + ''.join(rows) + '</ul>' if items else '<p>No entries yet.</p>')
@@ -126,7 +126,7 @@ def entry_edit_page(store, day, index, csrf):
         '<p><small>Markdown and safe HTML are displayed when viewing the diary; the source stays editable.</small></p>'
         '<p><label>Text<br><textarea name="text" required maxlength="4000" '
         'style="min-height:110px">' + escape(entry["text"]) + '</textarea></label></p>'
-        '<button type="submit">Save Changes</button></form>'
+        '<button type="submit" formaction="/diary-preview">Preview</button> <button type="submit">Save Changes</button></form>'
         '<p>Changes made elsewhere since opening this form prevent saving.</p>'
     )
 
