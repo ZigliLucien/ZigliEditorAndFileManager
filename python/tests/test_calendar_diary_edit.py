@@ -86,6 +86,57 @@ class LegacyDiaryImportTests(unittest.TestCase):
                 import_legacy_diary(original, year=2026, output=destination)
             self.assertFalse(destination.exists())
 
+    def test_explicit_all_day_recurrence_for_selected_years(self):
+        source = "All 5 | Monthly task\nAll 31 | Month end\nAll 29 | Special day\n"
+        entries = parse_legacy_diary(
+            source, 2024, expand_all=True, through_year=2025)
+        fifth = [r for r in entries if r["text"] == "Monthly task"]
+        end = [r for r in entries if r["text"] == "Month end"]
+        twenty_ninth = [r for r in entries if r["text"] == "Special day"]
+        self.assertEqual(len(fifth), 24)
+        self.assertEqual(len(end), 14)
+        self.assertEqual(len(twenty_ninth), 23)
+        self.assertIn("2024-02-29", [r["date"] for r in twenty_ninth])
+        self.assertNotIn("2025-02-29", [r["date"] for r in twenty_ninth])
+        self.assertEqual(fifth[0]["date"], "2024-01-05")
+        self.assertEqual(fifth[-1]["date"], "2025-12-05")
+
+    def test_all_requires_opt_in_and_bounded_years(self):
+        with self.assertRaisesRegex(ValueError, "expand-all"):
+            parse_legacy_diary("All 5 | Repeating", 2024)
+        with self.assertRaises(ValueError):
+            parse_legacy_diary("All 5 | Repeating", 2024, through_year=2025)
+        with self.assertRaises(ValueError):
+            parse_legacy_diary("All 0 | Invalid", 2024, expand_all=True)
+        with self.assertRaises(ValueError):
+            parse_legacy_diary("All 32 | Invalid", 2024, expand_all=True)
+        with self.assertRaises(ValueError):
+            parse_legacy_diary("All 5 | Repeating", 2024, expand_all=True,
+                               through_year=2023)
+        with self.assertRaises(ValueError):
+            parse_legacy_diary("All 5 | Repeating", 2024, expand_all=True,
+                               through_year=2130)
+
+    def test_recurring_import_is_idempotent_and_non_destructive(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source = root / "diary-user.txt"
+            csv = root / "calendar.csv"
+            source.write_text("Nov 23 | Single entry\nAll 5 | Monthly\n",
+                              encoding="utf-8")
+            self.assertEqual(import_legacy_diary(
+                source, year=2024, output=csv, dry_run=True,
+                expand_all=True, through_year=2025), (25, 0))
+            self.assertFalse(csv.exists())
+            self.assertEqual(import_legacy_diary(
+                source, year=2024, output=csv, expand_all=True,
+                through_year=2025), (25, 0))
+            self.assertEqual(import_legacy_diary(
+                source, year=2024, output=csv, expand_all=True,
+                through_year=2025), (0, 25))
+            self.assertEqual(len(CalendarDiary(csv).read()), 25)
+            self.assertIn("All 5", source.read_text(encoding="utf-8"))
+
     def test_no_invented_year_or_invalid_february(self):
         with self.assertRaises(ValueError):
             parse_legacy_diary("Feb 29 | Special day", 2026)
