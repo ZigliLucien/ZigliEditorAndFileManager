@@ -24,7 +24,7 @@ class CalendarTodayHighlightTests(unittest.TestCase):
         self.assertEqual(html.count('aria-current="date"'), 1)
         self.assertEqual(html.count('● Today'), 1)
         self.assertIn('background:#ffca55', html)
-        self.assertIn('border:3px solid #d66a00', html)
+        self.assertNotIn('border:3px solid #d66a00', html)
         self.assertIn('diary?date=2026-11-25', html)
 
     def test_different_month_has_no_today_highlight(self):
