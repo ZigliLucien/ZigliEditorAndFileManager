@@ -5,6 +5,7 @@ import calendar
 from datetime import date
 from html import escape
 from urllib.parse import urlencode
+from .diary_markup import render_diary
 
 
 def _url(route, **params):
@@ -46,7 +47,7 @@ def month_page(store, year, month):
             href = escape(_url("diary", date=key), quote=True)
             is_today = day == today
             style = ('height:90px;background:#ffca55;color:#332000;'
-                     'border:3px solid #d66a00;font-weight:700'
+                     'font-weight:700'
                      if is_today else
                      ('height:90px;opacity:.5' if day.month != month
                       else 'height:90px'))
@@ -81,12 +82,13 @@ def day_page(store, day, csrf):
         delete_url = escape(_url("diary-delete", date=day, row=index), quote=True)
         rows.append(
             '<li><strong>' + escape(entry["kind"].title()) + '</strong>: '
-            + escape(entry["text"]).replace("\n", "<br>") + ' '
+            + render_diary(entry["text"]) + ' '
             + '<small><a href="' + edit_url + '">Edit</a> · '
             + '<a href="' + delete_url + '">Delete…</a></small></li>')
     form = ('<form method="post" action="/diary" accept-charset="utf-8">'
             '<input type="hidden" name="csrf" value="' + escape(csrf, quote=True) + '">'
             '<input type="hidden" name="date" value="' + escape(day, quote=True) + '">'
+            '<p><small>Entries support Markdown and safe HTML formatting (headings, lists, links, emphasis). Scripts and event handlers are not allowed.</small></p>'
             '<label>Entry type <select name="kind">'
             '<option value="diary">Diary</option>'
             '<option value="appointment">Appointment</option></select></label> '
@@ -121,6 +123,7 @@ def entry_edit_page(store, day, index, csrf):
         '<p><label>Date <input type="date" name="new_date" required value="'
         + escape(entry["date"], quote=True) + '"></label></p>'
         '<p><label>Entry type ' + kind_select + '</label></p>'
+        '<p><small>Markdown and safe HTML are displayed when viewing the diary; the source stays editable.</small></p>'
         '<p><label>Text<br><textarea name="text" required maxlength="4000" '
         'style="min-height:110px">' + escape(entry["text"]) + '</textarea></label></p>'
         '<button type="submit">Save Changes</button></form>'
