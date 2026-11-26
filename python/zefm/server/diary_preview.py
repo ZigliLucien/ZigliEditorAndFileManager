@@ -10,10 +10,13 @@ def preview_page(args, csrf):
     """Return an escaped editable form and sanitized rendering, no CSV writes."""
     if "row" in args:
         required = {"csrf", "date", "new_date", "row", "revision", "kind", "text"}
-        if set(args) != required:
+        meta_names = {"start_time", "end_time", "timezone", "location"}
+        if set(args) not in (required, required | meta_names):
             raise ValueError("Unexpected diary preview fields")
         valid_date(args["date"])
-        validated_record(args["new_date"], args["kind"], args["text"])
+        meta = ({key: args[key] for key in meta_names}
+                if meta_names <= set(args) else {})
+        validated_record(args["new_date"], args["kind"], args["text"], **meta)
         action = "/diary-edit"
         heading = "Preview diary changes"
         hidden = [("date", args["date"]), ("row", args["row"]),
@@ -36,11 +39,26 @@ def preview_page(args, csrf):
         '<option value="' + kind + '"' + (' selected' if kind == args["kind"] else '')
         + '>' + kind.title() + '</option>'
         for kind in ("diary", "appointment")) + '</select>'
+    metadata_fields = ""
+    if "row" in args and meta:
+        metadata_fields = (
+            '<fieldset><legend>Appointment time and place</legend>'
+            + ''.join('<p><label>' + escape(label)
+                      + ' <input name="' + escape(name) + '" value="'
+                      + escape(meta[name], quote=True) + '"'
+                      + (' type="time"' if name in ("start_time", "end_time")
+                         else ' maxlength="' + ('100' if name == "timezone" else "500") + '"')
+                      + '></label></p>'
+                      for name, label in (
+                          ("start_time", "Start"), ("end_time", "End"),
+                          ("timezone", "Timezone"), ("location", "Location")))
+            + '</fieldset>')
     form = (
         '<form method="post" action="' + action + '" accept-charset="utf-8">'
         '<input type="hidden" name="csrf" value="' + escape(csrf, quote=True) + '">'
         + "".join(fields)
         + '<p><label>Entry type ' + kind_select + '</label></p>'
+        + metadata_fields
         '<p><label>Source Markdown / HTML<br><textarea name="text" required '
         'maxlength="4000" style="min-height:220px">'
         + escape(args["text"]) + '</textarea></label></p>'
