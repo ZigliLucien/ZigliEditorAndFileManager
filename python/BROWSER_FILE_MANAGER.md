@@ -1086,3 +1086,22 @@ stable IDs within a snapshot. Editing a record changes its ID. Export does
 not change CSV files or create synchronization with another calendar: it is
 a one-way snapshot, not a live calendar feed.
 
+
+## Import all-day iCalendar appointments
+
+The monthly Calendar now has **Import appointments (.ics)**. Open the
+file as text, paste its iCalendar contents, and select **Preview Import**.
+The preview lists the proposed appointment dates and descriptions without
+writing to CSV. **Confirm Import** then appends them atomically and skips
+exact duplicates. The import refuses to write if calendar.csv changed since
+the preview, requiring a fresh review.
+
+This initial importer accepts **single-day, all-day events only** with
+`DTSTART;VALUE=DATE`. It deliberately rejects timed events, recurrence
+rules, multi-day appointments and alarms rather than inventing their
+semantics. It does not make network requests, load remote resources, or
+modify the source .ics file. The source Markdown/HTML is stored as plain
+entry text and later rendered with ZEFM's existing sanitizer. Input size
+is limited to 128 KiB and 500 events per import. CSV remains the source
+of truth; no synchronization with other calendar applications is implied.
+
