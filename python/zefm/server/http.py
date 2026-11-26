@@ -26,6 +26,7 @@ from .diary_preview import preview_page
 from .diary_search import search_page as diary_search_page
 from .diary_agenda import agenda_page
 from .ical_export import export_ical
+from .calendar_pages import display_entry
 from .ical_import import parse_ics, import_page as ical_import_page, import_preview_page
 from .rtl_keymap import RTL_KEYMAP_JS, yiddish_keymap_json
 from .listing_view import listing_data, listing_shell
@@ -959,7 +960,11 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                                   if meta <= set(args) else {})
                     except ValueError as exc:
                         raise BrowserError(str(exc)) from exc
-                    self._send(303, b"", extra={"Location": "/diary?" + urlencode({"date": args["date"]})})
+                    # Return to the viewing-zone date, which can differ
+                    # from the stored appointment date around midnight.
+                    added = diary.read()[-1]
+                    display_day = display_entry(added)["date"]
+                    self._send(303, b"", extra={"Location": "/diary?" + urlencode({"date": display_day})})
                 elif route=="/diary-edit":
                     base = {"csrf", "date", "row", "new_date", "kind", "text", "revision"}
                     meta = {"start_time", "end_time", "timezone", "location"}
@@ -975,8 +980,10 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                         raise BrowserError(str(exc), 409) from exc
                     except CalendarEntryNotFound as exc:
                         raise BrowserError(str(exc), 404) from exc
+                    updated = diary.record(_diary_row(args["row"]))
+                    display_day = display_entry(updated)["date"]
                     self._send(303, b"", extra={"Location":
-                        "/diary?" + urlencode({"date": args["new_date"]})})
+                        "/diary?" + urlencode({"date": display_day})})
                 elif route=="/diary-delete":
                     if set(args) != {"csrf", "date", "row", "revision"}:
                         raise BrowserError("Unexpected diary delete parameters")
