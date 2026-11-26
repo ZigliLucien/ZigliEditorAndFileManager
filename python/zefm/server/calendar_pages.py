@@ -236,6 +236,10 @@ def entry_edit_page(store, day, index, csrf):
         + escape(entry["date"], quote=True) + '"></label></p>'
         '<p><label>Entry type ' + kind_select + '</label></p>'
         '<p><small>Markdown and safe HTML are displayed when viewing the diary; the source stays editable.</small></p>'
+        + ('<p><small>Times below are the original event times ('
+           + escape(entry["timezone"]) + '). Calendar display: '
+           + appointment_meta(entry) + '</small></p>'
+           if entry.get("start_time") else '')
         + '<fieldset><legend>Appointment time and place (optional)</legend>'
         + '<p><label>Start <input type="time" name="start_time" value="'
         + escape(entry.get("start_time", ""), quote=True) + '"></label> '
