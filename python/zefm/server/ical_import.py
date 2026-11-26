@@ -9,6 +9,7 @@ from __future__ import annotations
 from datetime import date, datetime, timedelta
 from html import escape
 
+from .calendar_pages import timezone_label
 from ..storage.calendar_diary import validated_record
 
 MAX_ICS_SOURCE = 128 * 1024
@@ -229,7 +230,8 @@ def import_preview_page(entries, source, revision, csrf):
         if item.get("start_time"):
             time_info = (" · " + escape(item["start_time"]) + "–"
                          + escape(item["end_time"]) + " "
-                         + escape(item["timezone"]))
+                         + escape(timezone_label(item["date"], item["start_time"],
+                                                 item["timezone"])))
         if item.get("location"):
             time_info += " · " + escape(item["location"])
         output.append('<p><strong>' + escape(item["date"]) + time_info
