@@ -1177,3 +1177,13 @@ The field remains editable for individual events; imported timed events
 retain their original timezone. A timezone by itself does not make an event
 timed: leave start, end and location blank for an ordinary diary or all-day
 appointment, without adding new CSV columns.
+
+## Chronological appointment display
+
+The monthly calendar, individual day page, and upcoming Agenda now display
+all-day entries first, followed by timed appointments in ascending start-time
+order. Appointments inserted later still appear at their correct time.
+Entries with equal start times retain their original CSV order. This is
+presentation-only sorting: the CSV is not rewritten, and links to Edit and
+Delete continue to use each entry's original CSV row index. The monthly
+calendar still shows at most two compact entry previews per date.
