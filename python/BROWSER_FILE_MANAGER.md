@@ -1131,3 +1131,19 @@ Timed appointment details appear in the month, day, agenda and search views
 and are exported with corresponding DTSTART/DTEND and timezone fields.
 Export remains a snapshot, not calendar synchronization.
 
+
+## Editing imported timed appointments
+
+Once a timed invitation is imported, use its **Edit** link in the diary,
+agenda or search view. The browser edit form now offers start time, end
+time, IANA timezone and location controls alongside the Markdown/HTML
+description. **Preview** keeps these fields intact without writing any
+data; **Save Changes** uses the usual CSV revision check. Clear all four
+time/place fields to convert an event back to an all-day entry. The
+calendar preserves and exports the explicit timezone rather than
+silently substituting the machine's local timezone.
+
+The iCalendar importer also keeps distinct SUMMARY and DESCRIPTION text
+together in the diary entry. The original ZEFM round-trip remains
+unmodified when the description already contains the summary.
+
