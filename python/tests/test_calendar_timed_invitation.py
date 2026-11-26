@@ -76,6 +76,35 @@ class TimedStoreTests(unittest.TestCase):
                          "Research meeting\\n\\nDiscuss new results\\nBring the notes")
         self.assertEqual(item["location"], "Seminar room")
 
+    def test_edit_timed_appointment_metadata_and_clear_it(self):
+        with tempfile.TemporaryDirectory() as temp:
+            store = CalendarDiary(Path(temp) / "calendar.csv")
+            store.append_many([{
+                "date": "2026-11-25", "kind": "appointment",
+                "text": "Meeting", "start_time": "09:00",
+                "end_time": "10:00", "timezone": "America/Chicago",
+                "location": "Office",
+            }])
+            version = store.revision()
+            store.update(0, "2026-11-25", "Meeting adjusted", "appointment",
+                         version, start_time="09:30", end_time="11:00",
+                         timezone="America/Chicago", location="Library")
+            entry = store.record(0)
+            self.assertEqual(entry["start_time"], "09:30")
+            self.assertEqual(entry["location"], "Library")
+            self.assertEqual(entry["text"], "Meeting adjusted")
+            with self.assertRaises(ValueError):
+                store.update(0, "2026-11-25", "Invalid", "appointment",
+                             store.revision(), start_time="09:30",
+                             end_time="11:00", timezone="Not/AZone",
+                             location="Library")
+            store.update(0, "2026-11-25", "All-day", "appointment",
+                         store.revision(), start_time="", end_time="",
+                         timezone="", location="")
+            self.assertEqual(store.record(0),
+                             {"date": "2026-11-25", "kind": "appointment",
+                              "text": "All-day"})
+
     def test_old_entries_still_three_column_when_no_timed_event(self):
         with tempfile.TemporaryDirectory() as temp:
             store = CalendarDiary(Path(temp) / "calendar.csv")
