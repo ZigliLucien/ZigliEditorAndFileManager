@@ -5,7 +5,7 @@ uses local display dates; edit links deliberately use original CSV row/date.
 """
 from __future__ import annotations
 
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from html import escape
 from urllib.parse import urlencode
 
@@ -23,7 +23,7 @@ def week_start(anchor=None):
     """Monday on or before anchor; invalid dates are rejected."""
     if anchor is None:
         value = date.today()
-    elif isinstance(anchor, date) and not isinstance(anchor, __import__("datetime").datetime):
+    elif isinstance(anchor, date) and not isinstance(anchor, datetime):
         value = anchor
     else:
         value = date.fromisoformat(valid_date(anchor))
