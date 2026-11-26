@@ -3,9 +3,10 @@ from __future__ import annotations
 
 import calendar
 import os
-from datetime import date
+from datetime import date, datetime
 from html import escape
 from urllib.parse import urlencode
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from .diary_markup import render_diary
 
 
@@ -24,12 +25,34 @@ def entry_time_key(entry):
     return (bool(start), start)
 
 
+def timezone_label(day, clock, timezone):
+    """Date-appropriate abbreviation for display; retain IANA ID in storage."""
+    if not timezone:
+        return ""
+    try:
+        local = datetime.fromisoformat(day + "T" + (clock or "12:00"))
+        return local.replace(tzinfo=ZoneInfo(timezone)).tzname() or timezone
+    except (ValueError, ZoneInfoNotFoundError):
+        return timezone
+
+
+def timezone_field(day, timezone):
+    """Show concise zone while keeping the editable IANA identifier available."""
+    short = escape(timezone_label(day, "12:00", timezone))
+    return ('<details><summary>Time zone: ' + short + ' (change)</summary>'
+            '<p><label>IANA time zone '
+            '<input name="timezone" maxlength="100" value="'
+            + escape(timezone, quote=True)
+            + '"></label></p></details>')
+
+
 def appointment_meta(entry):
     """Readable, escaped optional time and location metadata."""
     details = []
     if entry.get("start_time"):
         details.append(entry["start_time"] + "–" + entry["end_time"]
-                       + " (" + entry["timezone"] + ")")
+                       + " " + timezone_label(entry["date"], entry["start_time"],
+                                             entry["timezone"]))
     if entry.get("location"):
         details.append(entry["location"])
     return ('<small>' + escape(" · ".join(details)) + '</small>') if details else ""
@@ -132,10 +155,7 @@ def day_page(store, day, csrf):
             '<fieldset><legend>Appointment time and place (optional)</legend>'
             '<p><label>Start <input type="time" name="start_time"></label> '
             '<label>End <input type="time" name="end_time"></label></p>'
-            '<p><label>Timezone (IANA, e.g. America/Chicago) '
-            '<input name="timezone" maxlength="100" value="'
-            + escape(default_appointment_timezone(), quote=True)
-            + '"></label></p>'
+            + timezone_field(day, default_appointment_timezone())
             '<p><label>Location <input name="location" maxlength="500"></label></p>'
             '<small>Leave start, end and location empty for an all-day entry. '
             'Timed appointments require start, end and timezone; '
@@ -180,9 +200,7 @@ def entry_edit_page(store, day, index, csrf):
         + escape(entry.get("start_time", ""), quote=True) + '"></label> '
         + '<label>End <input type="time" name="end_time" value="'
         + escape(entry.get("end_time", ""), quote=True) + '"></label></p>'
-        + '<p><label>Timezone (IANA, e.g. America/Chicago) '
-        + '<input name="timezone" maxlength="100" value="'
-        + escape(entry.get("timezone") or default_appointment_timezone(), quote=True) + '"></label></p>'
+        + timezone_field(entry["date"], entry.get("timezone") or default_appointment_timezone())
         + '<p><label>Location <input name="location" maxlength="500" value="'
         + escape(entry.get("location", ""), quote=True) + '"></label></p>'
         + '<small>For all-day entries leave start, end and location empty. Timed entries need '
