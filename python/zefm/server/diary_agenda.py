@@ -75,11 +75,18 @@ def agenda_page(store, *, days=30, kind="all", today=None):
             parts.append('<h2><a href="' + escape(day_url, quote=True) + '">'
                          + escape(current_date) + "</a></h2><ul>")
         edit_url = "/diary-edit?" + urlencode({"date": entry["date"], "row": index})
+        share_link = ""
+        if entry["kind"] == "appointment":
+            share_url = "/calendar-export-one?" + urlencode({
+                "date": entry["date"], "row": index})
+            share_link = (' · <a href="' + escape(share_url, quote=True)
+                          + '">Download .ics</a>')
         parts.append(
             '<li style="margin:.5em 0;padding:.3em 0">'
             '<strong>' + escape(entry["kind"].title()) + '</strong> · '
             '<a href="' + escape(edit_url, quote=True) + '">Edit</a>'
-            '<div style="overflow-wrap:anywhere;max-height:12em;overflow:auto">'
+            + share_link
+            + '<div style="overflow-wrap:anywhere;max-height:12em;overflow:auto">'
             + appointment_meta(entry) + render_diary(entry["text"]) + "</div></li>")
     parts.append("</ul>")
     summary = (f'<p>{count} upcoming entr{"y" if count == 1 else "ies"}'
