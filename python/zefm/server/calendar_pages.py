@@ -193,11 +193,16 @@ def day_page(store, day, csrf):
         # Edit/Delete use the original CSV date, even when display crosses a date.
         edit_url = escape(_url("diary-edit", date=entry["date"], row=index), quote=True)
         delete_url = escape(_url("diary-delete", date=entry["date"], row=index), quote=True)
+        export_url = escape(_url("calendar-export-one",
+                                 date=entry["date"], row=index), quote=True)
+        share_link = (' · <a href="' + export_url + '">Download .ics</a>'
+                      if entry["kind"] == "appointment" else "")
         rows.append(
             '<li><strong>' + escape(entry["kind"].title()) + '</strong>: '
             + appointment_meta(entry) + warning + render_diary(entry["text"]) + ' '
             + '<small><a href="' + edit_url + '">Edit</a> · '
-            + '<a href="' + delete_url + '">Delete…</a></small></li>')
+            + '<a href="' + delete_url + '">Delete…</a>'
+            + share_link + '</small></li>')
     form = ('<form method="post" action="/diary" accept-charset="utf-8">'
             '<input type="hidden" name="csrf" value="' + escape(csrf, quote=True) + '">'
             '<input type="hidden" name="date" value="' + escape(day, quote=True) + '">'
