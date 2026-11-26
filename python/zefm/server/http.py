@@ -957,12 +957,16 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                         raise BrowserError(str(exc)) from exc
                     self._send(303, b"", extra={"Location": "/diary?" + urlencode({"date": args["date"]})})
                 elif route=="/diary-edit":
-                    if set(args) != {"csrf", "date", "row", "new_date", "kind", "text", "revision"}:
+                    base = {"csrf", "date", "row", "new_date", "kind", "text", "revision"}
+                    meta = {"start_time", "end_time", "timezone", "location"}
+                    if set(args) not in (base, base | meta):
                         raise BrowserError("Unexpected diary edit parameters")
                     try:
                         diary.update(_diary_row(args["row"]), args["new_date"],
                                      args["text"], args["kind"],
-                                     args["revision"], expected_day=args["date"])
+                                     args["revision"], expected_day=args["date"],
+                                     **{key: args[key] for key in meta}
+                                     if meta <= set(args) else {})
                     except CalendarConflictError as exc:
                         raise BrowserError(str(exc), 409) from exc
                     except CalendarEntryNotFound as exc:
