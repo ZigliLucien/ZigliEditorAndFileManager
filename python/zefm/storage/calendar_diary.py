@@ -133,11 +133,13 @@ class CalendarDiary:
             records.append(record)
             self._write_locked(records)
 
-    def append_many(self, entries, *, skip_duplicates=True):
+    def append_many(self, entries, *, skip_duplicates=True, expected_revision=None):
         """Import a batch atomically. Repeated imports skip exact duplicate rows."""
         validated = [validated_record(item["date"], item["kind"], item["text"])
                      for item in entries]
         with self._lock:
+            if expected_revision is not None:
+                self._check_revision_locked(expected_revision)
             records = self.read()
             existing = {(r["date"], r["kind"], r["text"]) for r in records}
             added = 0
