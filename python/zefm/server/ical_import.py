@@ -178,7 +178,13 @@ def parse_ics(source):
         if ":" not in line:
             raise ValueError("Invalid iCalendar property")
         name, value = line.split(":", 1)
+        original_name = name
         name = name.upper()
+        # Property/parameter NAMES are case-insensitive; an IANA TZID's
+        # VALUE is case-sensitive. Do not turn America/Chicago into
+        # AMERICA/CHICAGO, which zoneinfo cannot resolve.
+        if name.startswith(("DTSTART;TZID=", "DTEND;TZID=")):
+            name = name.split("=", 1)[0] + "=" + original_name.split("=", 1)[1]
         if name in event:
             event[name].append(value)
         else:
