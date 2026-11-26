@@ -312,6 +312,23 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                     self._send(200, data, "text/calendar; charset=utf-8",
                                {"Content-Disposition":
                                 'attachment; filename="zefm-calendar.ics"'})
+                elif parsed.path == "/calendar-export-one":
+                    if set(args) != {"date", "row"}:
+                        raise BrowserError("Expected appointment date and row")
+                    try:
+                        source_date = valid_date(args["date"])
+                        index = _diary_row(args["row"])
+                        entry = diary.record(index, expected_day=source_date)
+                        if entry["kind"] != "appointment":
+                            raise BrowserError("Only appointments can be shared", 400)
+                        data = export_ical(diary, row_index=index)
+                    except CalendarEntryNotFound as exc:
+                        raise BrowserError(str(exc), 404) from exc
+                    except ValueError as exc:
+                        raise BrowserError(str(exc), 400) from exc
+                    self._send(200, data, "text/calendar; charset=utf-8",
+                               {"Content-Disposition":
+                                'attachment; filename="zefm-appointment.ics"'})
                 elif parsed.path == "/calendar":
                     if set(args) - {"year", "month"}:
                         raise BrowserError("Unexpected calendar parameters")
