@@ -1263,3 +1263,15 @@ row from the comparison, and touching endpoints are not conflicts.
 Preview never changes the CSV. The warning is informational: users may still
 save overlapping appointments when needed. The normal calendar, weekly view,
 and day view retain their existing overlap warnings.
+
+## Share one appointment as .ics
+
+Individual appointments in the daily and weekly calendar have a
+**Download .ics** link. This sends a single VEVENT in a valid iCalendar
+attachment, with its original IANA timezone, location and description.
+The export keeps the same deterministic UID as the corresponding record
+in the full calendar export, including when identical appointments exist.
+Diary entries do not receive the link. The endpoint validates both the
+original CSV row number and original event date; a shifted local display
+date does not change the source row. Downloads are read-only snapshots,
+not invitations that update automatically in another calendar.
