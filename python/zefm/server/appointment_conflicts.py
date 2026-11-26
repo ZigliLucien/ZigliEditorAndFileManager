@@ -56,3 +56,25 @@ def conflicting_rows(records):
         if max_end is None or end > max_end:
             max_end, max_index = end, index
     return conflicts
+
+
+def overlapping_candidates(candidate, records, *, exclude_index=None, limit=5):
+    """Find stored rows overlapping an unsaved candidate, in UTC order.
+
+    Editing excludes the original record to avoid a spurious self-conflict.
+    Only a bounded number of matches is returned for safe preview rendering.
+    """
+    target = appointment_interval(candidate)
+    if target is None:
+        return []
+    matches = []
+    for index, entry in enumerate(records):
+        if index == exclude_index:
+            continue
+        interval = appointment_interval(entry)
+        if interval is None:
+            continue
+        if target[0] < interval[1] and interval[0] < target[1]:
+            matches.append((interval[0], index, entry))
+    matches.sort(key=lambda item: (item[0], item[1]))
+    return [(index, entry) for _, index, entry in matches[:limit]]
