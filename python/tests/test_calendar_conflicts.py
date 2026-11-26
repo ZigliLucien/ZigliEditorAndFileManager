@@ -5,9 +5,10 @@ from tempfile import TemporaryDirectory
 from unittest.mock import patch
 import unittest
 
-from zefm.server.appointment_conflicts import appointment_interval, conflicting_rows
+from zefm.server.appointment_conflicts import appointment_interval, conflicting_rows, overlapping_candidates
 from zefm.server.calendar_pages import day_page
 from zefm.server.week_calendar import week_page
+from zefm.server.diary_preview import preview_page
 from zefm.storage.calendar_diary import CalendarDiary
 
 
@@ -59,6 +60,75 @@ class OverlapTests(unittest.TestCase):
             self.assertEqual(weekly.count("Overlaps another appointment"), 2)
             self.assertIn("view other", weekly)
             self.assertEqual(store.read(), rows_before)
+
+    def test_new_preview_warns_about_cross_timezone_conflict_without_save(self):
+        with TemporaryDirectory() as tmp:
+            store = CalendarDiary(Path(tmp) / "calendar.csv")
+            store.add("2026-07-01", "Existing <meeting>", "appointment",
+                      start_time="11:00", end_time="12:00",
+                      timezone="America/New_York")
+            original = store.read()
+            revision = store.revision()
+            args = {
+                "csrf": "token", "date": "2026-07-01",
+                "kind": "appointment", "text": "Candidate",
+                "start_time": "10:30", "end_time": "11:30",
+                "timezone": "America/Chicago", "location": "",
+            }
+            page = preview_page(args, "token", store)
+            self.assertIn("Scheduling overlap", page)
+            self.assertIn("You can still save it.", page)
+            self.assertIn("Existing &lt;meeting&gt;", page)
+            self.assertNotIn("Existing <meeting>", page)
+            self.assertIn("diary-edit?date=2026-07-01&amp;row=0", page)
+            self.assertEqual(store.revision(), revision)
+            self.assertEqual(store.read(), original)
+
+    def test_edit_preview_ignores_its_own_row(self):
+        with TemporaryDirectory() as tmp:
+            store = CalendarDiary(Path(tmp) / "calendar.csv")
+            store.add("2026-07-01", "Original", "appointment",
+                      start_time="10:00", end_time="11:00",
+                      timezone="America/Chicago")
+            args = {
+                "csrf": "token", "date": "2026-07-01", "new_date": "2026-07-01",
+                "row": "0", "revision": store.revision(),
+                "kind": "appointment", "text": "Edited",
+                "start_time": "10:00", "end_time": "11:00",
+                "timezone": "America/Chicago", "location": "",
+            }
+            html = preview_page(args, "token", store)
+            self.assertNotIn("Scheduling overlap", html)
+            store.add("2026-07-01", "Second", "appointment",
+                      start_time="10:30", end_time="11:30",
+                      timezone="America/Chicago")
+            html = preview_page(args, "token", store)
+            self.assertIn("Scheduling overlap", html)
+            self.assertIn("Second", html)
+            self.assertNotIn('>Original</a>', html)
+            self.assertIn("diary-edit?date=2026-07-01&amp;row=1", html)
+
+    def test_preview_adjacent_and_all_day_do_not_warn(self):
+        with TemporaryDirectory() as tmp:
+            store = CalendarDiary(Path(tmp) / "calendar.csv")
+            store.add("2026-07-01", "First", "appointment",
+                      start_time="10:00", end_time="11:00",
+                      timezone="America/Chicago")
+            adjacent = {
+                "csrf": "token", "date": "2026-07-01",
+                "kind": "appointment", "text": "Second",
+                "start_time": "12:00", "end_time": "13:00",
+                "timezone": "America/New_York", "location": "",
+            }
+            self.assertNotIn("Scheduling overlap",
+                             preview_page(adjacent, "token", store))
+            all_day = dict(adjacent, start_time="", end_time="")
+            self.assertNotIn("Scheduling overlap",
+                             preview_page(all_day, "token", store))
+            self.assertEqual(
+                overlapping_candidates(
+                    {"date": "2026-07-01", "kind": "diary", "text": "Note"},
+                    store.read()), [])
 
     def test_nonoverlap_all_day_and_large_identical_batch(self):
         records = [
