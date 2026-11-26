@@ -1105,3 +1105,29 @@ entry text and later rendered with ZEFM's existing sanitizer. Input size
 is limited to 128 KiB and 500 events per import. CSV remains the source
 of truth; no synchronization with other calendar applications is implied.
 
+
+## Browser-native iCalendar invitations and timed appointments
+
+The **Import appointments (.ics)** page now includes an ordinary browser
+file picker for downloaded .ics invitations. It reads the selected file
+locally in the browser and loads its UTF-8 source into the preview form.
+Alternatively, navigate to a .ics file under the ZEFM file manager's
+browsing root and click its name (or **Preview Invitation**) to open the
+same preview flow. No manual copy/paste is required for these files.
+
+One-day, timed invitations are accepted when they have an explicit UTC
+timestamp (`Z`) or a valid IANA `TZID`, with matching start/end zones.
+For example, `America/Chicago` is preserved. The browser preview shows
+date, start/end time, zone and location before any write. Floating times,
+invalid zones, multi-day events, alarms and recurring rules are still
+rejected rather than guessed. Embedded VTIMEZONE blocks are ignored;
+the system zoneinfo database supplies the timezone.
+
+The CSV remains backward compatible. Existing files keep their original
+`date,kind,text` columns until the first timed record is saved. That
+write atomically extends the CSV with `start_time,end_time,timezone,location`
+columns, preserving all existing diary content. Old records remain date-only.
+Timed appointment details appear in the month, day, agenda and search views
+and are exported with corresponding DTSTART/DTEND and timezone fields.
+Export remains a snapshot, not calendar synchronization.
+
