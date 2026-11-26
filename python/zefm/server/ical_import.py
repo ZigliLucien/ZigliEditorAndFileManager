@@ -9,7 +9,7 @@ from __future__ import annotations
 from datetime import date, datetime, timedelta
 from html import escape
 
-from .calendar_pages import timezone_label
+from .calendar_pages import timezone_label, display_entry
 from ..storage.calendar_diary import validated_record
 
 MAX_ICS_SOURCE = 128 * 1024
@@ -228,13 +228,18 @@ def import_preview_page(entries, source, revision, csrf):
     for item in entries[:MAX_ICS_EVENTS]:
         time_info = ""
         if item.get("start_time"):
-            time_info = (" · " + escape(item["start_time"]) + "–"
-                         + escape(item["end_time"]) + " "
-                         + escape(timezone_label(item["date"], item["start_time"],
-                                                 item["timezone"])))
+            shown = display_entry(item)
+            end_date = (" (" + shown["_end_date"] + ")"
+                        if shown.get("_end_date") else "")
+            time_info = (" · " + escape(shown["date"]) + " "
+                         + escape(shown["start_time"]) + "–"
+                         + escape(shown["end_time"]) + escape(end_date) + " "
+                         + escape(timezone_label(shown["date"], shown["start_time"],
+                                                 shown["timezone"])))
         if item.get("location"):
             time_info += " · " + escape(item["location"])
-        output.append('<p><strong>' + escape(item["date"]) + time_info
+        output.append('<p><strong>' + (escape(item["date"]) if not item.get("start_time")
+                      else "Local") + time_info
                       + '</strong>: ' + escape(item["text"][:250]) + '</p>')
     output.append(
         '<form method="post" action="/calendar-import" accept-charset="utf-8">'
