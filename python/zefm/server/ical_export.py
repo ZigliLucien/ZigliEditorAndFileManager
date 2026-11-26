@@ -40,10 +40,12 @@ def _fold(line: str) -> list[str]:
     return chunks
 
 
-def export_ical(store, kind="appointment", *, timestamp=None):
+def export_ical(store, kind="appointment", *, timestamp=None, row_index=None):
     """Generate downloadable ICS bytes without modifying calendar.csv."""
     if kind not in KINDS:
         raise ValueError("Invalid calendar export type")
+    if row_index is not None and (type(row_index) is not int or row_index < 0):
+        raise ValueError("Invalid calendar export row")
     now = timestamp or datetime.now(timezone.utc)
     if now.tzinfo is None:
         raise ValueError("iCalendar export timestamp must include a timezone")
@@ -57,14 +59,25 @@ def export_ical(store, kind="appointment", *, timestamp=None):
         "X-WR-CALNAME:ZEFM Calendar",
     ]
     seen = Counter()
-    for entry in store.read():
+    records = store.read()
+    if row_index is not None and row_index >= len(records):
+        raise ValueError("Calendar export row not found")
+    if row_index is not None and records[row_index]["kind"] != "appointment":
+        raise ValueError("Only appointments can be shared individually")
+    for index, entry in enumerate(records):
         if kind != "all" and entry["kind"] != kind:
+            continue
+        # Count all matching records to retain the same UID for a single
+        # appointment as in the full export, even with duplicate entries.
+        identity = tuple(entry.get(key, "") for key in (
+            "date", "kind", "text", "start_time", "end_time",
+            "timezone", "location"))
+        seen[identity] += 1
+        if row_index is not None and index != row_index:
             continue
         day = valid_date(entry["date"]).replace("-", "")
         # Hash of source content and duplicate ordinal provides a deterministic
         # identity for this snapshot. Editing a record changes its identity.
-        identity = tuple(entry.get(key, "") for key in ("date", "kind", "text", "start_time", "end_time", "timezone", "location"))
-        seen[identity] += 1
         unique = "\0".join(identity) + "\0" + str(seen[identity])
         uid = hashlib.sha256(unique.encode("utf-8")).hexdigest() + "@zefm.local"
         # A short, legible title; the full Markdown/HTML source is retained
