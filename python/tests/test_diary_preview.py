@@ -79,6 +79,25 @@ class DiaryPreviewTests(unittest.TestCase):
             self.assertEqual(code, expected)
         self.assertFalse(self.path.exists())
 
+    def test_http_preview_conflict_is_informational(self):
+        self.store.add("2026-07-01", "Existing", "appointment",
+                       start_time="11:00", end_time="12:00",
+                       timezone="America/New_York")
+        version = self.store.revision()
+        fields = {
+            "csrf": self.server.token, "date": "2026-07-01",
+            "kind": "appointment", "text": "Proposed",
+            "start_time": "10:30", "end_time": "11:30",
+            "timezone": "America/Chicago", "location": "",
+        }
+        status, html = self.post(fields)
+        self.assertEqual(status, 200)
+        self.assertIn("Scheduling overlap", html)
+        self.assertIn("Existing", html)
+        self.assertIn('action="/diary"', html)
+        self.assertEqual(version, self.store.revision())
+        self.assertEqual(len(self.store.read()), 1)
+
     def test_forms_offer_preview_before_save(self):
         html = self.get("diary?date=2026-11-25")
         self.assertIn('formaction="/diary-preview"', html)
