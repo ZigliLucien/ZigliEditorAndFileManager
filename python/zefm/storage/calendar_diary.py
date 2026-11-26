@@ -201,8 +201,8 @@ class CalendarDiary:
                 raise CalendarEntryNotFound("Entry does not belong to that date")
             return dict(selected)
 
-    def update(self, index, day, text, kind, expected_revision, expected_day=None):
-        new = validated_record(day, kind, text)
+    def update(self, index, day, text, kind, expected_revision, expected_day=None,
+               *, start_time=None, end_time=None, timezone=None, location=None):
         with self._lock:
             self._check_revision_locked(expected_revision)
             records = self.read()
@@ -210,11 +210,14 @@ class CalendarDiary:
                 raise CalendarEntryNotFound("Calendar entry not found")
             if expected_day is not None and records[index]["date"] != valid_date(expected_day):
                 raise CalendarEntryNotFound("Entry does not belong to that date")
-            if any(records[index].get(k, "") for k in TIMED_HEADERS[3:]):
-                new = validated_record(
-                    day, kind, text,
-                    **{k: records[index].get(k, "") for k in TIMED_HEADERS[3:]})
-            records[index] = new
+            supplied = (start_time, end_time, timezone, location)
+            if all(value is None for value in supplied):
+                meta = {k: records[index].get(k, "") for k in TIMED_HEADERS[3:]}
+            elif any(value is None for value in supplied):
+                raise ValueError("Specify all appointment metadata fields")
+            else:
+                meta = dict(zip(TIMED_HEADERS[3:], supplied))
+            records[index] = validated_record(day, kind, text, **meta)
             self._write_locked(records)
 
     def delete(self, index, expected_revision, expected_day=None):
