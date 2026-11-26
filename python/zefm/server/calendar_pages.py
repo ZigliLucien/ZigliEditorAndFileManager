@@ -14,6 +14,16 @@ def default_appointment_timezone():
     return os.environ.get("ZEFM_TIMEZONE", "America/Chicago")
 
 
+def entry_time_key(entry):
+    """All-day entries first, then timed appointments from earliest to latest.
+
+    Sorting is presentation-only: the CSV file and original row indexes stay
+    untouched so existing Edit/Delete links remain correct.
+    """
+    start = entry.get("start_time", "")
+    return (bool(start), start)
+
+
 def appointment_meta(entry):
     """Readable, escaped optional time and location metadata."""
     details = []
@@ -63,7 +73,7 @@ def month_page(store, year, month):
         table.append('<tr>')
         for day in week:
             key = day.isoformat()
-            events = month_events.get(key, [])
+            events = sorted(month_events.get(key, []), key=entry_time_key)
             label = str(day.day)
             href = escape(_url("diary", date=key), quote=True)
             is_today = day == today
@@ -101,6 +111,7 @@ def day_page(store, day, csrf):
     valid_date(day)
     items = [(index, entry) for index, entry in enumerate(store.read())
              if entry["date"] == day]
+    items.sort(key=lambda pair: entry_time_key(pair[1]))
     month_url = _url("calendar", year=int(day[:4]), month=int(day[5:7]))
     rows = []
     for index, entry in items:
