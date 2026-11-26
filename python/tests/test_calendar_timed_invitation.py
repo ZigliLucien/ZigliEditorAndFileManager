@@ -145,6 +145,84 @@ class BrowserInvitationTests(unittest.TestCase):
             finally:
                 server.close()
 
+    def test_create_timed_appointment_from_browser_with_preview(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            store = CalendarDiary(root / "calendar.csv")
+            server = BrowserServer(root, calendar_path=store.path)
+            server.start()
+            try:
+                with urlopen(server.url + "diary?date=2026-11-25", timeout=5) as response:
+                    form = response.read().decode("utf-8")
+                for field in ("start_time", "end_time", "timezone", "location"):
+                    self.assertIn('name="' + field + '"', form)
+                fields = {
+                    "csrf": server.token,
+                    "date": "2026-11-25",
+                    "kind": "appointment",
+                    "text": "Doctor **visit**",
+                    "start_time": "09:15", "end_time": "10:00",
+                    "timezone": "America/Chicago", "location": "Clinic",
+                }
+                preview = Request(
+                    server.url + "diary-preview",
+                    data=urlencode(fields).encode("utf-8"),
+                    headers={"Content-Type": "application/x-www-form-urlencoded"})
+                with urlopen(preview, timeout=5) as response:
+                    html = response.read().decode("utf-8")
+                self.assertIn("<strong>visit</strong>", html)
+                self.assertIn('name="start_time" value="09:15"', html)
+                self.assertIn('name="timezone" value="America/Chicago"', html)
+                self.assertFalse(store.path.exists())
+                save = Request(
+                    server.url + "diary",
+                    data=urlencode(fields).encode("utf-8"),
+                    headers={"Content-Type": "application/x-www-form-urlencoded"})
+                with urlopen(save, timeout=5) as response:
+                    self.assertIn("09:15", response.read().decode("utf-8"))
+                entry = store.record(0)
+                self.assertEqual(entry["start_time"], "09:15")
+                self.assertEqual(entry["end_time"], "10:00")
+                self.assertEqual(entry["timezone"], "America/Chicago")
+                self.assertEqual(entry["location"], "Clinic")
+                self.assertIn("09:15", day_page(store, "2026-11-25", server.token))
+                self.assertIn("09:15", month_page(store, 2026, 11))
+            finally:
+                server.close()
+
+    def test_new_timed_appointment_rejects_invalid_metadata(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            store = CalendarDiary(root / "calendar.csv")
+            server = BrowserServer(root, calendar_path=store.path)
+            server.start()
+            try:
+                base = {
+                    "csrf": server.token, "date": "2026-11-25",
+                    "kind": "appointment", "text": "Meeting",
+                    "start_time": "09:00", "end_time": "10:00",
+                    "timezone": "America/Chicago", "location": "",
+                }
+                for changes in (
+                    {"end_time": "08:00"},
+                    {"timezone": "Not/AZone"},
+                    {"start_time": ""},
+                    {"kind": "diary"},
+                ):
+                    fields = dict(base, **changes)
+                    for endpoint in ("diary-preview", "diary"):
+                        with self.subTest(changes=changes, endpoint=endpoint):
+                            req = Request(
+                                server.url + endpoint,
+                                data=urlencode(fields).encode("utf-8"),
+                                headers={"Content-Type": "application/x-www-form-urlencoded"})
+                            with self.assertRaises(HTTPError) as error:
+                                urlopen(req, timeout=5)
+                            self.assertEqual(error.exception.code, 400)
+                self.assertFalse(store.path.exists())
+            finally:
+                server.close()
+
     def test_edit_imported_appointment_in_browser(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
