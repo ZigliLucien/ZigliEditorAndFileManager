@@ -105,6 +105,22 @@ class TimedStoreTests(unittest.TestCase):
                              {"date": "2026-11-25", "kind": "appointment",
                               "text": "All-day"})
 
+    def test_timezone_only_default_does_not_make_event_timed(self):
+        with tempfile.TemporaryDirectory() as temp:
+            store = CalendarDiary(Path(temp) / "calendar.csv")
+            store.add("2026-11-25", "All-day", "appointment",
+                      timezone="America/Chicago")
+            store.add("2026-11-26", "Diary entry", "diary",
+                      timezone="America/Chicago")
+            self.assertEqual(store.record(0), {
+                "date": "2026-11-25", "kind": "appointment", "text": "All-day"})
+            self.assertEqual(store.record(1), {
+                "date": "2026-11-26", "kind": "diary", "text": "Diary entry"})
+            import csv
+            with store.path.open(encoding="utf-8", newline="") as handle:
+                self.assertEqual(next(csv.reader(handle)),
+                                 ["date", "kind", "text"])
+
     def test_old_entries_still_three_column_when_no_timed_event(self):
         with tempfile.TemporaryDirectory() as temp:
             store = CalendarDiary(Path(temp) / "calendar.csv")
@@ -144,6 +160,19 @@ class BrowserInvitationTests(unittest.TestCase):
                 self.assertFalse(store.path.exists())
             finally:
                 server.close()
+
+    def test_default_timezone_prefilled_in_new_and_edit_forms(self):
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            store = CalendarDiary(root / "calendar.csv")
+            with patch.dict("os.environ", {"ZEFM_TIMEZONE": "America/New_York"}):
+                self.assertIn('name="timezone" maxlength="100" value="America/New_York"',
+                              day_page(store, "2026-11-25", "csrf"))
+                store.add("2026-11-25", "All-day")
+                from zefm.server.calendar_pages import entry_edit_page
+                self.assertIn('name="timezone" maxlength="100" value="America/New_York"',
+                              entry_edit_page(store, "2026-11-25", 0, "csrf"))
 
     def test_create_timed_appointment_from_browser_with_preview(self):
         with tempfile.TemporaryDirectory() as temp:
