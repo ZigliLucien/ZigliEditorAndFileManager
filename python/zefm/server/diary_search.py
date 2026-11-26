@@ -5,6 +5,7 @@ from html import escape
 from urllib.parse import urlencode
 
 from .diary_markup import render_diary
+from .calendar_pages import appointment_meta
 from ..storage.calendar_diary import valid_date
 
 MAX_QUERY = 200
@@ -69,7 +70,7 @@ def search_page(store, query="", start="", end="", kind="all"):
             '<small><a href="' + escape(edit_url, quote=True)
             + '">Edit</a></small>'
             '<div style="max-height:12em;overflow:auto;overflow-wrap:anywhere">'
-            + render_diary(entry["text"]) + '</div></li>')
+            + appointment_meta(entry) + render_diary(entry["text"]) + '</div></li>')
     summary = (f'<p>{count} matching entr{"y" if count == 1 else "ies"}'
                + (f" (showing the first {MAX_RESULTS})" if count > MAX_RESULTS else "")
                + '.</p>')
