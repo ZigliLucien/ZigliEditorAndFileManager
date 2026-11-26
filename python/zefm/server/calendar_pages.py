@@ -107,7 +107,11 @@ def month_page(store, year, month):
     if not 2 <= year <= 9998 or not 1 <= month <= 12:
         raise ValueError("Invalid calendar month")
     month_events = {}
-    for entry in store.read():
+    # Real CSV stores expose read(); minimal calendar adapters may expose
+    # only in_month(). The full read is necessary for cross-month shifts.
+    source_entries = (store.read() if hasattr(store, "read")
+                      else store.in_month(year, month))
+    for entry in source_entries:
         shown = display_entry(entry)
         if shown["date"].startswith(f"{year:04d}-{month:02d}-"):
             month_events.setdefault(shown["date"], []).append(entry)
