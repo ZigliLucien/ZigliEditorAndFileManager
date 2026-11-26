@@ -54,7 +54,9 @@ def validated_record(day, kind, text, *, start_time="", end_time="", timezone=""
         raise ValueError("Invalid calendar entry type")
     if not isinstance(text, str) or not text.strip() or len(text) > MAX_TEXT:
         raise ValueError("Diary entry must contain 1 to 4,000 characters")
-    if any((start_time, end_time, timezone, location)):
+    # A prefilled timezone alone does not make an entry timed.
+    # Preserve the three-column CSV representation for all-day entries.
+    if start_time or end_time or location:
         if (kind != "appointment" or not start_time or not end_time
                 or not timezone):
             raise ValueError("Timed appointments require start, end and timezone")
