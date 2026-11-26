@@ -166,21 +166,28 @@ def parse_ics(source):
     return entries
 
 
-def import_page(csrf):
-    """Local-only paste form. No JavaScript, file upload, or network access."""
+def import_page(csrf, source="", filename=""):
+    """Browser file chooser or prefilled local .ics source, with no auto-import."""
     return (
-        '<h1>Import iCalendar appointments</h1>'
+        '<h1>Import iCalendar invitation</h1>'
         '<p><a href="/calendar">← Calendar</a></p>'
-        '<p>Open an .ics file as text and paste its contents below. '
-        'Only one-day all-day events are accepted. Timed events, '
-        'recurrences and alarms are rejected rather than guessed. '
-        'Nothing is written until you confirm the preview.</p>'
-        '<form method="post" action="/calendar-import-preview" accept-charset="utf-8">'
+        '<p>Choose an .ics file, or open one from the ZEFM file listing. '
+        'Preview its dates, times, timezones and descriptions before importing. '
+        'Only explicit single-day events are supported; ambiguous invitations '
+        'and recurrence rules are rejected.</p>'
+        '<form id="ical-import-form" method="post" action="/calendar-import-preview" '
+        'accept-charset="utf-8">'
         '<input type="hidden" name="csrf" value="' + escape(csrf, quote=True) + '">'
-        '<p><label>iCalendar (.ics) contents<br>'
-        '<textarea name="ics" required maxlength="131072" '
-        'style="width:100%;min-height:240px"></textarea></label></p>'
-        '<button type="submit">Preview Import</button></form>'
+        '<p><label>Choose .ics invitation '
+        '<input type="file" id="ical-file" accept=".ics,text/calendar"></label></p>'
+        '<p><label>iCalendar text<br>'
+        '<textarea id="ical-source" name="ics" required maxlength="131072" '
+        'style="width:100%;min-height:180px">'
+        + escape(source) + '</textarea></label></p>'
+        '<button type="submit">Preview Invitation</button>'
+        '</form><script defer src="/calendar-import.js"></script>'
+        '<p><small>The file is read in your browser and sent only to the local '
+        'ZEFM server for preview; it is not imported until you confirm.</small></p>'
     )
 
 
@@ -190,8 +197,15 @@ def import_preview_page(entries, source, revision, csrf):
               '<p>Nothing has been imported. These entries will be appended as '
               'appointments; exact duplicates are skipped.</p>']
     for item in entries[:MAX_ICS_EVENTS]:
-        output.append('<p><strong>' + escape(item["date"]) + '</strong>: '
-                      + escape(item["text"][:250]) + '</p>')
+        time_info = ""
+        if item.get("start_time"):
+            time_info = (" · " + escape(item["start_time"]) + "–"
+                         + escape(item["end_time"]) + " "
+                         + escape(item["timezone"]))
+        if item.get("location"):
+            time_info += " · " + escape(item["location"])
+        output.append('<p><strong>' + escape(item["date"]) + time_info
+                      + '</strong>: ' + escape(item["text"][:250]) + '</p>')
     output.append(
         '<form method="post" action="/calendar-import" accept-charset="utf-8">'
         '<input type="hidden" name="csrf" value="' + escape(csrf, quote=True) + '">'
