@@ -1187,3 +1187,17 @@ Entries with equal start times retain their original CSV order. This is
 presentation-only sorting: the CSV is not rewritten, and links to Edit and
 Delete continue to use each entry's original CSV row index. The monthly
 calendar still shows at most two compact entry previews per date.
+
+## Compact timezone display
+
+The browser's month, day, agenda, search and invitation-preview views
+display short timezone abbreviations, computed for the appointment date
+and start time using the stored IANA zone. For `America/Chicago`, this
+means **CST** in standard time and **CDT** during daylight time.
+Other IANA zones use their corresponding date-appropriate abbreviations.
+
+New and edit appointment forms show the short zone in a collapsible
+**Time zone: CST/CDT (change)** control. Expanding it exposes the
+editable full IANA identifier when necessary. The full identifier remains
+in CSV and iCalendar output so daylight-saving rules are preserved; no
+fixed UTC offset is substituted.
