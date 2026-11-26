@@ -24,9 +24,12 @@ def preview_page(args, csrf):
         save_label = "Save Changes"
     else:
         required = {"csrf", "date", "kind", "text"}
-        if set(args) != required:
+        meta_names = {"start_time", "end_time", "timezone", "location"}
+        if set(args) not in (required, required | meta_names):
             raise ValueError("Unexpected diary preview fields")
-        validated_record(args["date"], args["kind"], args["text"])
+        meta = ({key: args[key] for key in meta_names}
+                if meta_names <= set(args) else {})
+        validated_record(args["date"], args["kind"], args["text"], **meta)
         action = "/diary"
         heading = "Preview new diary entry"
         hidden = [("date", args["date"])]
@@ -40,7 +43,7 @@ def preview_page(args, csrf):
         + '>' + kind.title() + '</option>'
         for kind in ("diary", "appointment")) + '</select>'
     metadata_fields = ""
-    if "row" in args and meta:
+    if meta:
         metadata_fields = (
             '<fieldset><legend>Appointment time and place</legend>'
             + ''.join('<p><label>' + escape(label)
