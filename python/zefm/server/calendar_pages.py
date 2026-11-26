@@ -8,6 +8,7 @@ from html import escape
 from urllib.parse import urlencode
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from .diary_markup import render_diary
+from .appointment_conflicts import conflicting_rows
 
 
 def default_appointment_timezone():
@@ -173,18 +174,28 @@ def month_page(store, year, month):
 def day_page(store, day, csrf):
     from ..storage.calendar_diary import valid_date
     valid_date(day)
-    items = [(index, entry) for index, entry in enumerate(store.read())
+    source_rows = store.read()
+    conflicts = conflicting_rows(source_rows)
+    items = [(index, entry) for index, entry in enumerate(source_rows)
              if display_entry(entry)["date"] == day]
     items.sort(key=lambda pair: entry_time_key(display_entry(pair[1])))
     month_url = _url("calendar", year=int(day[:4]), month=int(day[5:7]))
     rows = []
     for index, entry in items:
+        warning = ""
+        if index in conflicts:
+            other_index = conflicts[index]
+            other = source_rows[other_index]
+            other_url = escape(_url("diary-edit", date=other["date"], row=other_index),
+                               quote=True)
+            warning = (' <small role="status">⚠ Overlaps another appointment'
+                       ' (<a href="' + other_url + '">view other</a>)</small>')
         # Edit/Delete use the original CSV date, even when display crosses a date.
         edit_url = escape(_url("diary-edit", date=entry["date"], row=index), quote=True)
         delete_url = escape(_url("diary-delete", date=entry["date"], row=index), quote=True)
         rows.append(
             '<li><strong>' + escape(entry["kind"].title()) + '</strong>: '
-            + appointment_meta(entry) + render_diary(entry["text"]) + ' '
+            + appointment_meta(entry) + warning + render_diary(entry["text"]) + ' '
             + '<small><a href="' + edit_url + '">Edit</a> · '
             + '<a href="' + delete_url + '">Delete…</a></small></li>')
     form = ('<form method="post" action="/diary" accept-charset="utf-8">'
