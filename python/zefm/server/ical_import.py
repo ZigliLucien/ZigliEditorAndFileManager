@@ -117,8 +117,20 @@ def parse_ics(source):
         raise ValueError("Only iCalendar VERSION:2.0 is supported")
     entries = []
     event = None
+    timezone_depth = 0
     for line in unfolded[1:-1]:
         upper = line.upper()
+        if timezone_depth:
+            if upper.startswith("BEGIN:"):
+                timezone_depth += 1
+            elif upper.startswith("END:"):
+                timezone_depth -= 1
+            continue
+        if upper == "BEGIN:VTIMEZONE" and event is None:
+            # Ignore embedded timezone definitions; use only a validated
+            # IANA TZID and the system's zoneinfo rules, never execute data.
+            timezone_depth = 1
+            continue
         if upper == "BEGIN:VALARM":
             # Explicitly reject alarms, including nested alarm blocks.
             raise ValueError("Events containing alarms are not supported")
@@ -161,8 +173,8 @@ def parse_ics(source):
             event[name].append(value)
         else:
             event[name] = [value]
-    if event is not None:
-        raise ValueError("Unclosed VEVENT")
+    if event is not None or timezone_depth:
+        raise ValueError("Unclosed iCalendar component")
     return entries
 
 
