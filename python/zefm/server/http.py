@@ -949,10 +949,14 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                         raise BrowserError(str(exc)) from exc
                     self._send(200, page("Diary Preview", content))
                 elif route=="/diary":
-                    if set(args) != {"csrf", "date", "kind", "text"}:
+                    base = {"csrf", "date", "kind", "text"}
+                    meta = {"start_time", "end_time", "timezone", "location"}
+                    if set(args) not in (base, base | meta):
                         raise BrowserError("Unexpected diary entry parameters")
                     try:
-                        diary.add(args["date"], args["text"], args["kind"])
+                        diary.add(args["date"], args["text"], args["kind"],
+                                  **{key: args[key] for key in meta}
+                                  if meta <= set(args) else {})
                     except ValueError as exc:
                         raise BrowserError(str(exc)) from exc
                     self._send(303, b"", extra={"Location": "/diary?" + urlencode({"date": args["date"]})})
