@@ -1201,3 +1201,20 @@ New and edit appointment forms show the short zone in a collapsible
 editable full IANA identifier when necessary. The full identifier remains
 in CSV and iCalendar output so daylight-saving rules are preserved; no
 fixed UTC offset is substituted.
+
+## Display incoming invitations in local time
+
+Timed appointments are **displayed** using the timezone configured by
+`ZEFM_TIMEZONE` (default `America/Chicago`), regardless of the timezone in
+which they were originally created. Thus 3:00 PM Eastern is shown as
+2:00 PM Central, with CST/CDT selected for the actual appointment date.
+The original date, time and IANA zone remain untouched in CSV and iCalendar
+exports. The browser changes only its presentation, not the event itself.
+
+If conversion moves a start time across midnight, the month calendar,
+individual day view, Agenda and date-scoped Search use the **local start
+date**. End times that fall on another local date are labeled with that
+end date. Edit/Delete links retain the original CSV date and row number so
+they still address the correct record. All-day diary/appointment entries
+are never shifted. Other viewing timezones can be selected with
+`ZEFM_TIMEZONE`; no fixed EST/CST offset is assumed.
