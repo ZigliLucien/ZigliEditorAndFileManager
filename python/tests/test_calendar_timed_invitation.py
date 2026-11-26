@@ -73,7 +73,7 @@ class TimedStoreTests(unittest.TestCase):
         ])
         item = parse_ics(source)[0]
         self.assertEqual(item["text"],
-                         "Research meeting\\n\\nDiscuss new results\\nBring the notes")
+                         "Research meeting\n\nDiscuss new results\nBring the notes")
         self.assertEqual(item["location"], "Seminar room")
 
     def test_edit_timed_appointment_metadata_and_clear_it(self):
