@@ -162,7 +162,7 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
 
         def _params(self, body: str) -> dict[str, str]:
             try:
-                args = parse_qs(body, encoding="utf-8", errors="strict", max_num_fields=8,
+                args = parse_qs(body, encoding="utf-8", errors="strict", max_num_fields=16,
                                 strict_parsing=bool(body), keep_blank_values=True)
             except (UnicodeError, ValueError) as exc:
                 raise BrowserError("Invalid request parameters") from exc
