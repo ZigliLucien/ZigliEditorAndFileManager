@@ -118,6 +118,7 @@ def month_page(store, year, month):
     today = date.today()
     nav = ['<p><a href="/listing?path=.">← Files</a> · '
            '<a href="/diary-search">Search Diary</a> · '
+           '<a href="/calendar-week">Week</a> · '
            '<a href="/diary-agenda">Agenda</a> · '
            '<a href="/calendar-export?kind=appointment">Export appointments (.ics)</a> · '
            '<a href="/calendar-import">Import appointments (.ics)</a> · ',
@@ -207,7 +208,8 @@ def day_page(store, day, csrf):
             '<button type="submit" formaction="/diary-preview">Preview</button> <button type="submit">Add Entry</button></form>')
     return ('<p><a href="' + escape(month_url, quote=True) + '">← Calendar</a>'
             ' · <a href="/diary-search">Search Diary</a>'
-            ' · <a href="/diary-agenda">Agenda</a></p>'
+            ' · <a href="/diary-agenda">Agenda</a>'
+            ' · <a href="' + escape(_url("calendar-week", date=day), quote=True) + '">Week</a></p>'
             '<h1>' + escape(day) + '</h1><h2>Diary and appointments</h2>'
             + ('<ul>' + ''.join(rows) + '</ul>' if items else '<p>No entries yet.</p>')
             + form)
