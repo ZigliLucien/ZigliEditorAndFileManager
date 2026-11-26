@@ -1275,3 +1275,12 @@ Diary entries do not receive the link. The endpoint validates both the
 original CSV row number and original event date; a shifted local display
 date does not change the source row. Downloads are read-only snapshots,
 not invitations that update automatically in another calendar.
+
+## Share appointments from Agenda and Search
+
+The **Agenda** and **Search Calendar / Diary** results now provide the same
+**Download .ics** link used by the day and week views, but only for
+appointments. The download references the original CSV date and row index,
+even when the event appears on a different local calendar date after timezone
+conversion. This exports exactly one appointment, in its original timezone,
+without including private diary entries. No calendar data is modified.
