@@ -1235,3 +1235,18 @@ The week view never rewrites calendar.csv; edit links still use each
 entry's original CSV row number and source date even if its local date
 differs. For predictable rendering, the view shows at most 200 entries
 per week and displays a count if more exist.
+
+## Nonblocking appointment overlap warnings
+
+The weekly calendar and daily view now flag timed appointments that actually
+overlap with other appointments. A warning includes a **view other** link
+to one conflicting appointment. Comparison uses timezone-aware UTC start/end
+instants, so an imported Eastern invitation can conflict with a locally
+created Central event, including across local midnight. Meetings whose
+endpoints merely touch (one ends when another begins) are not conflicts.
+All-day diary and appointment entries are not treated as time conflicts.
+
+Warnings are informational: neither viewing the calendar nor a conflict
+check changes the CSV, and a conflict does not prevent saving an event.
+Edit links refer to the original CSV row and date even if the rendered
+local calendar date differs.
