@@ -204,6 +204,10 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                     if entry.suffix.casefold() == ".pdf":
                         links += f' &nbsp; <a href="{escape(link("/pdf", rel), quote=True)}">Open PDF</a>'
                     else:
+                        if entry.suffix.casefold() == ".ics":
+                            links += (' &nbsp; <a href="'
+                                      + escape(link("/calendar-import", rel), quote=True)
+                                      + '">Preview Invitation</a>')
                         links += (f' &nbsp; <a href="{escape(link("/edit", rel), quote=True)}">Quick edit</a>'
                               f' &nbsp; <a href="{escape(link("/edit", rel) + "&dir=rtl", quote=True)}">RTL edit</a>'
                               f' &nbsp; <a href="{escape(link("/raw", rel), quote=True)}">Download</a>'
@@ -270,10 +274,29 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                                if html_document else None)
                 elif parsed.path in ("/", "/browse"):
                     self._send(200, self._render_listing(rel))
-                elif parsed.path == "/calendar-import":
+                elif parsed.path == "/calendar-import.js":
                     if args:
+                        raise BrowserError("Unexpected chooser script parameters")
+                    script = Path(__file__).with_name("calendar_import.js").read_bytes()
+                    self._send(200, script, "text/javascript; charset=utf-8")
+                elif parsed.path == "/calendar-import":
+                    if set(args) - {"path"}:
                         raise BrowserError("Unexpected iCalendar import parameters")
-                    self._send(200, page("Import Calendar", ical_import_page(token)))
+                    source = ""
+                    if "path" in args:
+                        candidate = files.resolve(args["path"])
+                        if (candidate.suffix.lower() != ".ics" or not candidate.is_file()
+                                or (files.root / args["path"]).is_symlink()):
+                            raise BrowserError("Not a readable local .ics file", 404)
+                        if candidate.stat().st_size > 128 * 1024:
+                            raise BrowserError("iCalendar invitation exceeds 128 KiB", 413)
+                        try:
+                            source = candidate.read_text(encoding="utf-8-sig")
+                        except UnicodeError as exc:
+                            raise BrowserError("iCalendar file must be UTF-8", 415) from exc
+                    self._send(200, page("Import Calendar",
+                        ical_import_page(token, source=source)),
+                        allow_local_script=True)
                 elif parsed.path == "/calendar-export":
                     if set(args) - {"kind"}:
                         raise BrowserError("Unexpected calendar export parameters")
@@ -665,6 +688,10 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                     if set(args) - {"path", "back", "chapter", "page", "format", "sort", "desc", "filter"}:
                         raise BrowserError("Unexpected view parameters")
                     descriptor = handler_for(rel)
+                    if descriptor["extension"] == ".ics":
+                        self._send(303, b"", extra={
+                            "Location": "/calendar-import?" + urlencode({"path": rel})})
+                        return
                     kind = descriptor["view"]
                     if kind == "delimited":
                         table_format = args.get("format", "html")
