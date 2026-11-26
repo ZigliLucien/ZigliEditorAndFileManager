@@ -1218,3 +1218,20 @@ end date. Edit/Delete links retain the original CSV date and row number so
 they still address the correct record. All-day diary/appointment entries
 are never shifted. Other viewing timezones can be selected with
 `ZEFM_TIMEZONE`; no fixed EST/CST offset is assumed.
+
+## Weekly calendar
+
+The monthly Calendar includes a **Week** link; individual day pages also
+link to the week containing that date. The read-only `/calendar-week`
+browser view shows Monday through Sunday, with **Previous week**, **Next
+week**, and **Current week** navigation. Each day contains all-day diary
+entries and appointments first, followed by timed appointments in local
+start-time order. Dates and CST/CDT reflect the configured viewing zone
+(`ZEFM_TIMEZONE`, default `America/Chicago`), including when an
+imported invitation crosses a local date boundary. The view links to the
+day page and to Edit for each record.
+
+The week view never rewrites calendar.csv; edit links still use each
+entry's original CSV row number and source date even if its local date
+differs. For predictable rendering, the view shows at most 200 entries
+per week and displays a count if more exist.
