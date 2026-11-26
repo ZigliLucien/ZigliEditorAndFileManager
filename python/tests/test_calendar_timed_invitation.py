@@ -62,6 +62,20 @@ class TimedStoreTests(unittest.TestCase):
             self.assertIn("LOCATION:Room 3", export)
             self.assertEqual(parse_ics(export)[0]["timezone"], "America/Chicago")
 
+    def test_invitation_preserves_distinct_title_and_description(self):
+        source = "\\r\\n".join([
+            "BEGIN:VCALENDAR", "VERSION:2.0", "BEGIN:VEVENT",
+            "DTSTART;TZID=America/Chicago:20261125T100000",
+            "DTEND;TZID=America/Chicago:20261125T110000",
+            "SUMMARY:Research meeting",
+            "DESCRIPTION:Discuss new results\\\\nBring the notes",
+            "LOCATION:Seminar room", "END:VEVENT", "END:VCALENDAR", "",
+        ])
+        item = parse_ics(source)[0]
+        self.assertEqual(item["text"],
+                         "Research meeting\\n\\nDiscuss new results\\nBring the notes")
+        self.assertEqual(item["location"], "Seminar room")
+
     def test_old_entries_still_three_column_when_no_timed_event(self):
         with tempfile.TemporaryDirectory() as temp:
             store = CalendarDiary(Path(temp) / "calendar.csv")
