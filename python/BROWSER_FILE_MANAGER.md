@@ -1166,3 +1166,14 @@ calendar.csv files remain readable and are extended only when a timed
 appointment is first saved. Invalid or incomplete time metadata is
 rejected before any CSV write.
 
+
+## Default appointment timezone
+
+New appointment forms and edit forms for previously all-day entries now
+prefill the IANA timezone `America/Chicago`, avoiding repeated typing.
+To use a different default, set `ZEFM_TIMEZONE` before starting ZEFM,
+for example `export ZEFM_TIMEZONE=America/New_York` on Linux or macOS.
+The field remains editable for individual events; imported timed events
+retain their original timezone. A timezone by itself does not make an event
+timed: leave start, end and location blank for an ordinary diary or all-day
+appointment, without adding new CSV columns.
