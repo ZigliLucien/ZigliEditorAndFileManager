@@ -1,7 +1,7 @@
 """Read-only iCalendar 2.0 export of ZEFM's UTF-8 date-only CSV records.
 
-No appointment times exist in the current CSV schema. Entries are therefore
-represented as all-day events (not midnight appointments). Export is a
+Legacy date-only entries are exported as all-day events; records with explicit
+start/end time and IANA timezone are exported as timed events. Export is a
 snapshot: importing an .ics file into another app is not two-way sync.
 """
 from __future__ import annotations
@@ -73,14 +73,29 @@ def export_ical(store, kind="appointment", *, timestamp=None):
         if summary.startswith("#"):
             summary = summary.lstrip("#").strip()
         summary = summary[:120] or entry["kind"].title()
+        start_field = "DTSTART;VALUE=DATE:" + day
+        end_field = None
+        if entry.get("start_time"):
+            tzid = entry["timezone"]
+            start_stamp = day + "T" + entry["start_time"].replace(":", "") + "00"
+            end_stamp = day + "T" + entry["end_time"].replace(":", "") + "00"
+            if tzid == "UTC":
+                start_field = "DTSTART:" + start_stamp + "Z"
+                end_field = "DTEND:" + end_stamp + "Z"
+            else:
+                start_field = "DTSTART;TZID=" + tzid + ":" + start_stamp
+                end_field = "DTEND;TZID=" + tzid + ":" + end_stamp
         lines.extend([
             "BEGIN:VEVENT",
             "UID:" + uid,
             "DTSTAMP:" + stamp,
-            "DTSTART;VALUE=DATE:" + day,
+            start_field,
             "SUMMARY:" + _escape_ical(summary),
             "DESCRIPTION:" + _escape_ical(entry["text"]),
             "CATEGORIES:" + ("Appointment" if entry["kind"] == "appointment" else "Diary"),
+            *(["LOCATION:" + _escape_ical(entry["location"])]
+              if entry.get("location") else []),
+            *([end_field] if end_field else []),
             "END:VEVENT",
         ])
     lines.append("END:VCALENDAR")
