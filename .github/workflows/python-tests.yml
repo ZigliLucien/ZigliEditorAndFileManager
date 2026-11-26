@@ -33,3 +33,18 @@ jobs:
       - name: Run Python tests, including Tk GUI smoke tests
         working-directory: python
         run: xvfb-run -a python3 -m unittest discover -s tests -v
+
+  calendar-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install time zone database
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tzdata
+      - name: Run calendar and diary tests independently of Tk GUI
+        working-directory: python
+        run: |
+          python3 -m unittest discover -s tests -p 'test_calendar*.py' -v
+          python3 -m unittest discover -s tests -p 'test_diary*.py' -v
