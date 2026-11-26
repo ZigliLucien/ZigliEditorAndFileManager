@@ -145,6 +145,52 @@ class BrowserInvitationTests(unittest.TestCase):
             finally:
                 server.close()
 
+    def test_edit_imported_appointment_in_browser(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            store = CalendarDiary(root / "calendar.csv")
+            store.append_many(parse_ics(INVITE))
+            server = BrowserServer(root, calendar_path=store.path)
+            server.start()
+            try:
+                with urlopen(server.url + "diary-edit?date=2026-11-25&row=0",
+                             timeout=5) as response:
+                    form = response.read().decode("utf-8")
+                self.assertIn('name="start_time" value="14:30"', form)
+                self.assertIn('name="timezone" maxlength="100" value="America/Chicago"', form)
+                self.assertIn('name="location" maxlength="500" value="Room 3"', form)
+                import re
+                revision = re.search(r'name="revision" value="([0-9a-f]{64})"',
+                                     form).group(1)
+                fields = {
+                    "csrf": server.token, "date": "2026-11-25", "row": "0",
+                    "new_date": "2026-11-25", "kind": "appointment",
+                    "text": "Rescheduled", "revision": revision,
+                    "start_time": "15:00", "end_time": "16:00",
+                    "timezone": "America/Chicago", "location": "Room 4",
+                }
+                before = store.revision()
+                preview = Request(
+                    server.url + "diary-preview",
+                    data=urlencode(fields).encode("utf-8"),
+                    headers={"Content-Type": "application/x-www-form-urlencoded"})
+                with urlopen(preview, timeout=5) as response:
+                    page = response.read().decode("utf-8")
+                self.assertIn('name="start_time" value="15:00"', page)
+                self.assertEqual(store.revision(), before)
+                edit = Request(
+                    server.url + "diary-edit",
+                    data=urlencode(fields).encode("utf-8"),
+                    headers={"Content-Type": "application/x-www-form-urlencoded"})
+                with urlopen(edit, timeout=5) as response:
+                    self.assertIn("Rescheduled", response.read().decode("utf-8"))
+                record = store.record(0)
+                self.assertEqual(record["start_time"], "15:00")
+                self.assertEqual(record["end_time"], "16:00")
+                self.assertEqual(record["location"], "Room 4")
+            finally:
+                server.close()
+
     def test_symlink_or_non_ics_file_not_importable(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
