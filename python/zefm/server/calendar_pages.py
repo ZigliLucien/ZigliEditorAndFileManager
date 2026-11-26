@@ -8,6 +8,17 @@ from urllib.parse import urlencode
 from .diary_markup import render_diary
 
 
+def appointment_meta(entry):
+    """Readable, escaped optional time and location metadata."""
+    details = []
+    if entry.get("start_time"):
+        details.append(entry["start_time"] + "–" + entry["end_time"]
+                       + " (" + entry["timezone"] + ")")
+    if entry.get("location"):
+        details.append(entry["location"])
+    return ('<small>' + escape(" · ".join(details)) + '</small>') if details else ""
+
+
 def _url(route, **params):
     return "/" + route + "?" + urlencode(params)
 
@@ -64,7 +75,7 @@ def month_page(store, year, month):
                 '<div class="calendar-entry" style="font-size:.78em;'
                 'line-height:1.25;max-height:7em;overflow:auto;'
                 'overflow-wrap:anywhere;margin:.2em 0">'
-                + render_diary(item["text"]) + '</div>'
+                + appointment_meta(item) + render_diary(item["text"]) + '</div>'
                 for item in events[:2])
             if len(events) > 2:
                 shown += '<small>+' + str(len(events) - 2) + ' more</small>'
@@ -91,7 +102,7 @@ def day_page(store, day, csrf):
         delete_url = escape(_url("diary-delete", date=day, row=index), quote=True)
         rows.append(
             '<li><strong>' + escape(entry["kind"].title()) + '</strong>: '
-            + render_diary(entry["text"]) + ' '
+            + appointment_meta(entry) + render_diary(entry["text"]) + ' '
             + '<small><a href="' + edit_url + '">Edit</a> · '
             + '<a href="' + delete_url + '">Delete…</a></small></li>')
     form = ('<form method="post" action="/diary" accept-charset="utf-8">'
@@ -135,7 +146,8 @@ def entry_edit_page(store, day, index, csrf):
         + escape(entry["date"], quote=True) + '"></label></p>'
         '<p><label>Entry type ' + kind_select + '</label></p>'
         '<p><small>Markdown and safe HTML are displayed when viewing the diary; the source stays editable.</small></p>'
-        '<p><label>Text<br><textarea name="text" required maxlength="4000" '
+        + ('<p>' + appointment_meta(entry) + '</p>' if appointment_meta(entry) else '')
+        + '<p><label>Text<br><textarea name="text" required maxlength="4000" '
         'style="min-height:110px">' + escape(entry["text"]) + '</textarea></label></p>'
         '<button type="submit" formaction="/diary-preview">Preview</button> <button type="submit">Save Changes</button></form>'
         '<p>Changes made elsewhere since opening this form prevent saving.</p>'
