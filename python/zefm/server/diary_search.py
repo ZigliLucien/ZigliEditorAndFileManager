@@ -5,7 +5,7 @@ from html import escape
 from urllib.parse import urlencode
 
 from .diary_markup import render_diary
-from .calendar_pages import appointment_meta
+from .calendar_pages import appointment_meta, display_entry
 from ..storage.calendar_diary import valid_date
 
 MAX_QUERY = 200
@@ -29,11 +29,11 @@ def find_entries(store, query="", start="", end="", kind="all"):
         (index, entry) for index, entry in enumerate(store.read())
         if (not needle or needle in entry["text"].casefold())
         and (kind == "all" or entry["kind"] == kind)
-        and (not start or entry["date"] >= start)
-        and (not end or entry["date"] <= end)
+        and (not start or display_entry(entry)["date"] >= start)
+        and (not end or display_entry(entry)["date"] <= end)
     ]
     # Newest dates first, preserving CSV row order within each date.
-    matches.sort(key=lambda pair: pair[1]["date"], reverse=True)
+    matches.sort(key=lambda pair: display_entry(pair[1])["date"], reverse=True)
     return matches[:MAX_RESULTS], len(matches)
 
 
@@ -60,12 +60,13 @@ def search_page(store, query="", start="", end="", kind="all"):
         return form + '<p>Enter search text, a date range, or an entry type.</p>'
     cards = []
     for index, entry in results:
-        day_url = "/diary?" + urlencode({"date": entry["date"]})
+        shown = display_entry(entry)
+        day_url = "/diary?" + urlencode({"date": shown["date"]})
         edit_url = "/diary-edit?" + urlencode({"date": entry["date"], "row": index})
         cards.append(
             '<li style="margin:1em 0;padding:.5em;border-bottom:1px solid #bbb">'
             '<strong><a href="' + escape(day_url, quote=True) + '">'
-            + escape(entry["date"]) + '</a> — '
+            + escape(shown["date"]) + '</a> — '
             + escape(entry["kind"].title()) + '</strong> '
             '<small><a href="' + escape(edit_url, quote=True)
             + '">Edit</a></small>'
