@@ -41,10 +41,27 @@ class ICalendarParserTests(unittest.TestCase):
         )
         self.assertEqual(parse_ics(source)[0]["text"], "Meeting, notes")
 
+    def test_timed_utc_and_iana_timezone_and_location(self):
+        utc = calendar_event(
+            "DTSTART:20261125T130000Z", "DTEND:20261125T143000Z",
+            "SUMMARY:UTC meeting", "LOCATION:Room 5")
+        entry = parse_ics(utc)[0]
+        self.assertEqual((entry["start_time"], entry["end_time"], entry["timezone"]),
+                         ("13:00", "14:30", "UTC"))
+        self.assertEqual(entry["location"], "Room 5")
+        local = calendar_event(
+            "DTSTART;TZID=America/Chicago:20261125T090000",
+            "DTEND;TZID=America/Chicago:20261125T103000",
+            "SUMMARY:Local meeting", "LOCATION:Carbondale")
+        entry = parse_ics(local)[0]
+        self.assertEqual(entry["timezone"], "America/Chicago")
+        self.assertEqual(entry["date"], "2026-11-25")
+        self.assertEqual(entry["location"], "Carbondale")
+
     def test_reject_timed_multiday_and_recurring(self):
         unsafe = [
-            ("DTSTART:20261125T130000Z", "SUMMARY:Timed"),
-            ("DTSTART;TZID=America/Chicago:20261125T130000", "SUMMARY:Timed"),
+            ("DTSTART:20261125T130000Z", "SUMMARY:Missing end"),
+            ("DTSTART;TZID=America/Chicago:20261125T130000", "SUMMARY:Missing end"),
             ("DTSTART;VALUE=DATE:20261125", "DTEND;VALUE=DATE:20261127", "SUMMARY:Two days"),
             ("DTSTART;VALUE=DATE:20261125", "RRULE:FREQ=MONTHLY", "SUMMARY:Repeats"),
             ("DTSTART;VALUE=DATE:20261125", "BEGIN:VALARM", "END:VALARM", "SUMMARY:Alarm"),
