@@ -6,7 +6,7 @@ Never reads remote URL, opens external files, or expands RRULE expressions.
 """
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime, timedelta
 from html import escape
 
 from ..storage.calendar_diary import validated_record
@@ -35,6 +35,63 @@ def _text(value):
                 raise ValueError("Unsupported iCalendar text escape")
             i += 2
     return "".join(out)
+
+
+def _event_times(event):
+    """Parse either a date-only event or explicitly zoned same-day times."""
+    if any(k in event for k in ("RRULE", "RDATE", "EXDATE", "RECURRENCE-ID", "DURATION")):
+        raise ValueError("Recurring or duration-based events are not supported")
+    starts = [key for key in event if key.startswith("DTSTART")]
+    ends = [key for key in event if key.startswith("DTEND")]
+    if len(starts) != 1 or len(event[starts[0]]) != 1 or len(ends) > 1:
+        raise ValueError("Event must have one DTSTART and at most one DTEND")
+    start_key = starts[0]
+    raw_start = event[start_key][0]
+    if start_key == "DTSTART;VALUE=DATE":
+        if len(raw_start) != 8 or not raw_start.isascii() or not raw_start.isdecimal():
+            raise ValueError("Invalid all-day DTSTART")
+        try:
+            day = datetime.strptime(raw_start, "%Y%m%d").date()
+        except ValueError as exc:
+            raise ValueError("Invalid all-day DTSTART") from exc
+        if ends:
+            if ends[0] != "DTEND;VALUE=DATE":
+                raise ValueError("Incompatible all-day DTEND")
+            try:
+                day_end = datetime.strptime(event[ends[0]][0], "%Y%m%d").date()
+            except ValueError as exc:
+                raise ValueError("Invalid all-day DTEND") from exc
+            if day_end != day + timedelta(days=1):
+                raise ValueError("Multi-day events are not supported")
+        return day.isoformat(), {}
+    if start_key == "DTSTART" and raw_start.endswith("Z"):
+        tzid = "UTC"
+        start_value = raw_start[:-1]
+        end_key = "DTEND"
+        if not ends or ends[0] != end_key or not event[end_key][0].endswith("Z"):
+            raise ValueError("UTC events require a matching UTC end time")
+        end_value = event[end_key][0][:-1]
+    elif start_key.startswith("DTSTART;TZID="):
+        tzid = start_key.split("=", 1)[1]
+        start_value = raw_start
+        end_key = "DTEND;TZID=" + tzid
+        if not ends or ends[0] != end_key:
+            raise ValueError("Appointment timezone must match on start and end")
+        end_value = event[end_key][0]
+    else:
+        raise ValueError("Timed events require UTC (Z) or an IANA TZID")
+    try:
+        first = datetime.strptime(start_value, "%Y%m%dT%H%M%S")
+        last = datetime.strptime(end_value, "%Y%m%dT%H%M%S")
+    except ValueError as exc:
+        raise ValueError("Timed appointments require HHMMSS start and end") from exc
+    if first.date() != last.date() or last <= first:
+        raise ValueError("Only same-day positive-length appointments are supported")
+    return first.date().isoformat(), {
+        "start_time": first.strftime("%H:%M"),
+        "end_time": last.strftime("%H:%M"),
+        "timezone": tzid,
+    }
 
 
 def parse_ics(source):
@@ -75,32 +132,7 @@ def parse_ics(source):
                 raise ValueError("Unexpected END:VEVENT")
             if len(entries) >= MAX_ICS_EVENTS:
                 raise ValueError("iCalendar exceeds 500 events")
-            values = event.get("DTSTART;VALUE=DATE")
-            if not values or len(values) != 1:
-                raise ValueError("Only explicit all-day DTSTART;VALUE=DATE events are supported")
-            raw_day = values[0]
-            if len(raw_day) != 8 or not raw_day.isascii() or not raw_day.isdecimal():
-                raise ValueError("Invalid iCalendar DTSTART date")
-            try:
-                day = date(int(raw_day[:4]), int(raw_day[4:6]), int(raw_day[6:])).isoformat()
-            except ValueError as exc:
-                raise ValueError("Invalid iCalendar DTSTART date") from exc
-            if any(k.startswith("DTSTART") and k != "DTSTART;VALUE=DATE" for k in event):
-                raise ValueError("Timed events are not supported")
-            if any(k in event for k in ("RRULE", "RDATE", "EXDATE", "RECURRENCE-ID", "DURATION")):
-                raise ValueError("Recurring or duration-based events are not supported")
-            end = event.get("DTEND;VALUE=DATE")
-            if end:
-                if len(end) != 1 or len(end[0]) != 8 or not end[0].isascii() or not end[0].isdecimal():
-                    raise ValueError("Invalid all-day event end date")
-                try:
-                    end_date = date(int(end[0][:4]), int(end[0][4:6]), int(end[0][6:])).isoformat()
-                except ValueError as exc:
-                    raise ValueError("Invalid event end date") from exc
-                if (date.fromisoformat(end_date) - date.fromisoformat(day)).days != 1:
-                    raise ValueError("Only one-day events are supported")
-            if any(k.startswith("DTEND") and k != "DTEND;VALUE=DATE" for k in event):
-                raise ValueError("Timed event end date not supported")
+            day, timing = _event_times(event)
             if event.get("STATUS", [""])[0].upper() == "CANCELLED":
                 raise ValueError("Cancelled events cannot be imported")
             description = event.get("DESCRIPTION", [""])
@@ -108,7 +140,12 @@ def parse_ics(source):
             if len(description) != 1 or len(summary) != 1:
                 raise ValueError("Duplicate event summary or description")
             note = _text(description[0]) if description[0] else _text(summary[0])
-            entries.append(validated_record(day, "appointment", note))
+            location = event.get("LOCATION", [""])
+            if len(location) != 1:
+                raise ValueError("Duplicate LOCATION fields")
+            if timing:
+                timing["location"] = _text(location[0])
+            entries.append(validated_record(day, "appointment", note, **timing))
             event = None
             continue
         if upper.startswith(("BEGIN:", "END:")):
