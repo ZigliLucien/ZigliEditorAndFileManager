@@ -51,7 +51,8 @@ class TimedStoreTests(unittest.TestCase):
             self.assertEqual(store.append_many(rows), (0, 1))
             html = day_page(store, "2026-11-25", "token")
             self.assertIn("14:30–15:30", html)
-            self.assertIn("America/Chicago", html)
+            self.assertIn("CST", html)
+            self.assertNotIn("14:30–15:30 (America/Chicago)", html)
             self.assertIn("Room 3", html)
             agenda = agenda_page(store, today=datetime(2026, 11, 25).date())
             self.assertIn("14:30–15:30", agenda)
@@ -104,6 +105,21 @@ class TimedStoreTests(unittest.TestCase):
             self.assertEqual(store.record(0),
                              {"date": "2026-11-25", "kind": "appointment",
                               "text": "All-day"})
+
+    def test_abbreviations_follow_daylight_saving_date(self):
+        from zefm.server.calendar_pages import timezone_label, appointment_meta
+        self.assertEqual(timezone_label("2026-01-15", "09:00",
+                                        "America/Chicago"), "CST")
+        self.assertEqual(timezone_label("2026-07-15", "09:00",
+                                        "America/Chicago"), "CDT")
+        self.assertEqual(timezone_label("2026-07-15", "09:00",
+                                        "America/New_York"), "EDT")
+        self.assertEqual(timezone_label("2026-07-15", "09:00", "UTC"), "UTC")
+        winter = {"date": "2026-01-15", "start_time": "09:00",
+                  "end_time": "10:00", "timezone": "America/Chicago"}
+        summer = dict(winter, date="2026-07-15")
+        self.assertIn("09:00–10:00 CST", appointment_meta(winter))
+        self.assertIn("09:00–10:00 CDT", appointment_meta(summer))
 
     def test_timezone_only_default_does_not_make_event_timed(self):
         with tempfile.TemporaryDirectory() as temp:
