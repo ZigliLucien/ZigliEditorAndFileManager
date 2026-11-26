@@ -26,6 +26,7 @@ from .diary_preview import preview_page
 from .diary_search import search_page as diary_search_page
 from .diary_agenda import agenda_page
 from .ical_export import export_ical
+from .ical_import import parse_ics, import_page as ical_import_page, import_preview_page
 from .rtl_keymap import RTL_KEYMAP_JS, yiddish_keymap_json
 from .listing_view import listing_data, listing_shell
 from .listing_paging import paged_listing
@@ -269,6 +270,10 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                                if html_document else None)
                 elif parsed.path in ("/", "/browse"):
                     self._send(200, self._render_listing(rel))
+                elif parsed.path == "/calendar-import":
+                    if args:
+                        raise BrowserError("Unexpected iCalendar import parameters")
+                    self._send(200, page("Import Calendar", ical_import_page(token)))
                 elif parsed.path == "/calendar-export":
                     if set(args) - {"kind"}:
                         raise BrowserError("Unexpected calendar export parameters")
@@ -877,7 +882,37 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                 return_to = args.get("back")
                 if return_to:
                     safe_listing_return(files, return_to)
-                if route=="/diary-preview":
+                if route=="/calendar-import-preview":
+                    if set(args) != {"csrf", "ics"}:
+                        raise BrowserError("Unexpected calendar import preview fields")
+                    try:
+                        entries = parse_ics(args["ics"])
+                    except ValueError as exc:
+                        raise BrowserError(str(exc)) from exc
+                    if not entries:
+                        raise BrowserError("No importable all-day events")
+                    content = import_preview_page(
+                        entries, args["ics"], diary.revision(), token)
+                    self._send(200, page("Preview Calendar Import", content))
+                elif route=="/calendar-import":
+                    if set(args) != {"csrf", "ics", "revision"}:
+                        raise BrowserError("Unexpected calendar import fields")
+                    try:
+                        entries = parse_ics(args["ics"])
+                        if not entries:
+                            raise ValueError("No importable all-day events")
+                        imported, skipped = diary.append_many(
+                            entries, skip_duplicates=True,
+                            expected_revision=args["revision"])
+                    except CalendarConflictError as exc:
+                        raise BrowserError(str(exc), 409) from exc
+                    except ValueError as exc:
+                        raise BrowserError(str(exc)) from exc
+                    self._send(200, page("Calendar Import Complete",
+                        "<h1>Import complete</h1><p>" + str(imported) +
+                        " appointments added; " + str(skipped) +
+                        ' exact duplicates skipped.</p><p><a href="/calendar">Back to Calendar</a></p>'))
+                elif route=="/diary-preview":
                     # Preview uses the same CSRF check as writes but never persists data.
                     if "row" in args:
                         _diary_row(args["row"])
