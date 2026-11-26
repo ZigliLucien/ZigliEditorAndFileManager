@@ -6,7 +6,7 @@ from html import escape
 from urllib.parse import urlencode
 
 from .diary_markup import render_diary
-from .calendar_pages import appointment_meta
+from .calendar_pages import appointment_meta, entry_time_key
 
 MAX_AGENDA_RESULTS = 100
 WINDOWS = (7, 30, 90)
@@ -29,8 +29,9 @@ def upcoming_entries(store, *, days=30, kind="all", today=None):
         if start.isoformat() <= entry["date"] <= end.isoformat()
         and (kind == "all" or entry["kind"] == kind)
     ]
-    # Python sort is stable; within a date retain original CSV row order.
-    matches.sort(key=lambda pair: pair[1]["date"])
+    # Sort by date then time; stable ordering retains original CSV position
+    # for entries with the same date and time (including all-day entries).
+    matches.sort(key=lambda pair: (pair[1]["date"], *entry_time_key(pair[1])))
     return matches[:MAX_AGENDA_RESULTS], len(matches), start, end
 
 
@@ -55,7 +56,7 @@ def agenda_page(store, *, days=30, kind="all", today=None):
         '<button type="submit">Show Agenda</button></form>'
         '<p>From ' + escape(start.isoformat()) + ' through '
         + escape(end.isoformat()) + ' (inclusive). '
-        'Calendar entries contain dates, not appointment times.</p>'
+        'Entries without times are shown first; timed appointments follow in time order.</p>'
     )
     if not matches:
         return header + '<p>No entries in this period.</p>'
