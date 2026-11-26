@@ -6,6 +6,9 @@ import unittest
 from unittest.mock import patch
 
 from zefm.server.calendar_pages import display_entry, appointment_meta, day_page, month_page
+from zefm.server.http import BrowserServer
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
 from zefm.server.diary_agenda import upcoming_entries, agenda_page
 from zefm.server.diary_search import find_entries, search_page
 from zefm.server.ical_export import export_ical
@@ -81,6 +84,32 @@ class ViewingTimezoneTests(unittest.TestCase):
             self.assertEqual(store.record(0), original)
             exported = export_ical(store).decode("utf-8")
             self.assertIn("DTSTART;TZID=America/New_York:20260701T003000", exported)
+
+    def test_browser_save_returns_to_local_date(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            store = CalendarDiary(root / "calendar.csv")
+            server = BrowserServer(root, calendar_path=store.path)
+            server.start()
+            try:
+                with patch.dict("os.environ", {"ZEFM_TIMEZONE": "America/Chicago"}):
+                    fields = {
+                        "csrf": server.token, "date": "2026-07-01",
+                        "kind": "appointment", "text": "Eastern after midnight",
+                        "start_time": "00:30", "end_time": "01:30",
+                        "timezone": "America/New_York", "location": "",
+                    }
+                    req = Request(
+                        server.url + "diary",
+                        data=urlencode(fields).encode("utf-8"),
+                        headers={"Content-Type": "application/x-www-form-urlencoded"})
+                    with urlopen(req, timeout=5) as response:
+                        self.assertTrue(response.url.endswith("diary?date=2026-06-30"))
+                        self.assertIn("Eastern after midnight",
+                                      response.read().decode("utf-8"))
+                    self.assertEqual(store.record(0)["date"], "2026-07-01")
+            finally:
+                server.close()
 
     def test_all_day_records_do_not_shift(self):
         with patch.dict("os.environ", {"ZEFM_TIMEZONE": "America/Chicago"}):
