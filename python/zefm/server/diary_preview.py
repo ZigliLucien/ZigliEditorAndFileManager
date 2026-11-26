@@ -59,7 +59,7 @@ def preview_page(args, csrf):
         + "".join(fields)
         + '<p><label>Entry type ' + kind_select + '</label></p>'
         + metadata_fields
-        '<p><label>Source Markdown / HTML<br><textarea name="text" required '
+        + '<p><label>Source Markdown / HTML<br><textarea name="text" required '
         'maxlength="4000" style="min-height:220px">'
         + escape(args["text"]) + '</textarea></label></p>'
         '<button type="submit" formaction="/diary-preview">Refresh Preview</button> '
