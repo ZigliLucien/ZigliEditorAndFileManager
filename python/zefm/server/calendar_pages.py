@@ -156,7 +156,7 @@ def day_page(store, day, csrf):
             '<p><label>Start <input type="time" name="start_time"></label> '
             '<label>End <input type="time" name="end_time"></label></p>'
             + timezone_field(day, default_appointment_timezone())
-            '<p><label>Location <input name="location" maxlength="500"></label></p>'
+            + '<p><label>Location <input name="location" maxlength="500"></label></p>'
             '<small>Leave start, end and location empty for an all-day entry. '
             'Timed appointments require start, end and timezone; '
             'end must be later on the same date.</small>'
