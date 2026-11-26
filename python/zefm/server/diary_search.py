@@ -63,13 +63,19 @@ def search_page(store, query="", start="", end="", kind="all"):
         shown = display_entry(entry)
         day_url = "/diary?" + urlencode({"date": shown["date"]})
         edit_url = "/diary-edit?" + urlencode({"date": entry["date"], "row": index})
+        share_link = ""
+        if entry["kind"] == "appointment":
+            share_url = "/calendar-export-one?" + urlencode({
+                "date": entry["date"], "row": index})
+            share_link = (' · <a href="' + escape(share_url, quote=True)
+                          + '">Download .ics</a>')
         cards.append(
             '<li style="margin:1em 0;padding:.5em;border-bottom:1px solid #bbb">'
             '<strong><a href="' + escape(day_url, quote=True) + '">'
             + escape(shown["date"]) + '</a> — '
             + escape(entry["kind"].title()) + '</strong> '
             '<small><a href="' + escape(edit_url, quote=True)
-            + '">Edit</a></small>'
+            + '">Edit</a>' + share_link + '</small>'
             '<div style="max-height:12em;overflow:auto;overflow-wrap:anywhere">'
             + appointment_meta(entry) + render_diary(entry["text"]) + '</div></li>')
     summary = (f'<p>{count} matching entr{"y" if count == 1 else "ies"}'
