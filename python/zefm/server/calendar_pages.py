@@ -2,10 +2,16 @@
 from __future__ import annotations
 
 import calendar
+import os
 from datetime import date
 from html import escape
 from urllib.parse import urlencode
 from .diary_markup import render_diary
+
+
+def default_appointment_timezone():
+    """Configurable IANA timezone for new browser appointments."""
+    return os.environ.get("ZEFM_TIMEZONE", "America/Chicago")
 
 
 def appointment_meta(entry):
@@ -116,9 +122,11 @@ def day_page(store, day, csrf):
             '<p><label>Start <input type="time" name="start_time"></label> '
             '<label>End <input type="time" name="end_time"></label></p>'
             '<p><label>Timezone (IANA, e.g. America/Chicago) '
-            '<input name="timezone" maxlength="100"></label></p>'
+            '<input name="timezone" maxlength="100" value="'
+            + escape(default_appointment_timezone(), quote=True)
+            + '"></label></p>'
             '<p><label>Location <input name="location" maxlength="500"></label></p>'
-            '<small>Leave all fields empty for an all-day entry. '
+            '<small>Leave start, end and location empty for an all-day entry. '
             'Timed appointments require start, end and timezone; '
             'end must be later on the same date.</small>'
             '</fieldset>'
@@ -163,10 +171,10 @@ def entry_edit_page(store, day, index, csrf):
         + escape(entry.get("end_time", ""), quote=True) + '"></label></p>'
         + '<p><label>Timezone (IANA, e.g. America/Chicago) '
         + '<input name="timezone" maxlength="100" value="'
-        + escape(entry.get("timezone", ""), quote=True) + '"></label></p>'
+        + escape(entry.get("timezone") or default_appointment_timezone(), quote=True) + '"></label></p>'
         + '<p><label>Location <input name="location" maxlength="500" value="'
         + escape(entry.get("location", ""), quote=True) + '"></label></p>'
-        + '<small>For all-day entries leave all fields empty. Timed entries need '
+        + '<small>For all-day entries leave start, end and location empty. Timed entries need '
         + 'start, end and timezone; the end must be later on the same day.</small>'
         + '</fieldset>'
         + '<p><label>Text<br><textarea name="text" required maxlength="4000" '
