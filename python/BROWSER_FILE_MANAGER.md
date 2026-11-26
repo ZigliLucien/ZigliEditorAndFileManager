@@ -1250,3 +1250,16 @@ Warnings are informational: neither viewing the calendar nor a conflict
 check changes the CSV, and a conflict does not prevent saving an event.
 Edit links refer to the original CSV row and date even if the rendered
 local calendar date differs.
+
+## Appointment conflict warnings before Save
+
+The **Preview** button for a new or edited timed appointment now checks the
+proposed start and end instants against the existing calendar in UTC,
+regardless of whether an event was received in Eastern or created in Central.
+When an overlap exists, Preview displays **Scheduling overlap** and links to
+the existing appointment (up to five matches). Editing excludes the original
+row from the comparison, and touching endpoints are not conflicts.
+
+Preview never changes the CSV. The warning is informational: users may still
+save overlapping appointments when needed. The normal calendar, weekly view,
+and day view retain their existing overlap warnings.
