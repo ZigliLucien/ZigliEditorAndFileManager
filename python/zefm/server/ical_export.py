@@ -63,7 +63,7 @@ def export_ical(store, kind="appointment", *, timestamp=None):
         day = valid_date(entry["date"]).replace("-", "")
         # Hash of source content and duplicate ordinal provides a deterministic
         # identity for this snapshot. Editing a record changes its identity.
-        identity = (entry["date"], entry["kind"], entry["text"])
+        identity = tuple(entry.get(key, "") for key in ("date", "kind", "text", "start_time", "end_time", "timezone", "location"))
         seen[identity] += 1
         unique = "\0".join(identity) + "\0" + str(seen[identity])
         uid = hashlib.sha256(unique.encode("utf-8")).hexdigest() + "@zefm.local"
