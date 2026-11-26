@@ -1147,3 +1147,22 @@ The iCalendar importer also keeps distinct SUMMARY and DESCRIPTION text
 together in the diary entry. The original ZEFM round-trip remains
 unmodified when the description already contains the summary.
 
+
+## Create timed appointments directly in the browser
+
+On an individual Calendar/Diary date, the **Add Entry** form now supports
+optional **Start**, **End**, **Timezone** (IANA name such as
+`America/Chicago`) and **Location** fields. Select **Appointment**, fill
+in both times and the timezone, enter a Markdown/HTML description, then use
+**Preview** or **Add Entry**. The preview preserves all four fields and
+never saves data automatically. Times use the selected date and HH:MM
+format; the end must be later on that same date. Leave every optional
+field empty for an all-day appointment or diary entry. Diary records
+cannot have appointment-only metadata.
+
+These new appointments use the same optional CSV fields and iCalendar
+export support as imported meeting invitations. Existing three-column
+calendar.csv files remain readable and are extended only when a timed
+appointment is first saved. Invalid or incomplete time metadata is
+rejected before any CSV write.
+
