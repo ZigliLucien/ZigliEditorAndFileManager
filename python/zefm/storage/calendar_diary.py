@@ -160,8 +160,11 @@ class CalendarDiary:
             if temp is not None:
                 temp.unlink(missing_ok=True)
 
-    def add(self, day, text, kind="diary"):
-        record = validated_record(day, kind, text)
+    def add(self, day, text, kind="diary", *, start_time="", end_time="",
+            timezone="", location=""):
+        record = validated_record(day, kind, text, start_time=start_time,
+                                  end_time=end_time, timezone=timezone,
+                                  location=location)
         with self._lock:
             records = self.read()
             records.append(record)
