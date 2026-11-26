@@ -25,6 +25,7 @@ from .calendar_pages import month_page, day_page, entry_edit_page, entry_delete_
 from .diary_preview import preview_page
 from .diary_search import search_page as diary_search_page
 from .diary_agenda import agenda_page
+from .week_calendar import week_page
 from .ical_export import export_ical
 from .calendar_pages import display_entry
 from .ical_import import parse_ics, import_page as ical_import_page, import_preview_page
@@ -323,6 +324,14 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                     except ValueError as exc:
                         raise BrowserError("Invalid calendar month") from exc
                     self._send(200, page("Calendar", month_page(diary, year, month)))
+                elif parsed.path == "/calendar-week":
+                    if set(args) - {"date"}:
+                        raise BrowserError("Unexpected weekly calendar parameters")
+                    try:
+                        content = week_page(diary, args.get("date"))
+                    except (ValueError, OverflowError) as exc:
+                        raise BrowserError("Invalid weekly calendar date") from exc
+                    self._send(200, page("Weekly Calendar", content))
                 elif parsed.path == "/diary-agenda":
                     if set(args) - {"days", "kind"}:
                         raise BrowserError("Unexpected agenda parameters")
