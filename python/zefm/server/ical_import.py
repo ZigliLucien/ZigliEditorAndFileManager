@@ -151,7 +151,17 @@ def parse_ics(source):
             summary = event.get("SUMMARY", [""])
             if len(description) != 1 or len(summary) != 1:
                 raise ValueError("Duplicate event summary or description")
-            note = _text(description[0]) if description[0] else _text(summary[0])
+            title = _text(summary[0])
+            details = _text(description[0])
+            # Preserve both fields without repeating ZEFM's own full-source
+            # DESCRIPTION when its SUMMARY is derived from the first line.
+            if not details:
+                note = title
+            elif not title or title.strip() in (details.splitlines()[0].strip(),
+                                                 details.splitlines()[0].lstrip("# ").strip()):
+                note = details
+            else:
+                note = title + "\n\n" + details
             location = event.get("LOCATION", [""])
             if len(location) != 1:
                 raise ValueError("Duplicate LOCATION fields")
