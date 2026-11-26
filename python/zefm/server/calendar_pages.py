@@ -15,6 +15,36 @@ def default_appointment_timezone():
     return os.environ.get("ZEFM_TIMEZONE", "America/Chicago")
 
 
+def display_entry(entry):
+    """Project an appointment into the configured viewing zone, never mutate CSV.
+
+    A timed event can shift into the preceding or following calendar day.
+    All-day entries retain their original date and have no time conversion.
+    """
+    projected = dict(entry)
+    if not entry.get("start_time"):
+        return projected
+    try:
+        source_zone = ZoneInfo(entry["timezone"])
+        target_name = default_appointment_timezone()
+        target_zone = ZoneInfo(target_name)
+        day = entry["date"]
+        first = datetime.fromisoformat(day + "T" + entry["start_time"])
+        last = datetime.fromisoformat(day + "T" + entry["end_time"])
+        start_local = first.replace(tzinfo=source_zone).astimezone(target_zone)
+        end_local = last.replace(tzinfo=source_zone).astimezone(target_zone)
+        projected["date"] = start_local.date().isoformat()
+        projected["start_time"] = start_local.strftime("%H:%M")
+        projected["end_time"] = end_local.strftime("%H:%M")
+        projected["timezone"] = target_name
+        if end_local.date() != start_local.date():
+            projected["_end_date"] = end_local.date().isoformat()
+    except (ValueError, ZoneInfoNotFoundError, OverflowError):
+        # Keep the original event legible if a system lacks timezone data.
+        return projected
+    return projected
+
+
 def entry_time_key(entry):
     """All-day entries first, then timed appointments from earliest to latest.
 
@@ -50,9 +80,12 @@ def appointment_meta(entry):
     """Readable, escaped optional time and location metadata."""
     details = []
     if entry.get("start_time"):
-        details.append(entry["start_time"] + "–" + entry["end_time"]
-                       + " " + timezone_label(entry["date"], entry["start_time"],
-                                             entry["timezone"]))
+        shown = display_entry(entry)
+        end_suffix = (" (" + shown["_end_date"] + ")"
+                      if shown.get("_end_date") else "")
+        details.append(shown["start_time"] + "–" + shown["end_time"]
+                       + end_suffix + " " + timezone_label(
+                           shown["date"], shown["start_time"], shown["timezone"]))
     if entry.get("location"):
         details.append(entry["location"])
     return ('<small>' + escape(" · ".join(details)) + '</small>') if details else ""
@@ -74,8 +107,10 @@ def month_page(store, year, month):
     if not 2 <= year <= 9998 or not 1 <= month <= 12:
         raise ValueError("Invalid calendar month")
     month_events = {}
-    for entry in store.in_month(year, month):
-        month_events.setdefault(entry["date"], []).append(entry)
+    for entry in store.read():
+        shown = display_entry(entry)
+        if shown["date"].startswith(f"{year:04d}-{month:02d}-"):
+            month_events.setdefault(shown["date"], []).append(entry)
     today = date.today()
     nav = ['<p><a href="/listing?path=.">← Files</a> · '
            '<a href="/diary-search">Search Diary</a> · '
@@ -96,7 +131,8 @@ def month_page(store, year, month):
         table.append('<tr>')
         for day in week:
             key = day.isoformat()
-            events = sorted(month_events.get(key, []), key=entry_time_key)
+            events = sorted(month_events.get(key, []),
+                            key=lambda entry: entry_time_key(display_entry(entry)))
             label = str(day.day)
             href = escape(_url("diary", date=key), quote=True)
             is_today = day == today
@@ -133,13 +169,14 @@ def day_page(store, day, csrf):
     from ..storage.calendar_diary import valid_date
     valid_date(day)
     items = [(index, entry) for index, entry in enumerate(store.read())
-             if entry["date"] == day]
-    items.sort(key=lambda pair: entry_time_key(pair[1]))
+             if display_entry(entry)["date"] == day]
+    items.sort(key=lambda pair: entry_time_key(display_entry(pair[1])))
     month_url = _url("calendar", year=int(day[:4]), month=int(day[5:7]))
     rows = []
     for index, entry in items:
-        edit_url = escape(_url("diary-edit", date=day, row=index), quote=True)
-        delete_url = escape(_url("diary-delete", date=day, row=index), quote=True)
+        # Edit/Delete use the original CSV date, even when display crosses a date.
+        edit_url = escape(_url("diary-edit", date=entry["date"], row=index), quote=True)
+        delete_url = escape(_url("diary-delete", date=entry["date"], row=index), quote=True)
         rows.append(
             '<li><strong>' + escape(entry["kind"].title()) + '</strong>: '
             + appointment_meta(entry) + render_diary(entry["text"]) + ' '
