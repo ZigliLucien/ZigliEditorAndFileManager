@@ -954,7 +954,7 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                     if "row" in args:
                         _diary_row(args["row"])
                     try:
-                        content = preview_page(args, token)
+                        content = preview_page(args, token, diary)
                     except ValueError as exc:
                         raise BrowserError(str(exc)) from exc
                     self._send(200, page("Diary Preview", content))
