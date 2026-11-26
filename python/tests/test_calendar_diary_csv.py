@@ -90,8 +90,10 @@ class CalendarBrowserTests(unittest.TestCase):
                 with urlopen(req, timeout=5) as response:
                     self.assertEqual(response.status, 200)
                     html = response.read().decode("utf-8")
-                self.assertIn("&lt;script&gt;", html)
+                # Diary now renders sanitized Markdown/HTML, not raw source.
+                self.assertNotIn("&lt;script&gt;", html)
                 self.assertNotIn("<script>", html)
+                self.assertNotIn("bad()", html)
                 self.assertIn("ייִדיש", html)
                 self.assertEqual(len(CalendarDiary(diary_path).on_day("2026-11-23")), 1)
                 fields["csrf"] = "bad"
