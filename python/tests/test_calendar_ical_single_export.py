@@ -9,6 +9,10 @@ import unittest
 from zefm.server.ical_export import export_ical
 from zefm.server.calendar_pages import day_page
 from zefm.server.week_calendar import week_page
+from zefm.server.diary_agenda import agenda_page
+from zefm.server.diary_search import search_page
+from datetime import date
+from unittest.mock import patch
 from zefm.server.http import BrowserServer
 from zefm.server.ical_import import parse_ics
 from zefm.storage.calendar_diary import CalendarDiary
@@ -56,6 +60,39 @@ class SingleIcsExportTests(unittest.TestCase):
             for row, expected in enumerate(uids):
                 single = export_ical(store, row_index=row).decode("utf-8")
                 self.assertIn("UID:" + expected, single)
+
+    def test_agenda_and_search_offer_source_safe_single_export(self):
+        with TemporaryDirectory() as tmp, patch.dict(
+            "os.environ", {"ZEFM_TIMEZONE": "America/Chicago"}):
+            store = CalendarDiary(Path(tmp) / "calendar.csv")
+            store.add("2026-07-01", "Private diary", "diary")
+            # This Eastern start is June 30 in the Central display zone.
+            store.add("2026-07-01", "Late Eastern", "appointment",
+                      start_time="00:30", end_time="01:30",
+                      timezone="America/New_York")
+            store.add("2026-06-30", "Morning Central", "appointment",
+                      start_time="09:00", end_time="10:00",
+                      timezone="America/Chicago")
+            before = store.read()
+            link = 'calendar-export-one?date=2026-07-01&amp;row=1'
+            agenda = agenda_page(store, days=7, today=date(2026, 6, 30))
+            search = search_page(store, query="Late Eastern",
+                                 start="2026-06-30", end="2026-06-30")
+            self.assertIn(link, agenda)
+            self.assertIn(link, search)
+            self.assertIn('diary?date=2026-06-30', search)
+            self.assertEqual(agenda.count("Download .ics"), 2)
+            self.assertEqual(search.count("Download .ics"), 1)
+            self.assertEqual(store.read(), before)
+
+    def test_search_does_not_offer_private_diary_as_ics(self):
+        with TemporaryDirectory() as tmp:
+            store = self.build(tmp)
+            diary_search = search_page(store, query="Private diary")
+            self.assertNotIn("Download .ics", diary_search)
+            all_search = search_page(store, kind="all", start="2026-07-01",
+                                     end="2026-07-01")
+            self.assertEqual(all_search.count("Download .ics"), 2)
 
     def test_http_download_and_edit_links(self):
         with TemporaryDirectory() as tmp:
