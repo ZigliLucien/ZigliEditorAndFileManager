@@ -8,9 +8,8 @@ from __future__ import annotations
 
 from datetime import date
 from html import escape
-from urllib.parse import urlencode
 
-from ..storage.calendar_diary import validated_record, valid_date
+from ..storage.calendar_diary import validated_record
 
 MAX_ICS_SOURCE = 128 * 1024
 MAX_ICS_EVENTS = 500
@@ -61,7 +60,6 @@ def parse_ics(source):
         raise ValueError("Only iCalendar VERSION:2.0 is supported")
     entries = []
     event = None
-    in_alarm = False
     for line in unfolded[1:-1]:
         upper = line.upper()
         if upper == "BEGIN:VALARM":
@@ -131,26 +129,21 @@ def parse_ics(source):
     return entries
 
 
-def import_page():
+def import_page(csrf):
+    """Local-only paste form. No JavaScript, file upload, or network access."""
     return (
         '<h1>Import iCalendar appointments</h1>'
         '<p><a href="/calendar">← Calendar</a></p>'
-        '<p>Only one-day, all-day events are accepted. Timed appointments, '
+        '<p>Open an .ics file as text and paste its contents below. '
+        'Only one-day all-day events are accepted. Timed events, '
         'recurrences and alarms are rejected rather than guessed. '
-        'Your CSV is not modified until you confirm the preview.</p>'
+        'Nothing is written until you confirm the preview.</p>'
         '<form method="post" action="/calendar-import-preview" accept-charset="utf-8">'
-        '<label>Select an .ics file (loaded locally in your browser) '
-        '<input id="ics-file" type="file" accept=".ics,text/calendar"></label>'
-        '<p><label>Or paste the contents of an .ics file<br>'
-        '<textarea id="ics-data" name="ics" required maxlength="131072" '
-        'style="width:100%;min-height:180px"></textarea></label></p>'
+        '<input type="hidden" name="csrf" value="' + escape(csrf, quote=True) + '">'
+        '<p><label>iCalendar (.ics) contents<br>'
+        '<textarea name="ics" required maxlength="131072" '
+        'style="width:100%;min-height:240px"></textarea></label></p>'
         '<button type="submit">Preview Import</button></form>'
-        '<script>'
-        'document.getElementById("ics-file").addEventListener("change",async(e)=>{'
-        'const file=e.target.files[0];if(!file)return;'
-        'if(file.size>131072){alert("iCalendar file too large");return;}'
-        'document.getElementById("ics-data").value=await file.text();'
-        '});</script>'
     )
 
 
