@@ -6,6 +6,7 @@ from html import escape
 from urllib.parse import urlencode
 
 from .diary_markup import render_diary
+from .calendar_pages import appointment_meta
 
 MAX_AGENDA_RESULTS = 100
 WINDOWS = (7, 30, 90)
@@ -74,7 +75,7 @@ def agenda_page(store, *, days=30, kind="all", today=None):
             '<strong>' + escape(entry["kind"].title()) + '</strong> · '
             '<a href="' + escape(edit_url, quote=True) + '">Edit</a>'
             '<div style="overflow-wrap:anywhere;max-height:12em;overflow:auto">'
-            + render_diary(entry["text"]) + "</div></li>")
+            + appointment_meta(entry) + render_diary(entry["text"]) + "</div></li>")
     parts.append("</ul>")
     summary = (f'<p>{count} upcoming entr{"y" if count == 1 else "ies"}'
                + (f" (showing the first {MAX_AGENDA_RESULTS})"
