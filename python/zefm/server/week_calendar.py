@@ -13,6 +13,7 @@ from .calendar_pages import (
     appointment_meta, default_appointment_timezone, display_entry, entry_time_key,
 )
 from .diary_markup import render_diary
+from .appointment_conflicts import conflicting_rows
 from ..storage.calendar_diary import valid_date
 
 DAYS_PER_WEEK = 7
@@ -66,6 +67,8 @@ def _nav(start):
 
 def week_page(store, anchor=None):
     start, rows, count = week_entries(store, anchor)
+    source_rows = store.read()
+    conflicts = conflicting_rows(source_rows)
     end = start + timedelta(days=DAYS_PER_WEEK - 1)
     result = [
         '<h1>Weekly Calendar</h1>',
@@ -89,10 +92,19 @@ def week_page(store, anchor=None):
         for index, original, shown in entries:
             edit = '/diary-edit?' + urlencode({
                 "date": original["date"], "row": index})
+            warning = ""
+            if index in conflicts:
+                other_index = conflicts[index]
+                other = source_rows[other_index]
+                other_link = '/diary-edit?' + urlencode({
+                    "date": other["date"], "row": other_index})
+                warning = (' <small role="status">⚠ Overlaps another appointment'
+                           ' (<a href="' + escape(other_link, quote=True) +
+                           '">view other</a>)</small>')
             result.append(
                 '<li style="padding:.35em 0;overflow-wrap:anywhere">'
                 '<strong>' + escape(original["kind"].title()) + '</strong> · ' +
-                appointment_meta(original) +
+                appointment_meta(original) + warning +
                 '<div>' + render_diary(original["text"]) + '</div>'
                 '<small><a href="' + escape(edit, quote=True) +
                 '">Edit</a></small></li>')
