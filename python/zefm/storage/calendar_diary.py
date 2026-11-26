@@ -6,7 +6,8 @@ atomic, with a revision check for edits/deletions and a per-instance lock.
 from __future__ import annotations
 
 import csv
-from datetime import date
+from datetime import date, datetime
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 import hashlib
 import hmac
 import os
@@ -16,6 +17,7 @@ import tempfile
 import threading
 
 HEADERS = ("date", "kind", "text")
+TIMED_HEADERS = HEADERS + ("start_time", "end_time", "timezone", "location")
 MAX_ROWS = 10000
 MAX_BYTES = 4 * 1024 * 1024
 MAX_TEXT = 4000
@@ -46,12 +48,36 @@ def valid_date(value):
     return value
 
 
-def validated_record(day, kind, text):
+def validated_record(day, kind, text, *, start_time="", end_time="", timezone="", location=""):
     valid_date(day)
     if kind not in KINDS:
         raise ValueError("Invalid calendar entry type")
     if not isinstance(text, str) or not text.strip() or len(text) > MAX_TEXT:
         raise ValueError("Diary entry must contain 1 to 4,000 characters")
+    if any((start_time, end_time, timezone, location)):
+        if (kind != "appointment" or not start_time or not end_time
+                or not timezone):
+            raise ValueError("Timed appointments require start, end and timezone")
+        if not all(isinstance(v, str) for v in (start_time, end_time, timezone, location)):
+            raise ValueError("Invalid appointment metadata")
+        for value in (start_time, end_time):
+            try:
+                parsed = datetime.strptime(value, "%H:%M")
+            except ValueError as exc:
+                raise ValueError("Appointment time must be HH:MM") from exc
+            if parsed.strftime("%H:%M") != value:
+                raise ValueError("Appointment time must be HH:MM")
+        if end_time <= start_time:
+            raise ValueError("End time must be later than start time on the same day")
+        if len(timezone) > 100 or len(location) > 500:
+            raise ValueError("Appointment metadata too long")
+        try:
+            ZoneInfo(timezone)
+        except (ValueError, ZoneInfoNotFoundError) as exc:
+            raise ValueError("Unknown appointment timezone") from exc
+        return {"date": day, "kind": kind, "text": text,
+                "start_time": start_time, "end_time": end_time,
+                "timezone": timezone, "location": location}
     return {"date": day, "kind": kind, "text": text}
 
 
@@ -86,8 +112,9 @@ class CalendarDiary:
                 raise ValueError("Calendar CSV exceeds size limit")
             with self.path.open("r", encoding="utf-8-sig", newline="") as stream:
                 reader = csv.DictReader(stream, strict=True)
-                if reader.fieldnames != list(HEADERS):
-                    raise ValueError("Calendar CSV columns must be date,kind,text")
+                if reader.fieldnames not in (list(HEADERS), list(TIMED_HEADERS)):
+                    raise ValueError("Unsupported calendar CSV columns")
+                extended = reader.fieldnames == list(TIMED_HEADERS)
                 rows = []
                 try:
                     for row in reader:
@@ -95,7 +122,10 @@ class CalendarDiary:
                             raise ValueError("Calendar CSV exceeds row limit")
                         if None in row or any(value is None for value in row.values()):
                             raise ValueError("Invalid calendar CSV row")
-                        rows.append(validated_record(row["date"], row["kind"], row["text"]))
+                        rows.append(validated_record(
+                            row["date"], row["kind"], row["text"],
+                            **({name: row[name] for name in TIMED_HEADERS[3:]}
+                               if extended else {})))
                 except csv.Error as exc:
                     raise ValueError("Malformed calendar CSV") from exc
                 return rows
@@ -113,9 +143,13 @@ class CalendarDiary:
             ) as stream:
                 temp = Path(stream.name)
                 os.chmod(temp, 0o600)
-                writer = csv.DictWriter(stream, fieldnames=HEADERS)
+                extended = any(any(record.get(k, "") for k in TIMED_HEADERS[3:])
+                               for record in records)
+                fields = TIMED_HEADERS if extended else HEADERS
+                writer = csv.DictWriter(stream, fieldnames=fields)
                 writer.writeheader()
-                writer.writerows(records)
+                writer.writerows([{name: record.get(name, "") for name in fields}
+                                  for record in records])
                 stream.flush()
                 os.fsync(stream.fileno())
             if temp.stat().st_size > MAX_BYTES:
@@ -135,16 +169,19 @@ class CalendarDiary:
 
     def append_many(self, entries, *, skip_duplicates=True, expected_revision=None):
         """Import a batch atomically. Repeated imports skip exact duplicate rows."""
-        validated = [validated_record(item["date"], item["kind"], item["text"])
-                     for item in entries]
+        validated = [validated_record(
+            item["date"], item["kind"], item["text"],
+            **{key: item.get(key, "") for key in TIMED_HEADERS[3:]})
+            for item in entries]
         with self._lock:
             if expected_revision is not None:
                 self._check_revision_locked(expected_revision)
             records = self.read()
-            existing = {(r["date"], r["kind"], r["text"]) for r in records}
+            existing = {tuple(r.get(k, "") for k in TIMED_HEADERS)
+                        for r in records}
             added = 0
             for record in validated:
-                key = (record["date"], record["kind"], record["text"])
+                key = tuple(record.get(k, "") for k in TIMED_HEADERS)
                 if skip_duplicates and key in existing:
                     continue
                 records.append(record)
@@ -173,6 +210,10 @@ class CalendarDiary:
                 raise CalendarEntryNotFound("Calendar entry not found")
             if expected_day is not None and records[index]["date"] != valid_date(expected_day):
                 raise CalendarEntryNotFound("Entry does not belong to that date")
+            if any(records[index].get(k, "") for k in TIMED_HEADERS[3:]):
+                new = validated_record(
+                    day, kind, text,
+                    **{k: records[index].get(k, "") for k in TIMED_HEADERS[3:]})
             records[index] = new
             self._write_locked(records)
 
