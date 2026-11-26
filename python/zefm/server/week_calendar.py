@@ -92,6 +92,11 @@ def week_page(store, anchor=None):
         for index, original, shown in entries:
             edit = '/diary-edit?' + urlencode({
                 "date": original["date"], "row": index})
+            share = '/calendar-export-one?' + urlencode({
+                "date": original["date"], "row": index})
+            share_link = (' · <a href="' + escape(share, quote=True) +
+                          '">Download .ics</a>'
+                          if original["kind"] == "appointment" else "")
             warning = ""
             if index in conflicts:
                 other_index = conflicts[index]
@@ -107,7 +112,7 @@ def week_page(store, anchor=None):
                 appointment_meta(original) + warning +
                 '<div>' + render_diary(original["text"]) + '</div>'
                 '<small><a href="' + escape(edit, quote=True) +
-                '">Edit</a></small></li>')
+                '">Edit</a>' + share_link + '</small></li>')
         result.append('</ul></section>')
     if count > MAX_WEEK_ENTRIES:
         result.append('<p>Showing the first ' + str(MAX_WEEK_ENTRIES) +
