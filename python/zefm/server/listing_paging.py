@@ -16,7 +16,7 @@ from .listing_view import MAX_LIST_ENTRIES
 from ..storage.word_notes import WordNotes
 
 PAGE_SIZE = 25
-SORT_KEYS = frozenset({"filename", "filetype", "timekey", "size", "notes"})
+SORT_KEYS = frozenset({"filename", "filetype", "timekey", "timeold", "size", "notes"})
 
 
 def _display_name(name):
@@ -94,6 +94,9 @@ def paged_listing(files, relative=".", *, page=1, sort="timekey", filter_text=""
     elif sort == "timekey":
         filtered.sort(key=lambda row: (
             -row["modified"], _display_name(row["name"]), row["name"]))
+    elif sort == "timeold":
+        filtered.sort(key=lambda row: (
+            row["modified"], _display_name(row["name"]), row["name"]))
     else:
         filtered.sort(key=lambda row: (_display_name(row["name"]), row["name"]))
 
