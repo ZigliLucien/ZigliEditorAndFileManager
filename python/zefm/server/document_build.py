@@ -295,6 +295,11 @@ def build_pdf(files, relative, *, publish_adjacent=False, latex_engine="lualatex
             # /math.css is a browser-server URL, not a filesystem path.
             # Embed the bundled stylesheet for the standalone PDF renderer.
             css = Path(__file__).with_name("math.css").read_text(encoding="utf-8")
+            # The bundled responsive rule is screen-only. Older PDF engines
+            # reject media queries and browser scrolling properties.
+            css = css.split("@media(max-width:700px)", 1)[0]
+            css = css.replace("font-weight: 650", "font-weight: 700")
+            css = css.replace("overflow-x: auto;", "")
             markup = format_math_html(html).replace(
                 '<link rel="stylesheet" href="/math.css">',
                 "<style>\n" + css + "\n</style>", 1)
