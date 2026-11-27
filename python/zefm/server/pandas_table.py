@@ -210,7 +210,7 @@ def _read_frame(path, pd, full):
         frame = pd.read_csv(
             path, sep="\t" if suffix == ".tsv" else ",",
             encoding="utf-8-sig", dtype=str, keep_default_na=False,
-            nrows=None if full else MAX_CSV_ROWS + 1, on_bad_lines="error")
+            nrows=MAX_DATA_ROWS + 1, on_bad_lines="error")
     _check_shape(*frame.shape)
     if frame.shape[1] > MAX_CSV_COLUMNS:
         raise BrowserError("Delimited file has too many columns", 413)
