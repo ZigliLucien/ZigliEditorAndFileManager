@@ -202,3 +202,30 @@ class PandasBrowserTests(unittest.TestCase):
         self.source.write_text("N\n" + "1\n" * 100, encoding="utf-8")
         with self.assertRaises(BrowserError):
             dataframe_preview(self.files, "data.csv", transpose=True)
+
+    def test_large_json_and_complete_pagination(self):
+        import json
+        source = self.root / "large.json"
+        rows = [{"id": i, "notes": "a" * 900} for i in range(2500)]
+        source.write_text(json.dumps(rows), encoding="utf-8")
+        self.assertGreater(source.stat().st_size, 2 * 1024 * 1024)
+        result = dataframe_preview(self.files, source.name, page=100, page_size=25,
+                                   hidden='["notes"]')
+        self.assertIn("Page 100 of 100", result)
+        self.assertIn("2500 matching rows of 2500", result)
+        self.assertIn("<td>2499</td>", result)
+
+    def test_visible_columns_export_and_hidden_filter(self):
+        import json
+        result = dataframe_preview(self.files, "data.csv", hidden='["Name"]',
+                                   contains="Alpha", column="Name", total1="Value")
+        self.assertIn("Columns (2 of 3 visible)", result)
+        self.assertNotIn("<td>Alpha</td>", result)
+        self.assertIn("<strong>110</strong>", result)
+        records = json.loads(dataframe_preview(self.files, "data.csv",
+                             hidden='["Name"]', contains="Alpha", column="Name", export="json"))
+        self.assertEqual(records, [{"Code": "001", "Value": "100"},
+                                   {"Code": "003", "Value": "10"}])
+        for hidden in ('["unknown"]', '["Code","Name","Value"]', '{}'):
+            with self.assertRaises(BrowserError):
+                dataframe_preview(self.files, "data.csv", hidden=hidden)
