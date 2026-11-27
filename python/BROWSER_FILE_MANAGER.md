@@ -1298,3 +1298,18 @@ clears the filename filter while retaining the sort. File operations
 continue to carry the validated sort, page and filter state in their
 Back-to-listing links. The chosen sort changes only presentation, not
 file modification times or filesystem contents.
+
+## LuaLaTeX builds with latexmk
+
+In the desktop editor, choose **Run → Select LaTeX Engine...** and enter
+`latexmk`. The choice is saved in `~/.config/zefm/latex_engine.json`.
+F4 saves the current TeX document and compiles using latexmk with
+LuaLaTeX, handling required reruns and bibliography processing automatically.
+ZEFM uses `-norc`, passes `-no-shell-escape` to the LaTeX engine, and
+builds in a private temporary directory with a bounded timeout. It verifies
+the PDF before publishing the adjacent `.pdf` and browser preview;
+failed builds leave the existing PDF untouched.
+
+The existing `lualatex`, `pdflatex`, and `xelatex` choices remain
+available. The default desktop and browser compiler remains `lualatex`
+unless you select `latexmk` in the desktop editor.
