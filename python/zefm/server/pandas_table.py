@@ -156,6 +156,80 @@ def _bibliography_cell(column, value, record):
     return _linked_cell(value)
 
 
+# Bounded process-local LRU. Only parsed, validated source frames are cached;
+# callers must not modify them in place.
+from collections import OrderedDict
+from threading import RLock
+
+_CACHE = OrderedDict()
+_CACHE_LOCK = RLock()
+CACHE_MAX_FILES = 8
+CACHE_MAX_CELLS = 500_000
+CACHE_MAX_BYTES = 32 * 1024 * 1024
+
+
+def _signature(path):
+    stat = path.stat()
+    return (stat.st_dev, stat.st_ino, stat.st_size,
+            stat.st_mtime_ns, stat.st_ctime_ns)
+
+
+def _read_frame(path, pd, full):
+    suffix = path.suffix.casefold()
+    if suffix == ".bib":
+        frame = _read_bib_records(path, pd)
+    elif suffix in JSON_EXTENSIONS:
+        frame = _read_json_records(path, pd, None if full else MAX_CSV_ROWS + 1)
+    else:
+        frame = pd.read_csv(
+            path, sep="\t" if suffix == ".tsv" else ",",
+            encoding="utf-8-sig", dtype=str, keep_default_na=False,
+            nrows=None if full else MAX_CSV_ROWS + 1, on_bad_lines="error")
+    if frame.shape[1] > MAX_CSV_COLUMNS:
+        raise BrowserError("Delimited file has too many columns", 413)
+    if any(len(_display(value)) > MAX_CSV_CELL
+           for values in frame.itertuples(index=False, name=None)
+           for value in values):
+        raise BrowserError("Delimited table contains oversized cells", 413)
+    return frame
+
+
+def _cached_frame(path, pd, full=False):
+    # BibTeX parsing always loads the entire file, so preview and export share
+    # one entry. Other formats retain the existing bounded preview read.
+    full = bool(full or path.suffix.casefold() == ".bib")
+    with _CACHE_LOCK:
+        signature = _signature(path)
+        if signature[2] > MAX_CSV_BYTES:
+            raise BrowserError("Data file exceeds 2 MB size limit", 413)
+        for key in list(_CACHE):
+            if key[0] == path and key[1] != signature:
+                del _CACHE[key]
+        key = (path, signature, full)
+        complete = (path, signature, True)
+        if not full and complete in _CACHE:
+            key = complete
+        if key in _CACHE:
+            _CACHE.move_to_end(key)
+            return _CACHE[key][0]
+        frame = _read_frame(path, pd, full)
+        if _signature(path) != signature:
+            raise BrowserError("Data file changed while reading; retry", 409)
+        cells = frame.shape[0] * max(1, frame.shape[1])
+        # Estimate object storage, including nested JSON's serialized contents.
+        size = int(frame.memory_usage(index=True, deep=True).sum())
+        size += sum(len(_display(v).encode("utf-8"))
+                    for row in frame.itertuples(index=False, name=None)
+                    for v in row if isinstance(v, (dict, list)))
+        if cells <= CACHE_MAX_CELLS and size <= CACHE_MAX_BYTES:
+            while _CACHE and (len(_CACHE) >= CACHE_MAX_FILES
+                              or sum(v[1] for v in _CACHE.values()) + size > CACHE_MAX_BYTES
+                              or sum(v[2] for v in _CACHE.values()) + cells > CACHE_MAX_CELLS):
+                _CACHE.popitem(last=False)
+            _CACHE[(path, signature, full)] = (frame, size, cells)
+        return frame
+
+
 def dataframe_preview(files, relative, sort="", descending=False, contains="",
                       column="", sort_type="text", page=1, page_size=50, export=""):
     if export not in ("", "json", "jsonl", "markdown", "csv", "html", "bib"):
@@ -178,19 +252,9 @@ def dataframe_preview(files, relative, sort="", descending=False, contains="",
     if export == "bib" and not is_bib:
         raise BrowserError("BibTeX export currently requires a BibTeX source")
     try:
-        if is_bib:
-            frame = _read_bib_records(path, pd)
-        elif is_json:
-            frame = _read_json_records(path, pd, None if export else MAX_CSV_ROWS + 1)
-        else:
-            frame = pd.read_csv(
-                path, sep="\t" if path.suffix.casefold() == ".tsv" else ",",
-                encoding="utf-8-sig", dtype=str, keep_default_na=False,
-                nrows=None if export else MAX_CSV_ROWS + 1, on_bad_lines="error")
+        frame = _cached_frame(path, pd, full=bool(export))
     except (UnicodeError, ValueError, pd.errors.ParserError, pd.errors.EmptyDataError) as exc:
         raise BrowserError("Invalid data table: " + str(exc), 415) from exc
-    if frame.shape[1] > MAX_CSV_COLUMNS:
-        raise BrowserError("Delimited file has too many columns", 413)
     truncated = len(frame) > MAX_CSV_ROWS
     if not export:
         frame = frame.head(MAX_CSV_ROWS)
@@ -200,9 +264,6 @@ def dataframe_preview(files, relative, sort="", descending=False, contains="",
         raise BrowserError("Unknown filter column")
     if sort and sort not in columns:
         raise BrowserError("Unknown column for sorting")
-    if any(len(_display(value)) > MAX_CSV_CELL for values in frame.itertuples(index=False, name=None)
-           for value in values):
-        raise BrowserError("Delimited table contains oversized cells", 413)
     if contains:
         if column:
             mask = frame[column].map(_display).str.contains(contains, case=False, regex=False, na=False)
@@ -269,8 +330,9 @@ def dataframe_preview(files, relative, sort="", descending=False, contains="",
         headings.append('<th>' + link(c + arrow, sort=c, desc=int(not descending) if c == sort else 0, page=1) + '</th>')
     rows = ['<tr><th>Row</th>' + ''.join(headings) + '</tr>']
     for values in visible.itertuples(index=True, name=None):
+        record = dict(zip(columns, values[1:])) if is_bib else None
         rows.append('<tr><th>' + e(values[0] + 1) + '</th>' +
-                    ''.join('<td>' + (_bibliography_cell(c, v, dict(zip(columns, values[1:]))) if is_bib else _linked_cell(v)) + '</td>' for c, v in zip(columns, values[1:])) + '</tr>')
+                    ''.join('<td>' + (_bibliography_cell(c, v, record) if is_bib else _linked_cell(v)) + '</td>' for c, v in zip(columns, values[1:])) + '</tr>')
     back = '/view?' + urlencode({"path": relative} if is_json or is_bib else {"path": relative, "format": "html"})
     parent = str(PurePosixPath(relative).parent)
     directory = '/listing?' + urlencode({"path": "" if parent == "." else parent})
