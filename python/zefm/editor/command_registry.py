@@ -10,8 +10,8 @@ class Command:
 
 MENUS = {
  "File": [Command(a,b) for a,b in zip(
- ["Open","Save","Save As","Revert Buffer","Print","Quit"],
- ["F9","F1","F3","Ctrl+F9","Ctrl+P","Ctrl+Q"])],
+ ["Open","Save","Save As","Revert Buffer","Print","Quit","Insert File Template"],
+ ["F9","F1","F3","Ctrl+F9","Ctrl+P","Ctrl+Q","Ctrl+Shift+T"])],
  "Edit": [Command(a,b) for a,b in zip(
  ["Refresh Buffer","Clear","Redo","Undo","Line Numbers","Find","Replace","Continue Find or Replace","Toggle ClickPad","Copy","Paste","Cut","Go to Matching LaTeX Delimiter","LaTeX Document Outline","Go to Line","Go to Record","Next Record","Previous Record"],
  ["F7","F8","F6","F5","Ctrl+F2","Ctrl+S","Ctrl+Shift+R","Ctrl+R","Ctrl+F","Ctrl+C","Ctrl+V","Ctrl+X","Ctrl+Shift+M","Ctrl+Shift+L","Ctrl+G",None,None,None])],
