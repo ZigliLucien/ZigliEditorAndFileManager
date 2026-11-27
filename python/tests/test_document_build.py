@@ -73,7 +73,13 @@ class BuildModelTests(unittest.TestCase):
             self.assertTrue(command[0].endswith("weasyprint"))
             self.assertEqual(Path(command[1]).name, "document.html")
             self.assertEqual(Path(command[2]).name, "document.pdf")
-            self.assertIn("<h1>שלום</h1>", Path(command[1]).read_text())
+            markup = Path(command[1]).read_text(encoding="utf-8")
+            self.assertIn("<h1>שלום</h1>", markup)
+            self.assertIn("font-weight: 700", markup)
+            self.assertNotIn('href="/math.css"', markup)
+            self.assertNotIn("font-weight: 650", markup)
+            self.assertNotIn("overflow-x: auto", markup)
+            self.assertNotIn("@media(max-width:700px)", markup)
             Path(command[2]).write_bytes(b"%PDF-1.7\nvalid")
             class Compiled:
                 returncode = 0
