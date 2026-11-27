@@ -19,12 +19,12 @@ class _Scanner(HTMLParser):
         self.parts = []
         self.hidden = None
 
-    def offset(self):
+    def _source_offset(self):
         line, column = self.getpos()
         return self.lines[line - 1] + column
 
     def mark(self, length, style):
-        start = self.offset()
+        start = self._source_offset()
         self.spans.append((start, min(start + length, len(self.text)), style))
 
     def finish_heading(self):
@@ -37,7 +37,7 @@ class _Scanner(HTMLParser):
 
     def handle_starttag(self, tag, attrs):
         raw = self.get_starttag_text()
-        start = self.offset()
+        start = self._source_offset()
         self.mark(len(raw), "command")
         name_end = re.match(r"<[^\s/>]+", raw)
         if name_end:
@@ -59,7 +59,7 @@ class _Scanner(HTMLParser):
             self.hidden = None
 
     def handle_endtag(self, tag):
-        start = self.offset()
+        start = self._source_offset()
         end = self.text.find(">", start)
         if end >= 0:
             self.mark(end - start + 1, "command")
