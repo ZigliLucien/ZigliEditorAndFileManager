@@ -16,8 +16,12 @@ class ShortcutTests(unittest.TestCase):
         menus = load_menus()
         self.assertEqual(next(c.shortcut for c in menus['Edit'] if c.label == 'Find'), 'Ctrl+S')
     def test_override(self):
-        menus = load_menus(self.config({'shortcuts': {'Find': 'Ctrl+G'}}))
-        self.assertEqual(next(c.shortcut for c in menus['Edit'] if c.label == 'Find'), 'Ctrl+G')
+        menus = load_menus(self.config({'shortcuts': {'Find': 'Shift+Ctrl+j'}}))
+        self.assertEqual(next(c.shortcut for c in menus['Edit'] if c.label == 'Find'), 'Ctrl+Shift+J')
+
+    def test_goto_line_shortcut_cannot_be_reused(self):
+        with self.assertRaisesRegex(ValueError, 'Duplicate shortcut'):
+            load_menus(self.config({'shortcuts': {'Find': 'Ctrl+G'}}))
     def test_duplicate_rejected(self):
         with self.assertRaises(ValueError):
             load_menus(self.config({'shortcuts': {'Find': 'Ctrl+R'}}))
