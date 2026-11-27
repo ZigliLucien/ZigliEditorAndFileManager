@@ -443,6 +443,9 @@ def syntax_spans(text, mode):
         return json_spans(text)
     if mode == "java":
         return java_spans(text)
+    if mode == "html":
+        from .html_outline import html_scan
+        return html_scan(text)[1]
     if mode == "markdown":
         from .markdown_outline import markdown_scan
         return markdown_scan(text)[1]
