@@ -12,10 +12,18 @@ import json
 DATAFRAME_EXTENSIONS = frozenset({".csv", ".tsv", ".json", ".jsonl", ".ndjson", ".bib"})
 JSON_EXTENSIONS = frozenset({".json", ".jsonl", ".ndjson"})
 
-from .delimited_preview import MAX_CSV_BYTES, MAX_CSV_ROWS, MAX_CSV_COLUMNS, MAX_CSV_CELL
+from .delimited_preview import MAX_CSV_COLUMNS, MAX_CSV_CELL
 from .file_manager import BrowserError
 
 PAGE_SIZES = (25, 50, 100, 250)
+MAX_DATA_BYTES = 32 * 1024 * 1024
+MAX_DATA_ROWS = 100_000
+MAX_DATA_CELLS = 2_000_000
+
+
+def _check_shape(rows, columns):
+    if rows > MAX_DATA_ROWS or rows * max(1, columns) > MAX_DATA_CELLS:
+        raise BrowserError("DataFrame exceeds 100,000 rows or 2,000,000 cells", 413)
 
 
 def _read_json_records(path, pd, limit):
@@ -60,6 +68,7 @@ def _read_json_records(path, pd, limit):
     columns = list(dict.fromkeys(key for record in records for key in record))
     if len(columns) > MAX_CSV_COLUMNS:
         raise ValueError("Too many columns")
+    _check_shape(len(records), len(columns))
     # Object dtype avoids converting integer identifiers or nulls to floats.
     frame = pd.DataFrame([[record.get(key) for key in columns] for record in records],
                          columns=columns, dtype=object)
@@ -93,6 +102,7 @@ def _read_bib_records(path, pd):
                 if key not in columns]
     if len(columns) > MAX_CSV_COLUMNS:
         raise BrowserError("Too many BibTeX fields", 413)
+    _check_shape(len(records), len(columns))
     return pd.DataFrame([[record.get(k) for k in columns] for record in records],
                         columns=columns, dtype=object)
 
@@ -180,8 +190,8 @@ from threading import RLock
 _CACHE = OrderedDict()
 _CACHE_LOCK = RLock()
 CACHE_MAX_FILES = 8
-CACHE_MAX_CELLS = 500_000
-CACHE_MAX_BYTES = 32 * 1024 * 1024
+CACHE_MAX_CELLS = MAX_DATA_CELLS
+CACHE_MAX_BYTES = 128 * 1024 * 1024
 
 
 def _signature(path):
@@ -195,12 +205,13 @@ def _read_frame(path, pd, full):
     if suffix == ".bib":
         frame = _read_bib_records(path, pd)
     elif suffix in JSON_EXTENSIONS:
-        frame = _read_json_records(path, pd, None if full else MAX_CSV_ROWS + 1)
+        frame = _read_json_records(path, pd, MAX_DATA_ROWS + 1)
     else:
         frame = pd.read_csv(
             path, sep="\t" if suffix == ".tsv" else ",",
             encoding="utf-8-sig", dtype=str, keep_default_na=False,
             nrows=None if full else MAX_CSV_ROWS + 1, on_bad_lines="error")
+    _check_shape(*frame.shape)
     if frame.shape[1] > MAX_CSV_COLUMNS:
         raise BrowserError("Delimited file has too many columns", 413)
     if any(len(_display(value)) > MAX_CSV_CELL
@@ -211,13 +222,12 @@ def _read_frame(path, pd, full):
 
 
 def _cached_frame(path, pd, full=False):
-    # BibTeX parsing always loads the entire file, so preview and export share
-    # one entry. Other formats retain the existing bounded preview read.
-    full = bool(full or path.suffix.casefold() == ".bib")
+    # All supported sources now use one complete, bounded frame for every view.
+    full = True
     with _CACHE_LOCK:
         signature = _signature(path)
-        if signature[2] > MAX_CSV_BYTES:
-            raise BrowserError("Data file exceeds 2 MB size limit", 413)
+        if signature[2] > MAX_DATA_BYTES:
+            raise BrowserError("Data file exceeds 32 MiB size limit", 413)
         for key in list(_CACHE):
             if key[0] == path and key[1] != signature:
                 del _CACHE[key]
@@ -292,14 +302,14 @@ def _transpose_frame(frame, pd):
 
 
 def dataframe_preview(files, relative, sort="", descending=False, contains="",
-                      column="", sort_type="text", page=1, page_size=50, export="", total1="", total2="", total3="", transpose=False):
+                      column="", sort_type="text", page=1, page_size=50, export="", total1="", total2="", total3="", transpose=False, hidden=""):
     if export not in ("", "json", "jsonl", "markdown", "csv", "html", "bib"):
         raise BrowserError("Unknown DataFrame export format")
     path = files.resolve(relative)
     if not path.is_file() or path.suffix.casefold() not in DATAFRAME_EXTENSIONS:
         raise BrowserError("Data file not found", 404)
-    if path.stat().st_size > MAX_CSV_BYTES:
-        raise BrowserError("Data file exceeds 2 MB size limit", 413)
+    if path.stat().st_size > MAX_DATA_BYTES:
+        raise BrowserError("Data file exceeds 32 MiB size limit", 413)
     if len(contains) > 200:
         raise BrowserError("Filter is too long")
     if sort_type not in ("text", "number") or page < 1 or page_size not in PAGE_SIZES:
@@ -323,12 +333,20 @@ def dataframe_preview(files, relative, sort="", descending=False, contains="",
         raise BrowserError("Invalid data table: " + str(exc), 415) from exc
     if transpose:
         frame = _transpose_frame(frame, pd)
-    truncated = len(frame) > MAX_CSV_ROWS and not (export or selected or transpose)
-    if not (export or selected or transpose):
-        frame = frame.head(MAX_CSV_ROWS)
     source_count = len(frame)
     columns = [str(col) for col in frame.columns]
-    if any(c not in columns for c in selected):
+    try:
+        omitted = json.loads(hidden) if hidden else []
+        if not isinstance(omitted, list) or any(not isinstance(c, str) or c not in columns for c in omitted):
+            raise ValueError("Unknown hidden column")
+    except (ValueError, TypeError) as exc:
+        raise BrowserError("Invalid column selection") from exc
+    shown = [c for c in columns if c not in omitted]
+    if columns and not shown:
+        raise BrowserError("At least one column must remain visible")
+    if omitted and export == "bib":
+        raise BrowserError("Show all fields before exporting BibTeX")
+    if any(c not in shown for c in selected):
         raise BrowserError("Unknown total column")
     if column and column not in columns:
         raise BrowserError("Unknown filter column")
@@ -351,6 +369,8 @@ def dataframe_preview(files, relative, sort="", descending=False, contains="",
             frame = frame.sort_values(by=sort, ascending=not descending, kind="stable", key=lambda values: values.map(_display))
     totals = _column_totals(frame, selected)
     if export:
+        frame = frame[shown]
+        columns = shown
         if totals:
             # A dedicated, collision-safe label column distinguishes the
             # derived summary row from actual source records.
@@ -402,7 +422,7 @@ def dataframe_preview(files, relative, sort="", descending=False, contains="",
               "desc": int(descending), "filter": contains, "column": column,
               "sort_type": sort_type, "page_size": page_size, "page": page,
               "total1": total1, "total2": total2, "total3": total3,
-              "transpose": int(transpose)}
+              "transpose": int(transpose), "hidden": hidden}
 
     def link(label, **changes):
         return '<a href="' + e('/view?' + urlencode(dict(params, **changes))) + '">' + e(label) + '</a>'
@@ -413,31 +433,50 @@ def dataframe_preview(files, relative, sort="", descending=False, contains="",
                        e(label) + '</option>' for value, label in items)
 
     headings = []
-    for c in columns:
+    for c in shown:
         arrow = (' ↓' if descending else ' ↑') if c == sort else ''
         headings.append('<th>' + link(c + arrow, sort=c, desc=int(not descending) if c == sort else 0, page=1) + '</th>')
     rows = ['<tr><th>Row</th>' + ''.join(headings) + '</tr>']
     for values in visible.itertuples(index=True, name=None):
-        record = dict(zip(columns, values[1:])) if is_bib else None
+        record = dict(zip(columns, values[1:]))
         rows.append('<tr><th>' + e(values[0] + 1) + '</th>' +
-                    ''.join('<td>' + (_bibliography_cell(c, v, record) if is_bib else _linked_cell(v)) + '</td>' for c, v in zip(columns, values[1:])) + '</tr>')
+                    ''.join('<td>' + (_bibliography_cell(c, record[c], record) if is_bib else _linked_cell(record[c])) + '</td>' for c in shown) + '</tr>')
     if totals:
-        rows.append('<tr><th>Total</th>' + ''.join('<td><strong>' + e(totals.get(c, "")) + '</strong></td>' for c in columns) + '</tr>')
+        rows.append('<tr><th>Total</th>' + ''.join('<td><strong>' + e(totals.get(c, "")) + '</strong></td>' for c in shown) + '</tr>')
     back = '/view?' + urlencode({"path": relative} if is_json or is_bib else {"path": relative, "format": "html"})
     parent = str(PurePosixPath(relative).parent)
     directory = '/listing?' + urlencode({"path": "" if parent == "." else parent})
     reset = '/view?' + urlencode({"path": relative, "format": "pandas", "transpose": int(transpose)})
     orientation = "" if is_bib else (" · " + link(
         "Normal view" if transpose else "Transpose", transpose=int(not transpose),
-        sort="", desc=0, filter="", column="", total1="", total2="", total3="", page=1))
+        sort="", desc=0, filter="", column="", total1="", total2="", total3="", hidden="", page=1))
+    column_links = []
+    for c in columns:
+        if c in omitted:
+            changed = [v for v in omitted if v != c]
+            label = "Show " + c
+        elif len(shown) > 1:
+            changed = omitted + [c]
+            label = "Hide " + c
+        else:
+            continue
+        column_links.append(link(label, hidden=json.dumps(changed, ensure_ascii=False),
+                                 total1="" if total1 == c else total1,
+                                 total2="" if total2 == c else total2,
+                                 total3="" if total3 == c else total3))
+    column_controls = ('<details><summary>Columns (' + str(len(shown)) + ' of ' +
+                       str(len(columns)) + ' visible)</summary><p>' +
+                       link("Show all columns", hidden="") + ' · ' +
+                       ' · '.join(column_links) + '</p></details>') if columns else ""
     total_controls = ''.join(
         '<label>Total column ' + str(i) + ' <select name="total' + str(i) + '">' +
-        options([("", "None")] + [(c, c) for c in columns], chosen) + '</select></label> '
+        options([("", "None")] + [(c, c) for c in shown], chosen) + '</select></label> '
         for i, chosen in enumerate((total1, total2, total3), 1))
     form = ('<form method="get" action="/view" accept-charset="utf-8">'
             '<input type="hidden" name="format" value="pandas">'
             '<input type="hidden" name="transpose" value="' + str(int(transpose)) + '">'
-            '<input type="hidden" name="path" value="' + e(relative) + '">'
+            '<input type="hidden" name="path" value="' + e(relative) + '">' 
+            '<input type="hidden" name="hidden" value="' + e(hidden) + '">'
             '<label>Filter text <input name="filter" maxlength="200" value="' + e(contains) + '"></label> '
             '<label>Filter column <select name="column">' +
             options([("", "All columns")] + [(c, c) for c in columns], column) + '</select></label> '
@@ -457,20 +496,18 @@ def dataframe_preview(files, relative, sort="", descending=False, contains="",
     summary = str(count) + ' matching rows of ' + str(source_count)
     if count:
         summary += ' — showing ' + str(start + 1) + '–' + str(start + len(visible))
-    if truncated:
-        summary += ' (preview limited to first ' + str(MAX_CSV_ROWS) + ' source rows)'
     if transpose:
         summary += ' — transposed view'
     if totals:
         summary += ' — totals across all matching rows (blank values omitted)'
-    exports = '<p>Export all matching records: ' + ' · '.join(
+    exports = '<p>Export all matching records (visible columns): ' + ' · '.join(
         link(label, export=kind) for kind, label in (
             ("json", "JSON"), ("jsonl", "JSONL"), ("markdown", "Markdown"),
-            ("csv", "CSV"), ("html", "HTML")) + ((("bib", "BibTeX"),) if is_bib and not selected else ())) + '</p>'
+            ("csv", "CSV"), ("html", "HTML")) + ((("bib", "BibTeX"),) if is_bib and not selected and not omitted else ())) + '</p>'
     return ('<h2>' + e(path.name) + ' — pandas DataFrame</h2>'
             '<p><a href="' + e(directory) + '">Return to source directory</a> · '
             '<a href="' + e(back) + '">Standard source view</a>'
             + orientation + ' · Read-only, original string identifiers preserved</p>'
-            + form + exports + '<p>' + e(summary) + '</p>' + nav
+            + form + column_controls + exports + '<p>' + e(summary) + '</p>' + nav
             + '<div style="overflow-x:auto"><table border="1" cellspacing="0" cellpadding="4">'
             + ''.join(rows) + '</table></div>' + nav)
