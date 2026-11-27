@@ -74,3 +74,18 @@ class PandasBrowserTests(unittest.TestCase):
         source.write_text('{"id":1}\ninvalid\n', encoding="utf-8")
         with self.assertRaises(BrowserError):
             dataframe_preview(self.files, source.name)
+
+    def test_clickable_urls_in_nested_json(self):
+        import json
+        source = self.root / "links.jsonl"
+        record = {"url": "https://example.org/p?a=1&b=2",
+                  "pdf": {"url": "https://example.org/p.pdf"},
+                  "notes": "<script>alert(1)</script> javascript:alert(1)"}
+        source.write_text(json.dumps(record) + "\n", encoding="utf-8")
+        result = dataframe_preview(self.files, source.name)
+        self.assertIn('href="https://example.org/p?a=1&amp;b=2"', result)
+        self.assertIn('href="https://example.org/p.pdf"', result)
+        self.assertIn('target="_blank" rel="noopener noreferrer"', result)
+        self.assertNotIn("<script>", result)
+        self.assertNotIn('href="javascript:', result)
+        self.assertEqual(json.loads(dataframe_preview(self.files, source.name, export="json")), [record])
