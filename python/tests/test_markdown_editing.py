@@ -40,7 +40,7 @@ class MarkdownEditingTests(unittest.TestCase):
     def test_outline_shortcut(self):
         commands = load_menus()["Edit"]
         self.assertEqual(next(c.shortcut for c in commands
-                              if c.label == "Markdown Document Outline"),
+                              if c.label == "Markup Document Outline"),
                          "Ctrl+Shift+H")
 
 
