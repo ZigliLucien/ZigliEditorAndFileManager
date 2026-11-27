@@ -1271,8 +1271,8 @@ class Window:
         current = self.latex_engine_preference.engine
         choice = simpledialog.askstring(
             "LaTeX engine",
-            "Engine: lualatex, pdflatex, or xelatex\n"
-            "LuaLaTeX remains the default for browser builds.",
+            "Engine: lualatex, pdflatex, xelatex, or latexmk\n"
+            "latexmk uses LuaLaTeX and automatically runs required passes.\n"\n            "LuaLaTeX remains the default for browser builds.",
             initialvalue=current, parent=self.root)
         if choice is None:
             return
