@@ -28,7 +28,7 @@ class FileTemplateTests(unittest.TestCase):
         self.assertEqual(template.cursor, "1.2")
         commands = load_menus()["Run"]
         self.assertEqual(next(c.shortcut for c in commands
-                              if c.label == "Preview Markdown"), "Ctrl+Shift+P")
+                              if c.label == "Preview Document"), "Ctrl+Shift+P")
 
     def test_no_overwrite(self):
         for mode in ("latex", "python", "perl", "markdown"):
