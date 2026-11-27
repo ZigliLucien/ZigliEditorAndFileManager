@@ -35,7 +35,7 @@ from .listing_paging import paged_listing
 from .pdf_delivery import select_pdf, byte_range
 from .rename_ops import RenameManager
 from .trash_ops import TrashManager
-from .navigation import safe_listing_return
+from .navigation import safe_listing_return, preview_navigation
 from .html_preview import site_url, site_resource, site_relative_path, HTML_PREVIEW_CSP, STATIC_SITE_EXTENSIONS
 from .file_types import handler_for
 from .book_preview import epub_page, djvu_page
@@ -271,6 +271,9 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                             "Location": link("/view", site_relative)})
                         return
                     data, media_type, html_document = site_resource(files, parsed.path)
+                    if html_document and extension != ".xhtml":
+                        directory_url = link("/listing", files.relative(site_file.parent))
+                        data = preview_navigation(data.decode("utf-8"), directory_url).encode("utf-8")
                     self._send(200, data, media_type,
                                {"Content-Security-Policy": HTML_PREVIEW_CSP}
                                if html_document else None)
@@ -534,7 +537,7 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                         raise BrowserError("File not found for rename", 404)
                     back = escape(safe_listing_return(files, back_state, files.relative(source.parent)), quote=True)
                     content = (
-                        f'<p><a href="{back}">← Back</a></p>'
+                        f'<p><a href="{back}">← Open source directory</a></p>'
                         f'<h2>Rename: {escape(rel)}</h2>'
                         '<p>Existing files are never overwritten. Notes follow the renamed file.'
                         ' Close any open desktop editor buffer before renaming.</p>'
@@ -794,7 +797,12 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                         self._serve_pdf(rel)
                         return
                     if handler_for(rel)["view"] == "markdown":
-                        self._send(200, markdown_html(files, rel),
+                        directory = files.relative(files.resolve(rel).parent)
+                        directory_url = link("/listing", directory)
+                        return_url = safe_listing_return(files, back_state, directory)
+                        markup = markdown_html(files, rel).decode("utf-8")
+                        data = preview_navigation(markup, directory_url, return_url).encode("utf-8")
+                        self._send(200, data,
                                    extra={"Content-Security-Policy": MATHJAX_PREVIEW_CSP})
                         return
                     if suffix in (".html", ".htm", ".xhtml"):
