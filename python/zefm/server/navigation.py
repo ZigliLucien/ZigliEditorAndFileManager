@@ -3,6 +3,8 @@
 Accept a listing URL only; never redirect to external addresses or other routes.
 Validate all its query parameters and keep directory traversal inside the root.
 """
+from html import escape
+import re
 from urllib.parse import parse_qs, urlencode, urlsplit
 
 from .file_manager import BrowserError
@@ -38,3 +40,20 @@ def safe_listing_return(files, candidate, default_path="."):
         raise BrowserError("Invalid return listing state")
     return "/listing?" + urlencode({"path": files.relative(directory),
                                    "page": str(int(page)), "sort": sort, "filter": filt})
+
+
+def preview_navigation(markup, directory_url, return_url=None):
+    """Add a visible directory link to rendered HTML without rewriting its body."""
+    links = ('<a href="' + escape(directory_url, quote=True)
+             + '">← Open source directory</a>')
+    if return_url and return_url != directory_url:
+        links += (' · <a href="' + escape(return_url, quote=True)
+                  + '">Return to previous listing</a>')
+    nav = ('<nav aria-label="ZEFM preview navigation" '
+           'style="padding:.65rem 1rem;margin:0 0 1rem;'
+           'background:#f4f4f4;border-bottom:1px solid #ccc;'
+           'font:14px system-ui,sans-serif">' + links + '</nav>')
+    match = re.search(r"<body(?:\s[^>]*)?>", markup, re.IGNORECASE)
+    if match:
+        return markup[:match.end()] + nav + markup[match.end():]
+    return nav + markup
