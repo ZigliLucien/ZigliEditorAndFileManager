@@ -292,7 +292,13 @@ def build_pdf(files, relative, *, publish_adjacent=False, latex_engine="lualatex
             if html is None:
                 raise BrowserError("Discount Markdown conversion failed", 422)
             html = _restore_passive_blocks(_restore_color_spans(html, spans), blocks)
-            (temporary / "document.html").write_text(format_math_html(html), encoding="utf-8")
+            # /math.css is a browser-server URL, not a filesystem path.
+            # Embed the bundled stylesheet for the standalone PDF renderer.
+            css = Path(__file__).with_name("math.css").read_text(encoding="utf-8")
+            markup = format_math_html(html).replace(
+                '<link rel="stylesheet" href="/math.css">',
+                "<style>\n" + css + "\n</style>", 1)
+            (temporary / "document.html").write_text(markup, encoding="utf-8")
         command = _command(source, temporary, descriptor,
                            latex_engine=latex_engine)
         started = time.monotonic()
