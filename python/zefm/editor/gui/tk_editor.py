@@ -354,7 +354,7 @@ class Window:
             widget.tag_remove("syntax_" + style, "1.0", "end")
         widget.tag_remove("syntax_match", "1.0", "end")
         widget.tag_remove("syntax_unmatched", "1.0", "end")
-        if len(text) > MAX_CHARS or mode not in ("latex", "python", "java", "json", "markdown"):
+        if len(text) > MAX_CHARS or mode not in ("latex", "python", "java", "json", "markdown", "html"):
             return
         for a, b, style in syntax_spans(text, mode):
             widget.tag_add("syntax_" + style,
@@ -1829,11 +1829,21 @@ class Window:
     def show_markdown_outline(self):
         self._show_document_outline("markdown")
 
+    def show_html_outline(self):
+        self._show_document_outline("html")
+
+    def show_markup_outline(self):
+        if self.buffer_modes[self.tabs.select()].name == "html":
+            self.show_html_outline()
+        else:
+            self.show_markdown_outline()
+
     def _show_document_outline(self, mode):
         """Navigate live document headings using a shared outline dialog."""
         from ..markdown_outline import markdown_outline
-        name = "LaTeX" if mode == "latex" else "Markdown"
-        outline = latex_outline if mode == "latex" else markdown_outline
+        from ..html_outline import html_outline
+        name = {"latex": "LaTeX", "markdown": "Markdown", "html": "HTML"}[mode]
+        outline = {"latex": latex_outline, "markdown": markdown_outline, "html": html_outline}[mode]
         dialog_title = name + " Document Outline"
         widget, _editor = self.current()
         if widget is None:
@@ -1957,17 +1967,25 @@ class Window:
         widget, _editor = self.current()
         if widget is None:
             return
-        if self.buffer_modes[self.tabs.select()].name != "markdown":
-            self.status.set("Heading navigation requires Markdown mode")
+        mode = self.buffer_modes[self.tabs.select()].name
+        if mode not in ("markdown", "html"):
+            self.status.set("Heading navigation requires Markdown or HTML mode")
             return
         text = widget.get("1.0", "end-1c")
         if len(text) > MAX_CHARS:
             self.status.set("Markdown heading navigation: buffer exceeds size limit")
             return
         cursor = len(widget.get("1.0", "insert"))
-        heading = adjacent_heading(text, cursor, direction)
+        if mode == "html":
+            from ..html_outline import html_outline
+            headings = html_outline(text)
+            heading = (next((h for h in headings if h.offset > cursor), None)
+                       if direction == "next" else
+                       next((h for h in reversed(headings) if h.offset < cursor), None))
+        else:
+            heading = adjacent_heading(text, cursor, direction)
         if heading is None:
-            self.status.set("No " + direction + " Markdown heading")
+            self.status.set("No " + direction + " heading")
             return
         target = f"1.0 + {heading.offset} chars"
         widget.mark_set("insert", target)
@@ -2518,7 +2536,7 @@ class Window:
         mode = self.buffer_modes[tab].name
         if mode not in TEMPLATES:
             choice = simpledialog.askstring(
-                "Insert File Template", "Choose latex, python, perl, or markdown:",
+                "Insert File Template", "Choose latex, python, perl, markdown, or html:",
                 initialvalue="latex", parent=self.root)
             if choice is None:
                 return
@@ -2567,9 +2585,9 @@ class Window:
         elif name=="Run Script":self.run_script()
         elif name in ("Preview Markdown", "Preview Document"):self.preview_document()
         elif name in ("Export Markdown PDF", "Export Document PDF"):self.export_markdown_pdf()
-        elif name=="Markdown Document Outline":self.show_markdown_outline()
-        elif name=="Next Markdown Heading":self.navigate_markdown_heading("next")
-        elif name=="Previous Markdown Heading":self.navigate_markdown_heading("previous")
+        elif name in ("Markdown Document Outline", "Markup Document Outline"):self.show_markup_outline()
+        elif name in ("Next Markdown Heading", "Next Markup Heading"):self.navigate_markdown_heading("next")
+        elif name in ("Previous Markdown Heading", "Previous Markup Heading"):self.navigate_markdown_heading("previous")
         elif name=="Shell":self.open_shell_terminal()
         elif name=="Revert Buffer":self.revert_buffer()
         elif name=="Refresh Buffer":self.refresh_buffer()
@@ -3785,7 +3803,10 @@ class Window:
         if name == "html":
             command("Preview Document", self.preview_document)
             command("Export HTML PDF...", self.export_markdown_pdf)
-        if name in ("python", "latex", "perl", "markdown"):
+            command("HTML Document Outline...", self.show_html_outline)
+            command("Next Heading", lambda: self.navigate_markdown_heading("next"))
+            command("Previous Heading", lambda: self.navigate_markdown_heading("previous"))
+        if name in ("python", "latex", "perl", "markdown", "html"):
             command("Insert File Template", self.insert_file_template)
         if name in ("python", "latex", "json", "perl", "markdown", "html"):
             popup.add_separator()
