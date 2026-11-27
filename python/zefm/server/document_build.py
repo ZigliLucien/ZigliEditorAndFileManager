@@ -153,6 +153,15 @@ def _command(source, output_dir, descriptor, *, latex_engine="lualatex"):
             raise BrowserError(
                 f"{engine} was not found. On macOS check "
                 f"/Library/TeX/texbin/{engine}; otherwise check PATH.", 503)
+        if engine == "latexmk":
+            # latexmk automates reruns, cross-references and BibTeX/Biber.
+            # -norc keeps user/local rc files from overriding these flags.
+            # The -latexoption form forwards the security flag to LuaLaTeX.
+            return [binary, "-norc", "-lualatex",
+                    "-interaction=nonstopmode", "-halt-on-error",
+                    "-file-line-error", "-synctex=1",
+                    "-latexoption=-no-shell-escape",
+                    f"-outdir={output_dir}", str(source)]
         return [binary, "-interaction=nonstopmode", "-halt-on-error",
                 "-file-line-error", "-synctex=1", "-no-shell-escape",
                 f"-output-directory={output_dir}",
@@ -226,9 +235,8 @@ def build_pdf(files, relative, *, publish_adjacent=False, latex_engine="lualatex
         command = _command(source, temporary, descriptor,
                            latex_engine=latex_engine)
         started = time.monotonic()
-        if descriptor["build"] == "lualatex":
-            # Desktop and browser use the same bounded multi-pass pipeline;
-            # engine choice is explicit (default remains LuaLaTeX).
+        if descriptor["build"] == "lualatex" and latex_engine != "latexmk":
+            # Direct engines use the bounded TeX/BibTeX/Biber sequence.
             rc, log, elapsed = run_tex_sequence(
                 command, source, temporary, timeout=BUILD_TIMEOUT)
         else:
