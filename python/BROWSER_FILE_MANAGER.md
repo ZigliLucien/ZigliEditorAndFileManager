@@ -1313,3 +1313,15 @@ failed builds leave the existing PDF untouched.
 The existing `lualatex`, `pdflatex`, and `xelatex` choices remain
 available. The default desktop and browser compiler remains `lualatex`
 unless you select `latexmk` in the desktop editor.
+
+## Reopen the latest LaTeX compiler log
+
+After F4 compiles a TeX document, **Run → View Last LaTeX Build Log**
+(or the same command in the LaTeX right-click menu) reopens the most
+recent log without rerunning the compiler. The editor remembers the
+latest log for each TeX master during the current session; if its log
+tab was closed, the text and clickable source-line diagnostics can be
+reconstructed. The command prefers the current TeX master when its
+log exists; otherwise it shows the latest build. The retained output
+is bounded to 100,000 characters, remains in memory only, and does
+not modify LaTeX sources or PDFs.
