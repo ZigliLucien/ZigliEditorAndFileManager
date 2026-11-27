@@ -7,7 +7,7 @@ from urllib.parse import parse_qs, urlencode, urlsplit
 
 from .file_manager import BrowserError
 
-_ALLOWED_SORTS = {"filename", "filetype", "timekey", "size", "notes"}
+_ALLOWED_SORTS = {"filename", "filetype", "timekey", "timeold", "size", "notes"}
 
 
 def safe_listing_return(files, candidate, default_path="."):
