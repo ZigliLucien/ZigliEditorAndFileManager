@@ -84,6 +84,8 @@ class Window:
         self.latex_masters = {}  # Per-tab overrides loaded from local preferences.
         self.latex_error_lists = {}  # Log-tab -> (diagnostics, next index, master).
         self.last_latex_log_tab = None
+        self.last_latex_log_source = None
+        self.recent_latex_logs = {}  # Master Path -> last completed build result.
         self.latex_master_preferences = LatexMasterPreferences()
         self.disk_signatures = {}
         self.external_dismissals = ExternalChangeDismissals()
@@ -1068,9 +1070,36 @@ class Window:
         self.latex_error_lists[tab] = (items, number + 1, master)
         self.open_latex_error(diagnostic, master)
 
+    def view_last_latex_log(self):
+        """Reopen the latest compiler log without recompiling."""
+        _widget, editor = self.current()
+        source = None
+        if editor is not None and editor.state.buffer.path:
+            path = Path(editor.state.buffer.path).expanduser().resolve()
+            if path.suffix.lower() == ".tex":
+                master = self.latex_masters.get(self.tabs.select())
+                source = master if master in self.recent_latex_logs else path
+        if source not in self.recent_latex_logs:
+            source = self.last_latex_log_source
+        if source not in self.recent_latex_logs:
+            self.status.set("No LaTeX build log yet; compile a .tex file with F4")
+            return
+        # Reuse the latest existing tab for this master when possible.
+        for tab in reversed(list(self.views)):
+            entry = self.latex_error_lists.get(tab)
+            if entry and entry[2] == source:
+                self.tabs.select(tab)
+                self.status.set(f"Build log: {source.name}")
+                return
+        self._show_latex_log(source, self.recent_latex_logs[source])
+        self.status.set(f"Build log: {source.name}")
+
     def _show_latex_log(self, source, result):
         """Preserve compiler output and link recognized error lines."""
-        log = result.get("log", "")
+        source = Path(source).expanduser().resolve()
+        log = result.get("log", "")[-100000:]
+        self.recent_latex_logs[source] = {"ok": bool(result["ok"]), "log": log}
+        self.last_latex_log_source = source
         summary = "SUCCESS" if result["ok"] else "FAILED"
         widget = self.new_buffer(
             text=f"LaTeX build {summary}: {source.name}\n\n{log}\n")
@@ -2778,6 +2807,8 @@ class Window:
                                  command=self.clear_latex_master)
                 menu.add_command(label="Select LaTeX Engine...",
                                  command=self.set_latex_engine)
+                menu.add_command(label="View Last LaTeX Build Log",
+                                 command=self.view_last_latex_log)
                 menu.add_command(label="Next LaTeX Error",
                                  command=self.next_latex_error)
                 menu.add_command(label="Forward SyncTeX to PDF",
@@ -3352,6 +3383,7 @@ class Window:
             command("Compile LaTeX (F4)", lambda: self.action("Compile"))
             command("LaTeX Document Outline...",
                     lambda: self.action("LaTeX Document Outline"))
+            command("View Last LaTeX Build Log", self.view_last_latex_log)
             command("Next LaTeX Error", self.next_latex_error)
             command("Set LaTeX Master...", self.set_latex_master)
             tools.add_separator()
