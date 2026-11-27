@@ -2248,6 +2248,41 @@ class Window:
         self.clickpad_frame.pack(side="top", fill="x", before=self.tabs)
         self.status.set("ClickPad shown; choose symbols to insert at cursor")
 
+    def insert_file_template(self):
+        """Initialize an empty buffer without replacing existing text."""
+        from ..file_templates import TEMPLATES, file_template
+        widget, _editor = self.current()
+        if widget is None:
+            return
+        source = widget.get("1.0", "end-1c")
+        if source:
+            self.status.set("Insert File Template requires an empty buffer")
+            return
+        tab = self.tabs.select()
+        mode = self.buffer_modes[tab].name
+        if mode not in TEMPLATES:
+            choice = simpledialog.askstring(
+                "Insert File Template", "Choose latex, python, or perl:",
+                initialvalue="latex", parent=self.root)
+            if choice is None:
+                return
+            mode = choice.strip().lower()
+        try:
+            template = file_template(mode, source)
+            spec = self.mode_registry.detect(override=mode)
+        except ValueError as exc:
+            self.status.set(str(exc))
+            return
+        widget.edit_separator()
+        widget.insert("1.0", template.text)
+        widget.edit_separator()
+        self.buffer_modes[tab] = spec
+        widget.mark_set("insert", template.cursor)
+        widget.see("insert")
+        widget.focus_set()
+        self._schedule_highlight(tab, delay=1)
+        self._status(widget)
+
     def action(self, name):
         widget,editor=self.current()
         if not widget:return
@@ -2267,6 +2302,7 @@ class Window:
         elif name=="Replace":self.query_replace()
         elif name=="Continue Find or Replace":self.find_next()
         elif name=="Open":self.open_file()
+        elif name=="Insert File Template":self.insert_file_template()
         elif name=="Save":self.save_file()
         elif name=="Save As":self.save_file(as_new=True)
         elif name=="Quit":self.quit()
@@ -3463,11 +3499,13 @@ class Window:
             command("Go to Matching Delimiter",
                     lambda: self.action("Go to Matching LaTeX Delimiter"))
 
-        if name in ("python", "latex", "json"):
+        if name in ("python", "latex", "perl"):
+            command("Insert File Template", self.insert_file_template)
+        if name in ("python", "latex", "json", "perl"):
             popup.add_separator()
             popup.add_cascade(
                 label={"python": "Python Tools", "latex": "LaTeX Tools",
-                       "json": "JSON / jq Tools"}[name],
+                       "json": "JSON / jq Tools", "perl": "Perl Tools"}[name],
                 menu=tools)
         else:
             tools.destroy()
