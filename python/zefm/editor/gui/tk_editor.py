@@ -2327,11 +2327,16 @@ class Window:
         self._compile_running = True
         results = Queue()
         def worker():
+            log = ""
+            returncode = None
             try:
                 files = LocalFiles(source.parent)
                 result = build_pdf(files, source.name)
+                log = result.get("log", "")
+                returncode = result.get("returncode")
                 if not result["ok"]:
-                    raise ValueError(result.get("log") or "PDF build failed")
+                    results.put((False, "PDF build failed", returncode, log))
+                    return
                 pdf = files.resolve(result["pdf"])
                 # Exclusive creation also protects against a concurrent writer.
                 with pdf.open("rb") as incoming:
@@ -2342,21 +2347,25 @@ class Window:
                             outgoing.close()
                             destination.unlink()
                             raise
-                results.put((True, str(destination)))
+                results.put((True, str(destination), returncode, log))
             except Exception as exc:
-                results.put((False, str(exc)))
+                results.put((False, str(exc), returncode, log))
 
         def poll():
             self._compile_poll_id = None
             try:
-                ok, detail = results.get_nowait()
+                ok, detail, returncode, log = results.get_nowait()
             except Empty:
                 self._compile_poll_id = self.root.after(120, poll)
                 return
             self._compile_running = False
+            outcome = "SUCCESS" if ok else "FAILED"
+            self.new_buffer(text=(
+                f"Markdown PDF export {outcome}: {source.name}\n"
+                f"Exit code: {returncode}\n"
+                f"{detail}\n\n{log}\n"))
             if not ok:
-                self.status.set("Markdown PDF export failed")
-                messagebox.showerror("Export Markdown PDF", detail, parent=self.root)
+                self.status.set("Markdown PDF export failed; see log tab")
                 return
             self.status.set("Markdown PDF exported: " + detail)
             try:
