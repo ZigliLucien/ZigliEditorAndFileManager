@@ -2321,7 +2321,7 @@ class Window:
         self._status(widget)
 
     def export_markdown_pdf(self):
-        """Build a saved Markdown file and export a PDF without overwriting."""
+        """Build saved Markdown or HTML and export a PDF without overwriting."""
         from threading import Thread
         from ...server.document_build import build_pdf
         from ...server.file_manager import LocalFiles
@@ -2329,8 +2329,9 @@ class Window:
         widget, editor = self.current()
         if widget is None:
             return
-        if self.buffer_modes[self.tabs.select()].name != "markdown":
-            self.status.set("Export Markdown PDF requires Markdown mode")
+        mode = self.buffer_modes[self.tabs.select()].name
+        if mode not in ("markdown", "html"):
+            self.status.set("Export Document PDF requires Markdown or HTML mode")
             return
         if self._compile_running:
             self.status.set("A document build is already running")
@@ -2338,18 +2339,19 @@ class Window:
         if self.save_file() is not True:
             return
         source = Path(editor.state.buffer.path).expanduser().resolve()
-        if source.suffix.lower() not in (".md", ".markdown"):
-            self.status.set("Save the document with a Markdown extension first")
+        if source.suffix.lower() not in (".md", ".markdown", ".html", ".htm"):
+            self.status.set("Save with a Markdown or HTML extension first")
             return
+        label = "HTML" if source.suffix.lower() in (".html", ".htm") else "Markdown"
         selected = filedialog.asksaveasfilename(
-            parent=self.root, title="Export Markdown PDF",
+            parent=self.root, title=f"Export {label} PDF",
             initialdir=str(source.parent), initialfile=source.name + ".pdf",
             defaultextension=".pdf", filetypes=[("PDF", "*.pdf")])
         if not selected:
             return
         destination = Path(selected).expanduser()
         if destination.exists() or destination.is_symlink():
-            messagebox.showwarning("Export Markdown PDF",
+            messagebox.showwarning(f"Export {label} PDF",
                 "Choose a new PDF filename; existing files will not be overwritten.",
                 parent=self.root)
             return
@@ -2360,7 +2362,7 @@ class Window:
             returncode = None
             try:
                 files = LocalFiles(source.parent)
-                result = build_pdf(files, source.name)
+                result = build_pdf(files, source.name, allow_html=True)
                 log = result.get("log", "")
                 returncode = result.get("returncode")
                 if not result["ok"]:
@@ -2390,21 +2392,57 @@ class Window:
             self._compile_running = False
             outcome = "SUCCESS" if ok else "FAILED"
             self.new_buffer(text=(
-                f"Markdown PDF export {outcome}: {source.name}\n"
+                f"{label} PDF export {outcome}: {source.name}\n"
                 f"Exit code: {returncode}\n"
                 f"{detail}\n\n{log}\n"))
             if not ok:
-                self.status.set("Markdown PDF export failed; see log tab")
+                self.status.set(f"{label} PDF export failed; see log tab")
                 return
-            self.status.set("Markdown PDF exported: " + detail)
+            self.status.set(f"{label} PDF exported: " + detail)
             try:
                 open_browser(destination.resolve().as_uri())
             except ValueError as exc:
                 messagebox.showwarning("PDF saved", detail + "\n" + str(exc),
                                        parent=self.root)
-        self.status.set("Exporting Markdown PDF...")
+        self.status.set(f"Exporting {label} PDF...")
         Thread(target=worker, name="zefm-markdown-pdf", daemon=True).start()
         self._compile_poll_id = self.root.after(120, poll)
+
+    def preview_document(self):
+        """Preview a saved document through the local file manager."""
+        widget, editor = self.current()
+        if widget is None:
+            return
+        mode = self.buffer_modes[self.tabs.select()].name
+        if mode not in ("markdown", "html"):
+            self.status.set("Preview Document requires Markdown or HTML mode")
+            return
+        path = editor.state.buffer.path
+        clean = widget.get("1.0", "end-1c") == self.saved_snapshots.get(self.tabs.select())
+        if mode == "markdown" and (not path or not clean):
+            self.preview_markdown()
+            return
+        if mode == "html" and (not path or not clean):
+            if not messagebox.askyesno("Preview HTML", "Save this HTML document before previewing?",
+                                       parent=self.root):
+                return
+            if self.save_file() is not True:
+                return
+            path = editor.state.buffer.path
+        try:
+            source = Path(path).expanduser().resolve()
+            if not source.is_file():
+                raise ValueError("Save the document before previewing")
+            if self.local_browser is not None and source.is_relative_to(self.local_browser.files.root):
+                url = self.local_browser.start()
+            else:
+                url = self.open_local_file_manager(directory=source.parent, open_browser=False)
+            if url:
+                relative = self.local_browser.files.relative(source)
+                open_browser(url + "view?" + urlencode({"path": relative}))
+                self.status.set("Document preview opened")
+        except (OSError, ValueError) as exc:
+            self.status.set(str(exc))
 
     def preview_markdown(self):
         """Open a rendered snapshot of the current Markdown buffer."""
@@ -2527,8 +2565,8 @@ class Window:
         elif name=="Debug Python":self.debug_python()
         elif name=="Compile":self.compile_latex()
         elif name=="Run Script":self.run_script()
-        elif name=="Preview Markdown":self.preview_markdown()
-        elif name=="Export Markdown PDF":self.export_markdown_pdf()
+        elif name in ("Preview Markdown", "Preview Document"):self.preview_document()
+        elif name in ("Export Markdown PDF", "Export Document PDF"):self.export_markdown_pdf()
         elif name=="Markdown Document Outline":self.show_markdown_outline()
         elif name=="Next Markdown Heading":self.navigate_markdown_heading("next")
         elif name=="Previous Markdown Heading":self.navigate_markdown_heading("previous")
@@ -3737,20 +3775,23 @@ class Window:
         if name == "perl":
             command("Configure Run Command...", self.configure_run_command)
         if name == "markdown":
-            command("Preview Markdown", lambda: self.action("Preview Markdown"))
+            command("Preview Document", self.preview_document)
             command("Export Markdown PDF...", self.export_markdown_pdf)
             command("Markdown Document Outline...", self.show_markdown_outline)
             command("Next Markdown Heading", lambda: self.action("Next Markdown Heading"))
             command("Previous Markdown Heading", lambda: self.action("Previous Markdown Heading"))
             tools.add_separator()
             self._add_markdown_insert_menu(tools)
+        if name == "html":
+            command("Preview Document", self.preview_document)
+            command("Export HTML PDF...", self.export_markdown_pdf)
         if name in ("python", "latex", "perl", "markdown"):
             command("Insert File Template", self.insert_file_template)
-        if name in ("python", "latex", "json", "perl", "markdown"):
+        if name in ("python", "latex", "json", "perl", "markdown", "html"):
             popup.add_separator()
             popup.add_cascade(
                 label={"python": "Python Tools", "latex": "LaTeX Tools",
-                       "json": "JSON / jq Tools", "perl": "Perl Tools", "markdown": "Markdown Tools"}[name],
+                       "json": "JSON / jq Tools", "perl": "Perl Tools", "markdown": "Markdown Tools", "html": "HTML Tools"}[name],
                 menu=tools)
         else:
             tools.destroy()
