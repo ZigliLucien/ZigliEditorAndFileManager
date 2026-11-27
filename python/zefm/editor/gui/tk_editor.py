@@ -2279,11 +2279,26 @@ class Window:
                 return
         directory = Path(self.print_preview_directory.name)
         preview = directory / ("markdown-" + uuid4().hex + ".html")
-        source = Path(path).resolve() if path else directory / "Untitled.md"
+        source_dir = (Path(path).expanduser().resolve().parent if path
+                      else Path(self.working_directory.initial_directory()).resolve())
+        source = source_dir / (Path(path).name if path else "Untitled.md")
+        # Keep an existing browser root when it already contains the source.
+        if (self.local_browser is not None
+                and source_dir.is_relative_to(self.local_browser.files.root)):
+            url = self.local_browser.start()
+        else:
+            url = self.open_local_file_manager(directory=source_dir, open_browser=False)
+        if not url:
+            return
+        listing_url = url + "listing?" + urlencode(
+            {"path": self.local_browser.files.relative(source_dir)})
+        from ...server.navigation import preview_navigation
         # Browser launch and file writes do not touch Tk from the worker.
         def worker():
             try:
-                preview.write_bytes(render_markdown_text(text, source))
+                markup = render_markdown_text(text, source).decode("utf-8")
+                markup = preview_navigation(markup, listing_url)
+                preview.write_text(markup, encoding="utf-8")
                 open_browser(preview.as_uri())
                 result = "Markdown preview opened"
             except (OSError, ValueError) as exc:
