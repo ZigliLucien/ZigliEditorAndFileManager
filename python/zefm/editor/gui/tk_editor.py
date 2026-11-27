@@ -354,7 +354,7 @@ class Window:
             widget.tag_remove("syntax_" + style, "1.0", "end")
         widget.tag_remove("syntax_match", "1.0", "end")
         widget.tag_remove("syntax_unmatched", "1.0", "end")
-        if len(text) > MAX_CHARS or mode not in ("latex", "python", "java", "json", "markdown", "html"):
+        if len(text) > MAX_CHARS or mode not in ("latex", "python", "java", "json", "markdown", "html", "xml"):
             return
         for a, b, style in syntax_spans(text, mode):
             widget.tag_add("syntax_" + style,
@@ -369,7 +369,7 @@ class Window:
         widget.tag_remove("syntax_match", "1.0", "end")
         widget.tag_remove("syntax_unmatched", "1.0", "end")
         mode = self.buffer_modes[tab].name
-        if mode not in ("latex", "python", "json"):
+        if mode not in ("latex", "python", "json", "html", "xml"):
             return
         if text is None:
             text = widget.get("1.0", "end-1c")
@@ -386,6 +386,9 @@ class Window:
                     pair = ((source, source + 1),
                             (partner, partner + 1) if partner is not None
                             else None)
+        elif mode in ("html", "xml"):
+            from ..markup_tags import matching_tag
+            pair = matching_tag(text, cursor, mode)
         else:
             pair = code_matching_delimiter(text, cursor, mode)
         if pair is None:
@@ -1673,22 +1676,26 @@ class Window:
         self.status.set("jq output opened in new buffer (source unchanged)")
 
     def go_to_matching_delimiter(self):
-        """Jump to a paired delimiter in LaTeX, Python or JSON without edits."""
+        """Jump to a paired delimiter or tag without edits."""
         widget, _editor = self.current()
         if widget is None:
             return False
         mode = self.buffer_modes[self.tabs.select()].name
-        if mode not in ("latex", "python", "json"):
-            self.status.set("Go to matching delimiter supports LaTeX, Python and JSON")
+        if mode not in ("latex", "python", "json", "html", "xml"):
+            self.status.set("Go to matching delimiter supports LaTeX, Python, JSON, HTML and XML")
             return False
         source_text = widget.get("1.0", "end-1c")
         if len(source_text) > MAX_CHARS:
             self.status.set("Matching delimiter: buffer exceeds size limit")
             return False
         cursor = len(widget.get("1.0", "insert"))
-        matched = (latex_matching_delimiter(source_text, cursor)
-                   if mode == "latex"
-                   else code_matching_delimiter(source_text, cursor, mode))
+        if mode in ("html", "xml"):
+            from ..markup_tags import matching_tag
+            matched = matching_tag(source_text, cursor, mode)
+        else:
+            matched = (latex_matching_delimiter(source_text, cursor)
+                       if mode == "latex"
+                       else code_matching_delimiter(source_text, cursor, mode))
         if matched is None:
             self.status.set("Matching delimiter: place the cursor on or after a delimiter")
             return False
@@ -2312,20 +2319,27 @@ class Window:
         self.status.set("ClickPad shown; choose symbols to insert at cursor")
 
     def insert_markdown_markup(self, kind):
-        """Insert a Markdown starter or wrap selected text as one undo step."""
+        self._insert_markup("markdown", kind)
+
+    def insert_html_markup(self, kind):
+        self._insert_markup("html", kind)
+
+    def _insert_markup(self, mode, kind):
+        """Insert a starter or wrap selection as one undo step."""
         widget, _editor = self.current()
         if widget is None:
             return
-        if self.buffer_modes[self.tabs.select()].name != "markdown":
-            self.status.set("Markdown insertion requires Markdown mode")
+        if self.buffer_modes[self.tabs.select()].name != mode:
+            self.status.set(f"Insertion requires {mode} mode")
             return
         ranges = widget.tag_ranges("sel")
         start, end = (str(ranges[0]), str(ranges[1])) if ranges else (
             widget.index("insert"), widget.index("insert"))
         selected = widget.get(start, end)
         from ..markdown_insert import markdown_markup
+        from ..markup_tags import html_markup
         try:
-            value, cursor = markdown_markup(kind, selected)
+            value, cursor = (markdown_markup if mode == "markdown" else html_markup)(kind, selected)
         except ValueError as exc:
             self.status.set(str(exc))
             return
@@ -2598,7 +2612,7 @@ class Window:
         elif name=="Go to Record":self.go_to_record()
         elif name=="Next Record":self.navigate_json("next_record")
         elif name=="Previous Record":self.navigate_json("previous_record")
-        elif name=="Go to Matching LaTeX Delimiter":self.go_to_matching_delimiter()
+        elif name in ("Go to Matching LaTeX Delimiter", "Go to Matching Delimiter"):self.go_to_matching_delimiter()
         elif name=="LaTeX Document Outline":self.show_latex_outline()
         elif name=="Clear":
             if messagebox.askyesno("Clear buffer","Delete all text in this buffer?",parent=self.root):
@@ -3728,6 +3742,13 @@ class Window:
                          command=self._clear_recent_files,
                          state="normal" if self.recent_files.entries else "disabled")
 
+    def _add_html_insert_menu(self, menu):
+        from ..markup_tags import HTML_ITEMS
+        insert = tk.Menu(menu, tearoff=False)
+        for kind, label in HTML_ITEMS:
+            insert.add_command(label=label, command=lambda k=kind: self.insert_html_markup(k))
+        menu.add_cascade(label="Insert HTML", menu=insert)
+
     def _add_markdown_insert_menu(self, menu):
         from ..markdown_insert import MARKUP_ITEMS
         insert = tk.Menu(menu, tearoff=False)
@@ -3800,19 +3821,22 @@ class Window:
             command("Previous Markdown Heading", lambda: self.action("Previous Markdown Heading"))
             tools.add_separator()
             self._add_markdown_insert_menu(tools)
+        if name in ("html", "xml"):
+            command("Go to Matching Tag", self.go_to_matching_delimiter)
         if name == "html":
             command("Preview Document", self.preview_document)
             command("Export HTML PDF...", self.export_markdown_pdf)
             command("HTML Document Outline...", self.show_html_outline)
             command("Next Heading", lambda: self.navigate_markdown_heading("next"))
             command("Previous Heading", lambda: self.navigate_markdown_heading("previous"))
+            self._add_html_insert_menu(tools)
         if name in ("python", "latex", "perl", "markdown", "html"):
             command("Insert File Template", self.insert_file_template)
-        if name in ("python", "latex", "json", "perl", "markdown", "html"):
+        if name in ("python", "latex", "json", "perl", "markdown", "html", "xml"):
             popup.add_separator()
             popup.add_cascade(
                 label={"python": "Python Tools", "latex": "LaTeX Tools",
-                       "json": "JSON / jq Tools", "perl": "Perl Tools", "markdown": "Markdown Tools", "html": "HTML Tools"}[name],
+                       "json": "JSON / jq Tools", "perl": "Perl Tools", "markdown": "Markdown Tools", "html": "HTML Tools", "xml": "XML Tools"}[name],
                 menu=tools)
         else:
             tools.destroy()
