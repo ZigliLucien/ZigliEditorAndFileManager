@@ -48,6 +48,7 @@ class ModeRegistry:
         first=text.split('\n',1)[0].strip()
         if first.startswith('#!'):
             if 'python' in first and 'python' in self.modes:return self.modes['python']
+            if 'perl' in first and 'perl' in self.modes:return self.modes['perl']
         if (first.startswith('<?xml') or first.startswith('<!DOCTYPE')) and 'xml' in self.modes:
             return self.modes['xml']
         return self.modes[self.default]
