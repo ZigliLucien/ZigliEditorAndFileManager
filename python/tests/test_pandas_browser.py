@@ -43,3 +43,34 @@ class PandasBrowserTests(unittest.TestCase):
         for options in ({"page": 0}, {"page_size": 999}, {"column": "missing"}, {"sort_type": "bad"}):
             with self.assertRaises(BrowserError):
                 dataframe_preview(self.files, "data.csv", **options)
+
+    def test_json_records_and_nested_values(self):
+        import json
+        source = self.root / "papers.json"
+        records = [{"id": "001", "year": 2020, "authors": [{"name": "Ada"}]},
+                   {"id": "002", "year": 2023, "authors": [], "notes": None}]
+        source.write_text(json.dumps(records), encoding="utf-8")
+        result = dataframe_preview(self.files, source.name, contains="Ada", column="authors")
+        self.assertIn("1 matching rows of 2", result)
+        data = json.loads(dataframe_preview(self.files, source.name, export="json"))
+        self.assertEqual(data[0]["id"], "001")
+        self.assertEqual(data[0]["year"], 2020)
+        self.assertEqual(data[0]["authors"], [{"name": "Ada"}])
+        self.assertIsNone(data[1]["notes"])
+
+    def test_jsonl_and_table_orientation(self):
+        import json
+        source = self.root / "data.jsonl"
+        source.write_text('{"id":"001","amount":10}\n{"id":"002","amount":2}\n', encoding="utf-8")
+        data = json.loads(dataframe_preview(self.files, source.name, sort="amount",
+                                           sort_type="number", export="json"))
+        self.assertEqual([row["id"] for row in data], ["002", "001"])
+        table = self.root / "table.json"
+        table.write_text(json.dumps({"schema": {"fields": []}, "data": data}), encoding="utf-8")
+        self.assertEqual(json.loads(dataframe_preview(self.files, table.name, export="json")), data)
+
+    def test_invalid_jsonl(self):
+        source = self.root / "bad.jsonl"
+        source.write_text('{"id":1}\ninvalid\n', encoding="utf-8")
+        with self.assertRaises(BrowserError):
+            dataframe_preview(self.files, source.name)
