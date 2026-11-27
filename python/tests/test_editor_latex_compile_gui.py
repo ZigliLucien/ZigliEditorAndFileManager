@@ -166,6 +166,48 @@ class CompileLatexGuiTests(unittest.TestCase):
         self.assertEqual(self.app.current()[0].index("insert"), "12.0")
         self.assertEqual(self.app.current()[0].get("1.0", "end-1c"), original)
 
+    def test_return_from_build_log_selects_existing_source_tab(self):
+        source_tab = self.app.tabs.select()
+        source_widget, _ = self.app.current()
+        source_widget.insert("end", " unsaved change")
+        self.root.update()
+        current_text = source_widget.get("1.0", "end-1c")
+        self.app._show_latex_log(
+            self.tex, {"ok": True, "log": "Completed"})
+        self.app.return_to_latex_source()
+        self.assertEqual(self.app.tabs.select(), source_tab)
+        self.assertEqual(source_widget.get("1.0", "end-1c"), current_text)
+        self.assertEqual(
+            sum(1 for _, editor in self.app.views.values()
+                if editor.state.buffer.path == str(self.tex)), 1)
+
+    def test_view_last_pdf_without_building_again(self):
+        pdf = self.tex.parent / "latest.pdf"
+        pdf.write_bytes(b"%PDF-1.7\\n")
+        self.app.latest_latex_pdfs[self.tex.resolve()] = pdf
+        with patch("zefm.editor.gui.tk_editor.open_browser") as opened:
+            self.app.view_last_latex_pdf()
+        opened.assert_called_once_with(pdf.as_uri())
+        self.assertIn("PDF preview", self.app.status.get())
+        pdf.unlink()
+        with patch("zefm.editor.gui.tk_editor.open_browser") as opened:
+            self.app.view_last_latex_pdf()
+        opened.assert_not_called()
+        self.assertIn("missing", self.app.status.get())
+
+    def test_log_to_pdf_uses_same_compiled_source(self):
+        pdf = self.tex.parent / "compiled.pdf"
+        pdf.write_bytes(b"%PDF-1.7\\n")
+        self.app.latest_latex_pdfs[self.tex.resolve()] = pdf
+        self.app._show_latex_log(self.tex, {"ok": True, "log": "Success"})
+        with patch("zefm.editor.gui.tk_editor.open_browser") as opened:
+            self.app.view_last_latex_pdf()
+        opened.assert_called_once_with(pdf.as_uri())
+        self.app.return_to_latex_source()
+        self.assertEqual(
+            Path(self.app.current()[1].state.buffer.path).resolve(),
+            self.tex.resolve())
+
     def test_reopen_last_build_log_without_recompiling(self):
         source_tab = self.app.tabs.select()
         log = "(./math.tex\n! Undefined control sequence.\nl.12 \\broken\n"
