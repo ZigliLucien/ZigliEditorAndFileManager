@@ -32,7 +32,11 @@ def validate_shortcut(value):
         raise ValueError(f"Duplicate modifier in shortcut: {value}")
     if not modifiers and parts[-1].upper() not in {f"F{i}" for i in range(1, 13)}:
         raise ValueError(f"Bare character shortcuts are not allowed: {value}")
-    return value
+    # Canonical spelling is shared by menu labels and Tk event binding.
+    # In particular, Ctrl must precede Shift for the macOS Command alias.
+    order = ("Ctrl", "Command", "Alt", "Shift")
+    return "+".join([part for part in order if part in modifiers]
+                    + [parts[-1].upper()])
 
 
 def load_menus(path=None):
