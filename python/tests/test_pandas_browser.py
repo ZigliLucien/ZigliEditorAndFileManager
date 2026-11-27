@@ -229,3 +229,36 @@ class PandasBrowserTests(unittest.TestCase):
         for hidden in ('["unknown"]', '["Code","Name","Value"]', '{}'):
             with self.assertRaises(BrowserError):
                 dataframe_preview(self.files, "data.csv", hidden=hidden)
+
+    def test_oversized_json_cell_kept_in_export(self):
+        import json
+        source = self.root / "long.json"
+        value = "a" * 13000 + " searchable tail"
+        source.write_text(json.dumps([{"notes": value}]), encoding="utf-8")
+        result = dataframe_preview(self.files, source.name, contains="searchable tail")
+        self.assertIn("preview shortened", result)
+        self.assertIn("1 matching rows of 1", result)
+        exported = json.loads(dataframe_preview(self.files, source.name, export="json"))
+        self.assertEqual(exported, [{"notes": value}])
+
+    def test_undefined_bib_string_keeps_records(self):
+        import json
+        try:
+            from bibtexparser.bparser import BibTexParser
+        except ImportError:
+            self.skipTest("optional bibtexparser 1.x dependency")
+        source = self.root / "undefined.bib"
+        source.write_text('@string{journalname = "Journal"}\n'
+                          '@article{a, author=john # { Smith}, title={First}, journal=journalname}\n'
+                          '@article{b, author={Jane}, title={Second}, month=jan}\n',
+                          encoding="utf-8")
+        original = source.read_bytes()
+        result = dataframe_preview(self.files, source.name)
+        self.assertIn("Unresolved BibTeX strings:", result)
+        self.assertIn("john Smith", result)
+        records = json.loads(dataframe_preview(self.files, source.name, export="json"))
+        self.assertEqual(len(records), 2)
+        self.assertEqual(records[0]["author"], "john Smith")
+        self.assertEqual(records[0]["journal"], "Journal")
+        self.assertEqual(records[1]["month"], "January")
+        self.assertEqual(source.read_bytes(), original)
