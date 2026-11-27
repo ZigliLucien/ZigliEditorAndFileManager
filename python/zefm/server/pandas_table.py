@@ -5,6 +5,7 @@ from html import escape
 from pathlib import PurePosixPath
 from urllib.parse import urlencode, urlsplit, quote
 import math
+from decimal import Decimal, localcontext
 import re
 import json
 
@@ -230,8 +231,32 @@ def _cached_frame(path, pd, full=False):
         return frame
 
 
+def _column_totals(frame, selected):
+    """Exact decimal totals for ordinary numeric fields; blanks are missing."""
+    totals = {}
+    for column in selected:
+        total = Decimal(0)
+        used = 0
+        with localcontext() as ctx:
+            ctx.prec = 512
+            for index, value in frame[column].items():
+                if value is None or (isinstance(value, str) and not value.strip()):
+                    continue
+                raw = _display(value).strip()
+                if (len(raw) > 100 or not re.fullmatch(
+                        r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d{1,3})?", raw)):
+                    raise BrowserError(f"Cannot total {column}: nonnumeric value at source row {index + 1}")
+                number = Decimal(raw)
+                if not number.is_finite() or abs(number.as_tuple().exponent) > 200 or abs(number.adjusted()) > 200:
+                    raise BrowserError(f"Cannot total {column}: number out of range at source row {index + 1}")
+                total += number
+                used += 1
+        totals[column] = format(total, "f") if used else ""
+    return totals
+
+
 def dataframe_preview(files, relative, sort="", descending=False, contains="",
-                      column="", sort_type="text", page=1, page_size=50, export=""):
+                      column="", sort_type="text", page=1, page_size=50, export="", total1="", total2="", total3=""):
     if export not in ("", "json", "jsonl", "markdown", "csv", "html", "bib"):
         raise BrowserError("Unknown DataFrame export format")
     path = files.resolve(relative)
@@ -251,15 +276,20 @@ def dataframe_preview(files, relative, sort="", descending=False, contains="",
     is_bib = path.suffix.casefold() == ".bib"
     if export == "bib" and not is_bib:
         raise BrowserError("BibTeX export currently requires a BibTeX source")
+    selected = list(dict.fromkeys(c for c in (total1, total2, total3) if c))
+    if selected and export == "bib":
+        raise BrowserError("Totals are not supported in BibTeX exports")
     try:
-        frame = _cached_frame(path, pd, full=bool(export))
+        frame = _cached_frame(path, pd, full=bool(export or selected))
     except (UnicodeError, ValueError, pd.errors.ParserError, pd.errors.EmptyDataError) as exc:
         raise BrowserError("Invalid data table: " + str(exc), 415) from exc
-    truncated = len(frame) > MAX_CSV_ROWS
-    if not export:
+    truncated = len(frame) > MAX_CSV_ROWS and not (export or selected)
+    if not (export or selected):
         frame = frame.head(MAX_CSV_ROWS)
     source_count = len(frame)
     columns = [str(col) for col in frame.columns]
+    if any(c not in columns for c in selected):
+        raise BrowserError("Unknown total column")
     if column and column not in columns:
         raise BrowserError("Unknown filter column")
     if sort and sort not in columns:
@@ -279,7 +309,23 @@ def dataframe_preview(files, relative, sort="", descending=False, contains="",
                                       na_position="last")
         else:
             frame = frame.sort_values(by=sort, ascending=not descending, kind="stable", key=lambda values: values.map(_display))
+    totals = _column_totals(frame, selected)
     if export:
+        if totals:
+            # A dedicated, collision-safe label column distinguishes the
+            # derived summary row from actual source records.
+            label = "__summary__"
+            while label in columns:
+                label += "_"
+            frame = frame.copy()
+            frame[label] = None
+            columns = [label] + columns
+            frame = frame[columns]
+            summary_record = dict.fromkeys(columns)
+            summary_record.update(totals)
+            summary_record[label] = "Total"
+            frame = pd.concat([frame, pd.DataFrame([summary_record], columns=columns, dtype=object)],
+                              ignore_index=True)
         if export == "bib":
             return _bib_export(frame)
         if export == "json":
@@ -314,7 +360,8 @@ def dataframe_preview(files, relative, sort="", descending=False, contains="",
 
     params = {"path": relative, "format": "pandas", "sort": sort,
               "desc": int(descending), "filter": contains, "column": column,
-              "sort_type": sort_type, "page_size": page_size, "page": page}
+              "sort_type": sort_type, "page_size": page_size, "page": page,
+              "total1": total1, "total2": total2, "total3": total3}
 
     def link(label, **changes):
         return '<a href="' + e('/view?' + urlencode(dict(params, **changes))) + '">' + e(label) + '</a>'
@@ -333,10 +380,16 @@ def dataframe_preview(files, relative, sort="", descending=False, contains="",
         record = dict(zip(columns, values[1:])) if is_bib else None
         rows.append('<tr><th>' + e(values[0] + 1) + '</th>' +
                     ''.join('<td>' + (_bibliography_cell(c, v, record) if is_bib else _linked_cell(v)) + '</td>' for c, v in zip(columns, values[1:])) + '</tr>')
+    if totals:
+        rows.append('<tr><th>Total</th>' + ''.join('<td><strong>' + e(totals.get(c, "")) + '</strong></td>' for c in columns) + '</tr>')
     back = '/view?' + urlencode({"path": relative} if is_json or is_bib else {"path": relative, "format": "html"})
     parent = str(PurePosixPath(relative).parent)
     directory = '/listing?' + urlencode({"path": "" if parent == "." else parent})
     reset = '/view?' + urlencode({"path": relative, "format": "pandas"})
+    total_controls = ''.join(
+        '<label>Total column ' + str(i) + ' <select name="total' + str(i) + '">' +
+        options([("", "None")] + [(c, c) for c in columns], chosen) + '</select></label> '
+        for i, chosen in enumerate((total1, total2, total3), 1))
     form = ('<form method="get" action="/view" accept-charset="utf-8">'
             '<input type="hidden" name="format" value="pandas">'
             '<input type="hidden" name="path" value="' + e(relative) + '">'
@@ -351,6 +404,7 @@ def dataframe_preview(files, relative, sort="", descending=False, contains="",
             (' checked' if descending else '') + '> Descending</label> '
             '<label>Rows per page <select name="page_size">' +
             options([(n, n) for n in PAGE_SIZES], page_size) + '</select></label> '
+            + total_controls +
             '<button type="submit">Apply</button> <a href="' + e(reset) + '">Reset</a></form>')
     nav = '<p>' + (' '.join([link("First", page=1), link("Previous", page=page-1)]) if page > 1 else '') 
     nav += ' Page ' + str(page) + ' of ' + str(pages) + ' '
@@ -360,10 +414,12 @@ def dataframe_preview(files, relative, sort="", descending=False, contains="",
         summary += ' — showing ' + str(start + 1) + '–' + str(start + len(visible))
     if truncated:
         summary += ' (preview limited to first ' + str(MAX_CSV_ROWS) + ' source rows)'
+    if totals:
+        summary += ' — totals across all matching source rows (blank values omitted)'
     exports = '<p>Export all matching records: ' + ' · '.join(
         link(label, export=kind) for kind, label in (
             ("json", "JSON"), ("jsonl", "JSONL"), ("markdown", "Markdown"),
-            ("csv", "CSV"), ("html", "HTML")) + ((("bib", "BibTeX"),) if is_bib else ())) + '</p>'
+            ("csv", "CSV"), ("html", "HTML")) + ((("bib", "BibTeX"),) if is_bib and not selected else ())) + '</p>'
     return ('<h2>' + e(path.name) + ' — pandas DataFrame</h2>'
             '<p><a href="' + e(directory) + '">Return to source directory</a> · '
             '<a href="' + e(back) + '">Standard source view</a>'
