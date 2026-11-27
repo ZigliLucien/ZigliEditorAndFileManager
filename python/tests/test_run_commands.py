@@ -28,6 +28,24 @@ class RunCommandTests(unittest.TestCase):
         store.clear("python")
         self.assertIsNone(RunCommands(self.prefs).get("python"))
 
+    def test_builtin_script_commands_and_overrides(self):
+        store = RunCommands(self.prefs)
+        self.assertEqual(store.script_command("python"), ["python3", "{file}"])
+        self.assertEqual(store.script_command("perl"), ["perl", "{file}"])
+        self.assertIsNone(store.script_command("latex"))
+        self.assertIsNone(store.get("perl"))
+        store.set("perl", ["perl", "-w", "{file}"])
+        self.assertEqual(RunCommands(self.prefs).script_command("perl"),
+                         ["perl", "-w", "{file}"])
+        store.clear("perl")
+        self.assertEqual(store.script_command("perl"), ["perl", "{file}"])
+
+    def test_script_commands_are_independent_copies(self):
+        store = RunCommands(self.prefs)
+        command = store.script_command("python")
+        command.append("extra")
+        self.assertEqual(store.script_command("python"), ["python3", "{file}"])
+
     def test_arg_placeholders_keep_spaces_and_unicode(self):
         self.assertEqual(
             expand_command(["python3", "{file}", "--dir={dir}", "{name}"],
