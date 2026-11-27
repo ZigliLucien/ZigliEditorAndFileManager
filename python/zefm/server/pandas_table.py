@@ -3,12 +3,12 @@ from __future__ import annotations
 
 from html import escape
 from pathlib import PurePosixPath
-from urllib.parse import urlencode, urlsplit
+from urllib.parse import urlencode, urlsplit, quote
 import math
 import re
 import json
 
-DATAFRAME_EXTENSIONS = frozenset({".csv", ".tsv", ".json", ".jsonl", ".ndjson"})
+DATAFRAME_EXTENSIONS = frozenset({".csv", ".tsv", ".json", ".jsonl", ".ndjson", ".bib"})
 JSON_EXTENSIONS = frozenset({".json", ".jsonl", ".ndjson"})
 
 from .delimited_preview import MAX_CSV_BYTES, MAX_CSV_ROWS, MAX_CSV_COLUMNS, MAX_CSV_CELL
@@ -50,6 +50,45 @@ def _read_json_records(path, pd, limit):
     # Object dtype avoids converting integer identifiers or nulls to floats.
     return pd.DataFrame([[record.get(key) for key in columns] for record in records],
                         columns=columns, dtype=object)
+
+
+def _bib_module():
+    try:
+        import bibtexparser
+        from bibtexparser.bparser import BibTexParser
+        from bibtexparser.bwriter import BibTexWriter
+        from bibtexparser.bibdatabase import BibDatabase
+    except ImportError as exc:
+        raise BrowserError("BibTeX requires bibtexparser 1.x: install bibtexparser>=1.4,<2", 501) from exc
+    return bibtexparser, BibTexParser, BibTexWriter, BibDatabase
+
+
+def _read_bib_records(path, pd):
+    module, parser_class, _, _ = _bib_module()
+    parser = parser_class(ignore_nonstandard_types=False, homogenize_fields=False,
+                          interpolate_strings=True, common_strings=True)
+    try:
+        database = module.loads(path.read_text(encoding="utf-8-sig"), parser=parser)
+    except Exception as exc:
+        raise BrowserError("Invalid BibTeX: " + str(exc), 415) from exc
+    records = database.entries
+    columns = ["ID", "ENTRYTYPE"]
+    columns += [key for key in dict.fromkeys(k for row in records for k in row)
+                if key not in columns]
+    if len(columns) > MAX_CSV_COLUMNS:
+        raise BrowserError("Too many BibTeX fields", 413)
+    return pd.DataFrame([[record.get(k) for k in columns] for record in records],
+                        columns=columns, dtype=object)
+
+
+def _bib_export(frame):
+    _, _, writer_class, database_class = _bib_module()
+    database = database_class()
+    database.entries = [{k: str(v) for k, v in row.items() if v is not None}
+                        for row in frame.to_dict(orient="records")]
+    writer = writer_class()
+    writer.order_entries_by = None
+    return writer.write(database)
 
 
 def _display(value):
@@ -100,9 +139,26 @@ def _linked_cell(value):
     return escape(_display(value))
 
 
+def _bibliography_cell(column, value, record):
+    if isinstance(value, str):
+        raw = value.strip()
+        target = None
+        if column.casefold() == "doi" and re.fullmatch(r"10\.\d{4,9}/[^\s<>]+", raw):
+            target = "https://doi.org/" + quote(raw, safe="/")
+        elif column.casefold() == "eprint":
+            archive = str(record.get("archiveprefix") or record.get("archivePrefix") or "").casefold()
+            if archive == "arxiv" or raw.lower().startswith("arxiv:"):
+                identifier = re.sub(r"^arxiv:\s*", "", raw, flags=re.I)
+                if re.fullmatch(r"(?:\d{4}\.\d{4,5}|[a-zA-Z.-]+/\d{7})(?:v\d+)?", identifier):
+                    target = "https://arxiv.org/abs/" + quote(identifier, safe="/")
+        if target:
+            return '<a href="' + escape(target, quote=True) + '" target="_blank" rel="noopener noreferrer">' + escape(value) + '</a>'
+    return _linked_cell(value)
+
+
 def dataframe_preview(files, relative, sort="", descending=False, contains="",
                       column="", sort_type="text", page=1, page_size=50, export=""):
-    if export not in ("", "json", "jsonl", "markdown", "csv", "html"):
+    if export not in ("", "json", "jsonl", "markdown", "csv", "html", "bib"):
         raise BrowserError("Unknown DataFrame export format")
     path = files.resolve(relative)
     if not path.is_file() or path.suffix.casefold() not in DATAFRAME_EXTENSIONS:
@@ -118,8 +174,13 @@ def dataframe_preview(files, relative, sort="", descending=False, contains="",
     except ImportError as exc:
         raise BrowserError("Pandas is not installed; install it to use the DataFrame view", 501) from exc
     is_json = path.suffix.casefold() in JSON_EXTENSIONS
+    is_bib = path.suffix.casefold() == ".bib"
+    if export == "bib" and not is_bib:
+        raise BrowserError("BibTeX export currently requires a BibTeX source")
     try:
-        if is_json:
+        if is_bib:
+            frame = _read_bib_records(path, pd)
+        elif is_json:
             frame = _read_json_records(path, pd, None if export else MAX_CSV_ROWS + 1)
         else:
             frame = pd.read_csv(
@@ -158,6 +219,8 @@ def dataframe_preview(files, relative, sort="", descending=False, contains="",
         else:
             frame = frame.sort_values(by=sort, ascending=not descending, kind="stable", key=lambda values: values.map(_display))
     if export:
+        if export == "bib":
+            return _bib_export(frame)
         if export == "json":
             return json.dumps(frame.to_dict(orient="records"), ensure_ascii=False, indent=2, allow_nan=False) + "\n"
         if export == "jsonl":
@@ -207,8 +270,8 @@ def dataframe_preview(files, relative, sort="", descending=False, contains="",
     rows = ['<tr><th>Row</th>' + ''.join(headings) + '</tr>']
     for values in visible.itertuples(index=True, name=None):
         rows.append('<tr><th>' + e(values[0] + 1) + '</th>' +
-                    ''.join('<td>' + _linked_cell(v) + '</td>' for v in values[1:]) + '</tr>')
-    back = '/view?' + urlencode({"path": relative} if is_json else {"path": relative, "format": "html"})
+                    ''.join('<td>' + (_bibliography_cell(c, v, dict(zip(columns, values[1:]))) if is_bib else _linked_cell(v)) + '</td>' for c, v in zip(columns, values[1:])) + '</tr>')
+    back = '/view?' + urlencode({"path": relative} if is_json or is_bib else {"path": relative, "format": "html"})
     parent = str(PurePosixPath(relative).parent)
     directory = '/listing?' + urlencode({"path": "" if parent == "." else parent})
     reset = '/view?' + urlencode({"path": relative, "format": "pandas"})
@@ -238,7 +301,7 @@ def dataframe_preview(files, relative, sort="", descending=False, contains="",
     exports = '<p>Export all matching records: ' + ' · '.join(
         link(label, export=kind) for kind, label in (
             ("json", "JSON"), ("jsonl", "JSONL"), ("markdown", "Markdown"),
-            ("csv", "CSV"), ("html", "HTML"))) + '</p>'
+            ("csv", "CSV"), ("html", "HTML")) + ((("bib", "BibTeX"),) if is_bib else ())) + '</p>'
     return ('<h2>' + e(path.name) + ' — pandas DataFrame</h2>'
             '<p><a href="' + e(directory) + '">Return to source directory</a> · '
             '<a href="' + e(back) + '">Standard source view</a>'
