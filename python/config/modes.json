@@ -16,7 +16,9 @@
     ".ndjson": "json",
     ".csv": "csv",
     ".txt": "text",
-    ".properties": "properties"
+    ".properties": "properties",
+    ".pl": "perl",
+    ".pm": "perl"
   },
   "filenames": {
     "Makefile": "makefile"
@@ -65,6 +67,10 @@
     "makefile": {
       "indent_width": 4,
       "use_tabs": true
+    },
+    "perl": {
+      "indent_width": 4,
+      "use_tabs": false
     }
   }
 }
