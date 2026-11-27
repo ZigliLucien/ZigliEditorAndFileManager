@@ -3,8 +3,9 @@ from __future__ import annotations
 
 from html import escape
 from pathlib import PurePosixPath
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlsplit
 import math
+import re
 import json
 
 DATAFRAME_EXTENSIONS = frozenset({".csv", ".tsv", ".json", ".jsonl", ".ndjson"})
@@ -57,6 +58,46 @@ def _display(value):
     if isinstance(value, (dict, list, bool)):
         return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
     return str(value)
+
+
+_URL = re.compile(r"""https?://[^\s<>"'\\]+""", re.IGNORECASE)
+
+
+def _linked_text(text):
+    """Escape all content; link only explicit HTTP(S) URLs."""
+    pieces = []
+    offset = 0
+    for match in _URL.finditer(text):
+        url = match.group().rstrip(".,;:!?")
+        for left, right in (("(", ")"), ("[", "]"), ("{", "}")):
+            while url.endswith(right) and url.count(right) > url.count(left):
+                url = url[:-1]
+        try:
+            parsed = urlsplit(url)
+            valid = parsed.scheme.lower() in ("http", "https") and bool(parsed.hostname)
+        except ValueError:
+            valid = False
+        if not valid:
+            continue
+        pieces.append(escape(text[offset:match.start()]))
+        safe = escape(url, quote=True)
+        pieces.append('<a href="' + safe + '" target="_blank" rel="noopener noreferrer">' + safe + '</a>')
+        offset = match.start() + len(url)
+    pieces.append(escape(text[offset:]))
+    return "".join(pieces)
+
+
+def _linked_cell(value):
+    """Render nested JSON recursively so URL boundaries remain intact."""
+    if isinstance(value, list):
+        return "[" + ", ".join(_linked_cell(item) for item in value) + "]"
+    if isinstance(value, dict):
+        return "{" + ", ".join(
+            escape(json.dumps(key, ensure_ascii=False)) + ": " + _linked_cell(item)
+            for key, item in value.items()) + "}"
+    if isinstance(value, str):
+        return _linked_text(value)
+    return escape(_display(value))
 
 
 def dataframe_preview(files, relative, sort="", descending=False, contains="",
@@ -166,7 +207,7 @@ def dataframe_preview(files, relative, sort="", descending=False, contains="",
     rows = ['<tr><th>Row</th>' + ''.join(headings) + '</tr>']
     for values in visible.itertuples(index=True, name=None):
         rows.append('<tr><th>' + e(values[0] + 1) + '</th>' +
-                    ''.join('<td>' + e(_display(v)) + '</td>' for v in values[1:]) + '</tr>')
+                    ''.join('<td>' + _linked_cell(v) + '</td>' for v in values[1:]) + '</tr>')
     back = '/view?' + urlencode({"path": relative} if is_json else {"path": relative, "format": "html"})
     parent = str(PurePosixPath(relative).parent)
     directory = '/listing?' + urlencode({"path": "" if parent == "." else parent})
