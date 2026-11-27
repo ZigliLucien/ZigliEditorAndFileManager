@@ -166,6 +166,47 @@ class CompileLatexGuiTests(unittest.TestCase):
         self.assertEqual(self.app.current()[0].index("insert"), "12.0")
         self.assertEqual(self.app.current()[0].get("1.0", "end-1c"), original)
 
+    def test_reopen_last_build_log_without_recompiling(self):
+        source_tab = self.app.tabs.select()
+        log = "(./math.tex\\n! Undefined control sequence.\\nl.12 \\\\broken\\n"
+        self.app._show_latex_log(
+            self.tex, {"ok": False, "log": log})
+        log_tab = self.app.tabs.select()
+        self.app.tabs.select(source_tab)
+        self.app.view_last_latex_log()
+        self.assertEqual(self.app.tabs.select(), log_tab)
+        # Closing the log tab must not discard the last compiler output.
+        self.app.close_tab()
+        self.assertNotIn(log_tab, self.app.views)
+        self.app.view_last_latex_log()
+        reopened = self.app.tabs.select()
+        self.assertNotEqual(reopened, log_tab)
+        widget, _ = self.app.current()
+        self.assertIn("Undefined control sequence", widget.get("1.0", "end-1c"))
+        self.assertEqual(len(self.app.latex_error_lists[reopened][0]), 1)
+
+    def test_view_build_log_before_first_compile_is_safe(self):
+        self.app.view_last_latex_log()
+        self.assertIn("No LaTeX build log yet", self.app.status.get())
+
+    def test_reopened_log_uses_latest_compile_for_same_source(self):
+        self.app._show_latex_log(
+            self.tex, {"ok": False, "log": "First build failed"})
+        previous_tab = self.app.tabs.select()
+        self.app._show_latex_log(
+            self.tex, {"ok": True, "log": "Second build succeeded"})
+        latest_tab = self.app.tabs.select()
+        self.assertNotEqual(previous_tab, latest_tab)
+        self.app.view_last_latex_log()
+        self.assertEqual(self.app.tabs.select(), latest_tab)
+        self.assertIn("Second build succeeded",
+                      self.app.current()[0].get("1.0", "end-1c"))
+        self.app.close_tab()
+        self.app.close_tab()
+        self.app.view_last_latex_log()
+        self.assertIn("Second build succeeded",
+                      self.app.current()[0].get("1.0", "end-1c"))
+
     def test_log_error_rejects_source_outside_project(self):
         other = Path(self.temp.name).parent / "outside.tex"
         from zefm.editor.latex_diagnostics import LatexDiagnostic
