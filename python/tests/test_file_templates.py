@@ -30,8 +30,15 @@ class FileTemplateTests(unittest.TestCase):
         self.assertEqual(next(c.shortcut for c in commands
                               if c.label == "Preview Document"), "Ctrl+Shift+P")
 
+    def test_html(self):
+        template = file_template("html")
+        self.assertIn("<!doctype html>", template.text)
+        self.assertIn("<body>", template.text)
+        self.assertIn("</html>", template.text)
+        self.assertEqual(template.cursor, "8.2")
+
     def test_no_overwrite(self):
-        for mode in ("latex", "python", "perl", "markdown"):
+        for mode in ("latex", "python", "perl", "markdown", "html"):
             with self.assertRaises(ValueError):
                 file_template(mode, "existing source")
         with self.assertRaises(ValueError):
