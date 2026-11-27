@@ -16,7 +16,7 @@ MENUS = {
  ["Refresh Buffer","Clear","Redo","Undo","Line Numbers","Find","Replace","Continue Find or Replace","Toggle ClickPad","Copy","Paste","Cut","Go to Matching LaTeX Delimiter","LaTeX Document Outline","Go to Line","Go to Record","Next Record","Previous Record","Markdown Document Outline","Next Markdown Heading","Previous Markdown Heading"],
  ["F7","F8","F6","F5","Ctrl+F2","Ctrl+S","Ctrl+Shift+R","Ctrl+R","Ctrl+F","Ctrl+C","Ctrl+V","Ctrl+X","Ctrl+Shift+M","Ctrl+Shift+L","Ctrl+G",None,None,None,"Ctrl+Shift+H",None,None])],
  "Run": [Command(a,b) for a,b in zip(
- ["Shell","Compile","Trace","Run Script","Preview Markdown","Export Markdown PDF"],
+ ["Shell","Compile","Trace","Run Script","Preview Document","Export Document PDF"],
  ["Ctrl+Shift+Z","F4","Ctrl+O","Ctrl+Shift+E","Ctrl+Shift+P",None])]
 }
 class Registry:
