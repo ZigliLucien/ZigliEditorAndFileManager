@@ -178,3 +178,27 @@ class PandasBrowserTests(unittest.TestCase):
         exported = json.loads(dataframe_preview(self.files, source.name, export="json"))
         self.assertEqual(exported, [{"_index": "A", "index": 12},
                                     {"_index": "B", "index": 13}])
+
+    def test_transpose_indexed_json(self):
+        import json
+        source = self.root / "months.json"
+        source.write_text('{"JAN":{"visa":500,"chase":100},"FEB":{"visa":600,"chase":200}}',
+                          encoding="utf-8")
+        original = source.read_bytes()
+        records = json.loads(dataframe_preview(self.files, source.name, transpose=True, export="json"))
+        self.assertEqual(records, [{"field": "visa", "JAN": 500, "FEB": 600},
+                                   {"field": "chase", "JAN": 100, "FEB": 200}])
+        result = dataframe_preview(self.files, source.name, transpose=True, total1="JAN")
+        self.assertIn("<strong>600</strong>", result)
+        self.assertIn("Normal view", result)
+        normal = dataframe_preview(self.files, source.name)
+        self.assertIn("<td>JAN</td>", normal)
+        self.assertEqual(source.read_bytes(), original)
+
+    def test_transpose_csv_and_width_limit(self):
+        import json
+        records = json.loads(dataframe_preview(self.files, "data.csv", transpose=True, export="json"))
+        self.assertEqual(records[0], {"field": "Code", "1": "001", "2": "002", "3": "003"})
+        self.source.write_text("N\n" + "1\n" * 100, encoding="utf-8")
+        with self.assertRaises(BrowserError):
+            dataframe_preview(self.files, "data.csv", transpose=True)
