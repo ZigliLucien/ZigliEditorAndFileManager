@@ -715,7 +715,7 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                     )
                     self._send(200, page("Extract archive member", content))
                 elif parsed.path == "/view":
-                    if set(args) - {"path", "back", "chapter", "page", "format", "sort", "desc", "filter", "column", "sort_type", "page_size", "export", "total1", "total2", "total3", "transpose"}:
+                    if set(args) - {"path", "back", "chapter", "page", "format", "sort", "desc", "filter", "column", "sort_type", "page_size", "export", "total1", "total2", "total3", "transpose", "hidden"}:
                         raise BrowserError("Unexpected view parameters")
                     descriptor = handler_for(rel)
                     if descriptor["extension"] == ".ics":
@@ -744,7 +744,8 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                                 sort_type=args.get("sort_type", "text"),
                                 page=int(raw_page), page_size=int(raw_size), export=export,
                                 total1=args.get("total1", ""), total2=args.get("total2", ""),
-                                total3=args.get("total3", ""), transpose=args.get("transpose") == "1")
+                                total3=args.get("total3", ""), transpose=args.get("transpose") == "1",
+                                hidden=args.get("hidden", ""))
                             if export:
                                 from urllib.parse import quote
                                 ext, mime = {
@@ -760,17 +761,34 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                                            extra={"Content-Disposition": "attachment; filename*=UTF-8''" + quote(filename, safe="")})
                                 return
                         else:
-                            if set(args) & {"sort", "desc", "filter", "column", "sort_type", "page_size", "export", "total1", "total2", "total3", "transpose"}:
+                            if set(args) & {"sort", "desc", "filter", "column", "sort_type", "page_size", "export", "total1", "total2", "total3", "transpose", "hidden"}:
                                 raise BrowserError("DataFrame options require pandas format")
-                            content = csv_preview(files, rel, table_format)
+                            try:
+                                content = csv_preview(files, rel, table_format)
+                            except BrowserError as exc:
+                                if exc.status != 413:
+                                    raise
+                                data_url = escape("/view?" + urlencode({"path": rel, "format": "pandas"}), quote=True)
+                                content = f'<p><a href="{data_url}">pandas DataFrame</a></p><p>{escape(str(exc))}</p>'
                         self._send(200, page(rel, content))
                         return
                     if descriptor["extension"] in (".jsonl", ".ndjson", ".bib"):
                         data_url = escape("/view?" + urlencode({"path": rel, "format": "pandas"}), quote=True)
-                        self._send(200, page(rel, f'<p><a href="{data_url}">pandas DataFrame</a></p>' + (preview_text(files, rel) or "")))
+                        try:
+                            content = preview_text(files, rel) or ""
+                        except BrowserError as exc:
+                            if exc.status != 413:
+                                raise
+                            content = "<p>" + escape(str(exc)) + "</p>"
+                        self._send(200, page(rel, f'<p><a href="{data_url}">pandas DataFrame</a></p>' + content))
                         return
                     if kind == "structured":
-                        content = transformed_document(files, rel)
+                        try:
+                            content = transformed_document(files, rel)
+                        except BrowserError as exc:
+                            if descriptor["extension"] != ".json" or exc.status != 413:
+                                raise
+                            content = "<p>" + escape(str(exc)) + "</p>"
                         if descriptor["extension"] == ".json":
                             data_url = escape("/view?" + urlencode({"path": rel, "format": "pandas"}), quote=True)
                             content = f'<p><a href="{data_url}">pandas DataFrame</a></p>' + content
