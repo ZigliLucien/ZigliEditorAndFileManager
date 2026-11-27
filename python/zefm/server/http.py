@@ -749,6 +749,7 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                                     "markdown": (".md", "text/markdown"),
                                     "csv": (".csv", "text/csv"),
                                     "html": (".html", "text/html"),
+                                    "bib": (".bib", "application/x-bibtex"),
                                 }[export]
                                 filename = files.resolve(rel).stem + "-export" + ext
                                 self._send(200, content.encode("utf-8"), mime + "; charset=utf-8",
@@ -760,7 +761,7 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                             content = csv_preview(files, rel, table_format)
                         self._send(200, page(rel, content))
                         return
-                    if descriptor["extension"] in (".jsonl", ".ndjson"):
+                    if descriptor["extension"] in (".jsonl", ".ndjson", ".bib"):
                         data_url = escape("/view?" + urlencode({"path": rel, "format": "pandas"}), quote=True)
                         self._send(200, page(rel, f'<p><a href="{data_url}">pandas DataFrame</a></p>' + (preview_text(files, rel) or "")))
                         return
