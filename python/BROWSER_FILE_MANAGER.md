@@ -1325,3 +1325,16 @@ reconstructed. The command prefers the current TeX master when its
 log exists; otherwise it shows the latest build. The retained output
 is bounded to 100,000 characters, remains in memory only, and does
 not modify LaTeX sources or PDFs.
+
+## LaTeX source, build log, and PDF navigation
+
+The desktop **Run** menu and LaTeX right-click menu provide three
+non-compiling actions: **Return to LaTeX Source**, **View Last LaTeX Build Log**,
+and **View Last LaTeX PDF**. Returning to the source selects an existing
+editor tab when one is already open; it does not duplicate a buffer or replace
+unsaved changes. A closed build-log tab can be reconstructed from the last
+in-memory log for that master. The PDF action opens the most recent **successful**
+preview for the current LaTeX master through the configured browser or Okular,
+without invoking a compiler. Missing PDFs are reported in the status line.
+These navigation actions work only for builds completed in the current session
+and never overwrite TeX files or change compiler settings.
