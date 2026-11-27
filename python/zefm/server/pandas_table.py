@@ -324,7 +324,7 @@ def _transpose_frame(frame, pd):
 
 
 def dataframe_preview(files, relative, sort="", descending=False, contains="",
-                      column="", sort_type="text", page=1, page_size=50, export="", total1="", total2="", total3="", transpose=False, hidden=""):
+                      column="", sort_type="text", page=1, page_size=50, export="", total1="", total2="", total3="", transpose=False, hidden="", row_number=0):
     if export not in ("", "json", "jsonl", "markdown", "csv", "html", "bib"):
         raise BrowserError("Unknown DataFrame export format")
     path = files.resolve(relative)
@@ -334,7 +334,7 @@ def dataframe_preview(files, relative, sort="", descending=False, contains="",
         raise BrowserError("Data file exceeds 32 MiB size limit", 413)
     if len(contains) > 200:
         raise BrowserError("Filter is too long")
-    if sort_type not in ("text", "number") or page < 1 or page_size not in PAGE_SIZES:
+    if sort_type not in ("text", "number") or page < 1 or page_size not in PAGE_SIZES or row_number < 0:
         raise BrowserError("Invalid table display options")
     try:
         import pandas as pd
@@ -434,6 +434,15 @@ def dataframe_preview(files, relative, sort="", descending=False, contains="",
                          + [row(values) for values in frame.itertuples(index=False, name=None)]) + "\n"
     count = len(frame)
     pages = max(1, math.ceil(count / page_size))
+    jump_message = ""
+    found_row = False
+    if row_number:
+        if row_number - 1 in frame.index:
+            position = int(frame.index.get_loc(row_number - 1))
+            page = position // page_size + 1
+            found_row = True
+        else:
+            jump_message = f"Row {row_number} is not in the current filtered view."
     page = min(page, pages)
     start = (page - 1) * page_size
     visible = frame.iloc[start:start + page_size]
@@ -462,7 +471,10 @@ def dataframe_preview(files, relative, sort="", descending=False, contains="",
     rows = ['<tr><th>Row</th>' + ''.join(headings) + '</tr>']
     for values in visible.itertuples(index=True, name=None):
         record = dict(zip(columns, values[1:]))
-        rows.append('<tr><th>' + e(values[0] + 1) + '</th>' +
+        number = values[0] + 1
+        tag = ('<tr id="selected-row" style="outline:2px solid #b8860b;outline-offset:-2px">' 
+               if found_row and number == row_number else '<tr>')
+        rows.append(tag + '<th>' + e(number) + '</th>' +
                     ''.join('<td>' + _preview_cell(c, record[c], record if is_bib else None) + '</td>' for c in shown) + '</tr>')
     if totals:
         rows.append('<tr><th>Total</th>' + ''.join('<td><strong>' + e(totals.get(c, "")) + '</strong></td>' for c in shown) + '</tr>')
@@ -516,6 +528,26 @@ def dataframe_preview(files, relative, sort="", descending=False, contains="",
     nav = '<p>' + (' '.join([link("First", page=1), link("Previous", page=page-1)]) if page > 1 else '') 
     nav += ' Page ' + str(page) + ' of ' + str(pages) + ' '
     nav += (' '.join([link("Next", page=page+1), link("Last", page=pages)]) if page < pages else '') + '</p>'
+
+    def jump_form(name, label, upper, value, button):
+        fields = ''.join('<input type="hidden" name="' + e(key) + '" value="' + e(val) + '">'
+                         for key, val in params.items() if key != name)
+        return ('<form method="get" action="/view" accept-charset="utf-8" style="display:inline-block;margin:0 1em .5em 0">'
+                + fields + '<label>' + e(label) + ' <input type="number" name="' + e(name) +
+                '" min="1" max="' + e(upper) + '" value="' + e(value) +
+                '" required style="width:7em"></label> <button type="submit">' +
+                e(button) + '</button></form>')
+
+    nav += '<div>' + jump_form("page", "Go to page", pages, page, "Go")
+    if source_count:
+        nav += jump_form("row", "Go to row (source number)", source_count,
+                         row_number if found_row else "", "Find row")
+    nav += '</div>'
+    if found_row:
+        nav += ('<p>Located row ' + e(row_number) + ' on page ' + e(page) +
+                ' · <a href="#selected-row">Jump to highlighted row</a></p>')
+    elif jump_message:
+        nav += '<p>' + e(jump_message) + '</p>'
     summary = str(count) + ' matching rows of ' + str(source_count)
     if count:
         summary += ' — showing ' + str(start + 1) + '–' + str(start + len(visible))
