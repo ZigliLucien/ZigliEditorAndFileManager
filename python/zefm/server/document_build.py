@@ -191,6 +191,11 @@ def render_markdown_text(text, source):
 
 
 def _command(source, output_dir, descriptor, *, latex_engine="lualatex"):
+    if descriptor["build"] == "html":
+        engine = shutil.which("weasyprint")
+        if not engine:
+            raise BrowserError("HTML PDF requires WeasyPrint", 503)
+        return [engine, str(source), str(output_dir / "document.pdf")]
     if descriptor["build"] == "discount":
         # The Markdown build now follows Discount -> HTML -> PDF, not Pandoc.
         # The HTML conversion itself is done before this command is returned.
@@ -264,7 +269,8 @@ def _publish_adjacent_pdf(produced: Path, source: Path) -> Path:
             temporary.unlink(missing_ok=True)
 
 
-def build_pdf(files, relative, *, publish_adjacent=False, latex_engine="lualatex"):
+def build_pdf(files, relative, *, publish_adjacent=False, latex_engine="lualatex",
+              allow_html=False):
     """Compile to a new PDF, returning its root-relative path and log.
 
     Builds are deliberately performed in a new temporary directory. A PDF
@@ -272,7 +278,11 @@ def build_pdf(files, relative, *, publish_adjacent=False, latex_engine="lualatex
     The desktop editor explicitly requests publish_adjacent=True to refresh
     the ordinary source-name PDF after a successful and validated build.
     """
-    source, descriptor = checked_source(files, relative, for_build=True)
+    source, descriptor = checked_source(files, relative, for_build=not allow_html)
+    if allow_html and descriptor["extension"] in (".html", ".htm"):
+        descriptor = dict(descriptor, build="html")
+    if descriptor["build"] is None:
+        raise BrowserError("This file type has no PDF builder", 415)
     output_base = source.parent / ".zefm-build"
     output_base.mkdir(mode=0o700, exist_ok=True)
     if output_base.is_symlink() or not output_base.resolve().is_relative_to(files.root):
