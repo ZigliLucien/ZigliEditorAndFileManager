@@ -115,6 +115,14 @@ def markdown_html(files, relative):
         text = source.read_bytes().decode("utf-8")
     except UnicodeDecodeError as exc:
         raise BrowserError("Markdown file is not UTF-8", 415) from exc
+    return render_markdown_text(text, source)
+
+
+def render_markdown_text(text, source):
+    """Render a UTF-8 Markdown snapshot using the shared browser renderer."""
+    source = Path(source)
+    if len(text.encode("utf-8")) > MAX_SOURCE_BYTES:
+        raise ValueError("Markdown exceeds browser source limit")
     prepared, spans = _protect_color_spans(text)
     rendered = _discount_render(prepared, source)
     if rendered is not None:
