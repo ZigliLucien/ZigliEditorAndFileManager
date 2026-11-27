@@ -715,7 +715,7 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                     )
                     self._send(200, page("Extract archive member", content))
                 elif parsed.path == "/view":
-                    if set(args) - {"path", "back", "chapter", "page", "format", "sort", "desc", "filter", "column", "sort_type", "page_size", "export", "total1", "total2", "total3", "transpose", "hidden"}:
+                    if set(args) - {"path", "back", "chapter", "page", "format", "sort", "desc", "filter", "column", "sort_type", "page_size", "export", "total1", "total2", "total3", "transpose", "hidden", "row"}:
                         raise BrowserError("Unexpected view parameters")
                     descriptor = handler_for(rel)
                     if descriptor["extension"] == ".ics":
@@ -730,6 +730,9 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                                 raise BrowserError("Invalid descending sort flag")
                             if args.get("transpose", "0") not in ("0", "1"):
                                 raise BrowserError("Invalid transpose flag")
+                            raw_row = args.get("row", "")
+                            if raw_row and not (raw_row.isascii() and raw_row.isdigit() and len(raw_row) <= 6 and int(raw_row) >= 1):
+                                raise BrowserError("Invalid DataFrame row number")
                             raw_page = args.get("page", "1")
                             raw_size = args.get("page_size", "50")
                             if not (raw_page.isascii() and raw_page.isdigit() and len(raw_page) <= 6
@@ -745,7 +748,7 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                                 page=int(raw_page), page_size=int(raw_size), export=export,
                                 total1=args.get("total1", ""), total2=args.get("total2", ""),
                                 total3=args.get("total3", ""), transpose=args.get("transpose") == "1",
-                                hidden=args.get("hidden", ""))
+                                hidden=args.get("hidden", ""), row_number=int(raw_row or "0"))
                             if export:
                                 from urllib.parse import quote
                                 ext, mime = {
@@ -761,7 +764,7 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                                            extra={"Content-Disposition": "attachment; filename*=UTF-8''" + quote(filename, safe="")})
                                 return
                         else:
-                            if set(args) & {"sort", "desc", "filter", "column", "sort_type", "page_size", "export", "total1", "total2", "total3", "transpose", "hidden"}:
+                            if set(args) & {"sort", "desc", "filter", "column", "sort_type", "page_size", "export", "total1", "total2", "total3", "transpose", "hidden", "row"}:
                                 raise BrowserError("DataFrame options require pandas format")
                             try:
                                 content = csv_preview(files, rel, table_format)
