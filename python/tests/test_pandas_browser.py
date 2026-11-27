@@ -89,3 +89,41 @@ class PandasBrowserTests(unittest.TestCase):
         self.assertNotIn("<script>", result)
         self.assertNotIn('href="javascript:', result)
         self.assertEqual(json.loads(dataframe_preview(self.files, source.name, export="json")), [record])
+
+    def test_cache_reuses_source_and_invalidates(self):
+        from unittest.mock import patch
+        from zefm.server import pandas_table as table
+        with patch.object(table, "_read_frame", wraps=table._read_frame) as read:
+            dataframe_preview(self.files, "data.csv", page=1)
+            dataframe_preview(self.files, "data.csv", sort="Value", sort_type="number")
+            dataframe_preview(self.files, "data.csv", contains="Alpha")
+            self.assertEqual(read.call_count, 1)
+            self.source.write_text("Code,Name,Value\n009,New,12345\n", encoding="utf-8")
+            result = dataframe_preview(self.files, "data.csv")
+            self.assertEqual(read.call_count, 2)
+            self.assertIn("<td>009</td>", result)
+            self.assertNotIn("<td>001</td>", result)
+
+    def test_cache_full_export_is_not_truncated(self):
+        import json
+        self.source.write_text("N\n" + "\n".join(str(i) for i in range(1100)), encoding="utf-8")
+        dataframe_preview(self.files, "data.csv")
+        records = json.loads(dataframe_preview(self.files, "data.csv", export="json"))
+        self.assertEqual(len(records), 1100)
+        self.assertEqual(records[-1]["N"], "1099")
+
+    def test_bib_preview_and_export_share_parse(self):
+        from unittest.mock import patch
+        from zefm.server import pandas_table as table
+        try:
+            from bibtexparser.bparser import BibTexParser
+        except ImportError:
+            self.skipTest("optional bibtexparser 1.x dependency")
+        source = self.root / "refs.bib"
+        source.write_text("@article{a, title={A}, year={2025}}\n"
+                          "@article{b, title={B}, year={2024}}\n", encoding="utf-8")
+        with patch.object(table, "_read_bib_records", wraps=table._read_bib_records) as read:
+            dataframe_preview(self.files, source.name)
+            dataframe_preview(self.files, source.name, sort="year")
+            dataframe_preview(self.files, source.name, export="bib")
+            self.assertEqual(read.call_count, 1)
