@@ -24,4 +24,3 @@ def file_template(mode, current_text=""):
         return TEMPLATES[mode]
     except KeyError:
         raise ValueError("Choose latex, python, or perl") from None
-}
