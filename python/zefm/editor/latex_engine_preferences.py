@@ -4,12 +4,12 @@ import os
 from pathlib import Path
 import tempfile
 
-ENGINES = ("lualatex", "pdflatex", "xelatex")
+ENGINES = ("lualatex", "pdflatex", "xelatex", "latexmk")
 
 
 def validate_engine(engine):
     if engine not in ENGINES or not isinstance(engine, str):
-        raise ValueError("Choose lualatex, pdflatex, or xelatex")
+        raise ValueError("Choose lualatex, pdflatex, xelatex, or latexmk")
     return engine
 
 
