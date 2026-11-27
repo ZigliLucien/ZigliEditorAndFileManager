@@ -1,4 +1,4 @@
-/* v48: ZEFM's original XSLT listing visual language, rebuilt with JSON + DOM.
+/* v49: ZEFM's original XSLT listing visual language, rebuilt with JSON + DOM.
    Use textContent only for filenames, notes, and directory data. */
 (() => {
   "use strict";
@@ -27,6 +27,13 @@
     const args = {path, page: String(page)};
     if (state.sort !== "timekey") args.sort = state.sort;
     if (state.filter) args.filter = state.filter;
+    return "/listing?" + new URLSearchParams(args);
+  }
+
+  function directoryListingUrl(path) {
+    // Changing folders clears only the filename filter, not the sort choice.
+    const args = {path, page: "1"};
+    if (state.sort !== "timekey") args.sort = state.sort;
     return "/listing?" + new URLSearchParams(args);
   }
 
@@ -67,14 +74,14 @@
       if (i) area.append(make("span", "separator", "/"));
       const item = crumbs[i];
       const a = make("a", "", item.name);
-      a.href = pathUrl("/listing", item.path);
+      a.href = directoryListingUrl(item.path);
       area.append(a);
     }
     $("directory-title").textContent = data.directory;
     // Native links work without the JavaScript navigation interception.
     // The selected root is the file-manager Home, not the OS home folder.
-    $("folder-home").href = pathUrl("/listing", ".");
-    $("folder-up").href = pathUrl("/listing", data.parent || ".");
+    $("folder-home").href = directoryListingUrl(".");
+    $("folder-up").href = directoryListingUrl(data.parent || ".");
     $("folder-up").setAttribute("aria-disabled", String(data.parent === null));
     $("folder-home").setAttribute("aria-disabled", String(data.relative === "."));
     $("basic-listing").href = pathUrl("/browse", data.relative);
@@ -102,7 +109,7 @@
           if (k < folders.length) {
             const folder = folders[k];
             const a = make("a", "", folder.name);
-            a.href = pathUrl("/listing", folder.path);
+            a.href = directoryListingUrl(folder.path);
             a.addEventListener("click", (event) => {
               if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
               event.preventDefault();
@@ -448,7 +455,7 @@
   }
   window.addEventListener("popstate", () => {
     const query = new URLSearchParams(location.search);
-    state.sort = ["filename", "filetype", "timekey", "size", "notes"].includes(query.get("sort"))
+    state.sort = ["filename", "filetype", "timekey", "timeold", "size", "notes"].includes(query.get("sort"))
       ? query.get("sort") : "timekey";
     state.filter = (query.get("filter") || "").slice(0, 200);
     $("sort-key").value = state.sort;
@@ -460,7 +467,7 @@
   updateClock();
   setInterval(updateClock, 1000);
   const query = new URLSearchParams(location.search);
-  state.sort = ["filename", "filetype", "timekey", "size", "notes"].includes(query.get("sort"))
+  state.sort = ["filename", "filetype", "timekey", "timeold", "size", "notes"].includes(query.get("sort"))
     ? query.get("sort") : "timekey";
   state.filter = (query.get("filter") || "").slice(0, 200);
   $("sort-key").value = state.sort;
