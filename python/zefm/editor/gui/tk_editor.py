@@ -86,6 +86,7 @@ class Window:
         self.last_latex_log_tab = None
         self.last_latex_log_source = None
         self.recent_latex_logs = {}  # Master Path -> last completed build result.
+        self.latest_latex_log_tabs = {}  # Master Path -> tab showing latest result.
         self.latex_master_preferences = LatexMasterPreferences()
         self.disk_signatures = {}
         self.external_dismissals = ExternalChangeDismissals()
@@ -1084,13 +1085,13 @@ class Window:
         if source not in self.recent_latex_logs:
             self.status.set("No LaTeX build log yet; compile a .tex file with F4")
             return
-        # Reuse the latest existing tab for this master when possible.
-        for tab in reversed(list(self.views)):
-            entry = self.latex_error_lists.get(tab)
-            if entry and entry[2] == source:
-                self.tabs.select(tab)
-                self.status.set(f"Build log: {source.name}")
-                return
+        # An older log tab must not masquerade as the latest after a
+        # newer tab has been closed.
+        tab = self.latest_latex_log_tabs.get(source)
+        if tab in self.views:
+            self.tabs.select(tab)
+            self.status.set(f"Build log: {source.name}")
+            return
         self._show_latex_log(source, self.recent_latex_logs[source])
         self.status.set(f"Build log: {source.name}")
 
@@ -1107,6 +1108,7 @@ class Window:
         items = parse_latex_errors(log, source)
         self.latex_error_lists[tab] = (items, 0, source)
         self.last_latex_log_tab = tab
+        self.latest_latex_log_tabs[source] = tab
         if items:
             widget.tag_configure("latex_error", foreground="#b03030",
                                  underline=True)
@@ -2963,6 +2965,9 @@ class Window:
         self.line_gutters.pop(tab,None)
         self.latex_masters.pop(tab,None)
         self.latex_error_lists.pop(tab,None)
+        for source, active_tab in list(self.latest_latex_log_tabs.items()):
+            if active_tab == tab:
+                self.latest_latex_log_tabs.pop(source, None)
         if self.last_latex_log_tab == tab:
             self.last_latex_log_tab = None
         self.disk_signatures.pop(tab,None)
