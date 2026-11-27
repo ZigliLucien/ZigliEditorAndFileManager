@@ -1,18 +1,19 @@
-"""Optional, read-only pandas DataFrame view of local CSV/TSV files.
-
-No eval/query strings, code execution, or data writes. Pandas is imported only
-when this view is requested; the browser and editor work without it.
-"""
+"""Read-only, paginated pandas data browser for local CSV/TSV files."""
 from __future__ import annotations
 
 from html import escape
+from pathlib import PurePosixPath
 from urllib.parse import urlencode
+import math
 
-from .delimited_preview import MAX_CSV_BYTES, MAX_CSV_ROWS, MAX_CSV_COLUMNS
+from .delimited_preview import MAX_CSV_BYTES, MAX_CSV_ROWS, MAX_CSV_COLUMNS, MAX_CSV_CELL
 from .file_manager import BrowserError
 
+PAGE_SIZES = (25, 50, 100, 250)
 
-def dataframe_preview(files, relative, sort="", descending=False, contains=""):
+
+def dataframe_preview(files, relative, sort="", descending=False, contains="",
+                      column="", sort_type="text", page=1, page_size=50):
     path = files.resolve(relative)
     if not path.is_file() or path.suffix.casefold() not in {".csv", ".tsv"}:
         raise BrowserError("CSV/TSV file not found", 404)
@@ -20,6 +21,8 @@ def dataframe_preview(files, relative, sort="", descending=False, contains=""):
         raise BrowserError("Delimited file exceeds preview size limit", 413)
     if len(contains) > 200:
         raise BrowserError("Filter is too long")
+    if sort_type not in ("text", "number") or page < 1 or page_size not in PAGE_SIZES:
+        raise BrowserError("Invalid table display options")
     try:
         import pandas as pd
     except ImportError as exc:
@@ -35,43 +38,90 @@ def dataframe_preview(files, relative, sort="", descending=False, contains=""):
         raise BrowserError("Delimited file has too many columns", 413)
     truncated = len(frame) > MAX_CSV_ROWS
     frame = frame.head(MAX_CSV_ROWS)
-    if contains:
-        mask = frame.apply(
-            lambda col: col.str.contains(contains, case=False, regex=False, na=False)
-        ).any(axis=1)
-        frame = frame.loc[mask]
-    if sort:
-        if sort not in frame.columns:
-            raise BrowserError("Unknown column for sorting")
-        frame = frame.sort_values(by=sort, ascending=not descending, kind="stable")
-    if any(len(str(value)) > 12000 for values in frame.itertuples(index=False, name=None)
+    source_count = len(frame)
+    columns = [str(col) for col in frame.columns]
+    if column and column not in columns:
+        raise BrowserError("Unknown filter column")
+    if sort and sort not in columns:
+        raise BrowserError("Unknown column for sorting")
+    if any(len(str(value)) > MAX_CSV_CELL for values in frame.itertuples(index=False, name=None)
            for value in values):
         raise BrowserError("Delimited table contains oversized cells", 413)
-    columns = [str(col) for col in frame.columns]
-    options = ['<option value="">Original row order</option>']
-    for column in columns:
-        selected = ' selected' if column == sort else ''
-        options.append(
-            '<option value="' + escape(column, quote=True) + '"' + selected + '>'
-            + escape(column) + '</option>')
-    rows = ['<tr>' + ''.join('<th>' + escape(c) + '</th>' for c in columns) + '</tr>']
-    for values in frame.itertuples(index=False, name=None):
-        rows.append('<tr>' + ''.join('<td>' + escape(str(v)) + '</td>' for v in values) + '</tr>')
+    if contains:
+        if column:
+            mask = frame[column].str.contains(contains, case=False, regex=False, na=False)
+        else:
+            mask = frame.apply(
+                lambda col: col.str.contains(contains, case=False, regex=False, na=False)
+            ).any(axis=1)
+        frame = frame.loc[mask]
+    if sort:
+        if sort_type == "number":
+            frame = frame.sort_values(by=sort, ascending=not descending, kind="stable",
+                                      key=lambda values: pd.to_numeric(values, errors="coerce"),
+                                      na_position="last")
+        else:
+            frame = frame.sort_values(by=sort, ascending=not descending, kind="stable")
+    count = len(frame)
+    pages = max(1, math.ceil(count / page_size))
+    page = min(page, pages)
+    start = (page - 1) * page_size
+    visible = frame.iloc[start:start + page_size]
+
+    def e(value):
+        return escape(str(value), quote=True)
+
+    params = {"path": relative, "format": "pandas", "sort": sort,
+              "desc": int(descending), "filter": contains, "column": column,
+              "sort_type": sort_type, "page_size": page_size, "page": page}
+
+    def link(label, **changes):
+        return '<a href="' + e('/view?' + urlencode(dict(params, **changes))) + '">' + e(label) + '</a>'
+
+    def options(items, selected):
+        return ''.join('<option value="' + e(value) + '"' +
+                       (' selected' if value == selected else '') + '>' +
+                       e(label) + '</option>' for value, label in items)
+
+    headings = []
+    for c in columns:
+        arrow = (' ↓' if descending else ' ↑') if c == sort else ''
+        headings.append('<th>' + link(c + arrow, sort=c, desc=int(not descending) if c == sort else 0, page=1) + '</th>')
+    rows = ['<tr><th>Row</th>' + ''.join(headings) + '</tr>']
+    for values in visible.itertuples(index=True, name=None):
+        rows.append('<tr><th>' + e(values[0] + 1) + '</th>' +
+                    ''.join('<td>' + e(v) + '</td>' for v in values[1:]) + '</tr>')
     back = '/view?' + urlencode({"path": relative, "format": "html"})
+    parent = str(PurePosixPath(relative).parent)
+    directory = '/listing?' + urlencode({"path": "" if parent == "." else parent})
+    reset = '/view?' + urlencode({"path": relative, "format": "pandas"})
     form = ('<form method="get" action="/view" accept-charset="utf-8">'
             '<input type="hidden" name="format" value="pandas">'
-            '<input type="hidden" name="path" value="' + escape(relative, quote=True) + '">'
-            '<label>Filter text <input name="filter" maxlength="200" value="'
-            + escape(contains, quote=True) + '"></label> '
-            '<label>Sort column <select name="sort">' + ''.join(options) + '</select></label> '
-            '<label><input type="checkbox" name="desc" value="1"'
-            + (' checked' if descending else '') + '> Descending</label> '
-            '<button type="submit">Apply</button></form>')
-    return ('<h2>' + escape(path.name) + ' — pandas DataFrame</h2>'
-            '<p><a href="' + escape(back, quote=True) + '">Standard CSV view</a>'
+            '<input type="hidden" name="path" value="' + e(relative) + '">'
+            '<label>Filter text <input name="filter" maxlength="200" value="' + e(contains) + '"></label> '
+            '<label>Filter column <select name="column">' +
+            options([("", "All columns")] + [(c, c) for c in columns], column) + '</select></label> '
+            '<label>Sort column <select name="sort">' +
+            options([("", "Original row order")] + [(c, c) for c in columns], sort) + '</select></label> '
+            '<label>Sort as <select name="sort_type">' +
+            options([("text", "Text"), ("number", "Number")], sort_type) + '</select></label> '
+            '<label><input type="checkbox" name="desc" value="1"' +
+            (' checked' if descending else '') + '> Descending</label> '
+            '<label>Rows per page <select name="page_size">' +
+            options([(n, n) for n in PAGE_SIZES], page_size) + '</select></label> '
+            '<button type="submit">Apply</button> <a href="' + e(reset) + '">Reset</a></form>')
+    nav = '<p>' + (' '.join([link("First", page=1), link("Previous", page=page-1)]) if page > 1 else '') 
+    nav += ' Page ' + str(page) + ' of ' + str(pages) + ' '
+    nav += (' '.join([link("Next", page=page+1), link("Last", page=pages)]) if page < pages else '') + '</p>'
+    summary = str(count) + ' matching rows of ' + str(source_count)
+    if count:
+        summary += ' — showing ' + str(start + 1) + '–' + str(start + len(visible))
+    if truncated:
+        summary += ' (preview limited to first ' + str(MAX_CSV_ROWS) + ' source rows)'
+    return ('<h2>' + e(path.name) + ' — pandas DataFrame</h2>'
+            '<p><a href="' + e(directory) + '">Return to source directory</a> · '
+            '<a href="' + e(back) + '">Standard CSV view</a>'
             ' · Read-only, text columns preserve leading zeros</p>'
-            + form + '<div style="overflow-x:auto"><table border="1">'
-            + ''.join(rows) + '</table></div>'
-            + '<p>' + str(len(frame)) + ' matching rows'
-            + (' (preview limited to first 1,000 source rows)' if truncated else '')
-            + '</p>')
+            + form + '<p>' + e(summary) + '</p>' + nav
+            + '<div style="overflow-x:auto"><table border="1" cellspacing="0" cellpadding="4">'
+            + ''.join(rows) + '</table></div>' + nav)
