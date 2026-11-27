@@ -13,7 +13,9 @@ PAGE_SIZES = (25, 50, 100, 250)
 
 
 def dataframe_preview(files, relative, sort="", descending=False, contains="",
-                      column="", sort_type="text", page=1, page_size=50):
+                      column="", sort_type="text", page=1, page_size=50, export=""):
+    if export not in ("", "json", "jsonl", "markdown", "csv", "html"):
+        raise BrowserError("Unknown DataFrame export format")
     path = files.resolve(relative)
     if not path.is_file() or path.suffix.casefold() not in {".csv", ".tsv"}:
         raise BrowserError("CSV/TSV file not found", 404)
@@ -31,13 +33,14 @@ def dataframe_preview(files, relative, sort="", descending=False, contains="",
         frame = pd.read_csv(
             path, sep="\t" if path.suffix.casefold() == ".tsv" else ",",
             encoding="utf-8-sig", dtype=str, keep_default_na=False,
-            nrows=MAX_CSV_ROWS + 1, on_bad_lines="error")
+            nrows=None if export else MAX_CSV_ROWS + 1, on_bad_lines="error")
     except (UnicodeError, ValueError, pd.errors.ParserError, pd.errors.EmptyDataError) as exc:
         raise BrowserError("Invalid CSV/TSV table", 415) from exc
     if frame.shape[1] > MAX_CSV_COLUMNS:
         raise BrowserError("Delimited file has too many columns", 413)
     truncated = len(frame) > MAX_CSV_ROWS
-    frame = frame.head(MAX_CSV_ROWS)
+    if not export:
+        frame = frame.head(MAX_CSV_ROWS)
     source_count = len(frame)
     columns = [str(col) for col in frame.columns]
     if column and column not in columns:
@@ -62,6 +65,28 @@ def dataframe_preview(files, relative, sort="", descending=False, contains="",
                                       na_position="last")
         else:
             frame = frame.sort_values(by=sort, ascending=not descending, kind="stable")
+    if export:
+        if export == "json":
+            return frame.to_json(orient="records", force_ascii=False, indent=2) + "\n"
+        if export == "jsonl":
+            return frame.to_json(orient="records", force_ascii=False, lines=True)
+        if export == "csv":
+            return frame.to_csv(index=False)
+        if export == "html":
+            return ('<!doctype html>\n<html><head><meta charset="utf-8">'
+                    '<title>' + escape(path.name) + '</title></head><body>\n'
+                    + frame.to_html(index=False, escape=True) + '\n</body></html>\n')
+        # Avoid requiring the optional tabulate dependency. Escape table
+        # separators, HTML, and inline Markdown formatting in literal cells.
+        def cell(value):
+            value = escape(str(value), quote=False).replace("\\", "\\\\")
+            for char in "|*_[]~" + chr(96):
+                value = value.replace(char, "\\" + char)
+            return value.replace("\r\n", "<br>").replace("\r", "<br>").replace("\n", "<br>")
+        def row(values):
+            return "| " + " | ".join(cell(v) for v in values) + " |"
+        return "\n".join([row(columns), "| " + " | ".join(["---"] * len(columns)) + " |"]
+                         + [row(values) for values in frame.itertuples(index=False, name=None)]) + "\n"
     count = len(frame)
     pages = max(1, math.ceil(count / page_size))
     page = min(page, pages)
@@ -118,10 +143,14 @@ def dataframe_preview(files, relative, sort="", descending=False, contains="",
         summary += ' — showing ' + str(start + 1) + '–' + str(start + len(visible))
     if truncated:
         summary += ' (preview limited to first ' + str(MAX_CSV_ROWS) + ' source rows)'
+    exports = '<p>Export all matching records: ' + ' · '.join(
+        link(label, export=kind) for kind, label in (
+            ("json", "JSON"), ("jsonl", "JSONL"), ("markdown", "Markdown"),
+            ("csv", "CSV"), ("html", "HTML"))) + '</p>'
     return ('<h2>' + e(path.name) + ' — pandas DataFrame</h2>'
             '<p><a href="' + e(directory) + '">Return to source directory</a> · '
             '<a href="' + e(back) + '">Standard CSV view</a>'
             ' · Read-only, text columns preserve leading zeros</p>'
-            + form + '<p>' + e(summary) + '</p>' + nav
+            + form + exports + '<p>' + e(summary) + '</p>' + nav
             + '<div style="overflow-x:auto"><table border="1" cellspacing="0" cellpadding="4">'
             + ''.join(rows) + '</table></div>' + nav)
