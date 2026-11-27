@@ -262,3 +262,22 @@ class PandasBrowserTests(unittest.TestCase):
         self.assertEqual(records[0]["journal"], "Journal")
         self.assertEqual(records[1]["month"], "January")
         self.assertEqual(source.read_bytes(), original)
+
+    def test_direct_row_navigation(self):
+        self.source.write_text("N\n" + "\n".join(str(i) for i in range(1, 101)), encoding="utf-8")
+        result = dataframe_preview(self.files, "data.csv", row_number=80, page_size=25)
+        self.assertIn("Page 4 of 4", result)
+        self.assertIn('id="selected-row"', result)
+        self.assertIn("Located row 80 on page 4", result)
+        self.assertIn('name="row"', result)
+        self.assertIn('name="page"', result)
+
+    def test_direct_row_navigation_after_sort_and_filter(self):
+        self.source.write_text("N\n" + "\n".join(str(i) for i in range(1, 101)), encoding="utf-8")
+        result = dataframe_preview(self.files, "data.csv", row_number=80,
+                                   sort="N", sort_type="number", descending=True, page_size=25)
+        self.assertIn("Located row 80 on page 1", result)
+        result = dataframe_preview(self.files, "data.csv", row_number=80,
+                                   contains="99", column="N", page_size=25)
+        self.assertIn("Row 80 is not in the current filtered view.", result)
+        self.assertNotIn('id="selected-row"', result)
