@@ -715,7 +715,7 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                     )
                     self._send(200, page("Extract archive member", content))
                 elif parsed.path == "/view":
-                    if set(args) - {"path", "back", "chapter", "page", "format", "sort", "desc", "filter", "column", "sort_type", "page_size", "export"}:
+                    if set(args) - {"path", "back", "chapter", "page", "format", "sort", "desc", "filter", "column", "sort_type", "page_size", "export", "total1", "total2", "total3"}:
                         raise BrowserError("Unexpected view parameters")
                     descriptor = handler_for(rel)
                     if descriptor["extension"] == ".ics":
@@ -740,7 +740,9 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                                 contains=args.get("filter", ""),
                                 column=args.get("column", ""),
                                 sort_type=args.get("sort_type", "text"),
-                                page=int(raw_page), page_size=int(raw_size), export=export)
+                                page=int(raw_page), page_size=int(raw_size), export=export,
+                                total1=args.get("total1", ""), total2=args.get("total2", ""),
+                                total3=args.get("total3", ""))
                             if export:
                                 from urllib.parse import quote
                                 ext, mime = {
@@ -756,7 +758,7 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                                            extra={"Content-Disposition": "attachment; filename*=UTF-8''" + quote(filename, safe="")})
                                 return
                         else:
-                            if set(args) & {"sort", "desc", "filter", "column", "sort_type", "page_size", "export"}:
+                            if set(args) & {"sort", "desc", "filter", "column", "sort_type", "page_size", "export", "total1", "total2", "total3"}:
                                 raise BrowserError("DataFrame options require pandas format")
                             content = csv_preview(files, rel, table_format)
                         self._send(200, page(rel, content))
