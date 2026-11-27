@@ -24,6 +24,7 @@ def _read_json_records(path, pd, limit):
         raise ValueError("Nonstandard JSON constant: " + value)
     def decode(line):
         return json.loads(line, parse_constant=invalid_constant)
+    index_field = None
     if path.suffix.casefold() == ".json":
         data = decode(path.read_text(encoding="utf-8-sig"))
         if isinstance(data, dict) and "schema" in data and "data" in data:
@@ -60,8 +61,11 @@ def _read_json_records(path, pd, limit):
     if len(columns) > MAX_CSV_COLUMNS:
         raise ValueError("Too many columns")
     # Object dtype avoids converting integer identifiers or nulls to floats.
-    return pd.DataFrame([[record.get(key) for key in columns] for record in records],
-                        columns=columns, dtype=object)
+    frame = pd.DataFrame([[record.get(key) for key in columns] for record in records],
+                         columns=columns, dtype=object)
+    if index_field is not None:
+        frame.attrs["zefm_index_field"] = index_field
+    return frame
 
 
 def _bib_module():
@@ -266,8 +270,29 @@ def _column_totals(frame, selected):
     return totals
 
 
+def _transpose_frame(frame, pd):
+    """Rotate a complete source table, preserving both axes as data."""
+    if len(frame) + 1 > MAX_CSV_COLUMNS:
+        raise BrowserError("Transpose requires at most " + str(MAX_CSV_COLUMNS - 1) +
+                           " source rows; the result would have too many columns", 413)
+    index_field = frame.attrs.get("zefm_index_field")
+    if index_field is not None and index_field in frame.columns:
+        labels = [str(v) for v in frame[index_field]]
+        values = frame.drop(columns=[index_field])
+    else:
+        labels = [str(i + 1) for i in range(len(frame))]
+        values = frame
+    field = "field"
+    while field in labels:
+        field = "_" + field
+    rotated = values.T.copy()
+    rotated.columns = labels
+    rotated.insert(0, field, [str(c) for c in values.columns])
+    return rotated.reset_index(drop=True)
+
+
 def dataframe_preview(files, relative, sort="", descending=False, contains="",
-                      column="", sort_type="text", page=1, page_size=50, export="", total1="", total2="", total3=""):
+                      column="", sort_type="text", page=1, page_size=50, export="", total1="", total2="", total3="", transpose=False):
     if export not in ("", "json", "jsonl", "markdown", "csv", "html", "bib"):
         raise BrowserError("Unknown DataFrame export format")
     path = files.resolve(relative)
@@ -288,14 +313,18 @@ def dataframe_preview(files, relative, sort="", descending=False, contains="",
     if export == "bib" and not is_bib:
         raise BrowserError("BibTeX export currently requires a BibTeX source")
     selected = list(dict.fromkeys(c for c in (total1, total2, total3) if c))
+    if transpose and is_bib:
+        raise BrowserError("Transpose is not supported for bibliographies")
     if selected and export == "bib":
         raise BrowserError("Totals are not supported in BibTeX exports")
     try:
-        frame = _cached_frame(path, pd, full=bool(export or selected))
+        frame = _cached_frame(path, pd, full=bool(export or selected or transpose))
     except (UnicodeError, ValueError, pd.errors.ParserError, pd.errors.EmptyDataError) as exc:
         raise BrowserError("Invalid data table: " + str(exc), 415) from exc
-    truncated = len(frame) > MAX_CSV_ROWS and not (export or selected)
-    if not (export or selected):
+    if transpose:
+        frame = _transpose_frame(frame, pd)
+    truncated = len(frame) > MAX_CSV_ROWS and not (export or selected or transpose)
+    if not (export or selected or transpose):
         frame = frame.head(MAX_CSV_ROWS)
     source_count = len(frame)
     columns = [str(col) for col in frame.columns]
@@ -372,7 +401,8 @@ def dataframe_preview(files, relative, sort="", descending=False, contains="",
     params = {"path": relative, "format": "pandas", "sort": sort,
               "desc": int(descending), "filter": contains, "column": column,
               "sort_type": sort_type, "page_size": page_size, "page": page,
-              "total1": total1, "total2": total2, "total3": total3}
+              "total1": total1, "total2": total2, "total3": total3,
+              "transpose": int(transpose)}
 
     def link(label, **changes):
         return '<a href="' + e('/view?' + urlencode(dict(params, **changes))) + '">' + e(label) + '</a>'
@@ -396,13 +426,17 @@ def dataframe_preview(files, relative, sort="", descending=False, contains="",
     back = '/view?' + urlencode({"path": relative} if is_json or is_bib else {"path": relative, "format": "html"})
     parent = str(PurePosixPath(relative).parent)
     directory = '/listing?' + urlencode({"path": "" if parent == "." else parent})
-    reset = '/view?' + urlencode({"path": relative, "format": "pandas"})
+    reset = '/view?' + urlencode({"path": relative, "format": "pandas", "transpose": int(transpose)})
+    orientation = "" if is_bib else (" · " + link(
+        "Normal view" if transpose else "Transpose", transpose=int(not transpose),
+        sort="", desc=0, filter="", column="", total1="", total2="", total3="", page=1))
     total_controls = ''.join(
         '<label>Total column ' + str(i) + ' <select name="total' + str(i) + '">' +
         options([("", "None")] + [(c, c) for c in columns], chosen) + '</select></label> '
         for i, chosen in enumerate((total1, total2, total3), 1))
     form = ('<form method="get" action="/view" accept-charset="utf-8">'
             '<input type="hidden" name="format" value="pandas">'
+            '<input type="hidden" name="transpose" value="' + str(int(transpose)) + '">'
             '<input type="hidden" name="path" value="' + e(relative) + '">'
             '<label>Filter text <input name="filter" maxlength="200" value="' + e(contains) + '"></label> '
             '<label>Filter column <select name="column">' +
@@ -425,8 +459,10 @@ def dataframe_preview(files, relative, sort="", descending=False, contains="",
         summary += ' — showing ' + str(start + 1) + '–' + str(start + len(visible))
     if truncated:
         summary += ' (preview limited to first ' + str(MAX_CSV_ROWS) + ' source rows)'
+    if transpose:
+        summary += ' — transposed view'
     if totals:
-        summary += ' — totals across all matching source rows (blank values omitted)'
+        summary += ' — totals across all matching rows (blank values omitted)'
     exports = '<p>Export all matching records: ' + ' · '.join(
         link(label, export=kind) for kind, label in (
             ("json", "JSON"), ("jsonl", "JSONL"), ("markdown", "Markdown"),
@@ -434,7 +470,7 @@ def dataframe_preview(files, relative, sort="", descending=False, contains="",
     return ('<h2>' + e(path.name) + ' — pandas DataFrame</h2>'
             '<p><a href="' + e(directory) + '">Return to source directory</a> · '
             '<a href="' + e(back) + '">Standard source view</a>'
-            ' · Read-only, original string identifiers preserved</p>'
+            + orientation + ' · Read-only, original string identifiers preserved</p>'
             + form + exports + '<p>' + e(summary) + '</p>' + nav
             + '<div style="overflow-x:auto"><table border="1" cellspacing="0" cellpadding="4">'
             + ''.join(rows) + '</table></div>' + nav)
