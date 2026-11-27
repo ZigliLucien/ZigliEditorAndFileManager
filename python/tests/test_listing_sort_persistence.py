@@ -4,6 +4,7 @@ from tempfile import TemporaryDirectory
 from urllib.parse import urlencode
 from urllib.request import urlopen
 import os
+import json
 import unittest
 
 from zefm.server.file_manager import LocalFiles
@@ -62,7 +63,7 @@ class DateOrderTests(unittest.TestCase):
                     self.assertEqual(response.status, 200)
                 with urlopen(server.url +
                              "api/listing-page?sort=timeold", timeout=5) as response:
-                    self.assertIn(b'"sort": "timeold"', response.read())
+                    self.assertEqual(json.loads(response.read())["sort"], "timeold")
             finally:
                 server.close()
 
