@@ -13,6 +13,7 @@ from .code_delimiters import json_spans
 
 MAX_CHARS = 250_000
 COLORS = {
+    "heading": "#165eaa",
     "comment": "#667381",
     "keyword": "#7039a7",
     "string": "#167044",
@@ -442,4 +443,7 @@ def syntax_spans(text, mode):
         return json_spans(text)
     if mode == "java":
         return java_spans(text)
+    if mode == "markdown":
+        from .markdown_outline import markdown_scan
+        return markdown_scan(text)[1]
     return []
