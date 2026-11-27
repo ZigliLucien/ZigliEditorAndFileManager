@@ -22,8 +22,16 @@ class FileTemplateTests(unittest.TestCase):
         self.assertEqual(python.cursor, "3.0")
         self.assertEqual(perl.cursor, "6.0")
 
+    def test_markdown(self):
+        template = file_template("markdown")
+        self.assertEqual(template.text, "# Title\n\n")
+        self.assertEqual(template.cursor, "1.2")
+        commands = load_menus()["Run"]
+        self.assertEqual(next(c.shortcut for c in commands
+                              if c.label == "Preview Markdown"), "Ctrl+Shift+P")
+
     def test_no_overwrite(self):
-        for mode in ("latex", "python", "perl"):
+        for mode in ("latex", "python", "perl", "markdown"):
             with self.assertRaises(ValueError):
                 file_template(mode, "existing source")
         with self.assertRaises(ValueError):
