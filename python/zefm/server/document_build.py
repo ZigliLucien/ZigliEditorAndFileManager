@@ -74,6 +74,57 @@ def _restore_color_spans(html: str, replacements: dict):
     return html
 
 
+
+# Preserve common passive HTML blocks while retaining Discount's nohtml
+# protection for arbitrary markup. Only plain text and a bounded font-size
+# percentage are accepted; event handlers and other attributes are discarded
+# by leaving unsupported blocks to Discount.
+_PASSIVE_BLOCK = re.compile(
+    r"""(?im)^ {0,3}<(h[1-6]|p)(?:[ \t]+style\s*=\s*(?:"font-size\s*:\s*(\d{1,3})%\s*;?"|'font-size\s*:\s*(\d{1,3})%\s*;?'|font-size\s*:\s*(\d{1,3})%))?[ \t]*>([^<>]*)</\1>[ \t]*$"""
+)
+
+
+def _protect_passive_blocks(text):
+    replacements = {}
+    key = "ZEFMBLOCK" + uuid4().hex.upper()
+    # Ignore fenced and indented code, where HTML must remain literal.
+    fence = None
+    output = []
+    for line in text.splitlines(keepends=True):
+        marker = re.match(r"^ {0,3}(\x60{3,}|~{3,})(.*)$", line.rstrip("\r\n"))
+        if fence:
+            output.append(line)
+            if marker and marker[1][0] == fence[0] and len(marker[1]) >= len(fence) and not marker[2].strip():
+                fence = None
+            continue
+        if marker:
+            fence = marker[1]
+            output.append(line)
+            continue
+        match = _PASSIVE_BLOCK.fullmatch(line.rstrip("\r\n"))
+        if not match:
+            output.append(line)
+            continue
+        tag = match[1].lower()
+        size = next((int(value) for value in match.groups()[1:4] if value), None)
+        if size is not None and not 25 <= size <= 400:
+            output.append(line)
+            continue
+        token = key + "TOKEN" + str(len(replacements)) + "END"
+        style = f' style="font-size:{size}%"' if size is not None else ""
+        replacements[token] = f"<{tag}{style}>" + escape(unescape(match[5])) + f"</{tag}>"
+        output.append("\n\n" + token + "\n\n")
+    return "".join(output), replacements
+
+
+def _restore_passive_blocks(markup, replacements):
+    for token, block in replacements.items():
+        markup = re.sub(r"<p>\s*" + re.escape(token) + r"\s*</p>",
+                        lambda _match: block, markup)
+        markup = markup.replace(token, block)
+    return markup
+
+
 def _discount_command():
     """Prefer Discount's makepage, as in the original ZEFM workflow."""
     executable = shutil.which("makepage")
@@ -123,10 +174,11 @@ def render_markdown_text(text, source):
     source = Path(source)
     if len(text.encode("utf-8")) > MAX_SOURCE_BYTES:
         raise ValueError("Markdown exceeds browser source limit")
-    prepared, spans = _protect_color_spans(text)
+    prepared, blocks = _protect_passive_blocks(text)
+    prepared, spans = _protect_color_spans(prepared)
     rendered = _discount_render(prepared, source)
     if rendered is not None:
-        rendered = _restore_color_spans(rendered, spans)
+        rendered = _restore_passive_blocks(_restore_color_spans(rendered, spans), blocks)
         return inject_mathjax(format_math_html(rendered)).encode("utf-8")
     fallback = ("<!doctype html><html><head><meta charset='utf-8'>"
             "<meta name='viewport' content='width=device-width,initial-scale=1'>"
@@ -234,11 +286,12 @@ def build_pdf(files, relative, *, publish_adjacent=False, latex_engine="lualatex
                 text = source.read_bytes().decode("utf-8")
             except UnicodeDecodeError as exc:
                 raise BrowserError("Markdown file is not UTF-8", 415) from exc
-            prepared, spans = _protect_color_spans(text)
+            prepared, blocks = _protect_passive_blocks(text)
+            prepared, spans = _protect_color_spans(prepared)
             html = _discount_render(prepared, source)
             if html is None:
                 raise BrowserError("Discount Markdown conversion failed", 422)
-            html = _restore_color_spans(html, spans)
+            html = _restore_passive_blocks(_restore_color_spans(html, spans), blocks)
             (temporary / "document.html").write_text(format_math_html(html), encoding="utf-8")
         command = _command(source, temporary, descriptor,
                            latex_engine=latex_engine)
