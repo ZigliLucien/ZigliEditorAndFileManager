@@ -59,6 +59,15 @@ class RunCommands:
         argv = self.commands.get(mode)
         return list(argv) if argv is not None else None
 
+    def script_command(self, mode):
+        """Return a configured script command or its built-in interpreter."""
+        defaults = {"python": ["python3", "{file}"],
+                    "perl": ["perl", "{file}"]}
+        if mode not in defaults:
+            return None
+        configured = self.get(mode)
+        return configured if configured is not None else defaults[mode]
+
     def set(self, mode, argv):
         if not isinstance(mode, str) or not mode or len(mode) > 60:
             raise ValueError("Invalid mode name")
