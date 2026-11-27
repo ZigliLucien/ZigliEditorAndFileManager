@@ -45,7 +45,7 @@ from .postscript_preview import postscript_pdf
 from .image_preview import image_preview
 from .text_preview import preview_text
 from .delimited_preview import csv_preview
-from .pandas_table import dataframe_preview
+from .pandas_table import dataframe_preview, DATAFRAME_EXTENSIONS, JSON_EXTENSIONS
 from .content_search import search_text
 from .structured_preview import transformed_document
 from .document_build import markdown_html, checked_source, build_pdf
@@ -723,7 +723,7 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                             "Location": "/calendar-import?" + urlencode({"path": rel})})
                         return
                     kind = descriptor["view"]
-                    if kind == "delimited":
+                    if kind == "delimited" or (descriptor["extension"] in DATAFRAME_EXTENSIONS and args.get("format") == "pandas"):
                         table_format = args.get("format", "html")
                         if table_format == "pandas":
                             if args.get("desc", "0") not in ("0", "1"):
@@ -760,8 +760,15 @@ def make_handler(files: LocalFiles, token: str, bound_port, notes_path=None, ope
                             content = csv_preview(files, rel, table_format)
                         self._send(200, page(rel, content))
                         return
+                    if descriptor["extension"] in (".jsonl", ".ndjson"):
+                        data_url = escape("/view?" + urlencode({"path": rel, "format": "pandas"}), quote=True)
+                        self._send(200, page(rel, f'<p><a href="{data_url}">pandas DataFrame</a></p>' + (preview_text(files, rel) or "")))
+                        return
                     if kind == "structured":
                         content = transformed_document(files, rel)
+                        if descriptor["extension"] == ".json":
+                            data_url = escape("/view?" + urlencode({"path": rel, "format": "pandas"}), quote=True)
+                            content = f'<p><a href="{data_url}">pandas DataFrame</a></p>' + content
                         if descriptor["extension"] == ".ipynb":
                             self._send(200, content.encode("utf-8"),
                                        extra={"Content-Security-Policy":
