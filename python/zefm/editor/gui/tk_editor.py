@@ -188,6 +188,8 @@ class Window:
                               for item in items] for group,items in self.menus.items()}
         self._make_menus()
         self.recent_popup = tk.Menu(self.root, tearoff=False)
+        self.root.bind("<Unmap>", self._dismiss_recent_popup, add="+")
+        self.root.bind("<FocusOut>", self._check_recent_popup_focus, add="+")
         # The ClickPad is hidden initially, as in the original editor.
         # Its buttons are independent of the actual document text.
         self.clickpad_frame = ttk.Frame(self.root, padding=3)
@@ -3759,13 +3761,36 @@ class Window:
 
     def _show_recent_files_popup(self, event):
         """Right-click: mode-specific tools and the existing recent-file list."""
+        self._dismiss_recent_popup()
         self._fill_recent_files_menu(self.recent_popup)
         self._populate_mode_context_menu()
-        try:
-            self.recent_popup.tk_popup(event.x_root, event.y_root)
-        finally:
-            self.recent_popup.grab_release()
+        # Tk's Menu class owns the popup grab until it unposts the menu.
+        # Releasing it immediately leaves the visible menu orphaned on X11.
+        self.recent_popup.tk_popup(event.x_root, event.y_root)
         return "break"
+
+    def _dismiss_recent_popup(self, event=None):
+        """Use Tk's menu cleanup, including cascades and focus restoration."""
+        try:
+            if self.recent_popup.winfo_ismapped():
+                self.root.tk.call("tk::MenuUnpost", str(self.recent_popup))
+        except tk.TclError:
+            # Some Tk ports do not expose the menu helper.
+            self.recent_popup.unpost()
+            if self.recent_popup.grab_current() == self.recent_popup:
+                self.recent_popup.grab_release()
+
+    def _check_recent_popup_focus(self, event=None):
+        # Focus may temporarily move to a cascade; defer until Tk settles.
+        def check():
+            if not self.recent_popup.winfo_ismapped():
+                return
+            focus = self.root.focus_displayof()
+            if focus is None or not (
+                    str(focus) == str(self.recent_popup)
+                    or str(focus).startswith(str(self.recent_popup) + ".")):
+                self._dismiss_recent_popup()
+        self.root.after_idle(check)
 
     def _clear_recent_files(self):
         self.recent_files.clear()
