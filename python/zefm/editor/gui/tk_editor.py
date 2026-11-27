@@ -2257,6 +2257,51 @@ class Window:
         self.clickpad_frame.pack(side="top", fill="x", before=self.tabs)
         self.status.set("ClickPad shown; choose symbols to insert at cursor")
 
+    def preview_markdown(self):
+        """Open a rendered snapshot of the current Markdown buffer."""
+        from ...server.document_build import render_markdown_text
+        from threading import Thread
+        widget, editor = self.current()
+        if widget is None:
+            return
+        if self.buffer_modes[self.tabs.select()].name != "markdown":
+            self.status.set("Preview Markdown requires Markdown mode")
+            return
+        # Take the snapshot on the Tk thread; the renderer runs off-thread.
+        text = widget.get("1.0", "end-1c")
+        path = editor.state.buffer.path
+        if self.print_preview_directory is None:
+            try:
+                self.print_preview_directory = tempfile.TemporaryDirectory(
+                    prefix="zefm-preview-")
+            except OSError as exc:
+                self.status.set(str(exc))
+                return
+        directory = Path(self.print_preview_directory.name)
+        preview = directory / ("markdown-" + uuid4().hex + ".html")
+        source = Path(path).resolve() if path else directory / "Untitled.md"
+        # Browser launch and file writes do not touch Tk from the worker.
+        def worker():
+            try:
+                preview.write_bytes(render_markdown_text(text, source))
+                open_browser(preview.as_uri())
+                result = "Markdown preview opened"
+            except (OSError, ValueError) as exc:
+                result = f"Markdown preview failed: {exc}"
+            results.put(result)
+
+        results = Queue()
+        def poll():
+            try:
+                result = results.get_nowait()
+            except Empty:
+                self.root.after(120, poll)
+                return
+            self.status.set(result)
+        self.status.set("Rendering Markdown preview...")
+        Thread(target=worker, name="zefm-markdown-preview", daemon=True).start()
+        self.root.after(120, poll)
+
     def insert_file_template(self):
         """Initialize an empty buffer without replacing existing text."""
         from ..file_templates import TEMPLATES, file_template
@@ -2271,7 +2316,7 @@ class Window:
         mode = self.buffer_modes[tab].name
         if mode not in TEMPLATES:
             choice = simpledialog.askstring(
-                "Insert File Template", "Choose latex, python, or perl:",
+                "Insert File Template", "Choose latex, python, perl, or markdown:",
                 initialvalue="latex", parent=self.root)
             if choice is None:
                 return
@@ -2318,6 +2363,7 @@ class Window:
         elif name=="Debug Python":self.debug_python()
         elif name=="Compile":self.compile_latex()
         elif name=="Run Script":self.run_script()
+        elif name=="Preview Markdown":self.preview_markdown()
         elif name=="Shell":self.open_shell_terminal()
         elif name=="Revert Buffer":self.revert_buffer()
         elif name=="Refresh Buffer":self.refresh_buffer()
@@ -3513,13 +3559,15 @@ class Window:
             command("Run Script", lambda: self.action("Run Script"))
         if name == "perl":
             command("Configure Run Command...", self.configure_run_command)
-        if name in ("python", "latex", "perl"):
+        if name == "markdown":
+            command("Preview Markdown", lambda: self.action("Preview Markdown"))
+        if name in ("python", "latex", "perl", "markdown"):
             command("Insert File Template", self.insert_file_template)
-        if name in ("python", "latex", "json", "perl"):
+        if name in ("python", "latex", "json", "perl", "markdown"):
             popup.add_separator()
             popup.add_cascade(
                 label={"python": "Python Tools", "latex": "LaTeX Tools",
-                       "json": "JSON / jq Tools", "perl": "Perl Tools"}[name],
+                       "json": "JSON / jq Tools", "perl": "Perl Tools", "markdown": "Markdown Tools"}[name],
                 menu=tools)
         else:
             tools.destroy()
