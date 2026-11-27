@@ -156,3 +156,25 @@ class PandasBrowserTests(unittest.TestCase):
     def test_total_invalid_numeric_value(self):
         with self.assertRaises(BrowserError):
             dataframe_preview(self.files, "data.csv", total1="Name")
+
+    def test_index_oriented_json(self):
+        import json
+        source = self.root / "monthly.json"
+        records = {"JAN": {"visa": 500.0, "chase": 3084.63},
+                   "FEB": {"visa": 500.0, "chase": 2690.24}}
+        source.write_text(json.dumps(records), encoding="utf-8")
+        result = dataframe_preview(self.files, source.name, total1="chase")
+        self.assertIn("<td>JAN</td>", result)
+        self.assertIn("<td>FEB</td>", result)
+        self.assertIn("<strong>5774.87</strong>", result)
+        exported = json.loads(dataframe_preview(self.files, source.name, export="json"))
+        self.assertEqual(exported, [{"index": key, **value} for key, value in records.items()])
+        self.assertEqual(json.loads(source.read_text(encoding="utf-8")), records)
+
+    def test_index_oriented_json_field_collision(self):
+        import json
+        source = self.root / "indexed.json"
+        source.write_text('{"A":{"index":12},"B":{"index":13}}', encoding="utf-8")
+        exported = json.loads(dataframe_preview(self.files, source.name, export="json"))
+        self.assertEqual(exported, [{"_index": "A", "index": 12},
+                                    {"_index": "B", "index": 13}])
