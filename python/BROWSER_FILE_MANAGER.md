@@ -1284,3 +1284,17 @@ appointments. The download references the original CSV date and row index,
 even when the event appears on a different local calendar date after timezone
 conversion. This exports exactly one appointment, in its original timezone,
 without including private diary entries. No calendar data is modified.
+
+## File listing: reversible date/time sorting
+
+The styled browser file manager defaults to **Newest first** by modification
+date/time. The Sort by menu also offers **Oldest first**. Both orders use
+filesystem modification timestamps, not filenames, with deterministic
+filename ordering when timestamps are equal.
+
+The chosen sort follows browser Back/Forward history, pagination,
+and native Home/Up/breadcrumb/directory links. Moving to another directory
+clears the filename filter while retaining the sort. File operations
+continue to carry the validated sort, page and filter state in their
+Back-to-listing links. The chosen sort changes only presentation, not
+file modification times or filesystem contents.
