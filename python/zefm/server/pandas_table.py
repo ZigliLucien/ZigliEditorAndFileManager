@@ -91,20 +91,37 @@ def _bib_module():
 def _read_bib_records(path, pd):
     module, parser_class, _, _ = _bib_module()
     parser = parser_class(ignore_nonstandard_types=False, homogenize_fields=False,
-                          interpolate_strings=True, common_strings=True)
+                          interpolate_strings=False, common_strings=True)
     try:
         database = module.loads(path.read_text(encoding="utf-8-sig"), parser=parser)
     except Exception as exc:
         raise BrowserError("Invalid BibTeX: " + str(exc), 415) from exc
-    records = database.entries
+    from bibtexparser.bibdatabase import BibDataString, BibDataStringExpression
+    unresolved = set()
+
+    def expand(value, active=frozenset()):
+        if isinstance(value, BibDataStringExpression):
+            return "".join(expand(part, active) for part in value.expr)
+        if isinstance(value, BibDataString):
+            name = value.name
+            if name in active or name not in database.strings:
+                unresolved.add(name)
+                return name
+            return expand(database.strings[name], active | {name})
+        return str(value)
+
+    records = [{key: expand(value) for key, value in entry.items()}
+               for entry in database.entries]
     columns = ["ID", "ENTRYTYPE"]
     columns += [key for key in dict.fromkeys(k for row in records for k in row)
                 if key not in columns]
     if len(columns) > MAX_CSV_COLUMNS:
         raise BrowserError("Too many BibTeX fields", 413)
     _check_shape(len(records), len(columns))
-    return pd.DataFrame([[record.get(k) for k in columns] for record in records],
-                        columns=columns, dtype=object)
+    frame = pd.DataFrame([[record.get(k) for k in columns] for record in records],
+                         columns=columns, dtype=object)
+    frame.attrs["unresolved_bib_strings"] = sorted(unresolved)
+    return frame
 
 
 def _bib_export(frame):
@@ -165,6 +182,15 @@ def _linked_cell(value):
     return escape(_display(value))
 
 
+def _preview_cell(column, value, record=None):
+    text = _display(value)
+    if len(text) > MAX_CSV_CELL:
+        return escape(text[:MAX_CSV_CELL]) + ' <em>[preview shortened; full value in export]</em>'
+    if record is not None:
+        return _bibliography_cell(column, value, record)
+    return _linked_cell(value)
+
+
 def _bibliography_cell(column, value, record):
     if isinstance(value, str):
         raw = value.strip()
@@ -214,10 +240,6 @@ def _read_frame(path, pd, full):
     _check_shape(*frame.shape)
     if frame.shape[1] > MAX_CSV_COLUMNS:
         raise BrowserError("Delimited file has too many columns", 413)
-    if any(len(_display(value)) > MAX_CSV_CELL
-           for values in frame.itertuples(index=False, name=None)
-           for value in values):
-        raise BrowserError("Delimited table contains oversized cells", 413)
     return frame
 
 
@@ -334,6 +356,7 @@ def dataframe_preview(files, relative, sort="", descending=False, contains="",
     if transpose:
         frame = _transpose_frame(frame, pd)
     source_count = len(frame)
+    unresolved = frame.attrs.get("unresolved_bib_strings", [])
     columns = [str(col) for col in frame.columns]
     try:
         omitted = json.loads(hidden) if hidden else []
@@ -440,7 +463,7 @@ def dataframe_preview(files, relative, sort="", descending=False, contains="",
     for values in visible.itertuples(index=True, name=None):
         record = dict(zip(columns, values[1:]))
         rows.append('<tr><th>' + e(values[0] + 1) + '</th>' +
-                    ''.join('<td>' + (_bibliography_cell(c, record[c], record) if is_bib else _linked_cell(record[c])) + '</td>' for c in shown) + '</tr>')
+                    ''.join('<td>' + _preview_cell(c, record[c], record if is_bib else None) + '</td>' for c in shown) + '</tr>')
     if totals:
         rows.append('<tr><th>Total</th>' + ''.join('<td><strong>' + e(totals.get(c, "")) + '</strong></td>' for c in shown) + '</tr>')
     back = '/view?' + urlencode({"path": relative} if is_json or is_bib else {"path": relative, "format": "html"})
@@ -504,10 +527,16 @@ def dataframe_preview(files, relative, sort="", descending=False, contains="",
         link(label, export=kind) for kind, label in (
             ("json", "JSON"), ("jsonl", "JSONL"), ("markdown", "Markdown"),
             ("csv", "CSV"), ("html", "HTML")) + ((("bib", "BibTeX"),) if is_bib and not selected and not omitted else ())) + '</p>'
+    warning = ""
+    if unresolved:
+        warning = ('<p><strong>Unresolved BibTeX strings:</strong> ' +
+                   e(", ".join(unresolved[:20])) +
+                   (' (more omitted)' if len(unresolved) > 20 else '') +
+                   '. Names retained as literal text in this view and derived exports; source unchanged.</p>')
     return ('<h2>' + e(path.name) + ' — pandas DataFrame</h2>'
             '<p><a href="' + e(directory) + '">Return to source directory</a> · '
             '<a href="' + e(back) + '">Standard source view</a>'
             + orientation + ' · Read-only, original string identifiers preserved</p>'
-            + form + column_controls + exports + '<p>' + e(summary) + '</p>' + nav
+            + warning + form + column_controls + exports + '<p>' + e(summary) + '</p>' + nav
             + '<div style="overflow-x:auto"><table border="1" cellspacing="0" cellpadding="4">'
             + ''.join(rows) + '</table></div>' + nav)
