@@ -168,7 +168,7 @@ class CompileLatexGuiTests(unittest.TestCase):
 
     def test_reopen_last_build_log_without_recompiling(self):
         source_tab = self.app.tabs.select()
-        log = "(./math.tex\\n! Undefined control sequence.\\nl.12 \\\\broken\\n"
+        log = "(./math.tex\n! Undefined control sequence.\nl.12 \\broken\n"
         self.app._show_latex_log(
             self.tex, {"ok": False, "log": log})
         log_tab = self.app.tabs.select()
@@ -176,7 +176,7 @@ class CompileLatexGuiTests(unittest.TestCase):
         self.app.view_last_latex_log()
         self.assertEqual(self.app.tabs.select(), log_tab)
         # Closing the log tab must not discard the last compiler output.
-        self.app.close_tab()
+        self.app.close_buffer()
         self.assertNotIn(log_tab, self.app.views)
         self.app.view_last_latex_log()
         reopened = self.app.tabs.select()
@@ -201,8 +201,8 @@ class CompileLatexGuiTests(unittest.TestCase):
         self.assertEqual(self.app.tabs.select(), latest_tab)
         self.assertIn("Second build succeeded",
                       self.app.current()[0].get("1.0", "end-1c"))
-        self.app.close_tab()
-        self.app.close_tab()
+        self.app.close_buffer()
+        self.app.close_buffer()
         self.app.view_last_latex_log()
         self.assertIn("Second build succeeded",
                       self.app.current()[0].get("1.0", "end-1c"))
