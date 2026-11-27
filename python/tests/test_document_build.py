@@ -93,6 +93,22 @@ class BuildModelTests(unittest.TestCase):
         self.assertTrue(result["ok"])
         self.assertIn("Rendered", result["log"])
 
+    def test_html_export_uses_original_source_and_no_discount(self):
+        source = self.root / "page.html"
+        source.write_text('<link rel="stylesheet" href="local.css"><h1>Notes</h1>')
+        def fake_run(command, **kwargs):
+            self.assertEqual(command[0], "/usr/bin/weasyprint")
+            self.assertEqual(Path(command[1]), source)
+            self.assertEqual(kwargs["cwd"], source.parent)
+            Path(command[2]).write_bytes(b"%PDF-1.7\nvalid")
+            import subprocess
+            return subprocess.CompletedProcess(command, 0, "", "")
+        with patch("zefm.server.document_build.shutil.which", return_value="/usr/bin/weasyprint"), patch("zefm.server.document_build.subprocess.run", side_effect=fake_run):
+            result = build_pdf(self.files, source.name, allow_html=True)
+        self.assertTrue(result["ok"])
+        with self.assertRaises(BrowserError):
+            build_pdf(self.files, source.name)
+
     def test_mactex_standard_path_when_gui_path_lacks_lualatex(self):
         from zefm.server.document_build import _command
         descriptor = handler_for("paper.tex")
