@@ -2291,6 +2291,83 @@ class Window:
         self.clickpad_frame.pack(side="top", fill="x", before=self.tabs)
         self.status.set("ClickPad shown; choose symbols to insert at cursor")
 
+    def export_markdown_pdf(self):
+        """Build a saved Markdown file and export a PDF without overwriting."""
+        from threading import Thread
+        from ...server.document_build import build_pdf
+        from ...server.file_manager import LocalFiles
+        import shutil
+        widget, editor = self.current()
+        if widget is None:
+            return
+        if self.buffer_modes[self.tabs.select()].name != "markdown":
+            self.status.set("Export Markdown PDF requires Markdown mode")
+            return
+        if self._compile_running:
+            self.status.set("A document build is already running")
+            return
+        if self.save_file() is not True:
+            return
+        source = Path(editor.state.buffer.path).expanduser().resolve()
+        if source.suffix.lower() not in (".md", ".markdown"):
+            self.status.set("Save the document with a Markdown extension first")
+            return
+        selected = filedialog.asksaveasfilename(
+            parent=self.root, title="Export Markdown PDF",
+            initialdir=str(source.parent), initialfile=source.name + ".pdf",
+            defaultextension=".pdf", filetypes=[("PDF", "*.pdf")])
+        if not selected:
+            return
+        destination = Path(selected).expanduser()
+        if destination.exists() or destination.is_symlink():
+            messagebox.showwarning("Export Markdown PDF",
+                "Choose a new PDF filename; existing files will not be overwritten.",
+                parent=self.root)
+            return
+        self._compile_running = True
+        results = Queue()
+        def worker():
+            try:
+                files = LocalFiles(source.parent)
+                result = build_pdf(files, source.name)
+                if not result["ok"]:
+                    raise ValueError(result.get("log") or "PDF build failed")
+                pdf = files.resolve(result["pdf"])
+                # Exclusive creation also protects against a concurrent writer.
+                with pdf.open("rb") as incoming:
+                    with destination.open("xb") as outgoing:
+                        try:
+                            shutil.copyfileobj(incoming, outgoing)
+                        except Exception:
+                            outgoing.close()
+                            destination.unlink()
+                            raise
+                results.put((True, str(destination)))
+            except Exception as exc:
+                results.put((False, str(exc)))
+
+        def poll():
+            self._compile_poll_id = None
+            try:
+                ok, detail = results.get_nowait()
+            except Empty:
+                self._compile_poll_id = self.root.after(120, poll)
+                return
+            self._compile_running = False
+            if not ok:
+                self.status.set("Markdown PDF export failed")
+                messagebox.showerror("Export Markdown PDF", detail, parent=self.root)
+                return
+            self.status.set("Markdown PDF exported: " + detail)
+            try:
+                open_browser(destination.resolve().as_uri())
+            except ValueError as exc:
+                messagebox.showwarning("PDF saved", detail + "\n" + str(exc),
+                                       parent=self.root)
+        self.status.set("Exporting Markdown PDF...")
+        Thread(target=worker, name="zefm-markdown-pdf", daemon=True).start()
+        self._compile_poll_id = self.root.after(120, poll)
+
     def preview_markdown(self):
         """Open a rendered snapshot of the current Markdown buffer."""
         from ...server.document_build import render_markdown_text
@@ -2413,6 +2490,7 @@ class Window:
         elif name=="Compile":self.compile_latex()
         elif name=="Run Script":self.run_script()
         elif name=="Preview Markdown":self.preview_markdown()
+        elif name=="Export Markdown PDF":self.export_markdown_pdf()
         elif name=="Markdown Document Outline":self.show_markdown_outline()
         elif name=="Next Markdown Heading":self.navigate_markdown_heading("next")
         elif name=="Previous Markdown Heading":self.navigate_markdown_heading("previous")
@@ -3613,6 +3691,7 @@ class Window:
             command("Configure Run Command...", self.configure_run_command)
         if name == "markdown":
             command("Preview Markdown", lambda: self.action("Preview Markdown"))
+            command("Export Markdown PDF...", self.export_markdown_pdf)
             command("Markdown Document Outline...", self.show_markdown_outline)
             command("Next Markdown Heading", lambda: self.action("Next Markdown Heading"))
             command("Previous Markdown Heading", lambda: self.action("Previous Markdown Heading"))
