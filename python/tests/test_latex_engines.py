@@ -25,6 +25,8 @@ class LatexEngineTests(unittest.TestCase):
         self.assertEqual(LatexEnginePreference(self.preference).engine, "xelatex")
         store.set("pdflatex")
         self.assertEqual(LatexEnginePreference(self.preference).engine, "pdflatex")
+        store.set("latexmk")
+        self.assertEqual(LatexEnginePreference(self.preference).engine, "latexmk")
 
     def test_invalid_engine_does_not_replace_preference(self):
         store = LatexEnginePreference(self.preference)
@@ -52,6 +54,21 @@ class LatexEngineTests(unittest.TestCase):
             self.assertEqual(argv[0], "/usr/bin/" + engine)
             self.assertIn("-no-shell-escape", argv)
             self.assertIn("-file-line-error", argv)
+
+    def test_latexmk_command_runs_lualatex_without_shell_escape(self):
+        descriptor = handler_for("main.tex")
+        with patch("zefm.server.document_build.shutil.which",
+                   return_value="/usr/bin/latexmk"):
+            argv = _command(self.source, self.directory, descriptor,
+                            latex_engine="latexmk")
+        self.assertEqual(argv[0], "/usr/bin/latexmk")
+        self.assertIn("-norc", argv)
+        self.assertIn("-lualatex", argv)
+        self.assertIn("-latexoption=-no-shell-escape", argv)
+        self.assertIn("-synctex=1", argv)
+        self.assertIn("-halt-on-error", argv)
+        self.assertIn("-outdir=" + str(self.directory), argv)
+        self.assertEqual(argv[-1], str(self.source))
 
     def test_browser_default_remains_lualatex(self):
         descriptor = handler_for("main.tex")
