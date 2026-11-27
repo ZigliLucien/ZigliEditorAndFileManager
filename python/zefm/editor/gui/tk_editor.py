@@ -352,7 +352,7 @@ class Window:
             widget.tag_remove("syntax_" + style, "1.0", "end")
         widget.tag_remove("syntax_match", "1.0", "end")
         widget.tag_remove("syntax_unmatched", "1.0", "end")
-        if len(text) > MAX_CHARS or mode not in ("latex", "python", "java", "json"):
+        if len(text) > MAX_CHARS or mode not in ("latex", "python", "java", "json", "markdown"):
             return
         for a, b, style in syntax_spans(text, mode):
             widget.tag_add("syntax_" + style,
@@ -1822,20 +1822,30 @@ class Window:
         field.focus_set()
 
     def show_latex_outline(self):
-        """Navigate the live LaTeX document by structural headings."""
+        self._show_document_outline("latex")
+
+    def show_markdown_outline(self):
+        self._show_document_outline("markdown")
+
+    def _show_document_outline(self, mode):
+        """Navigate live document headings using a shared outline dialog."""
+        from ..markdown_outline import markdown_outline
+        name = "LaTeX" if mode == "latex" else "Markdown"
+        outline = latex_outline if mode == "latex" else markdown_outline
+        dialog_title = name + " Document Outline"
         widget, _editor = self.current()
         if widget is None:
             return
         source_tab = self.tabs.select()
-        if self.buffer_modes[source_tab].name != "latex":
-            self.status.set("LaTeX Document Outline requires a LaTeX buffer")
+        if self.buffer_modes[source_tab].name != mode:
+            self.status.set(f"{dialog_title} requires a {name} buffer")
             return
         if len(widget.get("1.0", "end-1c")) > MAX_CHARS:
-            self.status.set("LaTeX Document Outline: buffer exceeds size limit")
+            self.status.set(f"{dialog_title}: buffer exceeds size limit")
             return
 
         dialog = tk.Toplevel(self.root)
-        dialog.title("LaTeX Document Outline")
+        dialog.title(dialog_title)
         dialog.transient(self.root)
         dialog.geometry("780x470")
         ttk.Label(
@@ -1894,10 +1904,10 @@ class Window:
                 return
             snapshot = widget.get("1.0", "end-1c")
             if len(snapshot) > MAX_CHARS:
-                self.status.set("LaTeX Document Outline: buffer exceeds size limit")
+                self.status.set(f"{dialog_title}: buffer exceeds size limit")
                 dialog.destroy()
                 return
-            headings = latex_outline(snapshot)
+            headings = outline(snapshot)
             update_listing()
 
         def go_to(event=None):
@@ -1911,7 +1921,7 @@ class Window:
             # after the listing was built, even if the headings look the same.
             if widget.get("1.0", "end-1c") != snapshot:
                 messagebox.showinfo(
-                    "LaTeX Document Outline",
+                    dialog_title,
                     "The buffer changed. Choose Refresh to update the outline.",
                     parent=dialog)
                 return
@@ -1924,7 +1934,7 @@ class Window:
             line, column = widget.index(target).split(".")
             self._cursor_highlight(widget)
             self.status.set(
-                f"LaTeX outline: {item.kind} at line {line}, "
+                f"{name} outline: {item.kind} at line {line}, "
                 f"column {int(column)+1} — {item.title}")
 
         filter_value.trace_add("write", update_listing)
@@ -1939,6 +1949,30 @@ class Window:
                    command=dialog.destroy).pack(side="right")
         refresh()
         filter_entry.focus_set()
+
+    def navigate_markdown_heading(self, direction):
+        from ..markdown_outline import adjacent_heading
+        widget, _editor = self.current()
+        if widget is None:
+            return
+        if self.buffer_modes[self.tabs.select()].name != "markdown":
+            self.status.set("Heading navigation requires Markdown mode")
+            return
+        text = widget.get("1.0", "end-1c")
+        if len(text) > MAX_CHARS:
+            self.status.set("Markdown heading navigation: buffer exceeds size limit")
+            return
+        cursor = len(widget.get("1.0", "insert"))
+        heading = adjacent_heading(text, cursor, direction)
+        if heading is None:
+            self.status.set("No " + direction + " Markdown heading")
+            return
+        target = f"1.0 + {heading.offset} chars"
+        widget.mark_set("insert", target)
+        widget.see(target)
+        widget.focus_set()
+        self._status(widget)
+        self.status.set(f"{heading.kind}: {heading.title}")
 
     def _current_latex_issues(self):
         """Return (widget, issues), or None if a scan is inappropriate."""
@@ -2379,6 +2413,9 @@ class Window:
         elif name=="Compile":self.compile_latex()
         elif name=="Run Script":self.run_script()
         elif name=="Preview Markdown":self.preview_markdown()
+        elif name=="Markdown Document Outline":self.show_markdown_outline()
+        elif name=="Next Markdown Heading":self.navigate_markdown_heading("next")
+        elif name=="Previous Markdown Heading":self.navigate_markdown_heading("previous")
         elif name=="Shell":self.open_shell_terminal()
         elif name=="Revert Buffer":self.revert_buffer()
         elif name=="Refresh Buffer":self.refresh_buffer()
@@ -3576,6 +3613,9 @@ class Window:
             command("Configure Run Command...", self.configure_run_command)
         if name == "markdown":
             command("Preview Markdown", lambda: self.action("Preview Markdown"))
+            command("Markdown Document Outline...", self.show_markdown_outline)
+            command("Next Markdown Heading", lambda: self.action("Next Markdown Heading"))
+            command("Previous Markdown Heading", lambda: self.action("Previous Markdown Heading"))
         if name in ("python", "latex", "perl", "markdown"):
             command("Insert File Template", self.insert_file_template)
         if name in ("python", "latex", "json", "perl", "markdown"):
