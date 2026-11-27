@@ -19,7 +19,7 @@ PAGE_SIZES = (25, 50, 100, 250)
 
 
 def _read_json_records(path, pd, limit):
-    """Accept records only; retain nested JSON values and native scalars."""
+    """Accept records and indexed records; retain nested values and native scalars."""
     def invalid_constant(value):
         raise ValueError("Nonstandard JSON constant: " + value)
     def decode(line):
@@ -28,9 +28,20 @@ def _read_json_records(path, pd, limit):
         data = decode(path.read_text(encoding="utf-8-sig"))
         if isinstance(data, dict) and "schema" in data and "data" in data:
             data = data["data"]
-        if not isinstance(data, list):
-            raise ValueError("Expected a JSON array of records or pandas table data")
-        records = data if limit is None else data[:limit]
+        if isinstance(data, dict) and all(isinstance(v, dict) for v in data.values()):
+            # Interpret object-of-objects as pandas orient="index".
+            # Keep the original keys as an ordinary, exportable column.
+            fields = {key for record in data.values() for key in record}
+            index_field = "index"
+            while index_field in fields:
+                index_field = "_" + index_field
+            from itertools import islice
+            items = data.items() if limit is None else islice(data.items(), limit)
+            records = [{index_field: key, **record} for key, record in items]
+        elif isinstance(data, list):
+            records = data if limit is None else data[:limit]
+        else:
+            raise ValueError("Expected a JSON array, indexed records, or pandas table data")
     else:
         records = []
         with path.open(encoding="utf-8-sig") as stream:
