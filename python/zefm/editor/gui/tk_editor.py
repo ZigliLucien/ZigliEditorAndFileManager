@@ -110,6 +110,7 @@ class Window:
         self.browser_saved_requests = Queue()
         self._compile_results = Queue()
         self.latest_synctex_pdfs = {}  # Master path -> matching fresh preview PDF
+        self.latest_latex_pdfs = {}  # Master path -> last successful PDF preview
         self.inverse_synctex = InverseSynctexServer()
         self._inverse_synctex_poll_id = None
         self.pdf_viewer = PdfViewerPreference()
@@ -1071,6 +1072,50 @@ class Window:
         self.latex_error_lists[tab] = (items, number + 1, master)
         self.open_latex_error(diagnostic, master)
 
+    def _current_latex_master(self):
+        """Select the compiled master from a log or the active TeX buffer."""
+        tab = self.tabs.select()
+        if tab in self.latex_error_lists:
+            return self.latex_error_lists[tab][2]
+        _widget, editor = self.current()
+        if editor is not None and editor.state.buffer.path:
+            path = Path(editor.state.buffer.path).expanduser().resolve()
+            if path.suffix.lower() == ".tex":
+                master = self.latex_masters.get(tab)
+                if master is not None:
+                    return Path(master).expanduser().resolve()
+                return path
+        return self.last_latex_log_source
+
+    def return_to_latex_source(self):
+        """Re-select the TeX master, retaining its existing unsaved buffer."""
+        source = self._current_latex_master()
+        if source is None or not source.is_file() or source.is_symlink():
+            self.status.set("No available LaTeX source to return to")
+            return
+        self._open_path(source)
+        self.status.set(f"LaTeX source: {source.name}")
+
+    def view_last_latex_pdf(self):
+        """Open a successful PDF preview again without running TeX."""
+        source = self._current_latex_master()
+        pdf = self.latest_latex_pdfs.get(source)
+        if pdf is None:
+            self.status.set("No successful PDF build for this LaTeX source")
+            return
+        if not pdf.is_file() or pdf.is_symlink():
+            self.status.set("Previous PDF preview is missing; compile with F4")
+            return
+        try:
+            if self.pdf_viewer.viewer == "okular":
+                launch_okular(pdf)
+            else:
+                open_browser(pdf.as_uri())
+        except (OSError, ValueError) as exc:
+            messagebox.showerror("LaTeX PDF", str(exc), parent=self.root)
+            return
+        self.status.set(f"PDF preview: {pdf.name}")
+
     def view_last_latex_log(self):
         """Reopen the latest compiler log without recompiling."""
         _widget, editor = self.current()
@@ -1402,6 +1447,7 @@ class Window:
         if result["ok"]:
             from ...server.file_manager import LocalFiles
             pdf = LocalFiles(source.parent).resolve(result["pdf"])
+            self.latest_latex_pdfs[source] = pdf
             if result.get("synctex"):
                 self.latest_synctex_pdfs[source] = pdf
             self.status.set(f"LaTeX PDF updated: {result.get('output_pdf', pdf.name)}")
@@ -2810,8 +2856,12 @@ class Window:
                                  command=self.clear_latex_master)
                 menu.add_command(label="Select LaTeX Engine...",
                                  command=self.set_latex_engine)
+                menu.add_command(label="Return to LaTeX Source",
+                                 command=self.return_to_latex_source)
                 menu.add_command(label="View Last LaTeX Build Log",
                                  command=self.view_last_latex_log)
+                menu.add_command(label="View Last LaTeX PDF",
+                                 command=self.view_last_latex_pdf)
                 menu.add_command(label="Next LaTeX Error",
                                  command=self.next_latex_error)
                 menu.add_command(label="Forward SyncTeX to PDF",
@@ -3389,7 +3439,9 @@ class Window:
             command("Compile LaTeX (F4)", lambda: self.action("Compile"))
             command("LaTeX Document Outline...",
                     lambda: self.action("LaTeX Document Outline"))
+            command("Return to LaTeX Source", self.return_to_latex_source)
             command("View Last LaTeX Build Log", self.view_last_latex_log)
+            command("View Last LaTeX PDF", self.view_last_latex_pdf)
             command("Next LaTeX Error", self.next_latex_error)
             command("Set LaTeX Master...", self.set_latex_master)
             tools.add_separator()
