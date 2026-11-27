@@ -2291,6 +2291,33 @@ class Window:
         self.clickpad_frame.pack(side="top", fill="x", before=self.tabs)
         self.status.set("ClickPad shown; choose symbols to insert at cursor")
 
+    def insert_markdown_markup(self, kind):
+        """Insert a Markdown starter or wrap selected text as one undo step."""
+        widget, _editor = self.current()
+        if widget is None:
+            return
+        if self.buffer_modes[self.tabs.select()].name != "markdown":
+            self.status.set("Markdown insertion requires Markdown mode")
+            return
+        ranges = widget.tag_ranges("sel")
+        start, end = (str(ranges[0]), str(ranges[1])) if ranges else (
+            widget.index("insert"), widget.index("insert"))
+        selected = widget.get(start, end)
+        from ..markdown_insert import markdown_markup
+        try:
+            value, cursor = markdown_markup(kind, selected)
+        except ValueError as exc:
+            self.status.set(str(exc))
+            return
+        widget.edit_separator()
+        widget.replace(start, end, value)
+        widget.edit_separator()
+        widget.tag_remove("sel", "1.0", "end")
+        widget.mark_set("insert", f"{start} + {cursor} chars")
+        widget.see("insert")
+        widget.focus_set()
+        self._status(widget)
+
     def export_markdown_pdf(self):
         """Build a saved Markdown file and export a PDF without overwriting."""
         from threading import Thread
@@ -3154,6 +3181,7 @@ class Window:
         mode_menu.add_command(label="Go to JSON Record...",command=lambda:self.action("Go to Record"))
         mode_menu.add_command(label="JSON Record Outline...",command=self.show_json_record_outline)
         mode_menu.add_command(label="Python Outline...", command=self.show_python_outline)
+        self._add_markdown_insert_menu(mode_menu)
         mode_menu.add_command(label="Get JSON Value at Path...",command=self.json_value_at_path)
         mode_menu.add_command(label="Format JSON",command=self.format_json_buffer)
         mode_menu.add_command(label="Run jq on Buffer... (external)",command=self.run_jq)
@@ -3642,6 +3670,14 @@ class Window:
                          command=self._clear_recent_files,
                          state="normal" if self.recent_files.entries else "disabled")
 
+    def _add_markdown_insert_menu(self, menu):
+        from ..markdown_insert import MARKUP_ITEMS
+        insert = tk.Menu(menu, tearoff=False)
+        for kind, label in MARKUP_ITEMS:
+            insert.add_command(label=label,
+                               command=lambda k=kind: self.insert_markdown_markup(k))
+        menu.add_cascade(label="Insert Markdown", menu=insert)
+
     def _populate_mode_context_menu(self):
         """Append contextual tools without displacing the Recent Files menu.
 
@@ -3704,6 +3740,8 @@ class Window:
             command("Markdown Document Outline...", self.show_markdown_outline)
             command("Next Markdown Heading", lambda: self.action("Next Markdown Heading"))
             command("Previous Markdown Heading", lambda: self.action("Previous Markdown Heading"))
+            tools.add_separator()
+            self._add_markdown_insert_menu(tools)
         if name in ("python", "latex", "perl", "markdown"):
             command("Insert File Template", self.insert_file_template)
         if name in ("python", "latex", "json", "perl", "markdown"):
