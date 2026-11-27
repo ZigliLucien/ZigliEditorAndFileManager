@@ -127,3 +127,32 @@ class PandasBrowserTests(unittest.TestCase):
             dataframe_preview(self.files, source.name, sort="year")
             dataframe_preview(self.files, source.name, export="bib")
             self.assertEqual(read.call_count, 1)
+
+    def test_decimal_totals_all_matching_rows(self):
+        import json
+        source = self.root / "budget.json"
+        records = [{"category": "Food", "amount": "0.10", "budget": "1.00"},
+                   {"category": "Food", "amount": "0.20", "budget": "2.00"},
+                   {"category": "Other", "amount": "99.00", "budget": "99.00"},
+                   {"category": "Food", "amount": None, "budget": "0.00"}]
+        source.write_text(json.dumps(records), encoding="utf-8")
+        original = source.read_bytes()
+        options = dict(contains="Food", column="category", total1="amount", total2="budget")
+        result = dataframe_preview(self.files, source.name, **options)
+        self.assertIn("<strong>0.30</strong>", result)
+        self.assertIn("<strong>3.00</strong>", result)
+        exported = json.loads(dataframe_preview(self.files, source.name, export="json", **options))
+        self.assertEqual(len(exported), 4)
+        self.assertEqual(exported[-1]["__summary__"], "Total")
+        self.assertEqual(exported[-1]["amount"], "0.30")
+        self.assertEqual(source.read_bytes(), original)
+
+    def test_totals_beyond_preview_limit(self):
+        self.source.write_text("Amount\n" + "0.01\n" * 1100, encoding="utf-8")
+        result = dataframe_preview(self.files, "data.csv", total1="Amount", page=2)
+        self.assertIn("<strong>11.00</strong>", result)
+        self.assertIn("1100 matching rows of 1100", result)
+
+    def test_total_invalid_numeric_value(self):
+        with self.assertRaises(BrowserError):
+            dataframe_preview(self.files, "data.csv", total1="Name")
