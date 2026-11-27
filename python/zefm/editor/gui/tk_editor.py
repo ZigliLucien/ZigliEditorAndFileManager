@@ -1531,7 +1531,8 @@ class Window:
         if widget is None:
             return
         mode = self.buffer_modes[self.tabs.select()].name
-        current = self.run_commands.get(mode)
+        current = (self.run_commands.get(mode)
+                   or self.run_commands.script_command(mode))
         answer = simpledialog.askstring(
             "Run command for " + mode,
             "Enter a JSON argument array. {file}, {name}, {dir} are allowed.\n"
@@ -1562,14 +1563,22 @@ class Window:
             return
         self.status.set(f"Cleared Run command for {mode}")
 
-    def run_configured_command(self):
-        """Run only explicitly configured commands against a saved file."""
+    def run_script(self):
+        """Run a saved Python or Perl script using the common Run worker."""
+        self.run_configured_command(script=True)
+
+    def run_configured_command(self, *, script=False):
+        """Run a saved file; script mode also allows built-in interpreters."""
         from threading import Thread
         widget, editor = self.current()
         if widget is None:
             return
         mode = self.buffer_modes[self.tabs.select()].name
-        argv = self.run_commands.get(mode)
+        argv = (self.run_commands.script_command(mode) if script
+                else self.run_commands.get(mode))
+        if script and argv is None:
+            self.status.set("Run Script requires Python or Perl mode")
+            return
         if argv is None:
             messagebox.showinfo(
                 "Run command", f"No Run command is configured for {mode}.\n"
@@ -1595,7 +1604,7 @@ class Window:
             self.status.set("A configured Run command is already executing")
             return
         self._run_busy = True
-        self.status.set(f"Running configured {mode} command on {source.name}")
+        self.status.set(f"Running {mode} command on {source.name}")
         def worker():
             try:
                 result = execute_command(argv, source)
@@ -2308,6 +2317,7 @@ class Window:
         elif name=="Quit":self.quit()
         elif name=="Debug Python":self.debug_python()
         elif name=="Compile":self.compile_latex()
+        elif name=="Run Script":self.run_script()
         elif name=="Shell":self.open_shell_terminal()
         elif name=="Revert Buffer":self.revert_buffer()
         elif name=="Refresh Buffer":self.refresh_buffer()
@@ -3499,6 +3509,10 @@ class Window:
             command("Go to Matching Delimiter",
                     lambda: self.action("Go to Matching LaTeX Delimiter"))
 
+        if name in ("python", "perl"):
+            command("Run Script", lambda: self.action("Run Script"))
+        if name == "perl":
+            command("Configure Run Command...", self.configure_run_command)
         if name in ("python", "latex", "perl"):
             command("Insert File Template", self.insert_file_template)
         if name in ("python", "latex", "json", "perl"):
